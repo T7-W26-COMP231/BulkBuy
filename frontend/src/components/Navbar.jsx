@@ -1,16 +1,28 @@
-import { Link } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 
 export default function Navbar() {
+  const iconLinkClass = ({ isActive }) =>
+    `flex h-10 w-10 items-center justify-center rounded-lg transition-colors ${
+      isActive
+        ? "bg-primary/20 text-text-main"
+        : "bg-neutral-light hover:bg-primary/20"
+    }`;
+
+  const profileLinkClass = ({ isActive }) =>
+    `size-10 overflow-hidden rounded-full border-2 ${
+      isActive ? "border-text-main" : "border-primary"
+    }`;
+
   return (
     <header className="border-b border-neutral-light bg-white px-6 py-3 md:px-20 lg:px-40">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-8">
-          <Link to="/" className="flex items-center gap-2 text-text-main">
+          <NavLink to="/" className="flex items-center gap-2 text-text-main">
             <div className="flex size-8 items-center justify-center rounded-lg bg-primary text-text-main">
               <span className="material-symbols-outlined">layers</span>
             </div>
             <h2 className="text-xl font-bold tracking-tight">BulkBuy</h2>
-          </Link>
+          </NavLink>
 
           <div className="hidden cursor-pointer items-center gap-2 md:flex">
             <span className="material-symbols-outlined text-primary">
@@ -38,30 +50,21 @@ export default function Navbar() {
           </div>
 
           <div className="flex gap-3">
-            <Link
-              to="/notifications"
-              className="flex h-10 w-10 items-center justify-center rounded-lg bg-neutral-light transition-colors hover:bg-primary/20"
-            >
+            <NavLink to="/notifications" className={iconLinkClass}>
               <span className="material-symbols-outlined">notifications</span>
-            </Link>
+            </NavLink>
 
-            <Link
-              to="/cart"
-              className="flex h-10 w-10 items-center justify-center rounded-lg bg-neutral-light transition-colors hover:bg-primary/20"
-            >
+            <NavLink to="/cart" className={iconLinkClass}>
               <span className="material-symbols-outlined">shopping_cart</span>
-            </Link>
+            </NavLink>
 
-            <Link
-              to="/profile"
-              className="size-10 overflow-hidden rounded-full border-2 border-primary"
-            >
+            <NavLink to="/profile" className={profileLinkClass}>
               <img
                 className="h-full w-full object-cover"
                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuB_b7YtfguGbEdMe3FDNfGBLbeNIwwgf8hsF5TohaBw-2Ogx-t4KlEF8ljlb3rY2ltEAL4tY9rWPr2OjxTPeuqloBDRGZ2vwcZ7y0p46ykQ9JOq_CseQgYkUDjBvsD16pXRzJ-mpoLMds_LDBfYAiJBmRll5uIH2MT4cR5liOAz0T_RyISCG3rvYxdec8asUoW8zTT7zA7chdYHdmUJPSrtHT5IrES1MiCzQns8wDHmcs4ENY7Rs_qYOFvqSx_nlYCA7ZTNn-9aUvU"
                 alt="User avatar"
               />
-            </Link>
+            </NavLink>
           </div>
         </div>
       </div>

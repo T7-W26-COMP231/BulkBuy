@@ -1,6 +1,30 @@
+import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 
-export default function Navbar() {
+const GTA_CITIES = [
+  "Toronto", "Scarborough", "Mississauga", "Brampton", "Markham", "Vaughan",
+  "Richmond Hill", "Oakville", "Burlington", "Pickering", "Ajax",
+  "Whitby", "Oshawa", "Milton", "Newmarket", "Aurora",
+];
+
+export default function Navbar({ detectedCity }) {
+  const [selected, setSelected] = useState("Toronto");
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    if (detectedCity) setSelected(detectedCity);
+  }, [detectedCity]);
+
+  useEffect(() => {
+    const handler = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    };
+
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
   return (
     <header className="border-b border-neutral-light bg-white px-6 py-3 md:px-20 lg:px-40">
       <div className="flex items-center justify-between">
@@ -12,23 +36,51 @@ export default function Navbar() {
             <h2 className="text-xl font-bold tracking-tight">BulkBuy</h2>
           </Link>
 
-          <div className="hidden cursor-pointer items-center gap-2 md:flex">
-            <span className="material-symbols-outlined text-primary">
-              location_on
-            </span>
-            <span className="text-sm font-semibold">Toronto</span>
-            <span className="material-symbols-outlined text-xs">
-              expand_more
-            </span>
+          {/* City Dropdown */}
+          <div className="relative hidden md:flex" ref={ref}>
+            <button
+              onClick={() => setOpen((o) => !o)}
+              className="cursor-pointer flex items-center gap-2 rounded-md px-2 py-1 hover:bg-gray-100 transition-colors"
+            >
+              <span className="material-symbols-outlined text-primary">location_on</span>
+              <span className="text-sm font-semibold">{selected}</span>
+              <span
+                className="material-symbols-outlined text-xs transition-transform duration-200"
+                style={{ transform: open ? "rotate(180deg)" : "rotate(0deg)" }}
+              >
+                expand_more
+              </span>
+            </button>
+
+            {open && (
+              <div className="absolute top-full left-0 z-50 mt-1 w-48 rounded-lg border border-gray-200 bg-white shadow-lg overflow-hidden">
+                <div className="py-1 max-h-64 overflow-y-auto">
+                  {GTA_CITIES.map((city) => (
+                    <button
+                      key={city}
+                      onClick={() => { setSelected(city); setOpen(false); }}
+                      className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 transition-colors flex items-center gap-2
+                        ${selected === city ? "font-semibold text-primary bg-blue-50" : "text-gray-700"}`}
+                    >
+                      <span
+                        className="material-symbols-outlined text-base"
+                        style={{ visibility: selected === city ? "visible" : "hidden" }}
+                      >
+                        check
+                      </span>
+                      {city}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
         <div className="flex flex-1 items-center justify-end gap-4 md:gap-6">
           <div className="hidden max-w-sm flex-1 sm:flex">
             <div className="flex h-10 w-full items-stretch rounded-lg bg-neutral-light px-3">
-              <span className="material-symbols-outlined self-center text-text-muted">
-                search
-              </span>
+              <span className="material-symbols-outlined self-center text-text-muted">search</span>
               <input
                 className="w-full border-none bg-transparent text-sm placeholder:text-text-muted focus:ring-0 focus:outline-none"
                 placeholder="Search bulk deals..."

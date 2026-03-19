@@ -280,7 +280,6 @@
 //     </div>
 //   );
 // }
-
 import { useState, useEffect } from "react";
 import Navbar from "../../components/Navbar";
 import Sidebar from "../../components/Sidebar";
@@ -351,6 +350,7 @@ export default function HomePage() {
       }
     }
   }, []);
+
   const handleAllow = () => {
     sessionStorage.setItem("askedLocation", "true");
     setLocationState("detecting");
@@ -569,8 +569,6 @@ export default function HomePage() {
               </div>
             </div>
           </div>
-
-
 
         </section>
       </main>

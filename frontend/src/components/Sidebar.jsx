@@ -5,7 +5,7 @@ const navItems = [
   { to: "/orders", icon: "receipt_long", label: "My Orders" },
   { to: "/savings", icon: "trending_up", label: "Savings Vault" },
   { to: "/community", icon: "group", label: "Community" },
-  { to: "/settings", icon: "settings", label: "Settings" },
+  { to: "/profile", icon: "settings", label: "Settings" },
 ];
 
 export default function Sidebar() {

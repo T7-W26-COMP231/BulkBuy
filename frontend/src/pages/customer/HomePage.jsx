@@ -253,6 +253,17 @@ export default function HomePage() {
             <div className="flex flex-1 flex-col justify-between gap-6 p-6 md:p-8">
               <div>
 
+                <div className="mb-2 flex items-start justify-between">
+                  <h2 className="text-2xl font-bold">
+                    {selectedAggregation?.title || "Premium Organic Avocados"}
+                  </h2>
+                  <div className="text-right">
+                    <span className="text-2xl font-bold text-primary">
+                      ${selectedAggregation?.price ?? 1.25}
+                    </span>
+                    <span className="block text-sm text-text-muted">Current Tier 2 Price</span>
+                  </div>
+                </div>
 
                 <div className="mb-6 flex items-center gap-2 text-sm text-text-muted">
                   <span className="material-symbols-outlined text-sm">schedule</span>

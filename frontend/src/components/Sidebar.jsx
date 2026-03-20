@@ -1,4 +1,5 @@
 import { NavLink } from "react-router-dom";
+import SavingsSummaryCard from "./SavingsSummaryCard";
 
 const navItems = [
   { to: "/marketplace", icon: "grid_view", label: "Marketplace" },
@@ -36,16 +37,12 @@ export default function Sidebar() {
         ))}
       </nav>
 
-      <div className="rounded-2xl bg-gradient-to-br from-primary to-teal-500 p-5 text-text-main shadow-lg">
-        <div className="mb-4 flex items-center justify-between">
-          <h3 className="font-bold">Total Savings</h3>
-          <span className="material-symbols-outlined">
-            account_balance_wallet
-          </span>
-        </div>
-        <div className="mb-1 text-3xl font-bold">$412.50</div>
-        <div className="text-xs opacity-80">Saved this month in Toronto</div>
-      </div>
+      <SavingsSummaryCard
+        saved={412.5}
+        goal={600}
+        city="Toronto"
+        monthLabel="this month"
+      />
     </aside>
   );
 }

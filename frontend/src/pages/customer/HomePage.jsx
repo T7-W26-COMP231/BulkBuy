@@ -66,6 +66,8 @@ export default function HomePage() {
       }
     } else {
       // Only ask if not already asked this session
+      setDetectedCity("Toronto");
+      sessionStorage.setItem("detectedCity", "Toronto");
       const asked = sessionStorage.getItem("askedLocation");
       if (!asked) {
         const timer = setTimeout(() => setLocationState("asking"), 600);
@@ -77,17 +79,25 @@ export default function HomePage() {
   useEffect(() => {
     const loadAggregations = async () => {
       const city = detectedCity || "Toronto";
+      console.log("Using city:", city, "| detectedCity:", detectedCity);
 
       try {
         setLoadingAggregations(true);
+        const start = performance.now();
         const response = await fetchAggregations(city);
+        const end = performance.now(); // ADD
+        console.log(`API call took ${(end - start).toFixed(2)} ms`);
 
         const data = Array.isArray(response)
           ? response
           : Array.isArray(response?.data)
             ? response.data
             : [];
-
+        if (data.length === 0) {
+          console.warn("No aggregations found for city:", city);
+        } else {
+          console.log("Aggregations loaded:", data.length);
+        }
         setAggregations(data);
       } catch (error) {
         console.error("Failed to load aggregations:", error);

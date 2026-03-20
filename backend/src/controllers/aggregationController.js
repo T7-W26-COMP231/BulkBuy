@@ -84,7 +84,7 @@ export const getAggregations = async (req, res) => {
       data: result,
     });
   } catch (error) {
-    console.error("🔥 Aggregation error:", error);
+    console.error("Aggregation error:", error);
 
     res.status(500).json({
       success: false,
@@ -151,7 +151,7 @@ export const getCityDemandSummary = async (req, res) => {
       city: item.city,
       soldUnits: item.soldUnits,
       targetUnits: item.targetUnits,
-      status: getAggregationStatus(item), // ⭐ ONLY YOUR TASK
+      status: getAggregationStatus(item),
       estimatedSavingsPerUnit: item.estimatedSavingsPerUnit,
     }));
 

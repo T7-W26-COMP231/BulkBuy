@@ -1,10 +1,9 @@
-
+// src/pages/marketplace/HomePage.jsx
 import { useState, useEffect } from "react";
 import Navbar from "../../components/Navbar";
 import Sidebar from "../../components/Sidebar";
 import Footer from "../../components/Footer";
-import { fetchAggregations } from "../../api/aggregationApi";
-
+import { getCityData, getFeaturedAggregation } from "../../data/mockData";
 
 const GTA_CITIES = [
   { name: "Toronto", lat: 43.6532, lng: -79.3832 },
@@ -49,25 +48,28 @@ function getNearestCity(lat, lng) {
 
 export default function HomePage() {
   const [locationState, setLocationState] = useState("idle");
-  const [aggregations, setAggregations] = useState([]);
-  const [loadingAggregations, setLoadingAggregations] = useState(false);
   const [detectedCity, setDetectedCity] = useState(null);
 
+  // Derive all display data from detectedCity — no loading state needed
+  const activeCity = detectedCity || "Toronto";
+  const cityData = getCityData(activeCity);
+  const selectedAggregation = getFeaturedAggregation(activeCity);
+  const aggregationStatus = selectedAggregation?.status ?? "OPEN";
+  const closesIn = selectedAggregation?.closesIn ?? "TBD";
+  const progressPct = selectedAggregation
+    ? Math.min((selectedAggregation.soldUnits / selectedAggregation.targetUnits) * 100, 100)
+    : 0;
+
   useEffect(() => {
-    // Check if city is already saved in sessionStorage
     const savedCity = sessionStorage.getItem("detectedCity");
     const dismissed = sessionStorage.getItem("locationModalDismissed");
 
     if (savedCity) {
       setDetectedCity(savedCity);
-      // Only show modal if it was not dismissed
       if (!dismissed) {
         setLocationState("done");
       }
     } else {
-      // Only ask if not already asked this session
-      setDetectedCity("Toronto");
-      sessionStorage.setItem("detectedCity", "Toronto");
       const asked = sessionStorage.getItem("askedLocation");
       if (!asked) {
         const timer = setTimeout(() => setLocationState("asking"), 600);
@@ -75,55 +77,6 @@ export default function HomePage() {
       }
     }
   }, []);
-
-  useEffect(() => {
-    const loadAggregations = async () => {
-      const city = detectedCity || "Toronto";
-      console.log("Using city:", city, "| detectedCity:", detectedCity);
-
-      try {
-        setLoadingAggregations(true);
-        const start = performance.now();
-        const response = await fetchAggregations(city);
-        const end = performance.now(); // ADD
-        console.log(`API call took ${(end - start).toFixed(2)} ms`);
-
-        const data = Array.isArray(response)
-          ? response
-          : Array.isArray(response?.data)
-            ? response.data
-            : [];
-        if (data.length === 0) {
-          console.warn("No aggregations found for city:", city);
-        } else {
-          console.log("Aggregations loaded:", data.length);
-        }
-        setAggregations(data);
-      } catch (error) {
-        console.error("Failed to load aggregations:", error);
-        setAggregations([]);
-      } finally {
-        setLoadingAggregations(false);
-      }
-    };
-
-    loadAggregations();
-  }, [detectedCity]);
-
-  const selectedAggregation =
-    Array.isArray(aggregations) && aggregations.length > 0
-      ? aggregations[0]
-      : null;
-
-  const aggregationStatus =
-    selectedAggregation && selectedAggregation.status
-      ? selectedAggregation.status
-      : "OPEN";
-
-  const closesIn =
-    selectedAggregation && selectedAggregation.closesIn
-      ? selectedAggregation.closesIn
-      : "TBD";
 
   const handleAllow = () => {
     sessionStorage.setItem("askedLocation", "true");
@@ -133,7 +86,7 @@ export default function HomePage() {
       (pos) => {
         const city = getNearestCity(pos.coords.latitude, pos.coords.longitude);
         setDetectedCity(city);
-        sessionStorage.setItem("detectedCity", city); // persist in session
+        sessionStorage.setItem("detectedCity", city);
         setLocationState("done");
       },
       () => setLocationState("denied")
@@ -142,8 +95,14 @@ export default function HomePage() {
 
   const handleDismiss = () => {
     sessionStorage.setItem("askedLocation", "true");
-    sessionStorage.setItem("locationModalDismissed", "true"); // mark modal as dismissed
-    setLocationState("idle"); // hide modal
+    sessionStorage.setItem("locationModalDismissed", "true");
+    setLocationState("idle");
+  };
+
+  // Called by Navbar dropdown when user picks a different city
+  const handleCityChange = (newCity) => {
+    setDetectedCity(newCity);
+    sessionStorage.setItem("detectedCity", newCity);
   };
 
   return (
@@ -221,34 +180,32 @@ export default function HomePage() {
           </div>
         )}
 
-      <Navbar detectedCity={detectedCity} />
+      <Navbar detectedCity={activeCity} onCityChange={handleCityChange} />
 
       <main className="flex flex-1 flex-col gap-8 px-4 py-8 md:flex-row md:px-20 lg:px-40">
-        <Sidebar />
+        <Sidebar
+          totalSavings={cityData.totalSavings}
+          savingsLabel={cityData.savingsLabel}
+        />
 
         <section className="flex flex-1 flex-col gap-8">
           <div className="flex flex-col gap-2">
             <h1 className="text-3xl font-extrabold tracking-tight">
-              Active Aggregations in {detectedCity || "Toronto"}
+              Active Aggregations in {activeCity}
             </h1>
-
             <p className="text-text-muted">
               Join local bulk buys to unlock lower pricing tiers.
             </p>
           </div>
 
-          {loadingAggregations && (
-            <p className="text-sm text-text-muted">Loading aggregation status...</p>
-          )}
-
           <div className="flex flex-col overflow-hidden rounded-2xl border border-neutral-light bg-white shadow-sm lg:flex-row">
             <div className="relative h-64 w-full lg:h-auto lg:w-2/5">
               <img
+                key={selectedAggregation?.id}
                 className="h-full w-full object-cover"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuAs5mRtJWYgicX4MpUHUxkozzsqxNYGZdf2dh0KbBVY6ymbmX9cEHyHEopXQmC5CPo0IAIh4Zq4Z1dTSAQg5mMn3vc2K_szU8u4vaYxzLCYK6IoHPmAwChr8oeJRy1cLxdXiVzSltoAKb9at-xfLehd3lVC1cvW5bTD3c1kdpmoYmVcDpsMrOQ8jONhajYH5ifXz6AJ0alLeJvvneQPquNecKzQDghsLMgjC72S4gltD8GwRNa30pHXy_5y4k3kH8WItjAopsJDxgI"
-                alt="Premium Organic Avocados"
+                src={selectedAggregation?.imageUrl}
+                alt={selectedAggregation?.title}
               />
-
               <div
                 className={`absolute left-4 top-4 rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider ${aggregationStatus === "CLOSED"
                   ? "bg-red-500 text-white"
@@ -257,19 +214,17 @@ export default function HomePage() {
               >
                 {aggregationStatus === "CLOSED" ? "Window Closed" : "Window Open"}
               </div>
-
             </div>
 
             <div className="flex flex-1 flex-col justify-between gap-6 p-6 md:p-8">
               <div>
-
                 <div className="mb-2 flex items-start justify-between">
                   <h2 className="text-2xl font-bold">
-                    {selectedAggregation?.title || "Premium Organic Avocados"}
+                    {selectedAggregation?.title ?? "—"}
                   </h2>
                   <div className="text-right">
                     <span className="text-2xl font-bold text-primary">
-                      ${selectedAggregation?.price ?? 1.25}
+                      ${selectedAggregation?.price?.toFixed(2) ?? "—"}
                     </span>
                     <span className="block text-sm text-text-muted">Current Tier 2 Price</span>
                   </div>
@@ -281,42 +236,34 @@ export default function HomePage() {
                     {aggregationStatus === "CLOSED" ? (
                       <span className="font-semibold text-red-500">Closed</span>
                     ) : (
-                      <>
-                        Closes in <span className="font-semibold text-red-500">{closesIn}</span>
-                      </>
+                      <>Closes in <span className="font-semibold text-red-500">{closesIn}</span></>
                     )}
                   </span>
                   <span className="mx-2">•</span>
                   <span className="material-symbols-outlined text-sm">local_shipping</span>
-                  <span>Pickup: Toronto Central</span>
+                  <span>Pickup: {selectedAggregation?.pickupLocation ?? activeCity}</span>
                 </div>
 
                 <div className="space-y-4">
                   <div className="flex items-end justify-between">
                     <div className="flex flex-col gap-1">
-                      <span className="text-sm font-medium">Progress to Tier 3 ($1.10)</span>
-                      <span className="text-xs text-text-muted">250 units remaining to trigger next discount</span>
+                      <span className="text-sm font-medium">
+                        Progress to {selectedAggregation?.nextTierLabel ?? "Next Tier"}
+                      </span>
+                      <span className="text-xs text-text-muted">
+                        {selectedAggregation?.unitsToNextTier ?? 0} units remaining to trigger next discount
+                      </span>
                     </div>
                     <span className="text-sm font-bold">
                       {selectedAggregation
                         ? `${selectedAggregation.soldUnits}/${selectedAggregation.targetUnits} units`
-                        : "750/1000 units"}
+                        : "—"}
                     </span>
                   </div>
                   <div className="h-3 w-full overflow-hidden rounded-full bg-neutral-light">
                     <div
                       className="h-full rounded-full bg-primary transition-all duration-500"
-                      style={{
-                        width:
-                          selectedAggregation && selectedAggregation.targetUnits > 0
-                            ? `${Math.min(
-                              ((selectedAggregation.soldUnits || 0) /
-                                (selectedAggregation.targetUnits || 1)) *
-                              100,
-                              100
-                            )}%`
-                            : "0%",
-                      }}
+                      style={{ width: `${progressPct}%` }}
                     />
                   </div>
                 </div>
@@ -327,7 +274,9 @@ export default function HomePage() {
                   <img className="h-10 w-10 rounded-full border-2 border-white object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDpdfgua5aFPlAwPtt5cfUEFEgDqMKbkk9Bm1GEEhhpBQD9TpE3WtQ_H6OkhfG7846fRpNPW1SAZYt4uaEolVo5c8Fg-TLpWTeXWQIx6wBXyWfzEtVM9c-YlOdA9uILcoubEdB9PWbWlIv6j7egNb6KAeM5HfPRRq_IUmucWPO9tWTjjt2b75HGD7J31I-d-XuyjgddMcHpFUdmYaWXamY6Z9EMT1HEjBuepehcx-s7bBhqhPe0CqmVTI6enIV0vXE3O0DiEhKRp04" alt="Participant 1" />
                   <img className="h-10 w-10 rounded-full border-2 border-white object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAsFULVhDcJWof7HJFmTV9SQlBsdZK2lMRvE4dSA6C6CLc3HPdtSr_UghpK3wnLAZYvYXXllRXwSQdieSCBhFSNoLqLTFIZq0GOtAq4My17dSpXxARXibYtPLZ4D7KIMlApKjxOul-iP12lVDzAxMfRBDykpSjPSrbeLFkEVKTV30b7vQ2XU0w3f0BzAsJDPEHaApyPLtCoGMouRddO-LBK-8VUupZGCCgPG9ypjpuB28rxOaI9Fd1KGgbE0EHt5tBluKUU9jyDez4" alt="Participant 2" />
                   <img className="h-10 w-10 rounded-full border-2 border-white object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCqEU1n3_0rGsl32BaBlsOo7qDxsdmDRSgkyxiJdNEfF2lzEPzoBc4KPn9qwNnwzzFAmfFDX5xvo3B02SxEEj8Hb2oRiA2NrSv1GHezDBik7fArh4OZ90nXltDmAgd5U57fd4HyOWvSqccHjKjt_3nsCl2IvHvcJouYl5ouKp3HR6yBAR1Cr3-1yCh4O5XXQXtESidlk-iZAZ5J3rXIjH77Fu3uNxZzntfsjD1eRY7i3uhQ5jDa4mQEuHPwaTn8JBgWZfRgZkUUyb8" alt="Participant 3" />
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-white bg-neutral-light text-xs font-medium">+142</div>
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-white bg-neutral-light text-xs font-medium">
+                    +{Math.max(0, (selectedAggregation?.participants ?? 145) - 3)}
+                  </div>
                 </div>
                 <button className="rounded-xl bg-primary px-8 py-3 font-bold text-text-main shadow-md transition-all hover:bg-primary/90">
                   Join Bulk Buy
@@ -336,7 +285,7 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Rest of your sections, Estimated Savings, Quality Guarantee, Map, etc. */}
+          {/* Estimated Savings + Quality Guarantee */}
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <div className="flex items-center gap-5 rounded-2xl border border-neutral-light bg-white p-6">
               <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary">
@@ -344,7 +293,9 @@ export default function HomePage() {
               </div>
               <div>
                 <h4 className="text-sm font-medium text-text-muted">Estimated Savings</h4>
-                <p className="text-xl font-bold">Save $0.65 per unit vs Retail</p>
+                <p className="text-xl font-bold">
+                  {selectedAggregation?.estimatedSavings ?? "—"}
+                </p>
               </div>
             </div>
 
@@ -354,16 +305,19 @@ export default function HomePage() {
               </div>
               <div>
                 <h4 className="text-sm font-medium text-text-muted">Quality Guarantee</h4>
-                <p className="text-xl font-bold">Grade A Organic Certified</p>
+                <p className="text-xl font-bold">
+                  {selectedAggregation?.qualityLabel ?? "—"}
+                </p>
               </div>
             </div>
           </div>
 
+          {/* Map */}
           <div className="overflow-hidden rounded-2xl border border-neutral-light bg-white">
             <div className="flex items-center justify-between border-b border-neutral-light px-6 py-4">
               <h3 className="font-bold">Aggregations Map</h3>
               <span className="text-sm font-semibold text-primary">
-                Live in {detectedCity || "Toronto"}
+                Live in {activeCity}
               </span>
             </div>
 
@@ -371,12 +325,12 @@ export default function HomePage() {
               <img
                 className="h-full w-full object-cover opacity-50 grayscale"
                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuCmMtUsrVJCgccxbkNopo_TMbC9d2xxPTsVyOZkRvhjmeYhEXglAoibwJ7oaEubZvYhftt3ZS1Gb-T14g5akFnaAytM-X0DX8Hd7AJq2bGV9Oy5SInujSd1yGwrhz2yV4HXzs04PwZmZcx_kfxLwebkZfMHQpoNa6Gc5rTfbePc3C73NQIEGE0w5kG5cjq3HXWIPGvxQjuYMn_WU44jL1tbCq5rydk-A-XGSjmD0u6UdD7aoRx9OfsiEvLgkaqQ8A3iFvPc6C3nQAk"
-                alt="Toronto aggregation map"
+                alt={`${activeCity} aggregation map`}
               />
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="relative">
                   <div className="absolute -left-1/2 -top-10 whitespace-nowrap rounded border border-primary bg-white px-3 py-1 text-xs shadow-lg">
-                    Pickup Point: St. Lawrence Market
+                    Pickup Point: {selectedAggregation?.pickupDetail ?? `${activeCity} Hub`}
                   </div>
                   <span className="material-symbols-outlined animate-bounce text-4xl text-primary">
                     location_on

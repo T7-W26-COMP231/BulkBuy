@@ -7,7 +7,7 @@ const GTA_CITIES = [
   "Whitby", "Oshawa", "Milton", "Newmarket", "Aurora",
 ];
 
-export default function Navbar({ detectedCity }) {
+export default function Navbar({ detectedCity, onCityChange }) {
   const [selected, setSelected] = useState("Toronto");
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
@@ -57,7 +57,7 @@ export default function Navbar({ detectedCity }) {
                   {GTA_CITIES.map((city) => (
                     <button
                       key={city}
-                      onClick={() => { setSelected(city); setOpen(false); }}
+                      onClick={() => { setSelected(city); setOpen(false); onCityChange?.(city); }}
                       className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 transition-colors flex items-center gap-2
                         ${selected === city ? "font-semibold text-primary bg-blue-50" : "text-gray-700"}`}
                     >

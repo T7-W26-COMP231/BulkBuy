@@ -1,6 +1,7 @@
 // ============================================================
 // 📦 AGGREGATION MODEL - BULKBUY
 // Stores aggregation items for each city
+// ✅ Includes status (OPEN / CLOSED)
 // ============================================================
 
 import mongoose from "mongoose";
@@ -32,6 +33,14 @@ const aggregationSchema = new mongoose.Schema(
       required: true,
       min: 1,
     },
+
+    // ⭐ ADD THIS (VERY IMPORTANT)
+    status: {
+      type: String,
+      enum: ["OPEN", "CLOSED"],
+      default: "OPEN",
+    },
+
     estimatedSavingsPerUnit: {
       type: Number,
       default: 0,

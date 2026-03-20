@@ -1,5 +1,6 @@
 // ============================================================
 // 🛣️ AGGREGATION ROUTES - BULKBUY
+// Handles aggregation endpoints
 // ============================================================
 
 import express from "express";
@@ -11,18 +12,18 @@ import {
 const router = express.Router();
 
 // ============================================================
-// 📊 GET CITY DEMAND SUMMARY
-// GET /api/aggregations/city-summary?city=Toronto
-// ============================================================
-
-router.get("/city-summary", getCityDemandSummary);
-
-// ============================================================
-// 📊 GET ALL AGGREGATIONS
+// 📊 GET ALL AGGREGATIONS (WITH STATUS)
 // GET /api/aggregations
 // Optional: ?city=Toronto
 // ============================================================
 
 router.get("/", getAggregations);
+
+// ============================================================
+// 🏙️ GET CITY DEMAND SUMMARY
+// GET /api/aggregations/city-summary?city=Toronto
+// ============================================================
+
+router.get("/city-summary", getCityDemandSummary);
 
 export default router;

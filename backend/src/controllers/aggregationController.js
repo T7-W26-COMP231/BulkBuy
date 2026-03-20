@@ -12,10 +12,11 @@ import Aggregation from "../models/Aggregation.js";
 const getAggregationStatus = (aggregation) => {
   if (!aggregation) return "CLOSED";
 
-  const { soldUnits = 0, targetUnits = 0 } = aggregation;
+  const sold = aggregation.soldUnits || 0;
+  const target = aggregation.targetUnits || 0;
 
   // ✅ If target reached → CLOSED
-  if (soldUnits >= targetUnits) {
+  if (sold >= target && target > 0) {
     return "CLOSED";
   }
 
@@ -62,13 +63,20 @@ export const getAggregations = async (req, res) => {
       filter.city = new RegExp(`^${city}$`, "i");
     }
 
-    const aggregations = await Aggregation.find(filter).sort({ createdAt: -1 });
+    const aggregations = await Aggregation.find(filter).sort({
+      createdAt: -1,
+    });
 
-    const result = aggregations.map((item) => ({
-      ...item.toObject(),
-      status: getAggregationStatus(item),
-      closesIn: getClosesIn(item.closesAt),
-    }));
+    // ✅ Ensure status is always correct
+    const result = aggregations.map((item) => {
+      const computedStatus = getAggregationStatus(item);
+
+      return {
+        ...item.toObject(),
+        status: computedStatus, // ⭐ ONLY YOUR TASK
+        closesIn: getClosesIn(item.closesAt),
+      };
+    });
 
     res.status(200).json({
       success: true,
@@ -143,7 +151,7 @@ export const getCityDemandSummary = async (req, res) => {
       city: item.city,
       soldUnits: item.soldUnits,
       targetUnits: item.targetUnits,
-      status: getAggregationStatus(item),
+      status: getAggregationStatus(item), // ⭐ ONLY YOUR TASK
       estimatedSavingsPerUnit: item.estimatedSavingsPerUnit,
     }));
 

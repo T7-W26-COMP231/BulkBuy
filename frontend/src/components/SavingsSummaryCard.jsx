@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-
+//this needs to be changed in future
 export default function SavingsSummaryCard({
   saved = 412.5,
   goal = 600,
@@ -21,10 +21,9 @@ export default function SavingsSummaryCard({
     <button
       type="button"
       onClick={() => setExpanded((prev) => !prev)}
-      className={`w-full rounded-2xl p-5 text-left shadow-lg transition-all duration-300 ${
-        expanded
-            ? "border border-neutral-light bg-white text-text-main"
-            : "bg-gradient-to-br from-primary to-teal-500 text-text-main"
+      className={`w-full rounded-2xl p-5 text-left shadow-lg transition-all duration-300 ${expanded
+        ? "border border-neutral-light bg-white text-text-main"
+        : "bg-gradient-to-br from-primary to-teal-500 text-text-main"
         }`}
     >
       {!expanded ? (

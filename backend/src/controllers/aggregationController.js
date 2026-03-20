@@ -1,12 +1,12 @@
 // ============================================================
-// 🗺️ AGGREGATION CONTROLLER - BULKBUY
+// AGGREGATION CONTROLLER - BULKBUY
 // Handles aggregation list + city demand summary
 // ============================================================
 
 import Aggregation from "../models/Aggregation.js";
 
 // ============================================================
-// 🧠 HELPER: DETERMINE STATUS
+//  HELPER: DETERMINE STATUS
 // ============================================================
 
 const getAggregationStatus = (aggregation) => {
@@ -15,17 +15,17 @@ const getAggregationStatus = (aggregation) => {
   const sold = aggregation.soldUnits || 0;
   const target = aggregation.targetUnits || 0;
 
-  // ✅ If target reached → CLOSED
+  // If target reached → CLOSED
   if (sold >= target && target > 0) {
     return "CLOSED";
   }
 
-  // ✅ Otherwise → OPEN
+  //  Otherwise → OPEN
   return "OPEN";
 };
 
 // ============================================================
-// 🧠 HELPER: CALCULATE TIME LEFT
+// HELPER: CALCULATE TIME LEFT
 // ============================================================
 
 const getClosesIn = (closesAt) => {
@@ -48,7 +48,7 @@ const getClosesIn = (closesAt) => {
 };
 
 // ============================================================
-// 🚀 GET ALL AGGREGATIONS (WITH STATUS)
+//  GET ALL AGGREGATIONS (WITH STATUS)
 // GET /api/aggregations
 // Optional: ?city=Toronto
 // ============================================================
@@ -67,13 +67,13 @@ export const getAggregations = async (req, res) => {
       createdAt: -1,
     });
 
-    // ✅ Ensure status is always correct
+    //  Ensure status is always correct
     const result = aggregations.map((item) => {
       const computedStatus = getAggregationStatus(item);
 
       return {
         ...item.toObject(),
-        status: computedStatus, // ⭐ ONLY YOUR TASK
+        status: computedStatus, // ONLY YOUR TASK
         closesIn: getClosesIn(item.closesAt),
       };
     });
@@ -94,7 +94,7 @@ export const getAggregations = async (req, res) => {
 };
 
 // ============================================================
-// 🏙️ GET CITY DEMAND SUMMARY
+//  GET CITY DEMAND SUMMARY
 // GET /api/aggregations/city-summary?city=Toronto
 // ============================================================
 
@@ -168,7 +168,7 @@ export const getCityDemandSummary = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("🔥 City demand summary error:", error);
+    console.error(" City demand summary error:", error);
 
     res.status(500).json({
       success: false,

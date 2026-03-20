@@ -49,7 +49,7 @@ function getNearestCity(lat, lng) {
 
 export default function HomePage() {
   const [locationState, setLocationState] = useState("idle");
-    const [aggregations, setAggregations] = useState([]);
+  const [aggregations, setAggregations] = useState([]);
   const [loadingAggregations, setLoadingAggregations] = useState(false);
   const [detectedCity, setDetectedCity] = useState(null);
 
@@ -74,7 +74,7 @@ export default function HomePage() {
     }
   }, []);
 
-    useEffect(() => {
+  useEffect(() => {
     const loadAggregations = async () => {
       const city = detectedCity || "Toronto";
 
@@ -85,8 +85,8 @@ export default function HomePage() {
         const data = Array.isArray(response)
           ? response
           : Array.isArray(response?.data)
-          ? response.data
-          : [];
+            ? response.data
+            : [];
 
         setAggregations(data);
       } catch (error) {
@@ -100,20 +100,20 @@ export default function HomePage() {
     loadAggregations();
   }, [detectedCity]);
 
-    const selectedAggregation =
-  Array.isArray(aggregations) && aggregations.length > 0
-    ? aggregations[0]
-    : null;
+  const selectedAggregation =
+    Array.isArray(aggregations) && aggregations.length > 0
+      ? aggregations[0]
+      : null;
 
-const aggregationStatus =
-  selectedAggregation && selectedAggregation.status
-    ? selectedAggregation.status
-    : "OPEN";
+  const aggregationStatus =
+    selectedAggregation && selectedAggregation.status
+      ? selectedAggregation.status
+      : "OPEN";
 
-const closesIn =
-  selectedAggregation && selectedAggregation.closesIn
-    ? selectedAggregation.closesIn
-    : "TBD";
+  const closesIn =
+    selectedAggregation && selectedAggregation.closesIn
+      ? selectedAggregation.closesIn
+      : "TBD";
 
   const handleAllow = () => {
     sessionStorage.setItem("askedLocation", "true");
@@ -228,8 +228,8 @@ const closesIn =
           </div>
 
           {loadingAggregations && (
-  <p className="text-sm text-text-muted">Loading aggregation status...</p>
-)}
+            <p className="text-sm text-text-muted">Loading aggregation status...</p>
+          )}
 
           <div className="flex flex-col overflow-hidden rounded-2xl border border-neutral-light bg-white shadow-sm lg:flex-row">
             <div className="relative h-64 w-full lg:h-auto lg:w-2/5">
@@ -240,42 +240,31 @@ const closesIn =
               />
 
               <div
-  className={`absolute left-4 top-4 rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider ${
-    aggregationStatus === "CLOSED"
-      ? "bg-red-500 text-white"
-      : "bg-primary text-text-main"
-  }`}
->
-  {aggregationStatus === "CLOSED" ? "Window Closed" : "Window Open"}
-</div>
+                className={`absolute left-4 top-4 rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider ${aggregationStatus === "CLOSED"
+                  ? "bg-red-500 text-white"
+                  : "bg-primary text-text-main"
+                  }`}
+              >
+                {aggregationStatus === "CLOSED" ? "Window Closed" : "Window Open"}
+              </div>
 
             </div>
 
             <div className="flex flex-1 flex-col justify-between gap-6 p-6 md:p-8">
               <div>
-                <div className="mb-2 flex items-start justify-between">
-                  <h2 className="text-2xl font-bold">
-  {selectedAggregation?.title || "Premium Organic Avocados"}
-</h2>
-                  <div className="text-right">
-                    <span className="text-2xl font-bold text-primary">
-  ${selectedAggregation?.price ?? 1.25}
-</span>
-                    <span className="block text-sm text-text-muted">Current Tier 2 Price</span>
-                  </div>
-                </div>
+
 
                 <div className="mb-6 flex items-center gap-2 text-sm text-text-muted">
                   <span className="material-symbols-outlined text-sm">schedule</span>
                   <span>
-  {aggregationStatus === "CLOSED" ? (
-    <span className="font-semibold text-red-500">Closed</span>
-  ) : (
-    <>
-      Closes in <span className="font-semibold text-red-500">{closesIn}</span>
-    </>
-  )}
-</span>
+                    {aggregationStatus === "CLOSED" ? (
+                      <span className="font-semibold text-red-500">Closed</span>
+                    ) : (
+                      <>
+                        Closes in <span className="font-semibold text-red-500">{closesIn}</span>
+                      </>
+                    )}
+                  </span>
                   <span className="mx-2">•</span>
                   <span className="material-symbols-outlined text-sm">local_shipping</span>
                   <span>Pickup: Toronto Central</span>
@@ -288,26 +277,26 @@ const closesIn =
                       <span className="text-xs text-text-muted">250 units remaining to trigger next discount</span>
                     </div>
                     <span className="text-sm font-bold">
-  {selectedAggregation
-    ? `${selectedAggregation.soldUnits}/${selectedAggregation.targetUnits} units`
-    : "750/1000 units"}
-</span>
+                      {selectedAggregation
+                        ? `${selectedAggregation.soldUnits}/${selectedAggregation.targetUnits} units`
+                        : "750/1000 units"}
+                    </span>
                   </div>
                   <div className="h-3 w-full overflow-hidden rounded-full bg-neutral-light">
                     <div
-  className="h-full rounded-full bg-primary transition-all duration-500"
-  style={{
-    width:
-      selectedAggregation && selectedAggregation.targetUnits > 0
-        ? `${Math.min(
-            ((selectedAggregation.soldUnits || 0) /
-              (selectedAggregation.targetUnits || 1)) *
-              100,
-            100
-          )}%`
-        : "0%",
-  }}
-/>
+                      className="h-full rounded-full bg-primary transition-all duration-500"
+                      style={{
+                        width:
+                          selectedAggregation && selectedAggregation.targetUnits > 0
+                            ? `${Math.min(
+                              ((selectedAggregation.soldUnits || 0) /
+                                (selectedAggregation.targetUnits || 1)) *
+                              100,
+                              100
+                            )}%`
+                            : "0%",
+                      }}
+                    />
                   </div>
                 </div>
               </div>

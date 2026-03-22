@@ -208,7 +208,7 @@ class UserRepository {
     const q = User.findOne(f);
     if (opts.select) q.select(opts.select);
     if (opts.populate) q.populate(opts.populate);
-    return q.lean().exec();
+    return q.populate('avatar').lean().exec();
   }
 
   /**

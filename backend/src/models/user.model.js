@@ -82,7 +82,8 @@ const UserSchema = new Schema({
   config: { type: Schema.Types.ObjectId, ref: 'Config' },
   paymentMethods: { type: [PaymentMethodSchema], default: [] },
 
-  avatar: { type: Schema.Types.ObjectId, ref: 'S3file' },
+  // avatar: { type: Schema.Types.ObjectId, ref: 'S3file', default: "642f1a9b8c9f1a2b3c4d5e6f"},
+  avatar: { type: String, default: "https://cfg-j.s3.us-east-1.amazonaws.com/avataaars.png"},
 
   // soft-delete metadata (epoch ms)
   deleted: { type: Boolean, default: false, index: true },
@@ -149,6 +150,29 @@ UserSchema.pre('save', async function () {
     }
   }
 });
+
+/*
+*------------------------------------------------------------
+// Add this to your User schema file (e.g., src/models/user.model.js) after the schema definition
+// — it auto-populates the avatar reference on read queries so the returned user already includes the S3file object.
+
+function _autoPopulateAvatar() {
+  // populate avatar with the referenced S3file document; adjust select as needed
+  this.populate({ path: 'avatar', select: '-__v' });
+}
+
+// Apply to common query types. The /^find/ regex covers find, findOne, findOneAndUpdate, findById (findById uses findOne).
+UserSchema.pre(/^find/, _autoPopulateAvatar);
+
+// Also populate for findOneAndDelete / findOneAndRemove if you use them
+UserSchema.pre('findOneAndDelete', _autoPopulateAvatar);
+UserSchema.pre('findOneAndRemove', _autoPopulateAvatar);
+
+// If you have any repository methods that call .lean() and then bypass mongoose middleware,
+// ensure those repository calls either remove .lean() or explicitly populate before calling .lean():
+// e.g. Model.findById(id).populate('avatar').lean().exec()
+*------------------------------------------------------------
+*/
 
 /* -------------------------
  * Statics / Helpers

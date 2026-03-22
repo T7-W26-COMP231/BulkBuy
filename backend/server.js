@@ -1,92 +1,69 @@
-// ============================================================
-// 🚀 BULKBUY BACKEND SERVER (PRODUCTION READY + MONGODB)
-// ============================================================
+// server.js
+const createApp = require('./src/app');
+const connectDB = require('./src/config/db');
+const config = require('./src/config/env');
 
-import express from "express";
-import cors from "cors";
-import dotenv from "dotenv";
+const start = async () => {
+  try {
+    await connectDB(config.mongoUri);
 
-// 🔗 DB CONNECTION
-import connectDB from "./src/config/db.js";
+    // const seedIndex = require('./src/config/db-seeds/seed-db-models.index');
+    // const summary = await seedIndex.run({ force: false, dryRun: false, logger: console });
+    // console.log('Seed summary', summary);
 
-// 🔗 ROUTES
-import aggregationRoutes from "./src/routes/aggregationRoutes.js";
+    //--------------------------------------------------------------------------------------
+    const mongoose = require('mongoose');
+    const enableMongooseDebugLogging = require('./src/config/capture-mongoose-debug');
 
-// 🔹 Load environment variables
-dotenv.config();
+    const disableLogging = enableMongooseDebugLogging(mongoose); // starts logging to ./debug.txt
 
-// ============================================================
-// 🗄️ CONNECT DATABASE (VERY IMPORTANT)
-// ============================================================
-connectDB();
+    // temporary debug: force all seeds and print full JSON
+    const seedIndex = require('./src/config/db-seeds/seed-db-models.index');
+    const summary = await seedIndex.run({ force: true, dryRun: false, logger: console });
+    console.log(JSON.stringify(summary, null, 2));
 
-// 🔹 Create app
-const app = express();
+    // write-debug.js
+    const fs = require('fs');
+    const path = require('path');
 
-// ============================================================
-// 🛡️ MIDDLEWARE
-// ============================================================
+    function writeDebug(message) {
+      const file = path.resolve(process.cwd(), 'debug.txt');
+      const line = `${new Date().toISOString()} - ${message}\n`;
+      fs.appendFileSync(file, line, { encoding: 'utf8' });
+    }
 
-// 🔹 CORS (Production Safe)
-app.use(
-  cors({
-    origin: "*", // 👉 later restrict to frontend domain
-    credentials: true,
-  })
-);
+    writeDebug(JSON.stringify(summary, null, 2))
 
-// 🔹 JSON parser
-app.use(express.json());
+    disableLogging();
+    //--------------------------------------------------------------------------------------
 
-// ============================================================
-// 🧪 TEST ROUTE (HEALTH CHECK)
-// ============================================================
+    const app = await createApp();
 
-app.get("/", (req, res) => {
-  res.send("🚀 BulkBuy API is running...");
-});
+    const server = app.listen(config.port, () => {
+      console.log(`\n\nServer running in ${config.nodeEnv} mode on port ${config.port}`);
+    });
 
-// ============================================================
-// 📊 API ROUTES
-// ============================================================
+    // Graceful shutdown
+    const shutdown = async () => {
+      console.log('Shutting down server...');
+      server.close(() => {
+        console.log('HTTP server closed');
+        process.exit(0);
+      });
 
-// 🔹 Aggregations API
-app.use("/api/aggregations", aggregationRoutes);
+      // Force exit after timeout
+      setTimeout(() => {
+        console.error('Forcing shutdown');
+        process.exit(1);
+      }, 10000);
+    };
 
-// ============================================================
-// ❌ 404 HANDLER (IMPORTANT)
-// ============================================================
+    process.on('SIGTERM', shutdown);
+    process.on('SIGINT', shutdown);
+  } catch (err) {
+    console.error('Failed to start server:', err);
+    process.exit(1);
+  }
+}
 
-app.use((req, res) => {
-  res.status(404).json({
-    success: false,
-    message: "Route not found",
-  });
-});
-
-// ============================================================
-// ❌ GLOBAL ERROR HANDLER (PRODUCTION SAFE)
-// ============================================================
-
-app.use((err, req, res, next) => {
-  console.error("🔥 Server Error:", err);
-
-  res.status(err.status || 500).json({
-    success: false,
-    message: err.message || "Internal Server Error",
-  });
-});
-
-// ============================================================
-// 🌐 PORT CONFIG
-// ============================================================
-
-const PORT = process.env.PORT || 5000;
-
-// ============================================================
-// 🚀 START SERVER
-// ============================================================
-
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-});
+start();

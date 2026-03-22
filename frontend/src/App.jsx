@@ -6,6 +6,8 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import ProductDetailsPage from "./pages/customer/ProductDetailsPage";
 import ProductListPage from "./pages/customer/ProductListPage";
 import CartPage from "./pages/customer/CartPage";
+import Shop from "./pages/customer/Marketplace";
+
 
 function PlaceholderPage({ title }) {
   return (
@@ -23,15 +25,14 @@ function PlaceholderPage({ title }) {
 export default function App() {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/marketplace" replace />} />
-      <Route path="/marketplace" element={<HomePage />} />
+      <Route path="/" element={<HomePage />} />
+      <Route path="/marketplace" element={<Shop />} />
       <Route path="/orders" element={<OrdersPage />} />
       <Route path="/supplier" element={<SupplierDashboard />} />
       <Route path="/admin" element={<AdminDashboard />} />
       <Route path="/cart" element={<CartPage />} />
       <Route path="/products/:id" element={<ProductDetailsPage />} />
       <Route path="/products" element={<ProductListPage />} />
-
       <Route path="/about" element={<PlaceholderPage title="About Us" />} />
       <Route path="/careers" element={<PlaceholderPage title="Careers" />} />
       <Route path="/partner-login" element={<PlaceholderPage title="Partner Login" />} />

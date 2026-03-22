@@ -9,12 +9,19 @@ const config = require('./config/env');
 
 // route imports
 const authRoutes = require('./routes/auth.routes');
-const usersRoutes = require('./routes/user.routes');
-const auditsRoutes = require('./routes/audit.routes');
-const productsRoutes = require('./routes/product.routes');
+const auditRoutes = require('./routes/audit.routes');
+const aggregationRoutes = require('./routes/aggregation.routes');
+const configRoutes = require('./routes/config.routes');
+const itemsRoutes = require('./routes/item.routes');
 const messageRoutes = require('./routes/message.routes');
-const s3storeRoutes = require('./routes/s3Storage.routes');
+const orderRoutes = require('./routes/order.routes');
+const productRoutes = require('./routes/product.routes');
+const regionMapRoutes = require('./routes/regionMap.routes');
 const reviewRoutes = require('./routes/review.routes');
+const salesWindowRoutes = require('./routes/salesWindow.routes');
+const supplyRoutes = require('./routes/supply.routes');
+const usersRoutes = require('./routes/user.routes');
+const s3storeRoutes = require('./routes/s3Storage.routes');
 
 const { s3Ensure } = require('./scripts/s3.ensure');
 
@@ -61,19 +68,26 @@ const createApp = async () => {
   app.use(limiter);
 
   // Ensure S3 bucket and baseline config before listening
-  await s3Ensure({ logger: app.get('logger'), bucket: 'comp321-bulkbuy+', enableCors: false });
+  await s3Ensure({ logger: app.get('logger'), bucket: 'comp321-bulkbuy', enableCors: false });
 
   // Health check
   app.get('/health', (req, res) => res.json({ status: 'ok' }));
 
   // API routes (versioned)
   app.use('/api/auth', authRoutes);
+  app.use('/api/audts', auditRoutes);
+  app.use('/api/aggrs', aggregationRoutes);
+  app.use('/api/confg', configRoutes);
+  app.use('/api/items', itemsRoutes);
+  app.use('/api/comms', messageRoutes);
+  app.use('/api/ordrs', orderRoutes);
+  app.use('/api/prdts', productRoutes);
+  app.use('/api/rmaps', regionMapRoutes);
+  app.use('/api/revws', reviewRoutes);
+  app.use('/api/swnds', salesWindowRoutes);
+  app.use('/api/supls', supplyRoutes);
   app.use('/api/users', usersRoutes);
-  app.use('/api/audts', auditsRoutes);
-  app.use('/api/prdts', productsRoutes);
-  app.use('/api/coms', messageRoutes);
-  app.use('/api/s3go', s3storeRoutes);
-  app.use('/api/rvws', reviewRoutes);
+  app.use('/api/s3fgo', s3storeRoutes);
 
   // 404 handler
   app.use((req, res, next) => {

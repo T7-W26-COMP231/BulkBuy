@@ -18,9 +18,25 @@ const SalesWindowSchema = new Schema({
   to: { type: Number, default: null } // epoch ms
 }, { _id: false });
 
+/* Pricing snapshot schema
+ * - atInstantPrice: price at the time the snapshot was taken (number)
+ * - discountedPercentage: percentage discount applied (0-100)
+ * - discountBracket: range or bracket that produced the discount (initial, final)
+ * - meta: optional extra fields (currency, promoCode, etc.)
+ */
+const PricingSnapshotSchema = new Schema({
+  atInstantPrice: { type: Number, default: 0 },
+  discountedPercentage: { type: Number, default: 0, min: 0, max: 100 },
+  discountBracket: {
+    initial: { type: Number, default: 0 },
+    final: { type: Number, default: 0 }
+  },
+  meta: { type: Schema.Types.Mixed, default: {} }
+}, { _id: false });
+
 const ItemDtoSchema = new Schema({
   itemId: { type: Schema.Types.ObjectId, ref: 'Item', required: true },
-  pricingSnapshot: { type: Schema.Types.Mixed, default: {} },
+  pricingSnapshot: { type: PricingSnapshotSchema, default: () => ({}) },
   supplierId: { type: Schema.Types.ObjectId, ref: 'User', default: null },
   salesWindow: { type: [SalesWindowSchema], default: [] }
 }, { _id: false });

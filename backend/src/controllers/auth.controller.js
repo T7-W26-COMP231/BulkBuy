@@ -1,7 +1,7 @@
 // src/controllers/auth.controller.js
 const authService = require('../services/auth.service');
 const auditService = require('../services/audit.service');
-const { registerSchema, loginSchema } = require('../validators/user.validator');
+const { registerSchema, loginSchema } = require('../validators/user.validators');
 const { requireRole, requireAnyRole } = require('../middleware/rbac.middleware');
 
 /**

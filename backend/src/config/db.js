@@ -1,18 +1,3 @@
-<<<<<<< HEAD
-import mongoose from "mongoose";
-
-const connectDB = async () => {
-  try {
-    await mongoose.connect(process.env.MONGO_URI);
-    console.log("✅ MongoDB Connected");
-  } catch (error) {
-    console.error("❌ MongoDB Error:", error);
-    process.exit(1);
-  }
-};
-
-export default connectDB;
-=======
 // src/config/db.js
 // Compact connector: prefer modern Mongoose usage, fallback to legacy flags once.
 
@@ -74,4 +59,3 @@ async function connectDB(mongoUri, options = {}) {
 }
 
 module.exports = connectDB;
->>>>>>> feature/models-core+

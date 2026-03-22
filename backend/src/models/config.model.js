@@ -56,7 +56,7 @@ const ConfigSchema = new Schema(
   {
     userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, unique: true, index: true },
     location: { type: LocationSchema, default: () => ({}) },
-    theme: { type: String, enum: THEME_ENUM, default: 'system', index: true },
+    theme: { type: String, enum: THEME_ENUM, default: 'system' },
     isPrivate: { type: Boolean, default: true, index: true },
     ops_region: { type: String, trim: true, default: '' },
     metadata: { type: Map, of: Schema.Types.Mixed, default: {} },
@@ -72,7 +72,8 @@ const ConfigSchema = new Schema(
 
 /* Indexes */
 ConfigSchema.index({ ops_region: 1 });
-ConfigSchema.index({ theme: 1 });
+// NOTE: Avoid declaring an additional index for `theme` here because the field-level index was removed
+// If you prefer an explicit schema index instead, add: ConfigSchema.index({ theme: 1 }); and keep theme without index: true
 
 /* Instance methods */
 
@@ -174,4 +175,5 @@ ConfigSchema.virtual('summary').get(function summary() {
   };
 });
 
-module.exports = mongoose.model('Config', ConfigSchema);
+/* Export model safely to avoid recompilation duplicate-index warnings in dev/hot-reload */
+module.exports = mongoose.models.Config || mongoose.model('Config', ConfigSchema);

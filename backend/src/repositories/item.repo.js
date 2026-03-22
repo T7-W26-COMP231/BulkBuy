@@ -349,10 +349,14 @@ class ItemRepo {
    * Bulk insert (ordered=false)
    */
   async bulkInsert(docs = [], opts = {}) {
-    if (!Array.isArray(docs) || docs.length === 0) return [];
-    const options = { ordered: false };
-    if (opts.session) options.session = opts.session;
-    return Item.insertMany(docs, options);
+    try {
+      if (!Array.isArray(docs) || docs.length === 0) return [];
+      const options = { ordered: false };
+      if (opts.session) options.session = opts.session;
+      return await Item.insertMany(docs, options);
+    } catch (error) {
+      throw new Error(`Items bulkInsert failed : ${error.message}`)
+    }
   }
 
   /**

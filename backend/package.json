@@ -10,7 +10,6 @@
     "testbed": "jest --runInBand",
     "testerr": "echo \"Error: no test specified\" && exit 1"
   },
-
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -38,9 +37,9 @@
     "jsonwebtoken": "^9.0.3",
     "luxon": "^3.7.2",
     "mongoose": "^9.2.1",
-    "morgan": "^1.10.1"
+    "morgan": "^1.10.1",
+    "slugify": "^1.6.8"
   },
-
   "devDependencies": {
     "nodemon": "^3.1.11"
   }

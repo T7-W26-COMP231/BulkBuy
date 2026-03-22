@@ -103,10 +103,13 @@ export default function Marketplace() {
 
                                     {/* FIX CLICK */}
                                     <button
-                                        onClick={(e) => e.stopPropagation()}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            navigate(`/product/${index}`);
+                                        }}
                                         className="mt-3 rounded-xl bg-primary py-3 text-text-main font-bold shadow-md hover:bg-primary/90 transition-all"
                                     >
-                                        Details go here
+                                        View Details
                                     </button>
 
                                 </div>

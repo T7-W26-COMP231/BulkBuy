@@ -12,6 +12,7 @@ const authRoutes = require('./routes/auth.routes');
 const usersRoutes = require('./routes/user.routes');
 const auditsRoutes = require('./routes/audit.routes');
 const productsRoutes = require('./routes/product.routes');
+const itemRoutes = require('./routes/item.routes');
 const messageRoutes = require('./routes/message.routes');
 const s3storeRoutes = require('./routes/s3Storage.routes');
 const reviewRoutes = require('./routes/review.routes');
@@ -71,6 +72,7 @@ const createApp = async () => {
   app.use('/api/users', usersRoutes);
   app.use('/api/audts', auditsRoutes);
   app.use('/api/prdts', productsRoutes);
+  app.use('/api/items', itemRoutes);
   app.use('/api/coms', messageRoutes);
   app.use('/api/s3go', s3storeRoutes);
   app.use('/api/rvws', reviewRoutes);

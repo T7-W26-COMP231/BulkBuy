@@ -130,6 +130,63 @@ class ItemRepo {
     return { items, total, page, limit, pages };
   }
 
+  /**
+   * Marketplace catalog items
+   * Public-facing item list for Browse Bulk Items page
+   */
+  async getCatalogItems(filters = {}, opts = {}) {
+    const o = normalizeOpts({ ...opts, lean: true });
+
+    const page = Math.max(1, parseInt(opts.page, 10) || 1);
+    const limit = Math.max(1, parseInt(opts.limit, 10) || 24);
+    const skip = (page - 1) * limit;
+
+    const query = {
+      published: true,
+      status: 'active'
+    };
+
+    if (filters.q) {
+      query.$text = { $search: String(filters.q).trim() };
+    }
+
+    if (filters.category) {
+      query.categories = filters.category;
+    }
+
+    if (filters.ops_region) {
+      query.ops_region = String(filters.ops_region).trim();
+    }
+
+    let findQuery = Item.find(query)
+      .skip(skip)
+      .limit(limit)
+      .sort(opts.sort || { createdAt: -1 });
+
+    if (o.select) findQuery = findQuery.select(o.select);
+    if (o.populate) findQuery = findQuery.populate(o.populate);
+    if (o.session) findQuery = findQuery.session(o.session);
+    if (o.lean) findQuery = findQuery.lean();
+
+    const countQuery = Item.countDocuments(query);
+    if (o.session) countQuery.session(o.session);
+
+    const [total, items] = await Promise.all([
+      countQuery.exec(),
+      findQuery.exec()
+    ]);
+
+    const pages = Math.max(1, Math.ceil(total / limit));
+
+    return {
+      items,
+      total,
+      page,
+      limit,
+      pages
+    };
+  }
+
   /* -------------------------
    * Update
    * ------------------------- */

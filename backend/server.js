@@ -12,15 +12,15 @@ const start = async () => {
     // console.log('Seed summary', summary);
 
     //--------------------------------------------------------------------------------------
-    const mongoose = require('mongoose');
-    const enableMongooseDebugLogging = require('./src/config/capture-mongoose-debug');
+   const mongoose = require('mongoose');
+const enableMongooseDebugLogging = require('./src/config/capture-mongoose-debug');
 
-    const disableLogging = enableMongooseDebugLogging(mongoose); // starts logging to ./debug.txt
+const disableLogging = enableMongooseDebugLogging(mongoose);
 
-    // temporary debug: force all seeds and print full JSON
-    const seedIndex = require('./src/config/db-seeds/seed-db-models.index');
-    const summary = await seedIndex.run({ force: true, dryRun: false, logger: console });
-    console.log(JSON.stringify(summary, null, 2));
+// ❌ Disabled seed (not needed for your task)
+// const seedIndex = require('./src/config/db-seeds/seed-db-models.index');
+// const summary = await seedIndex.run({ force: true, dryRun: false, logger: console });
+// console.log(JSON.stringify(summary, null, 2));
 
     // write-debug.js
     const fs = require('fs');
@@ -32,7 +32,7 @@ const start = async () => {
       fs.appendFileSync(file, line, { encoding: 'utf8' });
     }
 
-    writeDebug(JSON.stringify(summary, null, 2))
+    // writeDebug(JSON.stringify(summary, null, 2));
 
     disableLogging();
     //--------------------------------------------------------------------------------------

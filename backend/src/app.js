@@ -62,7 +62,7 @@ const createApp = async () => {
   app.use(limiter);
 
   // Ensure S3 bucket and baseline config before listening
-  await s3Ensure({ logger: app.get('logger'), bucket: 'comp321-bulkbuy+', enableCors: false });
+  // await s3Ensure({ logger: app.get('logger'), bucket: 'comp321-bulkbuy+', enableCors: false });
 
   // Health check
   app.get('/health', (req, res) => res.json({ status: 'ok' }));

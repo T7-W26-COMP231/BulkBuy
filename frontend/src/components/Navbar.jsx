@@ -7,7 +7,7 @@ const GTA_CITIES = [
   "Whitby", "Oshawa", "Milton", "Newmarket", "Aurora",
 ];
 
-export default function Navbar({ detectedCity, onCityChange, locationLabel }) {
+export default function Navbar({ detectedCity, onCityChange, locationLabel, onSearch }) {
   const [selected, setSelected] = useState("Toronto");
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
@@ -88,10 +88,15 @@ export default function Navbar({ detectedCity, onCityChange, locationLabel }) {
             <div className="flex h-10 w-full items-stretch rounded-lg bg-neutral-light px-3">
               <span className="material-symbols-outlined self-center text-text-muted">search</span>
               <input
-                className="w-full border-none bg-transparent text-sm placeholder:text-text-muted focus:ring-0 focus:outline-none"
-                placeholder="Search bulk deals..."
-                type="text"
-              />
+  className="w-full border-none bg-transparent text-sm placeholder:text-text-muted focus:ring-0 focus:outline-none"
+  placeholder="Search bulk deals..."
+  type="text"
+  onChange={(e) => {
+    if (typeof onSearch === "function") {
+      onSearch(e.target.value);
+    }
+  }}
+/>
             </div>
           </div>
 

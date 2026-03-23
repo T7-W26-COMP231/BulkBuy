@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import Sidebar from "../../components/Sidebar";
 import Footer from "../../components/Footer";
@@ -7,7 +7,8 @@ import ProductCard from "../../components/ProductCard";
 import { getProducts } from "../../api/productApi";
 
 export default function Marketplace() {
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchParams] = useSearchParams();
+  const [searchTerm, setSearchTerm] = useState(searchParams.get("q") || "");
   const [sortOption, setSortOption] = useState("default");
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -31,6 +32,11 @@ export default function Marketplace() {
 
     loadProducts();
   }, []);
+
+  useEffect(() => {
+    const q = searchParams.get("q") || "";
+    setSearchTerm(q);
+  }, [searchParams]);
 
   let filteredProducts = products.filter((item) =>
     (item.title || item.name || "")

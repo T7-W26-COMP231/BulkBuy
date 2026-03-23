@@ -193,22 +193,24 @@ const ItemSchema = new Schema(
 /* -------------------------
  * Indexes
  * ------------------------- */
-ItemSchema.index({ title: 'text', description: 'text', shortDescription: 'text', 'brand.name': 'text' }, { name: 'ItemTextIndex' });
-ItemSchema.index({ sku: 1 });
-ItemSchema.index({ slug: 1 });
+ItemSchema.index({ title: 'text', description: 'text', shortDescription: 'text', 'brand.name': 'text' });
+// Removed duplicate schema.index({ sku: 1 }) and schema.index({ slug: 1 }) because sku and slug already declare unique/index at field level
 ItemSchema.index({ ops_region: 1 });
 ItemSchema.index({ 'pricingTiers.minQty': 1 });
 
 /* -------------------------
  * Pre-save hooks
  * ------------------------- */
-ItemSchema.pre('validate', function (next) {
+ItemSchema.pre('validate', function () {
   // Ensure slug exists and is unique-ish; caller should handle uniqueness collisions
-  if (!this.slug && this.title) {
+  try {
+    if (!this.slug && this.title) {
     const base = slugify(this.title, { lower: true, strict: true, remove: /[*+~.()'"!:@]/g });
     this.slug = `${base}`.slice(0, 200);
+    }
+  } catch (error) {
+    throw new Error(`item alidation failed: ${error.message}`)
   }
-  next();
 });
 
 /* -------------------------

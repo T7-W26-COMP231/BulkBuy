@@ -26,7 +26,7 @@ const {
   GetBucketCorsCommand
 } = require('@aws-sdk/client-s3');
 
-const DEFAULT_BUCKET = 'comp321-bulkbuy+';
+const DEFAULT_BUCKET = 'comp321-bulkbuy';
 
 const { getS3Client } = require('../utils/s3.client.factory');
 

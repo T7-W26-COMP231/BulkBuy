@@ -153,3 +153,33 @@ module.exports = {
   findByIdempotencyKey,
   _model: FileModel
 };
+
+
+
+/*
+
+
+{
+  "_id": "642f1a9b8c9f1a2b3c4d5e6f",
+  "key": "uploads/avatars/69bfe479bfbdb6b869524ad4.png",
+  "ownerId": "9303040353474622",
+  "filename": "avataaars.png",
+  "contentType": "image/png",
+  "size": 12345,
+  "purpose": "avatar",
+  "status": "available",
+  "metadata": {
+    "url": "https://cfg-j.s3.us-east-1.amazonaws.com/avataaars.png",
+    "originalName": "profile_pic.png",
+    "checksum": "sha256:3a7bd3...",
+    "source": "web-uploader"
+  },
+  "createdAt": "2026-03-22T17:45:12.000Z",
+  "uploadedAt": "2026-03-22T17:46:05.000Z",
+  "processedAt": "2026-03-22T17:47:30.000Z",
+  "deletedAt": null,
+  "idempotencyKey": "upload-req-20260322-xyz"
+}
+
+
+*/

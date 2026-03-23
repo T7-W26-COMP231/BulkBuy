@@ -6,7 +6,7 @@
  */
 
 const ConfigService = require('../services/config.service');
-const auditService = require('./audit.service') || require('../services/audit.service');
+const auditService = require('../services/audit.service');
 
 function actorFromReq(req = {}) {
   const user = req.user || null;

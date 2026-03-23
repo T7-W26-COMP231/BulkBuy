@@ -15,7 +15,7 @@ const {
   normalizeKey
 } = require('../utils/s3.helper');
 
-const DEFAULT_BUCKET = process.env.STORAGE_BUCKET || 'comp321-bulkbuy+';
+const DEFAULT_BUCKET = process.env.STORAGE_BUCKET || 'comp321-bulkbuy';
 const DEFAULT_PUT_EXPIRES = parseInt(process.env.PRESIGN_PUT_EXPIRES || '900', 10); // seconds
 const DEFAULT_GET_EXPIRES = parseInt(process.env.PRESIGN_GET_EXPIRES || '300', 10); // seconds
 

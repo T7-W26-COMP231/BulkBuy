@@ -39,6 +39,31 @@ class ReviewRepo {
   }
 
   /**
+   * Bulk insert (ordered=false to continue on errors)
+   * @param {Array} docs
+   * @param {Object} opts
+   */
+  async bulkInsert(docs = [], opts = {}) {
+    if (!Array.isArray(docs) || docs.length === 0) return [];
+    const options = { ordered: false };
+    if (opts.session) options.session = opts.session;
+    return Review.insertMany(docs, options);
+  }
+
+  /**
+   * Count documents matching filter
+   * @param {Object} filter
+   * @param {Object} opts
+   */
+  async count(filter = {}, opts = {}) {
+    const f = { ...filter };
+    if (!opts || !opts.includeDeleted) f.deleted = false;
+    const q = Review.countDocuments(f);
+    if (opts && opts.session) q.session(opts.session);
+    return q.exec();
+  }
+
+  /**
    * Find by id (optionally includeDeleted)
    * @param {String|ObjectId} id
    * @param {Object} opts

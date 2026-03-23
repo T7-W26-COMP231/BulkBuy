@@ -23,8 +23,8 @@ const DescriptionSchema = new Schema({
 const SalesPriceSchema = new Schema({
   price: { type: Number, required: true },
   currency: { type: String, required: true, trim: true },
-  from: { type: Number, default: null }, // epoch ms
-  to: { type: Number, default: null } // epoch ms
+  from: { type: Number, required: true }, // epoch ms
+  to: { type: Number, required: true } // epoch ms
 }, { _id: false });
 
 const ItemRefSchema = new Schema({

@@ -35,87 +35,179 @@ class UserService {
    * @param {Object} [opts] - { session, actor, correlationId }
    * @returns {Promise<Object>} created user (plain object, safe for client)
    */
-  async createUser(payload = {}, opts = {}) {
-    if (!payload || typeof payload !== 'object') {
-      throw createError(400, 'Invalid payload');
-    }
+async createUser(payload = {}, opts = {}) {
+  if (!payload || typeof payload !== 'object') {
+    throw createError(400, 'Invalid payload');
+  }
 
-    const actor = actorFromOpts(opts);
-    const correlationId = opts.correlationId || null;
+  const actor = actorFromOpts(opts);
+  const correlationId = opts.correlationId || null;
 
-    const safe = { ...payload };
+  const safe = { ...payload };
 
-    // Remove fields clients must not set
-    delete safe._id;
-    delete safe.createdAt;
-    delete safe.updatedAt;
-    delete safe.deleted;
-    delete safe.deletedAt;
-    delete safe.deletedBy;
-    delete safe.status; // status controlled by business logic
-    delete safe.userId; // repo will generate if missing
+  // Remove fields clients must not set
+  delete safe._id;
+  delete safe.createdAt;
+  delete safe.updatedAt;
+  delete safe.deleted;
+  delete safe.deletedAt;
+  delete safe.deletedBy;
+  delete safe.status; // status controlled by business logic
+  delete safe.userId; // repo will generate if missing
 
-    if((payload.role == 'administrator' || payload.role == 'supplier')  && actor.role !== 'administrator'){
-      throw createError(422, 'Only an administrator can create an administrator or supplier account');
-    }
+  if ((payload.role == 'administrator' || payload.role == 'supplier') && actor.role !== 'administrator') {
+    throw createError(422, 'Only an administrator can create an administrator or supplier account');
+  }
 
-    // Normalize emails if present
-    if (Array.isArray(safe.emails)) {
-      safe.emails = safe.emails.map((e) => {
-        if (!e) return e;
-        const out = { ...e };
-        if (out.address) out.address = String(out.address).toLowerCase().trim();
-        return out;
-      });
-    }
+  // Normalize emails if present
+  if (Array.isArray(safe.emails)) {
+    safe.emails = safe.emails.map((e) => {
+      if (!e) return e;
+      const out = { ...e };
+      if (out.address) out.address = String(out.address).toLowerCase().trim();
+      return out;
+    }).filter(Boolean);
+  }
 
-    // Minimal required fields check
-    const hasName = !!(safe.firstName || safe.lastName);
-    const hasEmail = Array.isArray(safe.emails) && safe.emails.length > 0;
-    if (!hasName && !hasEmail) {
-      throw createError(422, 'At least one of firstName, lastName, or emails is required');
-    }
+  // Minimal required fields check
+  const hasName = !!(safe.firstName || safe.lastName);
+  const hasEmail = Array.isArray(safe.emails) && safe.emails.length > 0;
+  if (!hasName && !hasEmail) {
+    throw createError(422, 'At least one of firstName, lastName, or emails is required');
+  }
 
-    // If caller provided plain password, hash it here
-    if (safe.password) {
-      const saltRounds = parseInt(process.env.BCRYPT_SALT_ROUNDS || `${DEFAULT_SALT_ROUNDS}`, 10);
-      try {
-        safe.passwordHash = await bcrypt.hash(String(safe.password), saltRounds);
-      } catch (err) {
-        // audit failure to hash
-        await auditService.logEvent({
-          eventType: 'create.user',
-          actor,
-          target: safe.emails && safe.emails[0] ? safe.emails[0].address : undefined,
-          outcome: 'failure',
-          severity: 'error',
-          correlationId,
-          details: { error: `Failed to hash password: ${err.message}` }
-        });
-        throw createError(500, `Failed to hash password: ${err.message}`);
+  // Determine primary email to validate uniqueness
+  const repoOpts = {};
+  if (opts.session) repoOpts.session = opts.session;
+
+  let chosenPrimary = null; // normalized address string
+  let chosenPrimaryIndex = -1; // index in safe.emails if applicable
+
+  if (Array.isArray(safe.emails) && safe.emails.length > 0) {
+    // 1) If any email explicitly marked primary, prefer that (first one)
+    const explicitPrimaryIndex = safe.emails.findIndex((em) => em && (em.primary === true || em.primary === 'true'));
+    if (explicitPrimaryIndex !== -1) {
+      chosenPrimaryIndex = explicitPrimaryIndex;
+      chosenPrimary = safe.emails[explicitPrimaryIndex].address;
+    } else if (safe.emails.length === 1) {
+      // 2) If only one email provided, mark it primary and use it
+      safe.emails[0].primary = true;
+      chosenPrimaryIndex = 0;
+      chosenPrimary = safe.emails[0].address;
+    } else {
+      // 3) No explicit primary and multiple emails: check each email in order and pick the first that is not already used.
+      //    If all are already used, fail with 409 and list duplicates.
+      const duplicates = [];
+      for (let i = 0; i < safe.emails.length; i++) {
+        const em = safe.emails[i];
+        if (!em || !em.address) continue;
+        const addr = String(em.address).toLowerCase().trim();
+        let existingUser = null;
+        try {
+          if (typeof UserRepo !== 'undefined' && UserRepo && typeof UserRepo.findOne === 'function') {
+            existingUser = await UserRepo.findOne({ 'emails.address': addr }, repoOpts);
+          } else {
+            const UserModel = mongoose.models.User || mongoose.model('User');
+            existingUser = await UserModel.findOne({ 'emails.address': addr }).lean().exec();
+          }
+        } catch (lookupErr) {
+          // If lookup fails, surface as server error
+          await auditService.logEvent({
+            eventType: 'create.user',
+            actor,
+            target: addr,
+            outcome: 'failure',
+            severity: 'error',
+            correlationId,
+            details: { error: `Failed to validate email uniqueness: ${lookupErr && lookupErr.message}` }
+          });
+          throw createError(500, `Failed to validate email uniqueness: ${lookupErr && lookupErr.message ? lookupErr.message : String(lookupErr)}`);
+        }
+
+        if (!existingUser) {
+          // choose this one
+          chosenPrimaryIndex = i;
+          chosenPrimary = addr;
+          safe.emails[i].primary = true;
+          break;
+        } else {
+          duplicates.push(addr);
+        }
       }
-      delete safe.password;
+
+      if (!chosenPrimary) {
+        // All provided emails already exist -> conflict
+        try {
+          await auditService.logEvent({
+            eventType: 'create.user',
+            actor,
+            target: safe.emails.map((e) => e && e.address).filter(Boolean).join(', '),
+            outcome: 'failure',
+            severity: 'warn',
+            correlationId,
+            details: { error: 'All provided emails are already in use', duplicates }
+          });
+        } catch (auditErr) {
+          // swallow audit errors
+        }
+        throw createError(409, `All provided emails are already in use: ${duplicates.join(', ')}`);
+      }
     }
+  }
 
-    if (safe.passwordHash) {
-      safe.passwordHash = String(safe.passwordHash);
-    }
-
-    const repoOpts = {};
-    if (opts.session) repoOpts.session = opts.session;
-
+  // If we have a chosenPrimary (either explicit, single, or selected), verify it does not already exist
+  if (chosenPrimary) {
     try {
-      const created = await UserRepo.create(safe, repoOpts);
+      let existingUser = null;
+      if (typeof UserRepo !== 'undefined' && UserRepo && typeof UserRepo.findOne === 'function') {
+        existingUser = await UserRepo.findOne({ 'emails.address': chosenPrimary }, repoOpts);
+      } else {
+        const UserModel = mongoose.models.User || mongoose.model('User');
+        existingUser = await UserModel.findOne({ 'emails.address': chosenPrimary }).lean().exec();
+      }
+
+      if (existingUser) {
+        // Audit and fail
+        try {
+          await auditService.logEvent({
+            eventType: 'create.user',
+            actor,
+            target: chosenPrimary,
+            outcome: 'failure',
+            severity: 'warn',
+            correlationId,
+            details: { error: 'Primary email already in use' }
+          });
+        } catch (auditErr) {
+          // swallow audit errors
+        }
+        throw createError(409, 'Primary email already in use');
+      }
+    } catch (err) {
+      if (err && err.status && err.status === 409) throw err;
       await auditService.logEvent({
         eventType: 'create.user',
         actor,
-        target: created.userId || created._id || (created.emails && created.emails[0] && created.emails[0].address),
-        outcome: 'success',
+        target: chosenPrimary,
+        outcome: 'failure',
+        severity: 'error',
         correlationId,
-        details: { userId: created.userId || created._id }
+        details: { error: err && err.message ? err.message : String(err) }
       });
-      return sanitizeForClient(created);
+      throw createError(500, `Failed to validate primary email uniqueness: ${err && err.message ? err.message : String(err)}`);
+    }
+  }
+
+  // If no chosenPrimary (no emails provided), proceed (other validations will catch missing email if required)
+  // If chosenPrimary exists and is set in safe.emails, we already marked it primary above.
+
+  // If caller provided plain password, hash it here
+  if (safe.password) {
+    const saltRounds = parseInt(process.env.BCRYPT_SALT_ROUNDS || `${DEFAULT_SALT_ROUNDS}`, 10);
+    try {
+      safe.passwordHash = await bcrypt.hash(String(safe.password), saltRounds);
     } catch (err) {
+      // audit failure to hash
       await auditService.logEvent({
         eventType: 'create.user',
         actor,
@@ -123,11 +215,43 @@ class UserService {
         outcome: 'failure',
         severity: 'error',
         correlationId,
-        details: { error: err && err.message }
+        details: { error: `Failed to hash password: ${err.message}` }
       });
-      throw err;
+      throw createError(500, `Failed to hash password: ${err.message}`);
     }
+    delete safe.password;
   }
+
+  if (safe.passwordHash) {
+    safe.passwordHash = String(safe.passwordHash);
+  }
+
+  try {
+    const created = await UserRepo.create(safe, repoOpts);
+    await auditService.logEvent({
+      eventType: 'create.user',
+      actor,
+      target: created.userId || created._id || (created.emails && created.emails[0] && created.emails[0].address),
+      outcome: 'success',
+      correlationId,
+      details: { userId: created.userId || created._id }
+    });
+    return sanitizeForClient(created);
+  } catch (err) {
+    await auditService.logEvent({
+      eventType: 'create.user',
+      actor,
+      target: safe.emails && safe.emails[0] ? safe.emails[0].address : undefined,
+      outcome: 'failure',
+      severity: 'error',
+      correlationId,
+      details: { error: err && err.message }
+    });
+    throw err;
+  }
+}
+
+
 
   /**
    * Authenticate user by email + password

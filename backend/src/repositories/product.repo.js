@@ -277,11 +277,30 @@ class ProductRepository {
    * @returns {Promise<Array>}
    */
   async bulkInsert(docs = [], opts = {}) {
-    if (!Array.isArray(docs) || docs.length === 0) return [];
-    const options = { ordered: false };
-    if (opts.session) options.session = opts.session;
-    return Product.insertMany(docs, options);
+    try {
+      if (!Array.isArray(docs) || docs.length === 0) return [];
+      const options = { ordered: false };
+      if (opts.session) options.session = opts.session;
+      return await Product.insertMany(docs, options);
+    } catch (error) {
+      throw new Error(`Bulk insert products failed : ${error.message}`);
+    }
+    
   }
+
+  /**
+   * Count documents matching filter
+   * @param {Object} filter
+   * @param {Object} opts
+   */
+  async count(filter = {}, opts = {}) {
+    const f = { ...filter };
+    if (!opts || !opts.includeDeleted) f.deleted = false;
+    const q = Product.countDocuments(f);
+    if (opts && opts.session) q.session(opts.session);
+    return q.exec();
+  }
+
 }
 
 module.exports = new ProductRepository();

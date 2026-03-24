@@ -29,7 +29,6 @@ export default function Marketplace() {
         setLoading(false);
       }
     }
-
     loadProducts();
   }, []);
 
@@ -55,6 +54,7 @@ export default function Marketplace() {
     filteredProducts = [...filteredProducts].sort(
       (a, b) => getDisplayPrice(b) - getDisplayPrice(a)
     );
+
   }
 
   return (
@@ -113,7 +113,7 @@ export default function Marketplace() {
               {filteredProducts.map((item, index) => (
                 <div
                   key={item._id?.$oid || item._id || index}
-                  onClick={() => navigate(`/product/${item._id?.$oid || item._id || index}`)}
+                  onClick={() => navigate(`/items/${item._id?.$oid || item._id || index}`)}
                   className="cursor-pointer"
                 >
                   <ProductCard
@@ -127,7 +127,7 @@ export default function Marketplace() {
                     minTierPrice={item.pricingTiers?.[0]?.price ?? null}   // ← bulk tier floor
                     minTierQty={item.pricingTiers?.[0]?.minQty ?? null}
                     tags={item.tags || []}
-                    image={item.metadata?.imageUrl || ""}
+                    image={item.image || item.images?.[0] || ""}
                     size="large"
                   />
                 </div>

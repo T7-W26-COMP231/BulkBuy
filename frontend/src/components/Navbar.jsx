@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
-import SearchBar from "./SearchBar";
 
 const GTA_CITIES = [
   "Toronto", "Scarborough", "Mississauga", "Brampton", "Markham", "Vaughan",
@@ -86,7 +85,19 @@ export default function Navbar({ detectedCity, onCityChange, locationLabel, onSe
 
         <div className="flex flex-1 items-center justify-end gap-4 md:gap-6">
           <div className="hidden max-w-sm flex-1 sm:flex">
-            <SearchBar onSearch={onSearch} />
+            <div className="flex h-10 w-full items-stretch rounded-lg bg-neutral-light px-3">
+              <span className="material-symbols-outlined self-center text-text-muted">search</span>
+              <input
+                className="w-full border-none bg-transparent text-sm placeholder:text-text-muted focus:ring-0 focus:outline-none"
+                placeholder="Search bulk deals..."
+                type="text"
+                onChange={(e) => {
+                  if (typeof onSearch === "function") {
+                    onSearch(e.target.value);
+                  }
+                }}
+              />
+            </div>
           </div>
 
           <div className="flex gap-3">

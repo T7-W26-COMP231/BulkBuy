@@ -12,7 +12,6 @@ const API_URL = "http://localhost:5000/api/items";
 export const fetchItemCatalog = async (params = {}) => {
   try {
     const query = new URLSearchParams();
-
     if (params.page) query.append("page", params.page);
     if (params.limit) query.append("limit", params.limit);
     if (params.category) query.append("category", params.category);
@@ -23,7 +22,7 @@ export const fetchItemCatalog = async (params = {}) => {
 
     const res = await fetch(url);
     const data = await res.json();
-
+    console.log(data)
     if (!res.ok || !data.success) {
       throw new Error(data.message || "Failed to fetch item catalog");
     }

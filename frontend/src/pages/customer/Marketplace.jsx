@@ -38,9 +38,10 @@ export default function Marketplace() {
   }, [searchParams]);
 
   // ── helpers to extract price from price[] array ──────────────
-  const getListPrice = (item) => item.price?.[0]?.list ?? 0;
-  const getSalePrice = (item) => item.price?.[0]?.sale ?? null;
-  const getDisplayPrice = (item) => getSalePrice(item) ?? getListPrice(item);
+  // Use catalog fields directly
+  const getListPrice = (item) => item.currentPrice ?? 0;
+  const getSalePrice = (item) => null; // catalog doesn't return sale price separately
+  const getDisplayPrice = (item) => item.currentPrice ?? 0;
 
   let filteredProducts = products.filter((item) =>
     (item.title || "").toLowerCase().includes(searchTerm.toLowerCase())

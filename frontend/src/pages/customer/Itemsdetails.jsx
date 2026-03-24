@@ -43,7 +43,7 @@ export default function ItemDetail() {
     if (loading) {
         return (
             <div className="relative flex min-h-screen w-full flex-col bg-background-light font-display text-text-main">
-                <Navbar />
+                <Navbar locationLabel=" " />
                 <main className="flex flex-1 items-center justify-center">
                     <p className="text-text-muted">Loading item...</p>
                 </main>
@@ -55,7 +55,7 @@ export default function ItemDetail() {
     if (error || !item) {
         return (
             <div className="relative flex min-h-screen w-full flex-col bg-background-light font-display text-text-main">
-                <Navbar />
+                <Navbar locationLabel=" " />
                 <main className="flex flex-1 items-center justify-center">
                     <p className="text-red-500">{error || "Item not found."}</p>
                 </main>
@@ -78,7 +78,7 @@ export default function ItemDetail() {
 
     return (
         <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-background-light font-display text-text-main">
-            <Navbar locationLabel="" />
+            <Navbar locationLabel=" " />
 
             <main className="mx-auto w-full max-w-6xl px-4 py-10 md:px-10">
 
@@ -123,6 +123,139 @@ export default function ItemDetail() {
                     </div>
 
                     {/* RIGHT: Item details */}
+                    <div className="flex flex-col gap-5 md:w-1/2">
+
+                        {/* Active group buy badge */}
+                        <div className="w-fit rounded-full bg-primary/20 px-3 py-1 text-xs font-bold uppercase tracking-widest text-primary">
+                            Active Group Buy
+                        </div>
+
+                        {/* Title */}
+                        <h1 className="text-3xl font-extrabold leading-tight tracking-tight">
+                            {item.title}
+                        </h1>
+
+                        {/* Seller / brand */}
+                        <p className="flex items-center gap-1 text-sm text-text-muted">
+                            <span className="material-symbols-outlined text-base text-primary">verified</span>
+                            {item.brand?.name || item.seller?.name || "BulkBuy Supplier"}
+                        </p>
+
+
+                        {/* Bulk Pricing Tiers */}
+                        {tiers.length > 0 && (
+                            <div className="rounded-2xl border border-neutral-light bg-white p-4 shadow-sm">
+                                <div className="mb-3 flex items-center gap-2 font-bold">
+                                    <span className="material-symbols-outlined text-base text-primary">label</span>
+                                    Bulk Pricing Tiers
+                                </div>
+                                <div className="flex flex-col gap-2">
+                                    {tiers.map((tier, i) => {
+                                        const isActive = activeTier?.minQty === tier.minQty;
+                                        const nextTier = tiers[i + 1];
+                                        const label = nextTier
+                                            ? `Tier ${i + 1} (${tier.minQty}–${nextTier.minQty - 1} units)`
+                                            : `Tier ${i + 1} (${tier.minQty}+ units)`;
+                                        return (
+                                            <div
+                                                key={i}
+                                                className={`flex items-center justify-between rounded-xl px-4 py-2 text-sm ${isActive
+                                                    ? "bg-primary/10 font-bold text-primary"
+                                                    : "text-text-main"
+                                                    }`}
+                                            >
+                                                <span className="flex items-center gap-2">
+                                                    {label}
+                                                    {isActive && (
+                                                        <span className="rounded-full bg-primary px-2 py-0.5 text-xs font-bold text-white">
+                                                            LOWEST
+                                                        </span>
+                                                    )}
+                                                </span>
+                                                <span className="font-bold">${tier.price.toFixed(2)} / unit</span>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Community Progress (mock — replace with real group buy data) */}
+                        <div>
+                            <div className="mb-1 flex items-center justify-between text-sm">
+                                <span className="text-text-muted">Current commitment level</span>
+                                <span className="font-extrabold text-primary">
+                                    {stock} / {stock + 200} units
+                                </span>
+                            </div>
+                            <div className="h-2.5 w-full overflow-hidden rounded-full bg-neutral-light">
+                                <div
+                                    className="h-full rounded-full bg-primary transition-all"
+                                    style={{ width: `${Math.min((stock / (stock + 200)) * 100, 100)}%` }}
+                                />
+                            </div>
+                            {tiers[tiers.length - 1] && (
+                                <p className="mt-1 text-xs text-primary">
+                                    ↗ Add more units to unlock Tier {tiers.length} (${tiers[tiers.length - 1].price.toFixed(2)}) pricing!
+                                </p>
+                            )}
+                        </div>
+
+                        {/* Quantity selector */}
+                        <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-3 rounded-xl border border-neutral-light px-4 py-2">
+                                <button
+                                    onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                                    className="text-xl font-bold text-text-muted hover:text-text-main"
+                                >
+                                    −
+                                </button>
+                                <span className="w-8 text-center font-bold">{quantity}</span>
+                                <button
+                                    onClick={() => setQuantity((q) => q + 1)}
+                                    className="text-xl font-bold text-text-muted hover:text-text-main"
+                                >
+                                    +
+                                </button>
+                            </div>
+                            <span className="text-sm text-text-muted">
+                                Total selected: 1 box ({quantity} units)
+                            </span>
+                        </div>
+
+                        {/* CTA buttons */}
+                        <div className="flex gap-3">
+                            <button className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-primary py-3 font-bold text-text-main shadow-md transition hover:bg-primary/90">
+                                <span className="material-symbols-outlined text-base">add_shopping_cart</span>
+                                Add to Intent
+                            </button>
+                            <button className="flex h-12 w-12 items-center justify-center rounded-xl border border-neutral-light bg-white transition hover:bg-neutral-light">
+                                <span className="material-symbols-outlined text-base text-red-400">favorite</span>
+                            </button>
+                        </div>
+
+                        {/* Perks row */}
+                        <div className="grid grid-cols-2 gap-2 text-xs text-text-muted">
+                            <div className="flex items-center gap-1">
+                                <span className="material-symbols-outlined text-base text-primary">local_shipping</span>
+                                Free Local Delivery
+                            </div>
+                            <div className="flex items-center gap-1">
+                                <span className="material-symbols-outlined text-base text-primary">schedule</span>
+                                Closing in 3 days
+                            </div>
+                            <div className="flex items-center gap-1">
+                                <span className="material-symbols-outlined text-base text-primary">recycling</span>
+                                Zero-waste packaging
+                            </div>
+                            <div className="flex items-center gap-1">
+                                <span className="material-symbols-outlined text-base text-primary">group</span>
+                                42 buyers joined
+                            </div>
+                        </div>
+
+
+                    </div>
 
                 </div>
 
@@ -204,20 +337,4 @@ export default function ItemDetail() {
         </div>
     );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

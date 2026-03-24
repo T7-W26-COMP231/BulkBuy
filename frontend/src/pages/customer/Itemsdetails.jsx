@@ -141,6 +141,24 @@ export default function ItemDetail() {
                             {item.brand?.name || item.seller?.name || "BulkBuy Supplier"}
                         </p>
 
+                        {/* Price summary */}
+                        <div className="flex items-baseline gap-3">
+                            <span className="text-4xl font-extrabold text-text-main">
+                                ${displayPrice.toFixed(2)}
+                            </span>
+
+                            {hasSale && (
+                              <span className="text-base text-text-muted line-through opacity-80">
+                                ${listPrice.toFixed(2)}
+                              </span>
+                            )}
+
+                            {!!item.weight?.value && item.weight.value > 0 && (
+                              <span className="text-sm font-medium text-primary/80">
+                                (${(displayPrice / item.weight.value).toFixed(2)} / unit base)
+                              </span>
+                            )}
+                        </div>
 
                         {/* Bulk Pricing Tiers */}
                         {tiers.length > 0 && (

@@ -13,9 +13,8 @@ export default function ProductCard({
   return (
     <div className="w-full overflow-hidden rounded-2xl border border-neutral-light bg-white shadow-sm transition hover:shadow-lg">
       <div
-        className={`flex items-center justify-center bg-neutral-light text-text-muted ${
-          isSmall ? "h-48" : "h-64"
-        }`}
+        className={`flex items-center justify-center bg-neutral-light text-text-muted ${isSmall ? "h-48" : "h-64"
+          }`}
       >
         {image ? (
           <img
@@ -43,7 +42,7 @@ export default function ProductCard({
         </span>
 
         <Link
-          to={`/product/${id}`}
+          to={`/items/${id}`}
           onClick={(e) => e.stopPropagation()}
           className="mt-3 block rounded-xl bg-primary py-3 text-center font-bold text-text-main shadow-md transition-all hover:bg-primary/90"
         >

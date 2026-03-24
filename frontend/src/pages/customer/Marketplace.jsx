@@ -4,7 +4,7 @@ import Navbar from "../../components/Navbar";
 import Sidebar from "../../components/Sidebar";
 import Footer from "../../components/Footer";
 import ProductCard from "../../components/ProductCard";
-import { getProducts } from "../../api/productApi";
+import { fetchItemCatalog } from "../../api/itemApi"; // ← updated import
 
 export default function Marketplace() {
   const [searchParams] = useSearchParams();
@@ -20,7 +20,7 @@ export default function Marketplace() {
     async function loadProducts() {
       try {
         setLoading(true);
-        const data = await getProducts();
+        const data = await fetchItemCatalog(); // ← updated call
         setProducts(Array.isArray(data.items) ? data.items : []);
       } catch (err) {
         console.error(err);
@@ -38,19 +38,22 @@ export default function Marketplace() {
     setSearchTerm(q);
   }, [searchParams]);
 
+  // ── helpers to extract price from price[] array ──────────────
+  const getListPrice = (item) => item.price?.[0]?.list ?? 0;
+  const getSalePrice = (item) => item.price?.[0]?.sale ?? null;
+  const getDisplayPrice = (item) => getSalePrice(item) ?? getListPrice(item);
+
   let filteredProducts = products.filter((item) =>
-    (item.title || item.name || "")
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase())
+    (item.title || "").toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (sortOption === "priceLow") {
     filteredProducts = [...filteredProducts].sort(
-      (a, b) => (a.price || 0) - (b.price || 0)
+      (a, b) => getDisplayPrice(a) - getDisplayPrice(b)
     );
   } else if (sortOption === "priceHigh") {
     filteredProducts = [...filteredProducts].sort(
-      (a, b) => (b.price || 0) - (a.price || 0)
+      (a, b) => getDisplayPrice(b) - getDisplayPrice(a)
     );
   }
 
@@ -94,7 +97,6 @@ export default function Marketplace() {
           </div>
 
           {loading && <p className="text-text-muted">Loading products...</p>}
-
           {error && <p className="text-red-500">{error}</p>}
 
           {!loading && !error && filteredProducts.length === 0 && (
@@ -110,16 +112,22 @@ export default function Marketplace() {
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
               {filteredProducts.map((item, index) => (
                 <div
-                  key={item._id || index}
-                  onClick={() => navigate(`/product/${item._id || index}`)}
+                  key={item._id?.$oid || item._id || index}
+                  onClick={() => navigate(`/product/${item._id?.$oid || item._id || index}`)}
                   className="cursor-pointer"
                 >
                   <ProductCard
-                    id={item._id || index}
-                    title={item.title || item.name || "Untitled Product"}
-                    category={item.category || item.description || "No details available"}
-                    price={item.price || item.basePrice || 0}
-                    image={item.image || item.imageUrl || ""}
+                    id={item._id?.$oid || item._id || index}
+                    title={item.title || "Untitled Product"}
+                    category={item.shortDescription || item.description || "No details available"}
+                    price={getDisplayPrice(item)}        // ← sale price or list price
+                    salePrice={getSalePrice(item)}       // ← null if no sale
+                    listPrice={getListPrice(item)}       // ← original price
+                    stock={item.inventory?.stock ?? null}
+                    minTierPrice={item.pricingTiers?.[0]?.price ?? null}   // ← bulk tier floor
+                    minTierQty={item.pricingTiers?.[0]?.minQty ?? null}
+                    tags={item.tags || []}
+                    image={item.metadata?.imageUrl || ""}
                     size="large"
                   />
                 </div>

@@ -7,6 +7,8 @@ import ProductDetailsPage from "./pages/customer/ProductDetailsPage";
 import ProductListPage from "./pages/customer/ProductListPage";
 import CartPage from "./pages/customer/CartPage";
 import Shop from "./pages/customer/Marketplace";
+import Item from "./pages/customer/Itemsdetails";
+import { useAuthBootstrap } from "./hooks/useAuthBootstrap"; // ← added
 
 
 function PlaceholderPage({ title }) {
@@ -23,6 +25,8 @@ function PlaceholderPage({ title }) {
 }
 
 export default function App() {
+  useAuthBootstrap(); // ← added: auto-login until real auth is built
+
   return (
     <Routes>
       <Route path="/" element={<HomePage />} />
@@ -31,6 +35,8 @@ export default function App() {
       <Route path="/supplier" element={<SupplierDashboard />} />
       <Route path="/admin" element={<AdminDashboard />} />
       <Route path="/cart" element={<CartPage />} />
+      <Route path="/items/:id" element={<Item />} />
+
       <Route path="/product/:id" element={<ProductDetailsPage />} />
       <Route path="/products" element={<ProductListPage />} />
       <Route path="/about" element={<PlaceholderPage title="About Us" />} />

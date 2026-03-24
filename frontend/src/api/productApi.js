@@ -6,6 +6,7 @@ export async function getProducts() {
   if (!response.ok) {
     throw new Error("Failed to fetch products");
   }
+  console.log(response)
 
   return response.json();
 }

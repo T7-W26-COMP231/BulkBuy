@@ -4,7 +4,6 @@ import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 
 const API_URL = "http://localhost:5000/api/items";
-const PRODUCT_API_URL = "http://localhost:5000/api/prdts";
 
 export default function ItemDetail() {
     const { id } = useParams();
@@ -15,8 +14,7 @@ export default function ItemDetail() {
     const [selectedImage, setSelectedImage] = useState(0);
     const [quantity, setQuantity] = useState(1);
     const [activeTab, setActiveTab] = useState("description");
-
- useEffect(() => {
+useEffect(() => {
     async function loadItem() {
         try {
             setLoading(true);
@@ -41,72 +39,59 @@ export default function ItemDetail() {
             }
 
             // ============================================================
-// 🔹 2. FETCH PRODUCTS (for savings) — FIXED PAGINATION
+// 🔹 2. CALCULATE SAVINGS DIRECTLY FROM ITEM
 // ============================================================
-const productRes = await fetch(
-    `http://localhost:5000/api/prdts?limit=100`,
-    {
-        headers: {
-            "Content-Type": "application/json",
-        },
-    }
-);
+const currentItem = itemData.data;
 
-const productData = await productRes.json();
+let estimatedSavings = 0;
 
-// ============================================================
-// 🔹 3. SAFE PRODUCTS LIST (handles items OR data)
-// ============================================================
-const productsList =
-    productData.items ||
-    productData.data?.items ||
-    productData.data ||
-    [];
+// 🔹 Base price
+// 🔹 BASE PRICE (ALIGNED WITH UI)
+const listPrice = currentItem.price?.[0]?.list ?? 0;
+const salePrice = currentItem.price?.[0]?.sale ?? null;
 
-// 🔥 DEBUG (keep this for testing)
-console.log("TOTAL PRODUCTS:", productsList.length);
+const basePrice = Number(salePrice ?? listPrice) || 0;
 
-// ============================================================
-// 🔹 4. MATCH PRODUCT WITH ITEM (FINAL SAFE VERSION)
-// ============================================================
-const relatedProduct =
-    productRes.ok && productData.success
-        ? productsList.find((p) =>
-              p.items?.some(
-                  (i) => String(i.itemId) === String(itemData.data._id)
-              )
-          )
+// 🔹 Safe tiers
+const tiers = Array.isArray(currentItem.pricingTiers)
+    ? currentItem.pricingTiers
+    : [];
+
+// 🔹 ACTIVE tier based on quantity
+// 🔹 BEST POSSIBLE TIER (for preview savings)
+const bestTier =
+    tiers.length > 0
+        ? [...tiers].sort((a, b) => Number(b.minQty) - Number(a.minQty))[0]
         : null;
 
-// 🔥 DEBUG
-console.log("MATCHED PRODUCT:", relatedProduct);
+// 🔹 ACTIVE tier (for UI highlighting)
+const activeTier =
+    tiers
+        .slice()
+        .sort((a, b) => Number(b.minQty) - Number(a.minQty))
+        .find((t) => quantity >= Number(t.minQty)) || null;
 
-// 🔥 FORCE TEST (temporary)
-console.log("MATCH TEST RESULT:", relatedProduct);
+// 🔹 Use BEST tier for savings
+const tierPrice = Number(bestTier?.price) || basePrice;
 
-// 🔥 DEBUG (VERY IMPORTANT)
-console.log("CURRENT ITEM ID:", itemData.data._id);
-console.log(
-    "ALL PRODUCT ITEM IDS:",
-    productsList.map((p) => p.items?.map((i) => i.itemId))
-);
-console.log("MATCHED PRODUCT:", relatedProduct);
+// 🔹 Savings
+if (basePrice > tierPrice) {
+    estimatedSavings = Number((basePrice - tierPrice).toFixed(2));
+}
+
+// ============================================================
+// 🔹 DEBUG
+// ============================================================
+console.log("ITEM:", currentItem);
+console.log("ESTIMATED SAVINGS:", estimatedSavings);
 
             // ============================================================
-            // 🔹 DEBUG (keep for testing)
+            // 🔹 3. MERGE ITEM + SAVINGS
             // ============================================================
-            console.log("ITEM:", itemData.data);
-            console.log("PRODUCT:", relatedProduct);
-
-            // ============================================================
-            // 🔹 4. MERGE ITEM + SAVINGS
-            // ============================================================
-            setItem({
-                ...itemData.data,
-                estimatedSavings: Number(
-                    relatedProduct?.estimatedSavings ?? 0
-                ),
-            });
+           setItem({
+    ...currentItem,
+    estimatedSavings,
+});
 
         } catch (err) {
             console.error("LOAD ITEM ERROR:", err);
@@ -117,7 +102,7 @@ console.log("MATCHED PRODUCT:", relatedProduct);
     }
 
     loadItem();
-}, [id]);
+}, [id, quantity]);
 
     if (loading) {
         return (

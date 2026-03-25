@@ -13,7 +13,7 @@ export function useAuthBootstrap() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            email: "admin@bulkbuy.example.com",
+            email: "admin@bulkbuy.example.com", //hide this
             password: "AdminPass!234",
           }),
         });

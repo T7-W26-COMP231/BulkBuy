@@ -3,106 +3,135 @@ import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 
-const API_URL = "http://localhost:5000/api/items";
+const PRODUCTS_API = "http://localhost:5000/api/prdts";
+const ITEMS_API = "http://localhost:5000/api/items";
 
 export default function ItemDetail() {
     const { id } = useParams();
     const navigate = useNavigate();
+    const [productData, setProductData] = useState(null);
     const [item, setItem] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [productItems, setProductItems] = useState([]); // ✅ ADD HERE
     const [error, setError] = useState("");
     const [selectedImage, setSelectedImage] = useState(0);
     const [quantity, setQuantity] = useState(1);
     const [activeTab, setActiveTab] = useState("description");
-useEffect(() => {
-    async function loadItem() {
-        try {
-            setLoading(true);
 
-            // 🔹 Get token (for protected item API)
-            const token = localStorage.getItem("token");
-
-            // ============================================================
-            // 🔹 1. FETCH ITEM
-            // ============================================================
-            const itemRes = await fetch(`${API_URL}/${id}`, {
-                headers: {
+    useEffect(() => {
+        async function loadItem() {
+            try {
+                setLoading(true);
+                const token = localStorage.getItem("token");
+                const headers = {
                     "Content-Type": "application/json",
                     ...(token && { Authorization: `Bearer ${token}` }),
-                },
-            });
+                };
 
-            const itemData = await itemRes.json();
+                // ── 1. Try product API first ──────────────────────────────
+                const prodRes = await fetch(`${PRODUCTS_API}/${id}`, { headers });
+                const prodData = await prodRes.json();
+                const product = prodData.data ?? prodData;
 
-            if (!itemRes.ok || !itemData.success) {
-                throw new Error(itemData.message || "Failed to fetch item");
+                if (prodRes.ok && product?._id) {
+                    const itemIds = (product.items ?? [])
+                        .map((i) => i.itemId?.$oid || i.itemId?.toString?.() || i.itemId)
+                        .filter(Boolean);
+
+                    const itemsRes = await Promise.all(
+                        itemIds.map((itemId) =>
+                            fetch(`${ITEMS_API}/${itemId}`, { headers }).then((r) => r.json())
+                        )
+                    );
+
+                    const items = itemsRes
+                        .map((res) => res.data ?? res)
+                        .filter(Boolean);
+                    const sortedItems = [...items].sort((a, b) => {
+                        const getPrice = (item) => {
+                            const match = product.items?.find(
+                                pi => (pi.itemId?.$oid || pi.itemId) === (item._id?.$oid || item._id)
+                            );
+                            return match?.salesPrices?.find(sp => sp.currency === "USD")?.price ?? Infinity;
+                        };
+                        return getPrice(a) - getPrice(b);
+                    });
+
+                    if (items.length === 0) {
+                        setError("No items found in this product bundle.");
+                        return;
+                    }
+
+                    const mainItem = sortedItems[0];
+
+                    const basePrice = mainItem?.price?.[0]?.list ?? 0;
+                    const salePrice = mainItem?.price?.[0]?.sale ?? null;
+                    const itemTiers = mainItem?.pricingTiers ?? [];
+                    // Get the salesPrice for this item from the product doc
+                    const productItemData = product.items?.[0];
+                    const salesPrice = productItemData?.salesPrices?.find(
+                        sp => sp.currency === "USD"
+                    )?.price ?? null;
+                    let estimatedSavings = 0;
+                    if (salePrice !== null && salePrice < basePrice) {
+                        estimatedSavings = Number((basePrice - salePrice).toFixed(2));
+                    } else if (itemTiers.length > 0) {
+                        const bestTierPrice = Math.min(...itemTiers.map(t => t.price));
+                        if (basePrice > bestTierPrice) {
+                            estimatedSavings = Number((basePrice - bestTierPrice).toFixed(2));
+                        }
+                    }
+
+                    setProductData(product);
+                    setProductItems(items);
+                    setItem({
+                        ...mainItem,
+                        price: salesPrice !== null
+                            ? [{ list: salesPrice, sale: null, currency: "USD" }]
+                            : mainItem.price,
+                        estimatedSavings,
+                        _isProduct: true,
+                        _bundleItems: items.slice(1),
+                    });
+                    return; // ✅ stop here, don't fall through
+                }
+
+                // ── 2. Fallback: try plain item API ───────────────────────
+                const itemRes = await fetch(`${ITEMS_API}/${id}`, { headers });
+                const itemData = await itemRes.json();
+                const plainItem = itemData.data ?? itemData;
+
+                if (itemRes.ok && plainItem?._id) {
+                    const basePrice = plainItem?.price?.[0]?.list ?? 0;
+                    const salePrice = plainItem?.price?.[0]?.sale ?? null;
+                    const itemTiers = plainItem?.pricingTiers ?? [];
+
+                    let estimatedSavings = 0;
+                    if (salePrice !== null && salePrice < basePrice) {
+                        estimatedSavings = Number((basePrice - salePrice).toFixed(2));
+                    } else if (itemTiers.length > 0) {
+                        const bestTierPrice = Math.min(...itemTiers.map(t => t.price));
+                        if (basePrice > bestTierPrice) {
+                            estimatedSavings = Number((basePrice - bestTierPrice).toFixed(2));
+                        }
+                    }
+
+                    setItem({ ...plainItem, estimatedSavings, _isProduct: false, _bundleItems: [] });
+                    return;
+                }
+
+                setError("Item not found.");
+
+            } catch (err) {
+                console.error("LOAD ITEM ERROR:", err);
+                setError("Could not load item details.");
+            } finally {
+                setLoading(false);
             }
-
-            // ============================================================
-// 🔹 2. CALCULATE SAVINGS DIRECTLY FROM ITEM
-// ============================================================
-const currentItem = itemData.data;
-
-let estimatedSavings = 0;
-
-// 🔹 Base price
-// 🔹 BASE PRICE (ALIGNED WITH UI)
-const listPrice = currentItem.price?.[0]?.list ?? 0;
-const salePrice = currentItem.price?.[0]?.sale ?? null;
-
-const basePrice = Number(salePrice ?? listPrice) || 0;
-
-// 🔹 Safe tiers
-const tiers = Array.isArray(currentItem.pricingTiers)
-    ? currentItem.pricingTiers
-    : [];
-
-// 🔹 ACTIVE tier based on quantity
-// 🔹 BEST POSSIBLE TIER (for preview savings)
-const bestTier =
-    tiers.length > 0
-        ? [...tiers].sort((a, b) => Number(b.minQty) - Number(a.minQty))[0]
-        : null;
-
-// 🔹 ACTIVE tier (for UI highlighting)
-const activeTier =
-    tiers
-        .slice()
-        .sort((a, b) => Number(b.minQty) - Number(a.minQty))
-        .find((t) => quantity >= Number(t.minQty)) || null;
-
-// 🔹 Use BEST tier for savings
-const tierPrice = Number(bestTier?.price) || basePrice;
-
-// 🔹 Savings
-if (basePrice > tierPrice) {
-    estimatedSavings = Number((basePrice - tierPrice).toFixed(2));
-}
-
-// ============================================================
-// 🔹 DEBUG
-// ============================================================
-console.log("ITEM:", currentItem);
-console.log("ESTIMATED SAVINGS:", estimatedSavings);
-
-            // ============================================================
-            // 🔹 3. MERGE ITEM + SAVINGS
-            // ============================================================
-           setItem({
-    ...currentItem,
-    estimatedSavings,
-});
-
-        } catch (err) {
-            console.error("LOAD ITEM ERROR:", err);
-            setError("Could not load item details.");
-        } finally {
-            setLoading(false);
         }
-    }
 
-    loadItem();
-}, [id, quantity]);
+        loadItem();
+    }, [id]);
 
     if (loading) {
         return (
@@ -128,17 +157,26 @@ console.log("ESTIMATED SAVINGS:", estimatedSavings);
         );
     }
 
+
+    // ── Derived values (unchanged) ─────────────────────────────────────────────
+    const isProduct = item._isProduct === true;
+    const bundleItems = item._bundleItems ?? [];
+
     const listPrice = item.price?.[0]?.list ?? 0;
     const salePrice = item.price?.[0]?.sale ?? null;
     const displayPrice = salePrice ?? listPrice;
+    console.log(displayPrice)
     const hasSale = salePrice !== null && salePrice < listPrice;
     const currency = item.price?.[0]?.currency ?? "USD";
     const stock = item.inventory?.stock ?? 0;
     const images = item.images?.length > 0 ? item.images : [item.metadata?.imageUrl].filter(Boolean);
     const tiers = item.pricingTiers ?? [];
-
-    // Active tier based on quantity
     const activeTier = [...tiers].reverse().find((t) => quantity >= t.minQty);
+
+    // Tabs — add "items" tab when viewing a product
+    const tabs = isProduct
+        ? ["items", "description", "reviews"]
+        : ["description", "specifications", "reviews"];
 
     return (
         <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-background-light font-display text-text-main">
@@ -146,12 +184,11 @@ console.log("ESTIMATED SAVINGS:", estimatedSavings);
 
             <main className="mx-auto w-full max-w-6xl px-4 py-10 md:px-10">
 
-                {/* Top section: Image + Details */}
+                {/* Top section: Image + Details — UNCHANGED */}
                 <div className="flex flex-col gap-10 md:flex-row">
 
                     {/* LEFT: Image gallery */}
                     <div className="flex flex-col gap-3 md:w-1/2">
-                        {/* Main image */}
                         <div className="flex h-80 items-center justify-center overflow-hidden rounded-2xl bg-neutral-light md:h-96">
                             <img
                                 src={
@@ -163,16 +200,13 @@ console.log("ESTIMATED SAVINGS:", estimatedSavings);
                                 className="h-full w-full object-cover"
                             />
                         </div>
-
-                        {/* Thumbnails */}
                         {images.length > 0 && (
                             <div className="flex gap-2 overflow-x-auto">
                                 {images.slice(0, 4).map((img, i) => (
                                     <button
                                         key={i}
                                         onClick={() => setSelectedImage(i)}
-                                        className={`h-20 w-20 flex-shrink-0 overflow-hidden rounded-xl border-2 transition ${selectedImage === i ? "border-primary" : "border-neutral-light"
-                                            }`}
+                                        className={`h-20 w-20 flex-shrink-0 overflow-hidden rounded-xl border-2 transition ${selectedImage === i ? "border-primary" : "border-neutral-light"}`}
                                     >
                                         <img src={img} alt={`${item.title} ${i + 1}`} className="h-full w-full object-cover" />
                                     </button>
@@ -188,52 +222,61 @@ console.log("ESTIMATED SAVINGS:", estimatedSavings);
 
                     {/* RIGHT: Item details */}
                     <div className="flex flex-col gap-5 md:w-1/2">
-
-                        {/* Active group buy badge */}
                         <div className="w-fit rounded-full bg-primary/20 px-3 py-1 text-xs font-bold uppercase tracking-widest text-primary">
                             Active Group Buy
                         </div>
 
-                        {/* Title */}
                         <h1 className="text-3xl font-extrabold leading-tight tracking-tight">
                             {item.title}
                         </h1>
 
-                        {/* Seller / brand */}
                         <p className="flex items-center gap-1 text-sm text-text-muted">
                             <span className="material-symbols-outlined text-base text-primary">verified</span>
                             {item.brand?.name || item.seller?.name || "BulkBuy Supplier"}
                         </p>
 
-                        {/* Price summary */}
                         <div className="flex items-baseline gap-3">
-    <span className="text-4xl font-extrabold text-text-main">
-        ${displayPrice.toFixed(2)}
-    </span>
-
-    {/* 💰 ESTIMATED SAVINGS */}
-    {Number(item.estimatedSavings) > 0 && (
-        <div className="ml-2 rounded-lg bg-green-100 px-3 py-1 text-sm font-semibold text-green-700">
-            💰 You save ${item.estimatedSavings}
-        </div>
-    )}
-
-                            
-
-                            {hasSale && (
-                              <span className="text-base text-text-muted line-through opacity-80">
-                                ${listPrice.toFixed(2)}
-                              </span>
+                            <span className="text-4xl font-extrabold text-text-main">
+                                ${displayPrice.toFixed(2)}
+                            </span>
+                            {Number(item.estimatedSavings) > 0 && (
+                                <div className="ml-2 rounded-lg bg-green-100 px-3 py-1 text-sm font-semibold text-green-700">
+                                    💰 You save ${item.estimatedSavings}
+                                </div>
                             )}
+                            {hasSale && (
+                                <span className="text-base text-text-muted line-through opacity-80">
+                                    ${listPrice.toFixed(2)
+                                    }
 
+                                </span>
+                            )
+                            }
                             {!!item.weight?.value && item.weight.value > 0 && (
-                              <span className="text-sm font-medium text-primary/80">
-                                (${(displayPrice / item.weight.value).toFixed(2)} / unit base)
-                              </span>
+                                <span className="text-sm font-medium text-primary/80">
+                                    (${(displayPrice / item.weight.value).toFixed(2)} / unit base)
+                                </span>
                             )}
                         </div>
+                        {/* 🔍 DEBUG PANEL
+                        <div className="mt-6 rounded-xl bg-black p-4 text-xs text-green-400">
+                            <pre>
+                                {JSON.stringify({
+                                    item,
+                                    displayPrice,
+                                    listPrice,
+                                    salePrice,
+                                    hasSale,
+                                    currency,
+                                    stock,
+                                    images,
+                                    tiers,
+                                    activeTier,
+                                    quantity,
+                                }, null, 2)}
+                            </pre>
+                        </div> */}
 
-                        {/* Bulk Pricing Tiers */}
                         {tiers.length > 0 && (
                             <div className="rounded-2xl border border-neutral-light bg-white p-4 shadow-sm">
                                 <div className="mb-3 flex items-center gap-2 font-bold">
@@ -250,10 +293,7 @@ console.log("ESTIMATED SAVINGS:", estimatedSavings);
                                         return (
                                             <div
                                                 key={i}
-                                                className={`flex items-center justify-between rounded-xl px-4 py-2 text-sm ${isActive
-                                                    ? "bg-primary/10 font-bold text-primary"
-                                                    : "text-text-main"
-                                                    }`}
+                                                className={`flex items-center justify-between rounded-xl px-4 py-2 text-sm ${isActive ? "bg-primary/10 font-bold text-primary" : "text-text-main"}`}
                                             >
                                                 <span className="flex items-center gap-2">
                                                     {label}
@@ -271,7 +311,6 @@ console.log("ESTIMATED SAVINGS:", estimatedSavings);
                             </div>
                         )}
 
-                        {/* Community Progress (mock — replace with real group buy data) */}
                         <div>
                             <div className="mb-1 flex items-center justify-between text-sm">
                                 <span className="text-text-muted">Current commitment level</span>
@@ -292,29 +331,19 @@ console.log("ESTIMATED SAVINGS:", estimatedSavings);
                             )}
                         </div>
 
-                        {/* Quantity selector */}
                         <div className="flex items-center gap-4">
                             <div className="flex items-center gap-3 rounded-xl border border-neutral-light px-4 py-2">
-                                <button
-                                    onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                                    className="text-xl font-bold text-text-muted hover:text-text-main"
-                                >
-                                    −
-                                </button>
+                                <button onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                                    className="text-xl font-bold text-text-muted hover:text-text-main">−</button>
                                 <span className="w-8 text-center font-bold">{quantity}</span>
-                                <button
-                                    onClick={() => setQuantity((q) => q + 1)}
-                                    className="text-xl font-bold text-text-muted hover:text-text-main"
-                                >
-                                    +
-                                </button>
+                                <button onClick={() => setQuantity((q) => q + 1)}
+                                    className="text-xl font-bold text-text-muted hover:text-text-main">+</button>
                             </div>
                             <span className="text-sm text-text-muted">
                                 Total selected: 1 box ({quantity} units)
                             </span>
                         </div>
 
-                        {/* CTA buttons */}
                         <div className="flex gap-3">
                             <button className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-primary py-3 font-bold text-text-main shadow-md transition hover:bg-primary/90">
                                 <span className="material-symbols-outlined text-base">add_shopping_cart</span>
@@ -325,7 +354,6 @@ console.log("ESTIMATED SAVINGS:", estimatedSavings);
                             </button>
                         </div>
 
-                        {/* Perks row */}
                         <div className="grid grid-cols-2 gap-2 text-xs text-text-muted">
                             <div className="flex items-center gap-1">
                                 <span className="material-symbols-outlined text-base text-primary">local_shipping</span>
@@ -344,16 +372,13 @@ console.log("ESTIMATED SAVINGS:", estimatedSavings);
                                 42 buyers joined
                             </div>
                         </div>
-
-
                     </div>
-
                 </div>
 
-                {/* Tabs: Description / Specifications / Reviews */}
+                {/* Tabs — same layout, "items" tab added for products */}
                 <div className="mt-12">
                     <div className="flex border-b border-neutral-light">
-                        {["description", "specifications", "reviews"].map((tab) => (
+                        {tabs.map((tab) => (
                             <button
                                 key={tab}
                                 onClick={() => setActiveTab(tab)}
@@ -362,12 +387,103 @@ console.log("ESTIMATED SAVINGS:", estimatedSavings);
                                     : "text-text-muted hover:text-text-main"
                                     }`}
                             >
-                                {tab === "reviews" ? `Reviews (${item.reviews?.length ?? 0})` : tab}
+                                {tab === "reviews"
+                                    ? `Reviews (${item.reviews?.length ?? 0})`
+                                    : tab === "items"
+                                        ? `Items in Bundle (${bundleItems.length})`
+                                        : tab}
                             </button>
                         ))}
                     </div>
 
                     <div className="mt-6">
+
+                        {/* ── Items tab (products only) ── */}
+                        {/* ── Items tab (products only) ── */}
+                        {activeTab === "items" && (
+                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                                {bundleItems.map((bundleItem, i) => (
+                                    <div
+                                        key={bundleItem._id || i}
+                                        onClick={() => navigate(`/items/${bundleItem._id}`)}
+                                        className="flex cursor-pointer gap-4 rounded-2xl border border-neutral-light bg-white p-4 shadow-sm transition hover:shadow-md"
+                                    >
+                                        <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-xl bg-neutral-light">
+                                            <img
+                                                src={bundleItem.images?.[0] || bundleItem.metadata?.imageUrl || ""}
+                                                alt={bundleItem.title || "Item Image"}
+                                                className="h-full w-full object-cover"
+                                                onError={(e) => { e.target.style.display = "none"; }}
+                                            />
+                                        </div>
+                                        <div className="flex flex-col justify-center gap-1">
+                                            <h3 className="text-sm font-bold line-clamp-2">{bundleItem.title}</h3>
+                                            {bundleItem.shortDescription && (
+                                                <p className="text-xs text-text-muted line-clamp-1">{bundleItem.shortDescription}</p>
+                                            )}
+                                            <span className="text-sm font-extrabold text-primary">
+                                                ${bundleItem.salesPrice?.toFixed(2)
+                                                    ?? bundleItem.price?.[0]?.list?.toFixed(2)
+                                                    ?? "—"}
+                                            </span>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                        {/* ✅ 🔥 PUT IT RIGHT HERE 🔥 */}
+                        {productItems.length > 1 && (
+                            <div className="mt-10">
+                                <h2 className="mb-4 text-xl font-bold">Other Options</h2>
+
+                                <div className="flex gap-4 overflow-x-auto">
+                                    {productItems.map((it) => (
+                                        <div
+                                            key={it._id}
+                                            onClick={() => {
+                                                setItem({
+                                                    ...it,
+                                                    estimatedSavings: (() => {
+                                                        const base = it.price?.[0]?.list ?? 0;
+                                                        const sale = it.price?.[0]?.sale ?? null;
+                                                        const tiers = it.pricingTiers ?? [];
+                                                        if (sale !== null && sale < base) return Number((base - sale).toFixed(2));
+                                                        if (tiers.length > 0) {
+                                                            const best = Math.min(...tiers.map(p => p.price));
+                                                            return base > best ? Number((base - best).toFixed(2)) : 0;
+                                                        }
+                                                        return 0;
+                                                    })(),
+                                                    _isProduct: false, // optional: mark it as a single item now
+                                                    _bundleItems: [],  // optional: no further bundle
+                                                });
+                                                setSelectedImage(0);
+                                                setQuantity(1);
+                                                setActiveTab("description");
+                                            }}
+                                            className={`min-w-[180px] cursor-pointer rounded-xl border p-3 transition
+                        ${item._id === it._id ? "border-primary shadow-md" : "border-neutral-light"}
+                    `}
+                                        >
+                                            <img
+                                                src={it.images?.[0] || it.metadata?.imageUrl}
+                                                className="h-28 w-full rounded-lg object-cover"
+                                            />
+
+                                            <p className="mt-2 text-sm font-semibold">
+                                                {it.title}
+                                            </p>
+
+                                            <p className="text-xs text-gray-500">
+                                                ${it.price?.[0]?.list ?? 0}
+                                            </p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* ── Description tab — UNCHANGED ── */}
                         {activeTab === "description" && (
                             <div className="flex flex-col gap-4 text-sm leading-relaxed text-text-main">
                                 <p>{item.description}</p>
@@ -387,6 +503,7 @@ console.log("ESTIMATED SAVINGS:", estimatedSavings);
                             </div>
                         )}
 
+                        {/* ── Specifications tab — UNCHANGED ── */}
                         {activeTab === "specifications" && (
                             <div className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
                                 {[
@@ -414,6 +531,7 @@ console.log("ESTIMATED SAVINGS:", estimatedSavings);
                             </div>
                         )}
 
+                        {/* ── Reviews tab — UNCHANGED ── */}
                         {activeTab === "reviews" && (
                             <div className="flex flex-col items-center gap-3 py-10 text-center text-text-muted">
                                 <span className="material-symbols-outlined text-4xl">rate_review</span>
@@ -427,5 +545,5 @@ console.log("ESTIMATED SAVINGS:", estimatedSavings);
             <Footer />
         </div>
     );
-}
 
+}

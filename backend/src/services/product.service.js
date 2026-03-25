@@ -19,25 +19,23 @@ const DEFAULT_LIMIT = 25;
 function calculateEstimatedSavings(doc) {
   if (!doc || typeof doc !== 'object') return 0;
 
-  // 🔹 Need at least 2 items (base + bulk)
-  if (!Array.isArray(doc.items) || doc.items.length < 2) return 0;
+  // ✅ CASE 1: Product bundles (items[])
+  if (Array.isArray(doc.items) && doc.items.length > 0) {
+    const prices = doc.items
+      .map(i => Number(i?.salesPrices?.[0]?.price ?? 0))
+      .filter(p => Number.isFinite(p) && p > 0);
 
-  const firstItem = doc.items[0];
-  const secondItem = doc.items[1];
+    if (prices.length < 2) return 0;
 
-  const currentPrice = Number(
-    firstItem?.salesPrices?.[0]?.price ?? 0
-  );
+    const maxPrice = Math.max(...prices); // base
+    const minPrice = Math.min(...prices); // best deal
 
-  const bulkPrice = Number(
-    secondItem?.salesPrices?.[0]?.price ?? 0
-  );
+    if (maxPrice <= minPrice) return 0;
 
-  // 🔹 Safety checks
-  if (!Number.isFinite(currentPrice) || !Number.isFinite(bulkPrice)) return 0;
-  if (currentPrice <= 0 || currentPrice <= bulkPrice) return 0;
+    return Number((maxPrice - minPrice).toFixed(2));
+  }
 
-  return Number((currentPrice - bulkPrice).toFixed(2));
+  return 0;
 }
 
 /**
@@ -56,6 +54,7 @@ function sanitizeForClient(doc) {
   if (base.deletedBy === null) delete base.deletedBy;
   if (base.deleted === undefined) delete base.deleted;
 
+  delete base.estimatedSavings;
   base.estimatedSavings = calculateEstimatedSavings(base);
 
   return base;

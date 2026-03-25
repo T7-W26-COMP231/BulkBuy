@@ -4,7 +4,7 @@ import Navbar from "../../components/Navbar";
 import Sidebar from "../../components/Sidebar";
 import Footer from "../../components/Footer";
 import ProductCard from "../../components/ProductCard";
-import { fetchItemCatalog } from "../../api/itemApi"; // ← updated import
+import { fetchItemCatalog } from "../../api/itemApi";
 
 export default function Marketplace() {
   const [searchParams] = useSearchParams();
@@ -20,7 +20,7 @@ export default function Marketplace() {
     async function loadProducts() {
       try {
         setLoading(true);
-        const data = await fetchItemCatalog(); // ← updated call
+        const data = await fetchItemCatalog();
         setProducts(Array.isArray(data.items) ? data.items : []);
       } catch (err) {
         console.error(err);
@@ -37,25 +37,43 @@ export default function Marketplace() {
     setSearchTerm(q);
   }, [searchParams]);
 
-  // ── helpers to extract price from price[] array ──────────────
-  // Use catalog fields directly
-  const getListPrice = (item) => item.currentPrice ?? 0;
-  const getSalePrice = (item) => null; // catalog doesn't return sale price separately
-  const getDisplayPrice = (item) => item.currentPrice ?? 0;
+  // ── Helpers ────────────────────────────────────────────────────────────────────
 
-  // ✅ ESTIMATED SAVINGS CALCULATION (TASK 1)
-  const getEstimatedSavings = (item) => {
-    const current = item.currentPrice ?? 0;
-    const tier = item.pricingTiers?.[0]?.price ?? current;
-
-    if (!current || current <= tier) return 0;
-
-    return +(current - tier).toFixed(2);
+  const getTitle = (item) => {
+    const en = item.descriptions?.find((d) => d.locale === "en");
+    return en?.title || item.name || "";
   };
 
+  const getDescription = (item) => {
+    const en = item.descriptions?.find((d) => d.locale === "en");
+    return en?.body || "";
+  };
+
+  const getDisplayPrice = (item) => {
+    const prices = (item.items ?? [])
+      .flatMap((i) => i.salesPrices ?? [])
+      .filter((sp) => sp.currency === "USD")
+      .map((sp) => sp.price);
+
+    return prices.length ? Math.min(...prices) : 0;
+  };
+
+  const getMinTierPrice = (item, basePrice) => {
+    const tier = item.discountScheme?.tiers?.[0];
+    if (!tier || !basePrice) return null;
+    return +(basePrice * (1 - tier.discountPct / 100)).toFixed(2);
+  };
+
+  const getId = (item, index) =>
+    item._id?.$oid || item._id || String(index);
+
+  // ── Filtering ──────────────────────────────────────────────────────────────────
+
   let filteredProducts = products.filter((item) =>
-    (item.title || "").toLowerCase().includes(searchTerm.toLowerCase())
+    getTitle(item).toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // ── Sorting ────────────────────────────────────────────────────────────────────
 
   if (sortOption === "priceLow") {
     filteredProducts = [...filteredProducts].sort(
@@ -65,8 +83,9 @@ export default function Marketplace() {
     filteredProducts = [...filteredProducts].sort(
       (a, b) => getDisplayPrice(b) - getDisplayPrice(a)
     );
-
   }
+
+  // ── Render ─────────────────────────────────────────────────────────────────────
 
   return (
     <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-background-light font-display text-text-main">
@@ -81,7 +100,7 @@ export default function Marketplace() {
         <section className="flex flex-1 flex-col gap-8">
           <div className="flex flex-col gap-2">
             <h1 className="text-3xl font-extrabold tracking-tight">
-              Browse Bulk Items
+              Browse Bulk Products
             </h1>
             <p className="text-text-muted">
               Join active buying groups to unlock premium tier discounts.
@@ -114,38 +133,41 @@ export default function Marketplace() {
             <div className="rounded-2xl border border-neutral-light bg-white p-8 text-center shadow-sm">
               <h2 className="text-xl font-bold">No products available right now.</h2>
               <p className="mt-2 text-text-muted">
-                The marketplace is connected to the backend, but no product data is currently available.
+                The marketplace is connected to the backend, but no product data
+                is currently available.
               </p>
             </div>
           )}
 
           {!loading && !error && filteredProducts.length > 0 && (
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+              {filteredProducts.map((item, index) => {
+                const id = getId(item, index);
+                const price = getDisplayPrice(item);
+                console.log(price)
+                const minTierPrice = getMinTierPrice(item, price);
 
-              {filteredProducts.map((item, index) => (
-                <div
-                  key={item._id?.$oid || item._id || index}
-                  onClick={() => navigate(`/items/${item._id?.$oid || item._id || index}`)}
-                  className="cursor-pointer"
-                >
-                  <ProductCard
-                    id={item._id?.$oid || item._id || index}
-                    title={item.title || "Untitled Product"}
-                    category={item.shortDescription || item.description || "No details available"}
-                    price={getDisplayPrice(item)}        // ← sale price or list price
-                    salePrice={getSalePrice(item)}       // ← null if no sale
-                    listPrice={getListPrice(item)}       // ← original price
-                    stock={item.inventory?.stock ?? null}
-                    minTierPrice={item.pricingTiers?.[0]?.price ?? null}   // ← bulk tier floor
-                    minTierQty={item.pricingTiers?.[0]?.minQty ?? null}
+                return (
+                  <div
+                    key={id}
+                    onClick={() => navigate(`/items/${id}`)}
+                    className="cursor-pointer"
+                  >
+                    <ProductCard
+                      id={id}
+                      title={getTitle(item)}
+                      category={getDescription(item)}
+                      price={price}
+                      image={item.image || item.images?.[0] || ""}
+                      size="large"
+                      //minTierPrice={minTierPrice}      // ← uncomment
+                      //minTierQty={item.discountScheme?.tiers?.[0]?.minQty ?? null}  // ← uncomment
+                      estimatedSavings={item.estimatedSavings ?? 0}
 
-                    estimatedSavings={getEstimatedSavings(item)}
-                    tags={item.tags || []}
-                    image={item.image || item.images?.[0] || ""}
-                    size="large"
-                  />
-                </div>
-              ))}
+                    />
+                  </div>
+                );
+              })}
             </div>
           )}
         </section>

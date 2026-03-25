@@ -252,7 +252,11 @@ class ProductRepository {
    */
   async findByItemId(itemId, opts = {}) {
     if (!itemId) return [];
-    const f = { 'items.itemId': itemId };
+    const mongoose = require('mongoose');
+
+const f = {
+  'items.itemId': new mongoose.Types.ObjectId(itemId)
+};
     if (!opts.includeDeleted) f.deleted = false;
     const q = Product.find(f);
     if (opts.select) q.select(opts.select);

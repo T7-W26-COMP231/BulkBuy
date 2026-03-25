@@ -4,6 +4,7 @@ import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 
 const API_URL = "http://localhost:5000/api/items";
+const PRODUCT_API_URL = "http://localhost:5000/api/prdts";
 
 export default function ItemDetail() {
     const { id } = useParams();
@@ -15,30 +16,108 @@ export default function ItemDetail() {
     const [quantity, setQuantity] = useState(1);
     const [activeTab, setActiveTab] = useState("description");
 
-    useEffect(() => {
-        async function loadItem() {
-            try {
-                setLoading(true);
-                const token = localStorage.getItem("token");
-                const res = await fetch(`${API_URL}/${id}`, {
-                    headers: {
-                        "Content-Type": "application/json",
-                        ...(token && { Authorization: `Bearer ${token}` }),
-                    },
-                });
-                const data = await res.json();
-                if (!res.ok || !data.success) throw new Error(data.message || "Failed to fetch item");
-                setItem(data.data);
-                console.log(data)
-            } catch (err) {
-                console.error(err);
-                setError("Could not load item details.");
-            } finally {
-                setLoading(false);
+ useEffect(() => {
+    async function loadItem() {
+        try {
+            setLoading(true);
+
+            // 🔹 Get token (for protected item API)
+            const token = localStorage.getItem("token");
+
+            // ============================================================
+            // 🔹 1. FETCH ITEM
+            // ============================================================
+            const itemRes = await fetch(`${API_URL}/${id}`, {
+                headers: {
+                    "Content-Type": "application/json",
+                    ...(token && { Authorization: `Bearer ${token}` }),
+                },
+            });
+
+            const itemData = await itemRes.json();
+
+            if (!itemRes.ok || !itemData.success) {
+                throw new Error(itemData.message || "Failed to fetch item");
             }
+
+            // ============================================================
+// 🔹 2. FETCH PRODUCTS (for savings) — FIXED PAGINATION
+// ============================================================
+const productRes = await fetch(
+    `http://localhost:5000/api/prdts?limit=100`,
+    {
+        headers: {
+            "Content-Type": "application/json",
+        },
+    }
+);
+
+const productData = await productRes.json();
+
+// ============================================================
+// 🔹 3. SAFE PRODUCTS LIST (handles items OR data)
+// ============================================================
+const productsList =
+    productData.items ||
+    productData.data?.items ||
+    productData.data ||
+    [];
+
+// 🔥 DEBUG (keep this for testing)
+console.log("TOTAL PRODUCTS:", productsList.length);
+
+// ============================================================
+// 🔹 4. MATCH PRODUCT WITH ITEM (FINAL SAFE VERSION)
+// ============================================================
+const relatedProduct =
+    productRes.ok && productData.success
+        ? productsList.find((p) =>
+              p.items?.some(
+                  (i) => String(i.itemId) === String(itemData.data._id)
+              )
+          )
+        : null;
+
+// 🔥 DEBUG
+console.log("MATCHED PRODUCT:", relatedProduct);
+
+// 🔥 FORCE TEST (temporary)
+console.log("MATCH TEST RESULT:", relatedProduct);
+
+// 🔥 DEBUG (VERY IMPORTANT)
+console.log("CURRENT ITEM ID:", itemData.data._id);
+console.log(
+    "ALL PRODUCT ITEM IDS:",
+    productsList.map((p) => p.items?.map((i) => i.itemId))
+);
+console.log("MATCHED PRODUCT:", relatedProduct);
+
+            // ============================================================
+            // 🔹 DEBUG (keep for testing)
+            // ============================================================
+            console.log("ITEM:", itemData.data);
+            console.log("PRODUCT:", relatedProduct);
+
+            // ============================================================
+            // 🔹 4. MERGE ITEM + SAVINGS
+            // ============================================================
+            setItem({
+                ...itemData.data,
+                estimatedSavings: Number(
+                    relatedProduct?.estimatedSavings ?? 0
+                ),
+            });
+
+        } catch (err) {
+            console.error("LOAD ITEM ERROR:", err);
+            setError("Could not load item details.");
+        } finally {
+            setLoading(false);
         }
-        loadItem();
-    }, [id]);
+    }
+
+    loadItem();
+}, [id]);
 
     if (loading) {
         return (
@@ -143,9 +222,18 @@ export default function ItemDetail() {
 
                         {/* Price summary */}
                         <div className="flex items-baseline gap-3">
-                            <span className="text-4xl font-extrabold text-text-main">
-                                ${displayPrice.toFixed(2)}
-                            </span>
+    <span className="text-4xl font-extrabold text-text-main">
+        ${displayPrice.toFixed(2)}
+    </span>
+
+    {/* 💰 ESTIMATED SAVINGS */}
+    {Number(item.estimatedSavings) > 0 && (
+        <div className="ml-2 rounded-lg bg-green-100 px-3 py-1 text-sm font-semibold text-green-700">
+            💰 You save ${item.estimatedSavings}
+        </div>
+    )}
+
+                            
 
                             {hasSale && (
                               <span className="text-base text-text-muted line-through opacity-80">

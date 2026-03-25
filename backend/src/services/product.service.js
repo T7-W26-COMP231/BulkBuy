@@ -13,17 +13,52 @@ const auditService = require('./audit.service');
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 25;
 
+// ============================================================
+// 💰 ESTIMATED SAVINGS HELPER (FINAL FIX - PRODUCTION SAFE)
+// ============================================================
+function calculateEstimatedSavings(doc) {
+  if (!doc || typeof doc !== 'object') return 0;
+
+  // 🔹 Need at least 2 items (base + bulk)
+  if (!Array.isArray(doc.items) || doc.items.length < 2) return 0;
+
+  const firstItem = doc.items[0];
+  const secondItem = doc.items[1];
+
+  const currentPrice = Number(
+    firstItem?.salesPrices?.[0]?.price ?? 0
+  );
+
+  const bulkPrice = Number(
+    secondItem?.salesPrices?.[0]?.price ?? 0
+  );
+
+  // 🔹 Safety checks
+  if (!Number.isFinite(currentPrice) || !Number.isFinite(bulkPrice)) return 0;
+  if (currentPrice <= 0 || currentPrice <= bulkPrice) return 0;
+
+  return Number((currentPrice - bulkPrice).toFixed(2));
+}
+
 /**
  * Helper to sanitize product objects returned to clients.
  * Removes internal-only fields if present.
  */
 function sanitizeForClient(doc) {
   if (!doc) return doc;
-  const copy = { ...doc };
-  if (copy.deletedAt === null) delete copy.deletedAt;
-  if (copy.deletedBy === null) delete copy.deletedBy;
-  if (copy.deleted === undefined) delete copy.deleted;
-  return copy;
+
+  const base =
+    doc && typeof doc.toObject === 'function'
+      ? doc.toObject()
+      : { ...doc };
+
+  if (base.deletedAt === null) delete base.deletedAt;
+  if (base.deletedBy === null) delete base.deletedBy;
+  if (base.deleted === undefined) delete base.deleted;
+
+  base.estimatedSavings = calculateEstimatedSavings(base);
+
+  return base;
 }
 
 /**

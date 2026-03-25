@@ -43,6 +43,16 @@ export default function Marketplace() {
   const getSalePrice = (item) => null; // catalog doesn't return sale price separately
   const getDisplayPrice = (item) => item.currentPrice ?? 0;
 
+  // ✅ ESTIMATED SAVINGS CALCULATION (TASK 1)
+  const getEstimatedSavings = (item) => {
+    const current = item.currentPrice ?? 0;
+    const tier = item.pricingTiers?.[0]?.price ?? current;
+
+    if (!current || current <= tier) return 0;
+
+    return +(current - tier).toFixed(2);
+  };
+
   let filteredProducts = products.filter((item) =>
     (item.title || "").toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -111,6 +121,7 @@ export default function Marketplace() {
 
           {!loading && !error && filteredProducts.length > 0 && (
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+
               {filteredProducts.map((item, index) => (
                 <div
                   key={item._id?.$oid || item._id || index}
@@ -127,6 +138,8 @@ export default function Marketplace() {
                     stock={item.inventory?.stock ?? null}
                     minTierPrice={item.pricingTiers?.[0]?.price ?? null}   // ← bulk tier floor
                     minTierQty={item.pricingTiers?.[0]?.minQty ?? null}
+
+                    estimatedSavings={getEstimatedSavings(item)}
                     tags={item.tags || []}
                     image={item.image || item.images?.[0] || ""}
                     size="large"

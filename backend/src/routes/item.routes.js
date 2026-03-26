@@ -46,12 +46,11 @@ router.post(
   asyncHandler(ItemController.create)
 );
 
-/* Get item by id */
+/* Public catalog */
 router.get(
-  '/:id',
-  requireAuth,
-  validators.idParam,
-  asyncHandler(ItemController.getById)
+  '/catalog',
+  validators.list,
+  asyncHandler(ItemController.catalog)
 );
 
 /* Get item by SKU */
@@ -60,6 +59,22 @@ router.get(
   requireAuth,
   validators.skuParam,
   asyncHandler(ItemController.findBySku)
+);
+
+/* Public search (no auth required) */
+router.get(
+  '/search',
+  validators.publicSearch,
+  asyncHandler(ItemController.publicSearch)
+);
+
+
+/* Get item by id */
+router.get(
+  '/:id',
+  requireAuth,
+  validators.idParam,
+  asyncHandler(ItemController.getById)
 );
 
 /* List / paginate items */
@@ -155,13 +170,6 @@ router.post(
   requireAuth,
   validators.publish,
   asyncHandler(ItemController.unpublish)
-);
-
-/* Public search (no auth required) */
-router.get(
-  '/search',
-  validators.publicSearch,
-  asyncHandler(ItemController.publicSearch)
 );
 
 module.exports = router;

@@ -209,7 +209,7 @@ function buildSalesWindows() {
   };
 
   return {
-    payloads: [pastWindow, currentWindow, futureWindow],
+    payloads: [{...pastWindow,  ops_region: "GTA"} , {...currentWindow,  ops_region: "Calgary"}, {...futureWindow,  ops_region: "Victoria"}],
     placeholders
   };
 }

@@ -17033,3 +17033,2457 @@
     ]
   }
 }
+2026-03-25T03:14:43.335Z - mongoose: users.createIndex - query: {"userId":1} - doc: {"unique":true}
+2026-03-25T03:14:43.383Z - mongoose: aggregations.createIndex - query: {"status":1} - doc: {}
+2026-03-25T03:14:43.430Z - mongoose: items.createIndex - query: {"sku":1} - doc: {"unique":true}
+2026-03-25T03:14:43.472Z - mongoose: messages.createIndex - query: {"type":1} - doc: {}
+2026-03-25T03:14:43.488Z - mongoose: configs.createIndex - query: {"userId":1} - doc: {"unique":true}
+2026-03-25T03:14:43.512Z - mongoose: audits.createIndex - query: {"correlationId":1} - doc: {}
+2026-03-25T03:14:43.531Z - mongoose: regionmaps.createIndex - query: {"ops_region":1} - doc: {}
+2026-03-25T03:14:43.540Z - mongoose: reviews.createIndex - query: {"reviewerId":1} - doc: {}
+2026-03-25T03:14:43.557Z - mongoose: saleswindows.createIndex - query: {"window.fromEpoch":1} - doc: {}
+2026-03-25T03:14:43.573Z - mongoose: supplies.createIndex - query: {"status":1} - doc: {}
+2026-03-25T03:14:43.600Z - mongoose: s3storedfiles.createIndex - query: {"key":1} - doc: {"unique":true}
+2026-03-25T03:14:43.614Z - mongoose: users.createIndex - query: {"deleted":1} - doc: {}
+2026-03-25T03:14:43.618Z - mongoose: aggregations.createIndex - query: {"ops_region":1,"status":1} - doc: {}
+2026-03-25T03:14:43.664Z - mongoose: orders.createIndex - query: {"userId":1} - doc: {}
+2026-03-25T03:14:43.679Z - mongoose: messages.createIndex - query: {"ops_region":1} - doc: {}
+2026-03-25T03:14:43.686Z - mongoose: products.createIndex - query: {"status":1} - doc: {}
+2026-03-25T03:14:43.694Z - mongoose: regionmaps.createIndex - query: {"code":1} - doc: {"unique":true}
+2026-03-25T03:14:43.710Z - mongoose: users.countDocuments - query: {} - doc: {"projection":{"passwordHash":0}}
+2026-03-25T03:14:43.711Z - mongoose: reviews.createIndex - query: {"revieweeId":1} - doc: {}
+2026-03-25T03:14:43.722Z - mongoose: saleswindows.createIndex - query: {"window.toEpoch":1} - doc: {}
+2026-03-25T03:14:43.730Z - mongoose: supplies.createIndex - query: {"ops_region":1} - doc: {}
+2026-03-25T03:14:43.742Z - mongoose: s3storedfiles.createIndex - query: {"ownerId":1} - doc: {}
+2026-03-25T03:14:43.757Z - mongoose: users.createIndex - query: {"emails.address":1} - doc: {"unique":true,"partialFilterExpression":{"emails.address":{"$exists":true,"$ne":""}}}
+2026-03-25T03:14:43.764Z - mongoose: aggregations.createIndex - query: {"itemDtos.itemId":1} - doc: {}
+2026-03-25T03:14:43.773Z - mongoose: messages.createIndex - query: {"status":1} - doc: {}
+2026-03-25T03:14:43.793Z - mongoose: orders.createIndex - query: {"ops_region":1} - doc: {}
+2026-03-25T03:14:43.816Z - mongoose: configs.createIndex - query: {"isPrivate":1} - doc: {}
+2026-03-25T03:14:43.817Z - mongoose: items.createIndex - query: {"slug":1} - doc: {"unique":true}
+2026-03-25T03:14:43.819Z - mongoose: products.createIndex - query: {"deleted":1} - doc: {}
+2026-03-25T03:14:43.835Z - mongoose: reviews.createIndex - query: {"productId":1} - doc: {}
+2026-03-25T03:14:43.837Z - mongoose: saleswindows.createIndex - query: {"products.productId":1} - doc: {}
+2026-03-25T03:14:43.850Z - mongoose: supplies.createIndex - query: {"deleted":1} - doc: {}
+2026-03-25T03:14:43.871Z - mongoose: messages.createIndex - query: {"deleted":1} - doc: {}
+2026-03-25T03:14:43.872Z - mongoose: s3storedfiles.createIndex - query: {"status":1} - doc: {}
+2026-03-25T03:14:43.876Z - mongoose: users.createIndex - query: {"firstName":"text","lastName":"text"} - doc: {"name":"UserTextIndex","default_language":"english"}
+2026-03-25T03:14:43.898Z - mongoose: aggregations.createIndex - query: {"createdAt":-1} - doc: {}
+2026-03-25T03:14:43.899Z - mongoose: orders.createIndex - query: {"status":1} - doc: {}
+2026-03-25T03:14:43.900Z - mongoose: configs.createIndex - query: {"deleted":1} - doc: {}
+2026-03-25T03:14:43.925Z - mongoose: items.createIndex - query: {"status":1} - doc: {}
+2026-03-25T03:14:43.962Z - mongoose: reviews.createIndex - query: {"itemId":1} - doc: {}
+2026-03-25T03:14:43.977Z - mongoose: products.createIndex - query: {"name":"text","descriptions.title":"text","descriptions.body":"text"} - doc: {"name":"ProductTextIndex","default_language":"english"}
+2026-03-25T03:14:43.978Z - mongoose: saleswindows.createIndex - query: {"products.items.itemId":1} - doc: {}
+2026-03-25T03:14:43.987Z - mongoose: configs.createIndex - query: {"ops_region":1} - doc: {}
+2026-03-25T03:14:43.996Z - mongoose: users.insertOne - query: {"userId":"0848391157229984","firstName":"Supply","lastName":"One","passwordHash":"$2b$10$cKZqXAnPR0CyTwk/cK0tauj7oBeN/vxtjkVey9DX0/n8ZZfsGIWFm","role":"supplier","status":"active","emails":[{"address":"supplier1@bulkbuy.example.com","verified":true,"primary":true,"verifiedAt":1774408483911}],"avatar":"https://cfg-j.s3.us-east-1.amazonaws.com/avataaars.png","deleted":false,"deletedAt":null,"deletedBy":null,"reviews":[],"metadata":{},"_id":"69c35323dec6d4f932a80604","phones":[],"addresses":[],"paymentMethods":[],"refreshTokens":[],"createdAt":1774408483919,"updatedAt":1774408483924,"__v":0} - doc: {}
+2026-03-25T03:14:44.001Z - mongoose: regionmaps.createIndex - query: {"locations.locationId":1} - doc: {}
+2026-03-25T03:14:44.040Z - mongoose: orders.createIndex - query: {"createdAt":1} - doc: {}
+2026-03-25T03:14:44.045Z - mongoose: configs.insertOne - query: {"userId":"69c35323dec6d4f932a80604","theme":"system","isPrivate":true,"ops_region":"","metadata":{},"internalNotes":"","deleted":false,"_id":"69c35324dec6d4f932a8060d","location":{"address":""},"createdAt":"2026-03-25T03:14:44.044Z","updatedAt":"2026-03-25T03:14:44.044Z","__v":0} - doc: {}
+2026-03-25T03:14:44.046Z - mongoose: s3storedfiles.createIndex - query: {"idempotencyKey":1} - doc: {"sparse":true}
+2026-03-25T03:14:44.052Z - mongoose: items.createIndex - query: {"published":1} - doc: {}
+2026-03-25T03:14:44.053Z - mongoose: products.createIndex - query: {"ops_region":1,"status":1} - doc: {}
+2026-03-25T03:14:44.071Z - mongoose: reviews.createIndex - query: {"status":1} - doc: {}
+2026-03-25T03:14:44.082Z - mongoose: users.findOneAndUpdate - query: {"_id":"69c35323dec6d4f932a80604"} - doc: {"$set":{"config":"69c35324dec6d4f932a8060d"}}
+2026-03-25T03:14:44.097Z - mongoose: saleswindows.createIndex - query: {"window.fromEpoch":1,"window.toEpoch":1} - doc: {"name":"window_range_idx"}
+2026-03-25T03:14:44.103Z - mongoose: messages.createIndex - query: {"type":1,"status":1,"createdAt":-1} - doc: {}
+2026-03-25T03:14:44.116Z - mongoose: supplies.createIndex - query: {"supplierId":1,"status":1,"createdAt":-1} - doc: {}
+2026-03-25T03:14:44.117Z - mongoose: orders.createIndex - query: {"deliveryLocation.geo":"2dsphere"} - doc: {}
+2026-03-25T03:14:44.118Z - mongoose: s3storedfiles.createIndex - query: {"ownerId":1,"status":1,"createdAt":-1} - doc: {}
+2026-03-25T03:14:44.133Z - mongoose: items.createIndex - query: {"title":"text","description":"text","shortDescription":"text","brand.name":"text"} - doc: {}
+2026-03-25T03:14:44.144Z - mongoose: reviews.createIndex - query: {"deleted":1} - doc: {}
+2026-03-25T03:14:44.161Z - mongoose: messages.createIndex - query: {"recipients.users":1} - doc: {}
+2026-03-25T03:14:44.172Z - mongoose: users.insertOne - query: {"userId":"0848410951660069","firstName":"Supply","lastName":"Two","passwordHash":"$2b$10$OSN3IjvE6K17WOwGgj7sG.RqN691KOH7LHvi.iG8R8SdXWWOhqn4e","role":"supplier","status":"active","emails":[{"address":"supplier2@bulkbuy.example.com","verified":true,"primary":true,"verifiedAt":1774408483911}],"avatar":"https://cfg-j.s3.us-east-1.amazonaws.com/avataaars.png","deleted":false,"deletedAt":null,"deletedBy":null,"reviews":[],"metadata":{},"_id":"69c35324dec6d4f932a80616","phones":[],"addresses":[],"paymentMethods":[],"refreshTokens":[],"createdAt":1774408484109,"updatedAt":1774408484110,"__v":0} - doc: {}
+2026-03-25T03:14:44.176Z - mongoose: supplies.createIndex - query: {"items.itemId":1} - doc: {}
+2026-03-25T03:14:44.191Z - mongoose: orders.createIndex - query: {"userId":1,"createdAt":-1} - doc: {}
+2026-03-25T03:14:44.192Z - mongoose: items.createIndex - query: {"ops_region":1} - doc: {}
+2026-03-25T03:14:44.198Z - mongoose: configs.insertOne - query: {"userId":"69c35324dec6d4f932a80616","theme":"system","isPrivate":true,"ops_region":"","metadata":{},"internalNotes":"","deleted":false,"_id":"69c35324dec6d4f932a80621","location":{"address":""},"createdAt":"2026-03-25T03:14:44.198Z","updatedAt":"2026-03-25T03:14:44.198Z","__v":0} - doc: {}
+2026-03-25T03:14:44.205Z - mongoose: reviews.createIndex - query: {"reviewerId":1,"revieweeId":1,"productId":1} - doc: {}
+2026-03-25T03:14:44.231Z - mongoose: users.findOneAndUpdate - query: {"_id":"69c35324dec6d4f932a80616"} - doc: {"$set":{"config":"69c35324dec6d4f932a80621"}}
+2026-03-25T03:14:44.232Z - mongoose: messages.createIndex - query: {"fromUserId":1} - doc: {}
+2026-03-25T03:14:44.241Z - mongoose: supplies.createIndex - query: {"ops_region":1,"status":1} - doc: {}
+2026-03-25T03:14:44.245Z - mongoose: regionmaps.createIndex - query: {"locations.geo":"2dsphere"} - doc: {"name":"locations_geo_2dsphere"}
+2026-03-25T03:14:44.257Z - mongoose: orders.createIndex - query: {"ops_region":1,"status":1} - doc: {}
+2026-03-25T03:14:44.267Z - mongoose: items.createIndex - query: {"pricingTiers.minQty":1} - doc: {}
+2026-03-25T03:14:44.301Z - mongoose: reviews.createIndex - query: {"rating":-1,"createdAt":-1} - doc: {}
+2026-03-25T03:14:44.321Z - mongoose: users.insertOne - query: {"userId":"0848425582094368","firstName":"Customer","lastName":"One","passwordHash":"$2b$10$gpBhkFJ.YROuAv4b1gVxhu4DQ5QYl4eCWM2ega3ZvXuj4JM3qeVka","role":"customer","status":"active","emails":[{"address":"customer1@bulkbuy.example.com","verified":true,"primary":true,"verifiedAt":1774408483911}],"avatar":"https://cfg-j.s3.us-east-1.amazonaws.com/avataaars.png","deleted":false,"deletedAt":null,"deletedBy":null,"reviews":[],"metadata":{},"_id":"69c35324dec6d4f932a80628","phones":[],"addresses":[],"paymentMethods":[],"refreshTokens":[],"createdAt":1774408484256,"updatedAt":1774408484256,"__v":0} - doc: {}
+2026-03-25T03:14:44.346Z - mongoose: configs.insertOne - query: {"userId":"69c35324dec6d4f932a80628","theme":"system","isPrivate":true,"ops_region":"","metadata":{},"internalNotes":"","deleted":false,"_id":"69c35324dec6d4f932a8062d","location":{"address":""},"createdAt":"2026-03-25T03:14:44.346Z","updatedAt":"2026-03-25T03:14:44.346Z","__v":0} - doc: {}
+2026-03-25T03:14:44.371Z - mongoose: users.findOneAndUpdate - query: {"_id":"69c35324dec6d4f932a80628"} - doc: {"$set":{"config":"69c35324dec6d4f932a8062d"}}
+2026-03-25T03:14:44.466Z - mongoose: users.insertOne - query: {"userId":"0848440099566717","firstName":"Customer","lastName":"Two","passwordHash":"$2b$10$neegH5SG17v148GaqsG9HOXJeifY4wThpes4rMqRR4zogOjVAxkwW","role":"customer","status":"active","emails":[{"address":"customer2@bulkbuy.example.com","verified":true,"primary":true,"verifiedAt":1774408483911}],"avatar":"https://cfg-j.s3.us-east-1.amazonaws.com/avataaars.png","deleted":false,"deletedAt":null,"deletedBy":null,"reviews":[],"metadata":{},"_id":"69c35324dec6d4f932a80630","phones":[],"addresses":[],"paymentMethods":[],"refreshTokens":[],"createdAt":1774408484401,"updatedAt":1774408484402,"__v":0} - doc: {}
+2026-03-25T03:14:44.496Z - mongoose: configs.insertOne - query: {"userId":"69c35324dec6d4f932a80630","theme":"system","isPrivate":true,"ops_region":"","metadata":{},"internalNotes":"","deleted":false,"_id":"69c35324dec6d4f932a80632","location":{"address":""},"createdAt":"2026-03-25T03:14:44.496Z","updatedAt":"2026-03-25T03:14:44.496Z","__v":0} - doc: {}
+2026-03-25T03:14:44.526Z - mongoose: users.findOneAndUpdate - query: {"_id":"69c35324dec6d4f932a80630"} - doc: {"$set":{"config":"69c35324dec6d4f932a80632"}}
+2026-03-25T03:14:44.621Z - mongoose: users.insertOne - query: {"userId":"0848455349629525","firstName":"System","lastName":"Admin","passwordHash":"$2b$10$FpHhsWfDKDCTCJdd2phvIOpLesy77r9Q8jDEYE1gdECu0Pl4J/Hiq","role":"administrator","status":"active","emails":[{"address":"admin@bulkbuy.example.com","verified":true,"primary":true,"verifiedAt":1774408483911}],"avatar":"https://cfg-j.s3.us-east-1.amazonaws.com/avataaars.png","deleted":false,"deletedAt":null,"deletedBy":null,"reviews":[],"metadata":{},"_id":"69c35324dec6d4f932a80635","phones":[],"addresses":[],"paymentMethods":[],"refreshTokens":[],"createdAt":1774408484555,"updatedAt":1774408484556,"__v":0} - doc: {}
+2026-03-25T03:14:44.649Z - mongoose: configs.insertOne - query: {"userId":"69c35324dec6d4f932a80635","theme":"system","isPrivate":true,"ops_region":"","metadata":{},"internalNotes":"","deleted":false,"_id":"69c35324dec6d4f932a80637","location":{"address":""},"createdAt":"2026-03-25T03:14:44.648Z","updatedAt":"2026-03-25T03:14:44.648Z","__v":0} - doc: {}
+2026-03-25T03:14:44.675Z - mongoose: users.findOneAndUpdate - query: {"_id":"69c35324dec6d4f932a80635"} - doc: {"$set":{"config":"69c35324dec6d4f932a80637"}}
+2026-03-25T03:14:44.754Z - mongoose: items.countDocuments - query: {} - doc: {}
+2026-03-25T03:14:44.778Z - mongoose: items.find - query: {"sku":{"$in":["BB-ITEM-000","BB-ITEM-001","BB-ITEM-002","BB-ITEM-003","BB-ITEM-004","BB-ITEM-005","BB-ITEM-006","BB-ITEM-007","BB-ITEM-008","BB-ITEM-009","BB-ITEM-010","BB-ITEM-011","BB-ITEM-012","BB-ITEM-013","BB-ITEM-014","BB-ITEM-015","BB-ITEM-016","BB-ITEM-017","BB-ITEM-018","BB-ITEM-019"]}} - doc: {"projection":{"sku":1}}
+2026-03-25T03:14:44.838Z - mongoose: items.insertMany - query: [{"sku":"BB-ITEM-000","title":"Organic Almonds 1kg","slug":"bb-item-000-organic-almonds-1kg","description":"Organic Almonds 1kg — high quality, bulk-friendly packaging suitable for retailers and foodservice.","shortDescription":"Organic Almonds 1kg — bulk pack.","brand":{"id":null,"name":"BulkBuy Brand"},"categories":[],"tags":["grocery","bulk","organic"],"images":[],"media":[],"price":[{"list":10,"sale":8,"currency":"USD","effectiveFrom":null,"effectiveTo":null}],"pricingTiers":[{"minQty":10,"price":9.5,"currency":"USD"},{"minQty":50,"price":9,"currency":"USD"}],"inventory":{"stock":100,"reserved":0,"backorder":true,"warehouses":[]},"variants":[],"weight":{"value":0.5,"unit":"kg"},"dimensions":{"length":20,"width":10,"height":5,"unit":"cm"},"shipping":{"class":"standard","freightClass":"","shipsFrom":"CA"},"taxClass":"standard","ratings":{"avg":0,"count":0},"reviews":[],"relatedProducts":[],"seller":{"id":null,"name":"BulkBuy Supplier"},"metadata":{},"status":"active","ops_region":"NA","published":true,"_id":"69c35324dec6d4f932a8063c","__v":0,"createdAt":"2026-03-25T03:14:44.835Z","updatedAt":"2026-03-25T03:14:44.835Z"},{"sku":"BB-ITEM-001","title":"Premium Olive Oil 500ml","slug":"bb-item-001-premium-olive-oil-500ml","description":"Premium Olive Oil 500ml — high quality, bulk-friendly packaging suitable for retailers and foodservice.","shortDescription":"Premium Olive Oil 500ml — bulk pack.","brand":{"id":null,"name":"BulkBuy Brand"},"categories":[],"tags":["grocery","bulk","standard"],"images":[],"media":[],"price":[{"list":12,"sale":null,"currency":"USD","effectiveFrom":null,"effectiveTo":null}],"pricingTiers":[{"minQty":10,"price":11.4,"currency":"USD"},{"minQty":50,"price":10.8,"currency":"USD"}],"inventory":{"stock":105,"reserved":0,"backorder":false,"warehouses":[]},"variants":[],"weight":{"value":0.75,"unit":"kg"},"dimensions":{"length":21,"width":11,"height":6,"unit":"cm"},"shipping":{"class":"standard","freightClass":"","shipsFrom":"CA"},"taxClass":"standard","ratings":{"avg":0,"count":0},"reviews":[],"relatedProducts":[],"seller":{"id":null,"name":"BulkBuy Supplier"},"metadata":{},"status":"active","ops_region":"NA","published":true,"_id":"69c35324dec6d4f932a8063d","__v":0,"createdAt":"2026-03-25T03:14:44.835Z","updatedAt":"2026-03-25T03:14:44.835Z"},{"sku":"BB-ITEM-002","title":"Whole Grain Oats 2kg","slug":"bb-item-002-whole-grain-oats-2kg","description":"Whole Grain Oats 2kg — high quality, bulk-friendly packaging suitable for retailers and foodservice.","shortDescription":"Whole Grain Oats 2kg — bulk pack.","brand":{"id":null,"name":"BulkBuy Brand"},"categories":[],"tags":["grocery","bulk","organic"],"images":[],"media":[],"price":[{"list":14,"sale":null,"currency":"USD","effectiveFrom":null,"effectiveTo":null}],"pricingTiers":[{"minQty":10,"price":13.3,"currency":"USD"},{"minQty":50,"price":12.6,"currency":"USD"}],"inventory":{"stock":110,"reserved":0,"backorder":false,"warehouses":[]},"variants":[],"weight":{"value":1,"unit":"kg"},"dimensions":{"length":22,"width":12,"height":7,"unit":"cm"},"shipping":{"class":"standard","freightClass":"","shipsFrom":"CA"},"taxClass":"standard","ratings":{"avg":0,"count":0},"reviews":[],"relatedProducts":[],"seller":{"id":null,"name":"BulkBuy Supplier"},"metadata":{},"status":"active","ops_region":"NA","published":true,"_id":"69c35324dec6d4f932a8063e","__v":0,"createdAt":"2026-03-25T03:14:44.835Z","updatedAt":"2026-03-25T03:14:44.835Z"},{"sku":"BB-ITEM-003","title":"Canned Tuna in Olive Oil 185g","slug":"bb-item-003-canned-tuna-in-olive-oil-185g","description":"Canned Tuna in Olive Oil 185g — high quality, bulk-friendly packaging suitable for retailers and foodservice.","shortDescription":"Canned Tuna in Olive Oil 185g — bulk pack.","brand":{"id":null,"name":"BulkBuy Brand"},"categories":[],"tags":["grocery","bulk","standard"],"images":[],"media":[],"price":[{"list":16,"sale":null,"currency":"USD","effectiveFrom":null,"effectiveTo":null}],"pricingTiers":[{"minQty":10,"price":15.2,"currency":"USD"},{"minQty":50,"price":14.4,"currency":"USD"}],"inventory":{"stock":115,"reserved":0,"backorder":false,"warehouses":[]},"variants":[],"weight":{"value":1.25,"unit":"kg"},"dimensions":{"length":23,"width":13,"height":8,"unit":"cm"},"shipping":{"class":"standard","freightClass":"","shipsFrom":"CA"},"taxClass":"standard","ratings":{"avg":0,"count":0},"reviews":[],"relatedProducts":[],"seller":{"id":null,"name":"BulkBuy Supplier"},"metadata":{},"status":"active","ops_region":"NA","published":true,"_id":"69c35324dec6d4f932a8063f","__v":0,"createdAt":"2026-03-25T03:14:44.836Z","updatedAt":"2026-03-25T03:14:44.836Z"},{"sku":"BB-ITEM-004","title":"Roasted Coffee Beans 1kg","slug":"bb-item-004-roasted-coffee-beans-1kg","description":"Roasted Coffee Beans 1kg — high quality, bulk-friendly packaging suitable for retailers and foodservice.","shortDescription":"Roasted Coffee Beans 1kg — bulk pack.","brand":{"id":null,"name":"BulkBuy Brand"},"categories":[],"tags":["grocery","bulk","organic"],"images":[],"media":[],"price":[{"list":18,"sale":null,"currency":"USD","effectiveFrom":null,"effectiveTo":null}],"pricingTiers":[{"minQty":10,"price":17.1,"currency":"USD"},{"minQty":50,"price":16.2,"currency":"USD"}],"inventory":{"stock":120,"reserved":0,"backorder":false,"warehouses":[]},"variants":[],"weight":{"value":1.5,"unit":"kg"},"dimensions":{"length":24,"width":14,"height":9,"unit":"cm"},"shipping":{"class":"standard","freightClass":"","shipsFrom":"CA"},"taxClass":"standard","ratings":{"avg":0,"count":0},"reviews":[],"relatedProducts":[],"seller":{"id":null,"name":"BulkBuy Supplier"},"metadata":{},"status":"active","ops_region":"NA","published":true,"_id":"69c35324dec6d4f932a80640","__v":0,"createdAt":"2026-03-25T03:14:44.836Z","updatedAt":"2026-03-25T03:14:44.836Z"},{"sku":"BB-ITEM-005","title":"Natural Peanut Butter 1kg","slug":"bb-item-005-natural-peanut-butter-1kg","description":"Natural Peanut Butter 1kg — high quality, bulk-friendly packaging suitable for retailers and foodservice.","shortDescription":"Natural Peanut Butter 1kg — bulk pack.","brand":{"id":null,"name":"BulkBuy Brand"},"categories":[],"tags":["grocery","bulk","standard"],"images":[],"media":[],"price":[{"list":20,"sale":15.5,"currency":"USD","effectiveFrom":null,"effectiveTo":null}],"pricingTiers":[{"minQty":10,"price":19,"currency":"USD"},{"minQty":50,"price":18,"currency":"USD"}],"inventory":{"stock":125,"reserved":0,"backorder":false,"warehouses":[]},"variants":[],"weight":{"value":0.5,"unit":"kg"},"dimensions":{"length":25,"width":15,"height":10,"unit":"cm"},"shipping":{"class":"standard","freightClass":"","shipsFrom":"CA"},"taxClass":"standard","ratings":{"avg":0,"count":0},"reviews":[],"relatedProducts":[],"seller":{"id":null,"name":"BulkBuy Supplier"},"metadata":{},"status":"active","ops_region":"NA","published":true,"_id":"69c35324dec6d4f932a80641","__v":0,"createdAt":"2026-03-25T03:14:44.836Z","updatedAt":"2026-03-25T03:14:44.836Z"},{"sku":"BB-ITEM-006","title":"Dried Mango Slices 500g","slug":"bb-item-006-dried-mango-slices-500g","description":"Dried Mango Slices 500g — high quality, bulk-friendly packaging suitable for retailers and foodservice.","shortDescription":"Dried Mango Slices 500g — bulk pack.","brand":{"id":null,"name":"BulkBuy Brand"},"categories":[],"tags":["grocery","bulk","organic"],"images":[],"media":[],"price":[{"list":22,"sale":null,"currency":"USD","effectiveFrom":null,"effectiveTo":null}],"pricingTiers":[{"minQty":10,"price":20.9,"currency":"USD"},{"minQty":50,"price":19.8,"currency":"USD"}],"inventory":{"stock":130,"reserved":0,"backorder":false,"warehouses":[]},"variants":[],"weight":{"value":0.75,"unit":"kg"},"dimensions":{"length":26,"width":16,"height":11,"unit":"cm"},"shipping":{"class":"standard","freightClass":"","shipsFrom":"CA"},"taxClass":"standard","ratings":{"avg":0,"count":0},"reviews":[],"relatedProducts":[],"seller":{"id":null,"name":"BulkBuy Supplier"},"metadata":{},"status":"active","ops_region":"NA","published":true,"_id":"69c35324dec6d4f932a80642","__v":0,"createdAt":"2026-03-25T03:14:44.836Z","updatedAt":"2026-03-25T03:14:44.836Z"},{"sku":"BB-ITEM-007","title":"Sparkling Mineral Water 1L","slug":"bb-item-007-sparkling-mineral-water-1l","description":"Sparkling Mineral Water 1L — high quality, bulk-friendly packaging suitable for retailers and foodservice.","shortDescription":"Sparkling Mineral Water 1L — bulk pack.","brand":{"id":null,"name":"BulkBuy Brand"},"categories":[],"tags":["grocery","bulk","standard"],"images":[],"media":[],"price":[{"list":24,"sale":null,"currency":"USD","effectiveFrom":null,"effectiveTo":null}],"pricingTiers":[{"minQty":10,"price":22.8,"currency":"USD"},{"minQty":50,"price":21.6,"currency":"USD"}],"inventory":{"stock":135,"reserved":0,"backorder":true,"warehouses":[]},"variants":[],"weight":{"value":1,"unit":"kg"},"dimensions":{"length":27,"width":17,"height":12,"unit":"cm"},"shipping":{"class":"standard","freightClass":"","shipsFrom":"CA"},"taxClass":"standard","ratings":{"avg":0,"count":0},"reviews":[],"relatedProducts":[],"seller":{"id":null,"name":"BulkBuy Supplier"},"metadata":{},"status":"active","ops_region":"NA","published":true,"_id":"69c35324dec6d4f932a80643","__v":0,"createdAt":"2026-03-25T03:14:44.836Z","updatedAt":"2026-03-25T03:14:44.836Z"},{"sku":"BB-ITEM-008","title":"Dark Chocolate 70% 100g","slug":"bb-item-008-dark-chocolate-70-100g","description":"Dark Chocolate 70% 100g — high quality, bulk-friendly packaging suitable for retailers and foodservice.","shortDescription":"Dark Chocolate 70% 100g — bulk pack.","brand":{"id":null,"name":"BulkBuy Brand"},"categories":[],"tags":["grocery","bulk","organic"],"images":[],"media":[],"price":[{"list":26,"sale":null,"currency":"USD","effectiveFrom":null,"effectiveTo":null}],"pricingTiers":[{"minQty":10,"price":24.7,"currency":"USD"},{"minQty":50,"price":23.4,"currency":"USD"}],"inventory":{"stock":140,"reserved":0,"backorder":false,"warehouses":[]},"variants":[],"weight":{"value":1.25,"unit":"kg"},"dimensions":{"length":28,"width":18,"height":13,"unit":"cm"},"shipping":{"class":"standard","freightClass":"","shipsFrom":"CA"},"taxClass":"standard","ratings":{"avg":0,"count":0},"reviews":[],"relatedProducts":[],"seller":{"id":null,"name":"BulkBuy Supplier"},"metadata":{},"status":"active","ops_region":"NA","published":true,"_id":"69c35324dec6d4f932a80644","__v":0,"createdAt":"2026-03-25T03:14:44.836Z","updatedAt":"2026-03-25T03:14:44.836Z"},{"sku":"BB-ITEM-009","title":"Multigrain Pasta 1kg","slug":"bb-item-009-multigrain-pasta-1kg","description":"Multigrain Pasta 1kg — high quality, bulk-friendly packaging suitable for retailers and foodservice.","shortDescription":"Multigrain Pasta 1kg — bulk pack.","brand":{"id":null,"name":"BulkBuy Brand"},"categories":[],"tags":["grocery","bulk","standard"],"images":[],"media":[],"price":[{"list":28,"sale":null,"currency":"USD","effectiveFrom":null,"effectiveTo":null}],"pricingTiers":[{"minQty":10,"price":26.6,"currency":"USD"},{"minQty":50,"price":25.2,"currency":"USD"}],"inventory":{"stock":145,"reserved":0,"backorder":false,"warehouses":[]},"variants":[],"weight":{"value":1.5,"unit":"kg"},"dimensions":{"length":29,"width":19,"height":14,"unit":"cm"},"shipping":{"class":"standard","freightClass":"","shipsFrom":"CA"},"taxClass":"standard","ratings":{"avg":0,"count":0},"reviews":[],"relatedProducts":[],"seller":{"id":null,"name":"BulkBuy Supplier"},"metadata":{},"status":"active","ops_region":"NA","published":true,"_id":"69c35324dec6d4f932a80645","__v":0,"createdAt":"2026-03-25T03:14:44.836Z","updatedAt":"2026-03-25T03:14:44.836Z"},{"sku":"BB-ITEM-010","title":"Honey Raw 500g","slug":"bb-item-010-honey-raw-500g","description":"Honey Raw 500g — high quality, bulk-friendly packaging suitable for retailers and foodservice.","shortDescription":"Honey Raw 500g — bulk pack.","brand":{"id":null,"name":"BulkBuy Brand"},"categories":[],"tags":["grocery","bulk","organic"],"images":[],"media":[],"price":[{"list":10,"sale":12.5,"currency":"USD","effectiveFrom":null,"effectiveTo":null}],"pricingTiers":[{"minQty":10,"price":9.5,"currency":"USD"},{"minQty":50,"price":9,"currency":"USD"}],"inventory":{"stock":150,"reserved":0,"backorder":false,"warehouses":[]},"variants":[],"weight":{"value":0.5,"unit":"kg"},"dimensions":{"length":30,"width":20,"height":15,"unit":"cm"},"shipping":{"class":"standard","freightClass":"","shipsFrom":"CA"},"taxClass":"standard","ratings":{"avg":0,"count":0},"reviews":[],"relatedProducts":[],"seller":{"id":null,"name":"BulkBuy Supplier"},"metadata":{},"status":"active","ops_region":"NA","published":true,"_id":"69c35324dec6d4f932a80646","__v":0,"createdAt":"2026-03-25T03:14:44.836Z","updatedAt":"2026-03-25T03:14:44.836Z"},{"sku":"BB-ITEM-011","title":"Green Tea Bags 100ct","slug":"bb-item-011-green-tea-bags-100ct","description":"Green Tea Bags 100ct — high quality, bulk-friendly packaging suitable for retailers and foodservice.","shortDescription":"Green Tea Bags 100ct — bulk pack.","brand":{"id":null,"name":"BulkBuy Brand"},"categories":[],"tags":["grocery","bulk","standard"],"images":[],"media":[],"price":[{"list":12,"sale":null,"currency":"USD","effectiveFrom":null,"effectiveTo":null}],"pricingTiers":[{"minQty":10,"price":11.4,"currency":"USD"},{"minQty":50,"price":10.8,"currency":"USD"}],"inventory":{"stock":155,"reserved":0,"backorder":false,"warehouses":[]},"variants":[],"weight":{"value":0.75,"unit":"kg"},"dimensions":{"length":31,"width":21,"height":16,"unit":"cm"},"shipping":{"class":"standard","freightClass":"","shipsFrom":"CA"},"taxClass":"standard","ratings":{"avg":0,"count":0},"reviews":[],"relatedProducts":[],"seller":{"id":null,"name":"BulkBuy Supplier"},"metadata":{},"status":"active","ops_region":"NA","published":true,"_id":"69c35324dec6d4f932a80647","__v":0,"createdAt":"2026-03-25T03:14:44.837Z","updatedAt":"2026-03-25T03:14:44.837Z"},{"sku":"BB-ITEM-012","title":"Sea Salt 1kg","slug":"bb-item-012-sea-salt-1kg","description":"Sea Salt 1kg — high quality, bulk-friendly packaging suitable for retailers and foodservice.","shortDescription":"Sea Salt 1kg — bulk pack.","brand":{"id":null,"name":"BulkBuy Brand"},"categories":[],"tags":["grocery","bulk","organic"],"images":[],"media":[],"price":[{"list":14,"sale":null,"currency":"USD","effectiveFrom":null,"effectiveTo":null}],"pricingTiers":[{"minQty":10,"price":13.3,"currency":"USD"},{"minQty":50,"price":12.6,"currency":"USD"}],"inventory":{"stock":160,"reserved":0,"backorder":false,"warehouses":[]},"variants":[],"weight":{"value":1,"unit":"kg"},"dimensions":{"length":32,"width":22,"height":17,"unit":"cm"},"shipping":{"class":"standard","freightClass":"","shipsFrom":"CA"},"taxClass":"standard","ratings":{"avg":0,"count":0},"reviews":[],"relatedProducts":[],"seller":{"id":null,"name":"BulkBuy Supplier"},"metadata":{},"status":"active","ops_region":"NA","published":true,"_id":"69c35324dec6d4f932a80648","__v":0,"createdAt":"2026-03-25T03:14:44.837Z","updatedAt":"2026-03-25T03:14:44.837Z"},{"sku":"BB-ITEM-013","title":"Quinoa White 1kg","slug":"bb-item-013-quinoa-white-1kg","description":"Quinoa White 1kg — high quality, bulk-friendly packaging suitable for retailers and foodservice.","shortDescription":"Quinoa White 1kg — bulk pack.","brand":{"id":null,"name":"BulkBuy Brand"},"categories":[],"tags":["grocery","bulk","standard"],"images":[],"media":[],"price":[{"list":16,"sale":null,"currency":"USD","effectiveFrom":null,"effectiveTo":null}],"pricingTiers":[{"minQty":10,"price":15.2,"currency":"USD"},{"minQty":50,"price":14.4,"currency":"USD"}],"inventory":{"stock":165,"reserved":0,"backorder":false,"warehouses":[]},"variants":[],"weight":{"value":1.25,"unit":"kg"},"dimensions":{"length":33,"width":23,"height":18,"unit":"cm"},"shipping":{"class":"standard","freightClass":"","shipsFrom":"CA"},"taxClass":"standard","ratings":{"avg":0,"count":0},"reviews":[],"relatedProducts":[],"seller":{"id":null,"name":"BulkBuy Supplier"},"metadata":{},"status":"active","ops_region":"NA","published":true,"_id":"69c35324dec6d4f932a80649","__v":0,"createdAt":"2026-03-25T03:14:44.837Z","updatedAt":"2026-03-25T03:14:44.837Z"},{"sku":"BB-ITEM-014","title":"Coconut Milk 400ml","slug":"bb-item-014-coconut-milk-400ml","description":"Coconut Milk 400ml — high quality, bulk-friendly packaging suitable for retailers and foodservice.","shortDescription":"Coconut Milk 400ml — bulk pack.","brand":{"id":null,"name":"BulkBuy Brand"},"categories":[],"tags":["grocery","bulk","organic"],"images":[],"media":[],"price":[{"list":18,"sale":null,"currency":"USD","effectiveFrom":null,"effectiveTo":null}],"pricingTiers":[{"minQty":10,"price":17.1,"currency":"USD"},{"minQty":50,"price":16.2,"currency":"USD"}],"inventory":{"stock":170,"reserved":0,"backorder":true,"warehouses":[]},"variants":[],"weight":{"value":1.5,"unit":"kg"},"dimensions":{"length":34,"width":24,"height":19,"unit":"cm"},"shipping":{"class":"standard","freightClass":"","shipsFrom":"CA"},"taxClass":"standard","ratings":{"avg":0,"count":0},"reviews":[],"relatedProducts":[],"seller":{"id":null,"name":"BulkBuy Supplier"},"metadata":{},"status":"active","ops_region":"NA","published":true,"_id":"69c35324dec6d4f932a8064a","__v":0,"createdAt":"2026-03-25T03:14:44.837Z","updatedAt":"2026-03-25T03:14:44.837Z"},{"sku":"BB-ITEM-015","title":"Maple Syrup 250ml","slug":"bb-item-015-maple-syrup-250ml","description":"Maple Syrup 250ml — high quality, bulk-friendly packaging suitable for retailers and foodservice.","shortDescription":"Maple Syrup 250ml — bulk pack.","brand":{"id":null,"name":"BulkBuy Brand"},"categories":[],"tags":["grocery","bulk","standard"],"images":[],"media":[],"price":[{"list":20,"sale":9.5,"currency":"USD","effectiveFrom":null,"effectiveTo":null}],"pricingTiers":[{"minQty":10,"price":19,"currency":"USD"},{"minQty":50,"price":18,"currency":"USD"}],"inventory":{"stock":175,"reserved":0,"backorder":false,"warehouses":[]},"variants":[],"weight":{"value":0.5,"unit":"kg"},"dimensions":{"length":35,"width":25,"height":20,"unit":"cm"},"shipping":{"class":"standard","freightClass":"","shipsFrom":"CA"},"taxClass":"standard","ratings":{"avg":0,"count":0},"reviews":[],"relatedProducts":[],"seller":{"id":null,"name":"BulkBuy Supplier"},"metadata":{},"status":"active","ops_region":"NA","published":true,"_id":"69c35324dec6d4f932a8064b","__v":0,"createdAt":"2026-03-25T03:14:44.837Z","updatedAt":"2026-03-25T03:14:44.837Z"},{"sku":"BB-ITEM-016","title":"Chia Seeds 500g","slug":"bb-item-016-chia-seeds-500g","description":"Chia Seeds 500g — high quality, bulk-friendly packaging suitable for retailers and foodservice.","shortDescription":"Chia Seeds 500g — bulk pack.","brand":{"id":null,"name":"BulkBuy Brand"},"categories":[],"tags":["grocery","bulk","organic"],"images":[],"media":[],"price":[{"list":22,"sale":null,"currency":"USD","effectiveFrom":null,"effectiveTo":null}],"pricingTiers":[{"minQty":10,"price":20.9,"currency":"USD"},{"minQty":50,"price":19.8,"currency":"USD"}],"inventory":{"stock":180,"reserved":0,"backorder":false,"warehouses":[]},"variants":[],"weight":{"value":0.75,"unit":"kg"},"dimensions":{"length":36,"width":26,"height":21,"unit":"cm"},"shipping":{"class":"standard","freightClass":"","shipsFrom":"CA"},"taxClass":"standard","ratings":{"avg":0,"count":0},"reviews":[],"relatedProducts":[],"seller":{"id":null,"name":"BulkBuy Supplier"},"metadata":{},"status":"active","ops_region":"NA","published":true,"_id":"69c35324dec6d4f932a8064c","__v":0,"createdAt":"2026-03-25T03:14:44.838Z","updatedAt":"2026-03-25T03:14:44.838Z"},{"sku":"BB-ITEM-017","title":"Protein Bars 12-pack","slug":"bb-item-017-protein-bars-12-pack","description":"Protein Bars 12-pack — high quality, bulk-friendly packaging suitable for retailers and foodservice.","shortDescription":"Protein Bars 12-pack — bulk pack.","brand":{"id":null,"name":"BulkBuy Brand"},"categories":[],"tags":["grocery","bulk","standard"],"images":[],"media":[],"price":[{"list":24,"sale":null,"currency":"USD","effectiveFrom":null,"effectiveTo":null}],"pricingTiers":[{"minQty":10,"price":22.8,"currency":"USD"},{"minQty":50,"price":21.6,"currency":"USD"}],"inventory":{"stock":185,"reserved":0,"backorder":false,"warehouses":[]},"variants":[],"weight":{"value":1,"unit":"kg"},"dimensions":{"length":37,"width":27,"height":22,"unit":"cm"},"shipping":{"class":"standard","freightClass":"","shipsFrom":"CA"},"taxClass":"standard","ratings":{"avg":0,"count":0},"reviews":[],"relatedProducts":[],"seller":{"id":null,"name":"BulkBuy Supplier"},"metadata":{},"status":"active","ops_region":"NA","published":true,"_id":"69c35324dec6d4f932a8064d","__v":0,"createdAt":"2026-03-25T03:14:44.838Z","updatedAt":"2026-03-25T03:14:44.838Z"},{"sku":"BB-ITEM-018","title":"Frozen Mixed Berries 1kg","slug":"bb-item-018-frozen-mixed-berries-1kg","description":"Frozen Mixed Berries 1kg — high quality, bulk-friendly packaging suitable for retailers and foodservice.","shortDescription":"Frozen Mixed Berries 1kg — bulk pack.","brand":{"id":null,"name":"BulkBuy Brand"},"categories":[],"tags":["grocery","bulk","organic"],"images":[],"media":[],"price":[{"list":26,"sale":null,"currency":"USD","effectiveFrom":null,"effectiveTo":null}],"pricingTiers":[{"minQty":10,"price":24.7,"currency":"USD"},{"minQty":50,"price":23.4,"currency":"USD"}],"inventory":{"stock":190,"reserved":0,"backorder":false,"warehouses":[]},"variants":[],"weight":{"value":1.25,"unit":"kg"},"dimensions":{"length":38,"width":28,"height":23,"unit":"cm"},"shipping":{"class":"standard","freightClass":"","shipsFrom":"CA"},"taxClass":"standard","ratings":{"avg":0,"count":0},"reviews":[],"relatedProducts":[],"seller":{"id":null,"name":"BulkBuy Supplier"},"metadata":{},"status":"active","ops_region":"NA","published":true,"_id":"69c35324dec6d4f932a8064e","__v":0,"createdAt":"2026-03-25T03:14:44.838Z","updatedAt":"2026-03-25T03:14:44.838Z"},{"sku":"BB-ITEM-019","title":"Shelf-stable Milk 1L","slug":"bb-item-019-shelf-stable-milk-1l","description":"Shelf-stable Milk 1L — high quality, bulk-friendly packaging suitable for retailers and foodservice.","shortDescription":"Shelf-stable Milk 1L — bulk pack.","brand":{"id":null,"name":"BulkBuy Brand"},"categories":[],"tags":["grocery","bulk","standard"],"images":[],"media":[],"price":[{"list":28,"sale":null,"currency":"USD","effectiveFrom":null,"effectiveTo":null}],"pricingTiers":[{"minQty":10,"price":26.6,"currency":"USD"},{"minQty":50,"price":25.2,"currency":"USD"}],"inventory":{"stock":195,"reserved":0,"backorder":false,"warehouses":[]},"variants":[],"weight":{"value":1.5,"unit":"kg"},"dimensions":{"length":39,"width":29,"height":24,"unit":"cm"},"shipping":{"class":"standard","freightClass":"","shipsFrom":"CA"},"taxClass":"standard","ratings":{"avg":0,"count":0},"reviews":[],"relatedProducts":[],"seller":{"id":null,"name":"BulkBuy Supplier"},"metadata":{},"status":"active","ops_region":"NA","published":true,"_id":"69c35324dec6d4f932a8064f","__v":0,"createdAt":"2026-03-25T03:14:44.838Z","updatedAt":"2026-03-25T03:14:44.838Z"}] - doc: {"ordered":false}
+2026-03-25T03:14:44.901Z - mongoose: items.find - query: {"sku":{"$in":["BB-ITEM-000","BB-ITEM-001","BB-ITEM-002","BB-ITEM-003","BB-ITEM-004","BB-ITEM-005","BB-ITEM-006","BB-ITEM-007","BB-ITEM-008","BB-ITEM-009","BB-ITEM-010","BB-ITEM-011","BB-ITEM-012","BB-ITEM-013","BB-ITEM-014","BB-ITEM-015","BB-ITEM-016","BB-ITEM-017","BB-ITEM-018","BB-ITEM-019"]}} - doc: {}
+2026-03-25T03:14:45.018Z - mongoose: products.insertMany - query: [{"name":"Breakfast Essentials Pack","descriptions":[{"locale":"en","title":"Breakfast Essentials Pack","body":"Breakfast Essentials Pack — curated selection of high-demand items."}],"items":[{"itemId":"69c35323dec6d4f932a80604","salesPrices":[{"price":19.99,"currency":"USD","from":1774322085009,"to":1774494885009}]},{"itemId":"69c35324dec6d4f932a80616","salesPrices":[{"price":9.99,"currency":"USD","from":1774322085009,"to":1774494885009}]}],"discountScheme":{"type":"tiered","tiers":[{"minQty":10,"discountPct":5}]},"salesWindow":{"fromEpoch":1773803685009,"toEpoch":1775013285009},"ops_region":"NA","metadata":{},"status":"active","reviews":[],"deleted":false,"deletedAt":null,"deletedBy":null,"_id":"69c35325dec6d4f932a80652","createdAt":1774408485014,"updatedAt":1774408485014,"__v":0},{"name":"Pantry Staples Bundle","descriptions":[{"locale":"en","title":"Pantry Staples Bundle","body":"Pantry Staples Bundle — curated selection of high-demand items."}],"items":[{"itemId":"69c35323dec6d4f932a80604","salesPrices":[{"price":19.99,"currency":"USD","from":1774322085009,"to":1774494885009}]},{"itemId":"69c35324dec6d4f932a80616","salesPrices":[{"price":9.99,"currency":"USD","from":1774322085009,"to":1774494885009}]}],"discountScheme":{"type":"tiered","tiers":[{"minQty":10,"discountPct":5}]},"salesWindow":{"fromEpoch":1773803685009,"toEpoch":1775013285009},"ops_region":"NA","metadata":{},"status":"active","reviews":[],"deleted":false,"deletedAt":null,"deletedBy":null,"_id":"69c35325dec6d4f932a80653","createdAt":1774408485015,"updatedAt":1774408485015,"__v":0},{"name":"Organic Snacks Collection","descriptions":[{"locale":"en","title":"Organic Snacks Collection","body":"Organic Snacks Collection — curated selection of high-demand items."}],"items":[{"itemId":"69c35323dec6d4f932a80604","salesPrices":[{"price":19.99,"currency":"USD","from":1774322085009,"to":1774494885009}]},{"itemId":"69c35324dec6d4f932a80616","salesPrices":[{"price":9.99,"currency":"USD","from":1774322085009,"to":1774494885009}]}],"discountScheme":{"type":"tiered","tiers":[{"minQty":10,"discountPct":5}]},"salesWindow":{"fromEpoch":1773803685009,"toEpoch":1775013285009},"ops_region":"NA","metadata":{},"status":"active","reviews":[],"deleted":false,"deletedAt":null,"deletedBy":null,"_id":"69c35325dec6d4f932a80654","createdAt":1774408485016,"updatedAt":1774408485016,"__v":0},{"name":"Beverage Variety Case","descriptions":[{"locale":"en","title":"Beverage Variety Case","body":"Beverage Variety Case — curated selection of high-demand items."}],"items":[{"itemId":"69c35323dec6d4f932a80604","salesPrices":[{"price":19.99,"currency":"USD","from":1774322085009,"to":1774494885009}]},{"itemId":"69c35324dec6d4f932a80616","salesPrices":[{"price":9.99,"currency":"USD","from":1774322085009,"to":1774494885009}]}],"discountScheme":{"type":"tiered","tiers":[{"minQty":10,"discountPct":5}]},"salesWindow":{"fromEpoch":1773803685009,"toEpoch":1775013285009},"ops_region":"NA","metadata":{},"status":"active","reviews":[],"deleted":false,"deletedAt":null,"deletedBy":null,"_id":"69c35325dec6d4f932a80655","createdAt":1774408485016,"updatedAt":1774408485016,"__v":0},{"name":"Baking & Pantry Kit","descriptions":[{"locale":"en","title":"Baking & Pantry Kit","body":"Baking & Pantry Kit — curated selection of high-demand items."}],"items":[{"itemId":"69c35323dec6d4f932a80604","salesPrices":[{"price":19.99,"currency":"USD","from":1774322085009,"to":1774494885009}]},{"itemId":"69c35324dec6d4f932a80616","salesPrices":[{"price":9.99,"currency":"USD","from":1774322085009,"to":1774494885009}]}],"discountScheme":{"type":"tiered","tiers":[{"minQty":10,"discountPct":5}]},"salesWindow":{"fromEpoch":1773803685009,"toEpoch":1775013285009},"ops_region":"NA","metadata":{},"status":"active","reviews":[],"deleted":false,"deletedAt":null,"deletedBy":null,"_id":"69c35325dec6d4f932a80656","createdAt":1774408485017,"updatedAt":1774408485017,"__v":0}] - doc: {"ordered":false}
+2026-03-25T03:14:45.053Z - mongoose: products.find - query: {"$or":[{"sku":"BB-PROD-000"},{"sku":"BB-PROD-001"},{"sku":"BB-PROD-002"},{"sku":"BB-PROD-003"},{"sku":"BB-PROD-004"}]} - doc: {}
+2026-03-25T03:14:45.104Z - mongoose: saleswindows.countDocuments - query: {} - doc: {}
+2026-03-25T03:14:45.127Z - mongoose: saleswindows.insertMany - query: [{"window":{"fromEpoch":1771816485122,"toEpoch":1773803685122},"products":[{"productId":"69c35325dec6d4f932a8065a","items":[{"itemId":"69c35325dec6d4f932a8065d","pricing_snapshots":[{"atInstantPrice":19.99,"discountedPercentage":0,"discountBracket":{"initial":0,"final":0},"createdAt":"2026-03-25T03:14:45.122Z","updatedAt":"2026-03-25T03:14:45.122Z","metadata":{"currency":"USD","note":"list price"}},{"atInstantPrice":17.99,"discountedPercentage":10,"discountBracket":{"initial":0,"final":10},"createdAt":"2026-03-25T03:14:45.122Z","updatedAt":"2026-03-25T03:14:45.122Z","metadata":{"currency":"USD","note":"sale price"}}],"metadata":{"origin":"seed"},"createdAt":"2026-03-25T03:14:45.122Z","updatedAt":"2026-03-25T03:14:45.122Z"},{"itemId":"69c35325dec6d4f932a8065e","pricing_snapshots":[{"atInstantPrice":9.99,"discountedPercentage":0,"discountBracket":{"initial":0,"final":0},"createdAt":"2026-03-25T03:14:45.122Z","updatedAt":"2026-03-25T03:14:45.122Z","metadata":{"currency":"USD"}}],"metadata":{"origin":"seed"},"createdAt":"2026-03-25T03:14:45.122Z","updatedAt":"2026-03-25T03:14:45.122Z"}],"metadata":{"notes":"past product A"}},{"productId":"69c35325dec6d4f932a8065b","items":[{"itemId":"69c35325dec6d4f932a8065f","pricing_snapshots":[{"atInstantPrice":29.99,"discountedPercentage":0,"discountBracket":{"initial":0,"final":0},"createdAt":"2026-03-25T03:14:45.122Z","updatedAt":"2026-03-25T03:14:45.122Z","metadata":{"currency":"USD"}}],"metadata":{"notes":"past item"},"createdAt":"2026-03-25T03:14:45.122Z","updatedAt":"2026-03-25T03:14:45.122Z"}],"metadata":{"notes":"past product B"}}],"ops_region":"GTA","overflow_id":null,"metadata":{"seeded":true,"tag":"saleswindow.past"},"_id":"69c35325dec6d4f932a80661","__v":0,"createdAt":"2026-03-25T03:14:45.127Z","updatedAt":"2026-03-25T03:14:45.127Z"},{"window":{"fromEpoch":1774235685122,"toEpoch":1774840485122},"products":[{"productId":"69c35325dec6d4f932a8065a","items":[{"itemId":"69c35325dec6d4f932a8065d","pricing_snapshots":[{"atInstantPrice":18.99,"discountedPercentage":5,"discountBracket":{"initial":0,"final":5},"createdAt":"2026-03-25T03:14:45.122Z","updatedAt":"2026-03-25T03:14:45.122Z","metadata":{"currency":"USD","effectiveFrom":1774235685122,"effectiveTo":1774840485122}},{"atInstantPrice":16.99,"discountedPercentage":10,"discountBracket":{"initial":5,"final":10},"createdAt":"2026-03-25T03:14:45.122Z","updatedAt":"2026-03-25T03:14:45.122Z","metadata":{"currency":"USD","promo":"spring"}}],"metadata":{"promo":"spring"},"createdAt":"2026-03-25T03:14:45.122Z","updatedAt":"2026-03-25T03:14:45.122Z"},{"itemId":"69c35325dec6d4f932a80660","pricing_snapshots":[{"atInstantPrice":4.99,"discountedPercentage":0,"discountBracket":{"initial":0,"final":0},"createdAt":"2026-03-25T03:14:45.122Z","updatedAt":"2026-03-25T03:14:45.122Z","metadata":{"currency":"USD"}}],"metadata":{"pack":"single"},"createdAt":"2026-03-25T03:14:45.122Z","updatedAt":"2026-03-25T03:14:45.122Z"}],"metadata":{"notes":"current product A"}},{"productId":"69c35325dec6d4f932a8065c","items":[{"itemId":"69c35325dec6d4f932a8065e","pricing_snapshots":[{"atInstantPrice":11.99,"discountedPercentage":0,"discountBracket":{"initial":0,"final":0},"createdAt":"2026-03-25T03:14:45.122Z","updatedAt":"2026-03-25T03:14:45.122Z","metadata":{"currency":"USD"}}],"metadata":{"notes":"current item"},"createdAt":"2026-03-25T03:14:45.122Z","updatedAt":"2026-03-25T03:14:45.122Z"}],"metadata":{"notes":"current product C"}}],"ops_region":"Calgary","overflow_id":null,"metadata":{"seeded":true,"tag":"saleswindow.current"},"_id":"69c35325dec6d4f932a80662","__v":0,"createdAt":"2026-03-25T03:14:45.127Z","updatedAt":"2026-03-25T03:14:45.127Z"},{"window":{"fromEpoch":1775272485122,"toEpoch":1776136485122},"products":[{"productId":"69c35325dec6d4f932a8065b","items":[{"itemId":"69c35325dec6d4f932a8065f","pricing_snapshots":[{"atInstantPrice":27.99,"discountedPercentage":0,"discountBracket":{"initial":0,"final":0},"createdAt":"2026-03-25T03:14:45.122Z","updatedAt":"2026-03-25T03:14:45.122Z","metadata":{"currency":"USD"}},{"atInstantPrice":25.99,"discountedPercentage":7,"discountBracket":{"initial":0,"final":7},"createdAt":"2026-03-25T03:14:45.122Z","updatedAt":"2026-03-25T03:14:45.122Z","metadata":{"currency":"USD","planned":true}}],"metadata":{"planned":true},"createdAt":"2026-03-25T03:14:45.122Z","updatedAt":"2026-03-25T03:14:45.122Z"},{"itemId":"69c35325dec6d4f932a80660","pricing_snapshots":[{"atInstantPrice":5.49,"discountedPercentage":0,"discountBracket":{"initial":0,"final":0},"createdAt":"2026-03-25T03:14:45.122Z","updatedAt":"2026-03-25T03:14:45.122Z","metadata":{"currency":"USD"}},{"atInstantPrice":4.99,"discountedPercentage":9,"discountBracket":{"initial":0,"final":9},"createdAt":"2026-03-25T03:14:45.122Z","updatedAt":"2026-03-25T03:14:45.122Z","metadata":{"currency":"USD","planned":true}}],"metadata":{"planned":true},"createdAt":"2026-03-25T03:14:45.122Z","updatedAt":"2026-03-25T03:14:45.122Z"}],"metadata":{"notes":"future product B"}},{"productId":"69c35325dec6d4f932a8065c","items":[{"itemId":"69c35325dec6d4f932a8065d","pricing_snapshots":[{"atInstantPrice":20.99,"discountedPercentage":0,"discountBracket":{"initial":0,"final":0},"createdAt":"2026-03-25T03:14:45.122Z","updatedAt":"2026-03-25T03:14:45.122Z","metadata":{"currency":"USD"}}],"metadata":{"planned":true},"createdAt":"2026-03-25T03:14:45.122Z","updatedAt":"2026-03-25T03:14:45.122Z"}],"metadata":{"notes":"future product C"}}],"ops_region":"Victoria","overflow_id":null,"metadata":{"seeded":true,"tag":"saleswindow.future"},"_id":"69c35325dec6d4f932a80663","__v":0,"createdAt":"2026-03-25T03:14:45.127Z","updatedAt":"2026-03-25T03:14:45.127Z"}] - doc: {"ordered":false}
+2026-03-25T03:14:45.181Z - mongoose: supplies.countDocuments - query: {} - doc: {}
+2026-03-25T03:14:45.215Z - mongoose: supplies.insertMany - query: [{"supplierId":"69c35325dec6d4f932a80666","requesterId":"69c35325dec6d4f932a80668","items":[{"itemId":"69c35325dec6d4f932a80669","quotes":[{"pricePerBulkUnit":1200,"numberOfBulkUnits":1,"discountingScheme":[{"minQty":50,"discountPercent":5,"description":"5% for 50+"},{"minQty":100,"discountPercent":10,"description":"10% for 100+"}],"isAccepted":true,"meta":{"leadTimeDays":7},"createdAt":"2026-03-25T03:14:45.205Z","_id":"69c35325dec6d4f932a8066e"}],"requestedQuantity":100,"meta":{"category":"groceries"},"_id":"69c35325dec6d4f932a8066d"},{"itemId":"69c35325dec6d4f932a8066a","quotes":[{"pricePerBulkUnit":450,"numberOfBulkUnits":1,"discountingScheme":[],"isAccepted":true,"meta":{"packaging":"pallet"},"createdAt":"2026-03-25T03:14:45.205Z","_id":"69c35325dec6d4f932a80670"}],"requestedQuantity":200,"meta":{"category":"beverages"},"_id":"69c35325dec6d4f932a8066f"}],"deliveryLocation":{"label":"Main Distribution Center","line1":"100 Commerce Blvd","line2":"","city":"Brampton","region":"ON","postalCode":"L6T0A1","country":"Canada","geo":{"type":"Point","coordinates":[-79.7,43.7]}},"status":"received","ops_region":"ON-GTA","metadata":{},"internalNotes":"Seed: past supply marked received","deleted":false,"_id":"69c35325dec6d4f932a8066c","__v":0,"createdAt":"2026-03-25T03:14:45.214Z","updatedAt":"2026-03-25T03:14:45.214Z"},{"supplierId":"69c35325dec6d4f932a80667","requesterId":null,"items":[{"itemId":"69c35325dec6d4f932a8066b","quotes":[{"pricePerBulkUnit":2500,"numberOfBulkUnits":1,"discountingScheme":[{"minQty":10,"discountPercent":3,"description":"3% for 10+"}],"isAccepted":false,"meta":{"currency":"CAD"},"createdAt":"2026-03-25T03:14:45.205Z","_id":"69c35325dec6d4f932a80673"}],"requestedQuantity":50,"meta":{"fragile":true},"_id":"69c35325dec6d4f932a80672"}],"deliveryLocation":{"label":"Retailer Backroom","line1":"200 Retail Park","line2":"","city":"Toronto","region":"ON","postalCode":"M5V2T6","country":"Canada","geo":{"type":"Point"}},"status":"accepted","ops_region":"ON-TOR","metadata":{},"internalNotes":"Seed: accepted quote awaiting dispatch","deleted":false,"_id":"69c35325dec6d4f932a80671","__v":0,"createdAt":"2026-03-25T03:14:45.214Z","updatedAt":"2026-03-25T03:14:45.214Z"},{"supplierId":"69c35325dec6d4f932a80666","requesterId":null,"items":[{"itemId":"69c35325dec6d4f932a8066a","quotes":[{"pricePerBulkUnit":430,"numberOfBulkUnits":1,"discountingScheme":[{"minQty":100,"discountPercent":4,"description":"4% for 100+"}],"isAccepted":false,"meta":{"packaging":"box"},"createdAt":"2026-03-25T03:14:45.205Z","_id":"69c35325dec6d4f932a80676"},{"pricePerBulkUnit":410,"numberOfBulkUnits":1,"discountingScheme":[{"minQty":200,"discountPercent":6,"description":"6% for 200+"}],"isAccepted":false,"meta":{"packaging":"pallet"},"createdAt":"2026-03-25T03:14:45.205Z","_id":"69c35325dec6d4f932a80677"}],"requestedQuantity":300,"meta":{"category":"consumables"},"_id":"69c35325dec6d4f932a80675"}],"deliveryLocation":{"label":"Temporary Storage","line1":"55 Logistics Way","line2":"","city":"Mississauga","region":"ON","postalCode":"L5B0E6","country":"Canada","geo":{"type":"Point"}},"status":"quote","ops_region":"ON-MISS","metadata":{},"internalNotes":"Seed: initial quote","deleted":false,"_id":"69c35325dec6d4f932a80674","__v":0,"createdAt":"2026-03-25T03:14:45.214Z","updatedAt":"2026-03-25T03:14:45.214Z"}] - doc: {"ordered":false}
+2026-03-25T03:14:45.274Z - mongoose: orders.countDocuments - query: {} - doc: {}
+2026-03-25T03:14:45.304Z - mongoose: orders.insertMany - query: [{"userId":"69c35325dec6d4f932a8067a","items":[{"productId":"69c35325dec6d4f932a8067d","itemId":"69c35325dec6d4f932a8067d","pricingSnapshot":{"atInstantPrice":19.99,"discountedPercentage":5,"discountBracket":{"initial":0,"final":0},"meta":{"currency":"USD"}},"saveForLater":false,"quantity":10},{"productId":"69c35325dec6d4f932a8067e","itemId":"69c35325dec6d4f932a8067e","pricingSnapshot":{"atInstantPrice":9.99,"discountedPercentage":0,"discountBracket":{"initial":0,"final":0},"meta":{"currency":"USD"}},"saveForLater":false,"quantity":5}],"orderLocation":{"line1":"10 Past St","line2":null,"city":"Brampton","region":"ON","postalCode":"L6T0A1","country":"Canada","geo":{"type":"Point","coordinates":[-79.7624,43.7315]}},"deliveryLocation":{"line1":"10 Past St","line2":null,"city":"Brampton","region":"ON","postalCode":"L6T0A1","country":"Canada","geo":{"type":"Point","coordinates":[-79.7624,43.7315]}},"paymentMethod":{"type":"card","provider":"stripe","last4":"4242"},"salesWindow":null,"ops_region":"ON-GTA","messages":[],"metadata":{},"status":"fulfilled","createdAt":1769224485293,"updatedAt":1771816485293,"_id":"69c35325dec6d4f932a80681","__v":0},{"userId":"69c35325dec6d4f932a8067a","items":[{"productId":"69c35325dec6d4f932a8067f","itemId":"69c35325dec6d4f932a8067f","pricingSnapshot":{"atInstantPrice":29.99,"discountedPercentage":0,"discountBracket":{"initial":0,"final":0},"meta":{"currency":"USD"}},"saveForLater":false,"quantity":3},{"productId":"69c35325dec6d4f932a8067e","itemId":"69c35325dec6d4f932a8067e","pricingSnapshot":{"atInstantPrice":14.99,"discountedPercentage":0,"discountBracket":{"initial":0,"final":0},"meta":{"currency":"USD"}},"saveForLater":false,"quantity":2}],"orderLocation":{"line1":"200 Commerce Blvd","line2":null,"city":"Toronto","region":"ON","postalCode":"M5V2T6","country":"Canada","geo":{"type":"Point","coordinates":[-79.38,43.65]}},"deliveryLocation":{"line1":"200 Commerce Blvd","line2":null,"city":"Toronto","region":"ON","postalCode":"M5V2T6","country":"Canada","geo":{"type":"Point","coordinates":[-79.38,43.65]}},"paymentMethod":{"type":"card","provider":"stripe","last4":"1111"},"salesWindow":null,"ops_region":"ON-GTA","messages":[],"metadata":{},"status":"dispatched","createdAt":1773976485293,"updatedAt":1774322085293,"_id":"69c35325dec6d4f932a80682","__v":0},{"userId":"69c35325dec6d4f932a8067a","items":[{"productId":"69c35325dec6d4f932a8067d","itemId":"69c35325dec6d4f932a8067d","pricingSnapshot":{"atInstantPrice":19.99,"discountedPercentage":0,"discountBracket":{"initial":0,"final":0},"meta":{"currency":"USD"}},"saveForLater":false,"quantity":2},{"productId":"69c35325dec6d4f932a80680","itemId":"69c35325dec6d4f932a80680","pricingSnapshot":{"atInstantPrice":4.99,"discountedPercentage":0,"discountBracket":{"initial":0,"final":0},"meta":{"currency":"USD"}},"saveForLater":true,"quantity":1}],"orderLocation":{"line1":"Cart Address","line2":null,"city":"Mississauga","region":"ON","postalCode":"L5B0E6","country":"Canada"},"deliveryLocation":null,"paymentMethod":null,"salesWindow":null,"ops_region":"ON-GTA","messages":[],"metadata":{},"status":"draft","createdAt":1774401285293,"updatedAt":1774406685293,"_id":"69c35325dec6d4f932a80683","__v":0},{"userId":"69c35325dec6d4f932a8067b","items":[{"productId":"69c35325dec6d4f932a8067e","itemId":"69c35325dec6d4f932a8067e","pricingSnapshot":{"atInstantPrice":19.99,"discountedPercentage":5,"discountBracket":{"initial":0,"final":0},"meta":{"currency":"USD"}},"saveForLater":false,"quantity":10},{"productId":"69c35325dec6d4f932a8067f","itemId":"69c35325dec6d4f932a8067f","pricingSnapshot":{"atInstantPrice":9.99,"discountedPercentage":0,"discountBracket":{"initial":0,"final":0},"meta":{"currency":"USD"}},"saveForLater":false,"quantity":5}],"orderLocation":{"line1":"10 Past St","line2":null,"city":"Brampton","region":"ON","postalCode":"L6T0A1","country":"Canada","geo":{"type":"Point","coordinates":[-79.7624,43.7315]}},"deliveryLocation":{"line1":"10 Past St","line2":null,"city":"Brampton","region":"ON","postalCode":"L6T0A1","country":"Canada","geo":{"type":"Point","coordinates":[-79.7624,43.7315]}},"paymentMethod":{"type":"card","provider":"stripe","last4":"4242"},"salesWindow":null,"ops_region":"ON-TOR","messages":[],"metadata":{},"status":"fulfilled","createdAt":1769224485293,"updatedAt":1771816485293,"_id":"69c35325dec6d4f932a80684","__v":0},{"userId":"69c35325dec6d4f932a8067b","items":[{"productId":"69c35325dec6d4f932a80680","itemId":"69c35325dec6d4f932a80680","pricingSnapshot":{"atInstantPrice":29.99,"discountedPercentage":0,"discountBracket":{"initial":0,"final":0},"meta":{"currency":"USD"}},"saveForLater":false,"quantity":3},{"productId":"69c35325dec6d4f932a8067f","itemId":"69c35325dec6d4f932a8067f","pricingSnapshot":{"atInstantPrice":14.99,"discountedPercentage":0,"discountBracket":{"initial":0,"final":0},"meta":{"currency":"USD"}},"saveForLater":false,"quantity":2}],"orderLocation":{"line1":"200 Commerce Blvd","line2":null,"city":"Toronto","region":"ON","postalCode":"M5V2T6","country":"Canada","geo":{"type":"Point","coordinates":[-79.38,43.65]}},"deliveryLocation":{"line1":"200 Commerce Blvd","line2":null,"city":"Toronto","region":"ON","postalCode":"M5V2T6","country":"Canada","geo":{"type":"Point","coordinates":[-79.38,43.65]}},"paymentMethod":{"type":"card","provider":"stripe","last4":"1111"},"salesWindow":null,"ops_region":"ON-TOR","messages":[],"metadata":{},"status":"dispatched","createdAt":1773976485293,"updatedAt":1774322085293,"_id":"69c35325dec6d4f932a80685","__v":0},{"userId":"69c35325dec6d4f932a8067b","items":[{"productId":"69c35325dec6d4f932a8067e","itemId":"69c35325dec6d4f932a8067e","pricingSnapshot":{"atInstantPrice":19.99,"discountedPercentage":0,"discountBracket":{"initial":0,"final":0},"meta":{"currency":"USD"}},"saveForLater":false,"quantity":2},{"productId":"69c35325dec6d4f932a8067d","itemId":"69c35325dec6d4f932a8067d","pricingSnapshot":{"atInstantPrice":4.99,"discountedPercentage":0,"discountBracket":{"initial":0,"final":0},"meta":{"currency":"USD"}},"saveForLater":true,"quantity":1}],"orderLocation":{"line1":"Cart Address","line2":null,"city":"Mississauga","region":"ON","postalCode":"L5B0E6","country":"Canada"},"deliveryLocation":null,"paymentMethod":null,"salesWindow":null,"ops_region":"ON-TOR","messages":[],"metadata":{},"status":"draft","createdAt":1774401285293,"updatedAt":1774406685293,"_id":"69c35325dec6d4f932a80686","__v":0},{"userId":"69c35325dec6d4f932a8067c","items":[{"productId":"69c35325dec6d4f932a8067f","itemId":"69c35325dec6d4f932a8067f","pricingSnapshot":{"atInstantPrice":19.99,"discountedPercentage":5,"discountBracket":{"initial":0,"final":0},"meta":{"currency":"USD"}},"saveForLater":false,"quantity":10},{"productId":"69c35325dec6d4f932a80680","itemId":"69c35325dec6d4f932a80680","pricingSnapshot":{"atInstantPrice":9.99,"discountedPercentage":0,"discountBracket":{"initial":0,"final":0},"meta":{"currency":"USD"}},"saveForLater":false,"quantity":5}],"orderLocation":{"line1":"10 Past St","line2":null,"city":"Brampton","region":"ON","postalCode":"L6T0A1","country":"Canada","geo":{"type":"Point","coordinates":[-79.7624,43.7315]}},"deliveryLocation":{"line1":"10 Past St","line2":null,"city":"Brampton","region":"ON","postalCode":"L6T0A1","country":"Canada","geo":{"type":"Point","coordinates":[-79.7624,43.7315]}},"paymentMethod":{"type":"card","provider":"stripe","last4":"4242"},"salesWindow":null,"ops_region":"NA","messages":[],"metadata":{},"status":"fulfilled","createdAt":1769224485294,"updatedAt":1771816485294,"_id":"69c35325dec6d4f932a80687","__v":0},{"userId":"69c35325dec6d4f932a8067c","items":[{"productId":"69c35325dec6d4f932a8067d","itemId":"69c35325dec6d4f932a8067d","pricingSnapshot":{"atInstantPrice":29.99,"discountedPercentage":0,"discountBracket":{"initial":0,"final":0},"meta":{"currency":"USD"}},"saveForLater":false,"quantity":3},{"productId":"69c35325dec6d4f932a80680","itemId":"69c35325dec6d4f932a80680","pricingSnapshot":{"atInstantPrice":14.99,"discountedPercentage":0,"discountBracket":{"initial":0,"final":0},"meta":{"currency":"USD"}},"saveForLater":false,"quantity":2}],"orderLocation":{"line1":"200 Commerce Blvd","line2":null,"city":"Toronto","region":"ON","postalCode":"M5V2T6","country":"Canada","geo":{"type":"Point","coordinates":[-79.38,43.65]}},"deliveryLocation":{"line1":"200 Commerce Blvd","line2":null,"city":"Toronto","region":"ON","postalCode":"M5V2T6","country":"Canada","geo":{"type":"Point","coordinates":[-79.38,43.65]}},"paymentMethod":{"type":"card","provider":"stripe","last4":"1111"},"salesWindow":null,"ops_region":"NA","messages":[],"metadata":{},"status":"dispatched","createdAt":1773976485294,"updatedAt":1774322085294,"_id":"69c35325dec6d4f932a80688","__v":0},{"userId":"69c35325dec6d4f932a8067c","items":[{"productId":"69c35325dec6d4f932a8067f","itemId":"69c35325dec6d4f932a8067f","pricingSnapshot":{"atInstantPrice":19.99,"discountedPercentage":0,"discountBracket":{"initial":0,"final":0},"meta":{"currency":"USD"}},"saveForLater":false,"quantity":2},{"productId":"69c35325dec6d4f932a8067e","itemId":"69c35325dec6d4f932a8067e","pricingSnapshot":{"atInstantPrice":4.99,"discountedPercentage":0,"discountBracket":{"initial":0,"final":0},"meta":{"currency":"USD"}},"saveForLater":true,"quantity":1}],"orderLocation":{"line1":"Cart Address","line2":null,"city":"Mississauga","region":"ON","postalCode":"L5B0E6","country":"Canada"},"deliveryLocation":null,"paymentMethod":null,"salesWindow":null,"ops_region":"NA","messages":[],"metadata":{},"status":"draft","createdAt":1774401285294,"updatedAt":1774406685294,"_id":"69c35325dec6d4f932a80689","__v":0}] - doc: {"ordered":false}
+2026-03-25T03:14:45.369Z - mongoose: messages.countDocuments - query: {} - doc: {}
+2026-03-25T03:14:45.390Z - mongoose: messages.insertMany - query: [{"avatar":null,"type":"notification","recipients":{"all":true,"users":[]},"fromUserId":null,"subject":"Welcome to BulkBuy","details":"Welcome! BulkBuy is live. Check out current sales windows and top products.","attachments":[],"ops_region":"global","status":"submitted","replyTo":null,"metadata":{},"internalNotes":"","deleted":false,"_id":"69c35325dec6d4f932a8068c","createdAt":"2026-03-18T03:14:45.388Z","updatedAt":"2026-03-18T03:14:45.388Z","__v":0},{"avatar":null,"type":"order","recipients":{"all":true,"users":[]},"fromUserId":null,"subject":"Your order has been dispatched","details":"Order #BB-1001 has been dispatched and is on its way. Tracking will be available shortly.","attachments":[],"ops_region":"north-america","status":"submitted","replyTo":null,"metadata":{},"internalNotes":"","deleted":false,"_id":"69c35325dec6d4f932a8068d","createdAt":"2026-03-23T03:14:45.388Z","updatedAt":"2026-03-23T03:14:45.388Z","__v":0},{"avatar":null,"type":"email","recipients":{"all":true,"users":[]},"fromUserId":null,"subject":"Issue with your recent payment","details":"We noticed an issue processing your payment. Please update your payment method to avoid delays.","attachments":[],"ops_region":"europe","status":"unread","replyTo":null,"metadata":{},"internalNotes":"","deleted":false,"_id":"69c35325dec6d4f932a8068e","createdAt":"2026-03-24T15:14:45.388Z","updatedAt":"2026-03-24T15:14:45.388Z","__v":0},{"avatar":null,"type":"issue_wall","recipients":{"all":true,"users":[]},"fromUserId":null,"subject":"Request for bulk pricing clarification","details":"Can suppliers clarify the bulk pricing tiers for item X? I need pricing for 500 units.","attachments":[],"ops_region":"africa","status":"submitted","replyTo":null,"metadata":{},"internalNotes":"","deleted":false,"_id":"69c35325dec6d4f932a8068f","createdAt":"2026-03-24T21:14:45.388Z","updatedAt":"2026-03-24T21:14:45.388Z","__v":0},{"avatar":null,"type":"review","recipients":{"all":true,"users":[]},"fromUserId":null,"subject":"New review submitted for your product","details":"A customer submitted a 5-star review for \"Premium Rice 25kg\".","attachments":[],"ops_region":"asia","status":"submitted","replyTo":null,"metadata":{},"internalNotes":"","deleted":false,"_id":"69c35325dec6d4f932a80690","createdAt":"2026-03-25T02:44:45.388Z","updatedAt":"2026-03-25T02:44:45.388Z","__v":0},{"avatar":null,"type":"notification","recipients":{"all":true,"users":[]},"fromUserId":null,"subject":"Draft: Upcoming maintenance","details":"Draft: We plan maintenance next week. Finalize schedule before publishing.","attachments":[],"ops_region":"global","status":"draft","replyTo":null,"metadata":{},"internalNotes":"","deleted":false,"_id":"69c35325dec6d4f932a80691","createdAt":"2026-03-25T03:14:45.388Z","updatedAt":"2026-03-25T03:14:45.388Z","__v":0}] - doc: {"ordered":false}
+2026-03-25T03:14:45.452Z - mongoose: regionmaps.countDocuments - query: {} - doc: {}
+2026-03-25T03:14:45.479Z - mongoose: regionmaps.find - query: {"code":{"$in":["GTA-W","PEEL-E","HAM"]}} - doc: {}
+2026-03-25T03:14:45.516Z - mongoose: regionmaps.insertMany - query: [{"ops_region":"gta-west","code":"GTA-W","name":"Greater Toronto Area West","description":{"subject":"GTA West operations","text":"Operational region covering Brampton, Mississauga and surrounding suburbs.","files":[]},"locations":[{"name":"Brampton Fulfillment Hub","type":"fulfillment_center","description":{"subject":"Main hub","text":"Primary fulfillment and sorting hub for GTA West.","files":[]},"address":{"line1":"123 Commerce St","line2":"Unit 4","city":"Brampton","region":"ON","postalCode":"L6T 0A1","country":"Canada"},"geo":{"type":"Point","coordinates":[-79.7624,43.7315]},"contact":{"phone":"+1-905-555-0101","email":"hub-brampton@bulkbuy.example"},"metadata":{},"locationId":"69c35325dec6d4f932a80696","createdAt":"2026-03-25T03:14:45.515Z","updatedAt":"2026-03-25T03:14:45.515Z"},{"name":"Mississauga Pickup Point","type":"pickup_point","description":{"subject":"Customer pickup","text":"Convenient pickup location near Square One.","files":[]},"address":{"line1":"50 City Centre Dr","line2":"","city":"Mississauga","region":"ON","postalCode":"L5B 2C9","country":"Canada"},"geo":{"type":"Point","coordinates":[-79.6425,43.589]},"contact":{"phone":"+1-905-555-0202","email":"pickup-mississauga@bulkbuy.example"},"metadata":{},"locationId":"69c35325dec6d4f932a80697","createdAt":"2026-03-25T03:14:45.515Z","updatedAt":"2026-03-25T03:14:45.515Z"}],"metadata":{},"_id":"69c35325dec6d4f932a80695","__v":0,"createdAt":"2026-03-25T03:14:45.516Z","updatedAt":"2026-03-25T03:14:45.516Z"}] - doc: {"ordered":false}
+2026-03-25T03:14:45.542Z - mongoose: regionmaps.insertMany - query: [{"ops_region":"peel-east","code":"PEEL-E","name":"Peel East Region","description":{"subject":"Peel East operations","text":"Covers eastern Peel region including Caledon and eastern Brampton.","files":[]},"locations":[{"name":"Caledon Micro Hub","type":"micro_hub","description":{"subject":"Micro hub","text":"Small micro hub for last-mile deliveries.","files":[]},"address":{"line1":"77 Valley Rd","line2":"","city":"Caledon","region":"ON","postalCode":"L7C 0H1","country":"Canada"},"geo":{"type":"Point","coordinates":[-79.9,43.85]},"contact":{"phone":"+1-905-555-0303","email":"hub-caledon@bulkbuy.example"},"metadata":{},"locationId":"69c35325dec6d4f932a8069a","createdAt":"2026-03-25T03:14:45.542Z","updatedAt":"2026-03-25T03:14:45.542Z"}],"metadata":{},"_id":"69c35325dec6d4f932a80699","__v":0,"createdAt":"2026-03-25T03:14:45.542Z","updatedAt":"2026-03-25T03:14:45.542Z"}] - doc: {"ordered":false}
+2026-03-25T03:14:45.577Z - mongoose: regionmaps.insertMany - query: [{"ops_region":"hamilton","code":"HAM","name":"Hamilton Region","description":{"subject":"Hamilton operations","text":"Operations and pickup points across Hamilton and Burlington.","files":[]},"locations":[{"name":"Hamilton Distribution Center","type":"distribution_center","description":{"subject":"Distribution","text":"Primary distribution center for Hamilton region.","files":[]},"address":{"line1":"200 Industrial Pkwy","line2":"","city":"Hamilton","region":"ON","postalCode":"L8H 7K6","country":"Canada"},"geo":{"type":"Point","coordinates":[-79.8662,43.2557]},"contact":{"phone":"+1-905-555-0404","email":"dc-hamilton@bulkbuy.example"},"metadata":{},"locationId":"69c35325dec6d4f932a8069d","createdAt":"2026-03-25T03:14:45.576Z","updatedAt":"2026-03-25T03:14:45.576Z"},{"name":"Burlington Pickup Locker","type":"locker","description":{"subject":"24/7 locker","text":"Secure locker for after-hours pickups.","files":[]},"address":{"line1":"1000 Brant St","line2":"","city":"Burlington","region":"ON","postalCode":"L7R 2G8","country":"Canada"},"geo":{"type":"Point","coordinates":[-79.799,43.3255]},"contact":{"phone":"+1-905-555-0505","email":"locker-burlington@bulkbuy.example"},"metadata":{},"locationId":"69c35325dec6d4f932a8069e","createdAt":"2026-03-25T03:14:45.576Z","updatedAt":"2026-03-25T03:14:45.576Z"}],"metadata":{},"_id":"69c35325dec6d4f932a8069c","__v":0,"createdAt":"2026-03-25T03:14:45.577Z","updatedAt":"2026-03-25T03:14:45.577Z"}] - doc: {"ordered":false}
+2026-03-25T03:14:45.641Z - mongoose: reviews.countDocuments - query: {"deleted":false} - doc: {}
+2026-03-25T03:14:45.662Z - mongoose: reviews.insertMany - query: [{"reviewerId":"69c35325dec6d4f932a806a1","revieweeId":"69c35325dec6d4f932a806a3","productId":"69c35325dec6d4f932a806a4","itemId":"69c35325dec6d4f932a806a6","messageId":null,"rating":5,"ops_region":"NA","status":"submitted","metadata":{},"internalNotes":"Seeded review - high rating","deleted":false,"_id":"69c35325dec6d4f932a806a9","__v":0,"createdAt":"2026-03-25T03:14:45.661Z","updatedAt":"2026-03-25T03:14:45.661Z"},{"reviewerId":"69c35325dec6d4f932a806a2","revieweeId":"69c35325dec6d4f932a806a3","productId":"69c35325dec6d4f932a806a5","itemId":"69c35325dec6d4f932a806a7","messageId":null,"rating":4,"ops_region":"NA","status":"draft","metadata":{},"internalNotes":"Seeded review - draft","deleted":false,"_id":"69c35325dec6d4f932a806aa","__v":0,"createdAt":"2026-03-25T03:14:45.662Z","updatedAt":"2026-03-25T03:14:45.662Z"},{"reviewerId":"69c35325dec6d4f932a806a1","revieweeId":"69c35325dec6d4f932a806a3","productId":null,"itemId":null,"messageId":null,"rating":5,"ops_region":"NA","status":"submitted","metadata":{},"internalNotes":"Seeded supplier review","deleted":false,"_id":"69c35325dec6d4f932a806ab","__v":0,"createdAt":"2026-03-25T03:14:45.662Z","updatedAt":"2026-03-25T03:14:45.662Z"}] - doc: {"ordered":false}
+2026-03-25T03:14:45.709Z - mongoose: aggregations.countDocuments - query: {} - doc: {}
+2026-03-25T03:14:45.729Z - mongoose: aggregations.insertMany - query: [{"itemDtos":[{"itemId":"69c35325dec6d4f932a806b1","pricingSnapshot":{"atInstantPrice":0,"discountedPercentage":0,"discountBracket":{"initial":0,"final":0}},"supplierId":"69c35325dec6d4f932a806b5","salesWindow":[{"from":1769224485727,"to":1771816485727}]},{"itemId":"69c35325dec6d4f932a806b2","pricingSnapshot":{"atInstantPrice":0,"discountedPercentage":0,"discountBracket":{"initial":0,"final":0}},"supplierId":"69c35325dec6d4f932a806b6","salesWindow":[{"from":1769224485727,"to":1771816485727}]}],"orders":["69c35325dec6d4f932a806b7"],"ops_region":"NA","status":"processed","metadata":{},"createdAt":1772248485727,"updatedAt":1772680485727,"_id":"69c35325dec6d4f932a806b9","__v":0},{"itemDtos":[{"itemId":"69c35325dec6d4f932a806b1","pricingSnapshot":{"atInstantPrice":0,"discountedPercentage":0,"discountBracket":{"initial":0,"final":0}},"supplierId":"69c35325dec6d4f932a806b5","salesWindow":[{"from":1774235685727,"to":1774840485727}]},{"itemId":"69c35325dec6d4f932a806b3","pricingSnapshot":{"atInstantPrice":0,"discountedPercentage":0,"discountBracket":{"initial":0,"final":0}},"supplierId":"69c35325dec6d4f932a806b6","salesWindow":[{"from":1774235685727,"to":1774840485727}]}],"orders":["69c35325dec6d4f932a806b8"],"ops_region":"NA","status":"in_process","metadata":{},"createdAt":1774322085727,"updatedAt":1774365285727,"_id":"69c35325dec6d4f932a806ba","__v":0},{"itemDtos":[{"itemId":"69c35325dec6d4f932a806b4","pricingSnapshot":{"atInstantPrice":0,"discountedPercentage":0,"discountBracket":{"initial":0,"final":0}},"supplierId":"69c35325dec6d4f932a806b5","salesWindow":[{"from":1775272485727,"to":1776136485727}]},{"itemId":"69c35325dec6d4f932a806b2","pricingSnapshot":{"atInstantPrice":0,"discountedPercentage":0,"discountBracket":{"initial":0,"final":0}},"supplierId":"69c35325dec6d4f932a806b6","salesWindow":[{"from":1775272485727,"to":1776136485727}]}],"orders":[],"ops_region":"NA","status":"pending","metadata":{},"createdAt":1774408485727,"updatedAt":1774408485727,"_id":"69c35325dec6d4f932a806bb","__v":0}] - doc: {"ordered":false}
+2026-03-25T03:14:45.756Z - WARN - [seed-index] 23 placeholders remain unresolved after best-effort resolution.
+2026-03-25T03:14:45.800Z - {
+  "success": true,
+  "summary": {
+    "startedAt": "2026-03-25T03:14:45.799Z",
+    "seedOrder": [
+      "users",
+      "configs",
+      "items",
+      "products",
+      "salesWindows",
+      "supplies",
+      "orders",
+      "messages",
+      "regionMaps",
+      "reviews",
+      "aggregations"
+    ],
+    "seedResults": [
+      {
+        "name": "users",
+        "createdCount": 5,
+        "providedKeys": 7,
+        "missingCount": 2,
+        "skipped": false
+      },
+      {
+        "name": "configs",
+        "createdCount": 0,
+        "providedKeys": 0,
+        "missingCount": 0,
+        "skipped": true
+      },
+      {
+        "name": "items",
+        "createdCount": 20,
+        "providedKeys": 1,
+        "missingCount": 0,
+        "skipped": false
+      },
+      {
+        "name": "products",
+        "createdCount": 0,
+        "providedKeys": 1,
+        "missingCount": 0,
+        "skipped": false
+      },
+      {
+        "name": "salesWindows",
+        "createdCount": 3,
+        "providedKeys": 3,
+        "missingCount": 3,
+        "skipped": false
+      },
+      {
+        "name": "supplies",
+        "createdCount": 3,
+        "providedKeys": 3,
+        "missingCount": 3,
+        "skipped": false
+      },
+      {
+        "name": "orders",
+        "createdCount": 9,
+        "providedKeys": 9,
+        "missingCount": 9,
+        "skipped": false
+      },
+      {
+        "name": "messages",
+        "createdCount": 6,
+        "providedKeys": 0,
+        "missingCount": 0,
+        "skipped": false
+      },
+      {
+        "name": "regionMaps",
+        "createdCount": 3,
+        "providedKeys": 0,
+        "missingCount": 0,
+        "skipped": false
+      },
+      {
+        "name": "reviews",
+        "createdCount": 3,
+        "providedKeys": 3,
+        "missingCount": 3,
+        "skipped": false
+      },
+      {
+        "name": "aggregations",
+        "createdCount": 3,
+        "providedKeys": 3,
+        "missingCount": 3,
+        "skipped": false
+      }
+    ],
+    "provided": {
+      "supplier:supplier1@bulkbuy.example.com": [
+        "69c35323dec6d4f932a80604"
+      ],
+      "supplier:supplier2@bulkbuy.example.com": [
+        "69c35324dec6d4f932a80616"
+      ],
+      "customer:customer1@bulkbuy.example.com": [
+        "69c35324dec6d4f932a80628"
+      ],
+      "customer:customer2@bulkbuy.example.com": [
+        "69c35324dec6d4f932a80630"
+      ],
+      "administrator:admin@bulkbuy.example.com": [
+        "69c35324dec6d4f932a80635"
+      ],
+      "items": [
+        "69c35323dec6d4f932a80604",
+        "69c35324dec6d4f932a80616",
+        "69c35324dec6d4f932a80628",
+        "69c35324dec6d4f932a80630",
+        "69c35324dec6d4f932a80635",
+        "69c35324dec6d4f932a8063c",
+        "69c35324dec6d4f932a8063d",
+        "69c35324dec6d4f932a8063e",
+        "69c35324dec6d4f932a8063f",
+        "69c35324dec6d4f932a80640",
+        "69c35324dec6d4f932a80641",
+        "69c35324dec6d4f932a80642",
+        "69c35324dec6d4f932a80643",
+        "69c35324dec6d4f932a80644",
+        "69c35324dec6d4f932a80645",
+        "69c35324dec6d4f932a80646",
+        "69c35324dec6d4f932a80647",
+        "69c35324dec6d4f932a80648",
+        "69c35324dec6d4f932a80649",
+        "69c35324dec6d4f932a8064a",
+        "69c35324dec6d4f932a8064b",
+        "69c35324dec6d4f932a8064c",
+        "69c35324dec6d4f932a8064d",
+        "69c35324dec6d4f932a8064e",
+        "69c35324dec6d4f932a8064f"
+      ],
+      "itemsMap": [
+        "69c35323dec6d4f932a80604",
+        "69c35324dec6d4f932a80616",
+        "69c35324dec6d4f932a80628",
+        "69c35324dec6d4f932a80630",
+        "69c35324dec6d4f932a80635"
+      ],
+      "itemsMapMap": {
+        "supplier:supplier1@bulkbuy.example.com": "69c35323dec6d4f932a80604",
+        "supplier:supplier2@bulkbuy.example.com": "69c35324dec6d4f932a80616",
+        "customer:customer1@bulkbuy.example.com": "69c35324dec6d4f932a80628",
+        "customer:customer2@bulkbuy.example.com": "69c35324dec6d4f932a80630",
+        "administrator:admin@bulkbuy.example.com": "69c35324dec6d4f932a80635"
+      },
+      "products": [],
+      "69c35325dec6d4f932a80661": [
+        "saleswindow.past",
+        "69c35325dec6d4f932a8065a",
+        "69c35325dec6d4f932a8065d"
+      ],
+      "69c35325dec6d4f932a80661Map": {
+        "tag": "saleswindow.past",
+        "productPlaceholders": "69c35325dec6d4f932a8065a",
+        "itemPlaceholders": "69c35325dec6d4f932a8065d"
+      },
+      "69c35325dec6d4f932a80662": [
+        "saleswindow.current",
+        "69c35325dec6d4f932a8065a",
+        "69c35325dec6d4f932a8065d"
+      ],
+      "69c35325dec6d4f932a80662Map": {
+        "tag": "saleswindow.current",
+        "productPlaceholders": "69c35325dec6d4f932a8065a",
+        "itemPlaceholders": "69c35325dec6d4f932a8065d"
+      },
+      "69c35325dec6d4f932a80663": [
+        "saleswindow.future",
+        "69c35325dec6d4f932a8065b",
+        "69c35325dec6d4f932a8065f"
+      ],
+      "69c35325dec6d4f932a80663Map": {
+        "tag": "saleswindow.future",
+        "productPlaceholders": "69c35325dec6d4f932a8065b",
+        "itemPlaceholders": "69c35325dec6d4f932a8065f"
+      },
+      "69c35325dec6d4f932a8066c": [
+        "69c35325dec6d4f932a80666",
+        "69c35325dec6d4f932a80669"
+      ],
+      "69c35325dec6d4f932a8066cMap": {
+        "supplierPlaceholder": "69c35325dec6d4f932a80666",
+        "itemPlaceholders": "69c35325dec6d4f932a80669"
+      },
+      "69c35325dec6d4f932a80671": [
+        "69c35325dec6d4f932a80667",
+        "69c35325dec6d4f932a8066b"
+      ],
+      "69c35325dec6d4f932a80671Map": {
+        "supplierPlaceholder": "69c35325dec6d4f932a80667",
+        "itemPlaceholders": "69c35325dec6d4f932a8066b"
+      },
+      "69c35325dec6d4f932a80674": [
+        "69c35325dec6d4f932a80666",
+        "69c35325dec6d4f932a8066a"
+      ],
+      "69c35325dec6d4f932a80674Map": {
+        "supplierPlaceholder": "69c35325dec6d4f932a80666",
+        "itemPlaceholders": "69c35325dec6d4f932a8066a"
+      },
+      "69c35325dec6d4f932a80681": [
+        "69c35325dec6d4f932a8067a",
+        "69c35325dec6d4f932a8067d"
+      ],
+      "69c35325dec6d4f932a80681Map": {
+        "userPlaceholder": "69c35325dec6d4f932a8067a",
+        "itemPlaceholders": "69c35325dec6d4f932a8067d"
+      },
+      "69c35325dec6d4f932a80682": [
+        "69c35325dec6d4f932a8067a",
+        "69c35325dec6d4f932a8067f"
+      ],
+      "69c35325dec6d4f932a80682Map": {
+        "userPlaceholder": "69c35325dec6d4f932a8067a",
+        "itemPlaceholders": "69c35325dec6d4f932a8067f"
+      },
+      "69c35325dec6d4f932a80683": [
+        "69c35325dec6d4f932a8067a",
+        "69c35325dec6d4f932a8067d"
+      ],
+      "69c35325dec6d4f932a80683Map": {
+        "userPlaceholder": "69c35325dec6d4f932a8067a",
+        "itemPlaceholders": "69c35325dec6d4f932a8067d"
+      },
+      "69c35325dec6d4f932a80684": [
+        "69c35325dec6d4f932a8067b",
+        "69c35325dec6d4f932a8067e"
+      ],
+      "69c35325dec6d4f932a80684Map": {
+        "userPlaceholder": "69c35325dec6d4f932a8067b",
+        "itemPlaceholders": "69c35325dec6d4f932a8067e"
+      },
+      "69c35325dec6d4f932a80685": [
+        "69c35325dec6d4f932a8067b",
+        "69c35325dec6d4f932a80680"
+      ],
+      "69c35325dec6d4f932a80685Map": {
+        "userPlaceholder": "69c35325dec6d4f932a8067b",
+        "itemPlaceholders": "69c35325dec6d4f932a80680"
+      },
+      "69c35325dec6d4f932a80686": [
+        "69c35325dec6d4f932a8067b",
+        "69c35325dec6d4f932a8067e"
+      ],
+      "69c35325dec6d4f932a80686Map": {
+        "userPlaceholder": "69c35325dec6d4f932a8067b",
+        "itemPlaceholders": "69c35325dec6d4f932a8067e"
+      },
+      "69c35325dec6d4f932a80687": [
+        "69c35325dec6d4f932a8067c",
+        "69c35325dec6d4f932a8067f"
+      ],
+      "69c35325dec6d4f932a80687Map": {
+        "userPlaceholder": "69c35325dec6d4f932a8067c",
+        "itemPlaceholders": "69c35325dec6d4f932a8067f"
+      },
+      "69c35325dec6d4f932a80688": [
+        "69c35325dec6d4f932a8067c",
+        "69c35325dec6d4f932a8067d"
+      ],
+      "69c35325dec6d4f932a80688Map": {
+        "userPlaceholder": "69c35325dec6d4f932a8067c",
+        "itemPlaceholders": "69c35325dec6d4f932a8067d"
+      },
+      "69c35325dec6d4f932a80689": [
+        "69c35325dec6d4f932a8067c",
+        "69c35325dec6d4f932a8067f"
+      ],
+      "69c35325dec6d4f932a80689Map": {
+        "userPlaceholder": "69c35325dec6d4f932a8067c",
+        "itemPlaceholders": "69c35325dec6d4f932a8067f"
+      },
+      "69c35325dec6d4f932a806a9": [
+        "69c35325dec6d4f932a806a1",
+        "69c35325dec6d4f932a806a3",
+        "69c35325dec6d4f932a806a4",
+        "69c35325dec6d4f932a806a6",
+        "69c35325dec6d4f932a806a8"
+      ],
+      "69c35325dec6d4f932a806a9Map": {
+        "reviewerPlaceholder": "69c35325dec6d4f932a806a1",
+        "revieweePlaceholder": "69c35325dec6d4f932a806a3",
+        "productPlaceholder": "69c35325dec6d4f932a806a4",
+        "itemPlaceholder": "69c35325dec6d4f932a806a6",
+        "orderPlaceholder": "69c35325dec6d4f932a806a8"
+      },
+      "69c35325dec6d4f932a806aa": [],
+      "reviewerPlaceholder": [
+        "69c35325dec6d4f932a806a2",
+        "69c35325dec6d4f932a806a1"
+      ],
+      "revieweePlaceholder": [
+        "69c35325dec6d4f932a806a3"
+      ],
+      "productPlaceholder": [
+        "69c35325dec6d4f932a806a5"
+      ],
+      "itemPlaceholder": [
+        "69c35325dec6d4f932a806a7"
+      ],
+      "orderPlaceholder": [],
+      "69c35325dec6d4f932a806ab": [],
+      "69c35325dec6d4f932a806b9": [],
+      "tag": [],
+      "salesWindowPlaceholder": [],
+      "itemPlaceholders": [
+        "69c35325dec6d4f932a806b1",
+        "69c35325dec6d4f932a806b2",
+        "69c35325dec6d4f932a806b3",
+        "69c35325dec6d4f932a806b4"
+      ],
+      "supplierPlaceholders": [
+        "69c35325dec6d4f932a806b5",
+        "69c35325dec6d4f932a806b6"
+      ],
+      "69c35325dec6d4f932a806ba": [],
+      "69c35325dec6d4f932a806bb": []
+    },
+    "perSeedProvided": {
+      "users": {
+        "supplier:supplier1@bulkbuy.example.com": "69c35323dec6d4f932a80604",
+        "supplier:supplier2@bulkbuy.example.com": "69c35324dec6d4f932a80616",
+        "customer:customer1@bulkbuy.example.com": "69c35324dec6d4f932a80628",
+        "customer:customer2@bulkbuy.example.com": "69c35324dec6d4f932a80630",
+        "administrator:admin@bulkbuy.example.com": "69c35324dec6d4f932a80635"
+      },
+      "items": {
+        "items": [
+          "69c35324dec6d4f932a8063c",
+          "69c35324dec6d4f932a8063d",
+          "69c35324dec6d4f932a8063e",
+          "69c35324dec6d4f932a8063f",
+          "69c35324dec6d4f932a80640",
+          "69c35324dec6d4f932a80641",
+          "69c35324dec6d4f932a80642",
+          "69c35324dec6d4f932a80643",
+          "69c35324dec6d4f932a80644",
+          "69c35324dec6d4f932a80645",
+          "69c35324dec6d4f932a80646",
+          "69c35324dec6d4f932a80647",
+          "69c35324dec6d4f932a80648",
+          "69c35324dec6d4f932a80649",
+          "69c35324dec6d4f932a8064a",
+          "69c35324dec6d4f932a8064b",
+          "69c35324dec6d4f932a8064c",
+          "69c35324dec6d4f932a8064d",
+          "69c35324dec6d4f932a8064e",
+          "69c35324dec6d4f932a8064f"
+        ]
+      },
+      "products": {
+        "products": []
+      },
+      "salesWindows": {
+        "69c35325dec6d4f932a80661": {
+          "tag": "saleswindow.past",
+          "productPlaceholders": [
+            "69c35325dec6d4f932a8065a",
+            "69c35325dec6d4f932a8065b"
+          ],
+          "itemPlaceholders": [
+            "69c35325dec6d4f932a8065d",
+            "69c35325dec6d4f932a8065e",
+            "69c35325dec6d4f932a8065f"
+          ]
+        },
+        "69c35325dec6d4f932a80662": {
+          "tag": "saleswindow.current",
+          "productPlaceholders": [
+            "69c35325dec6d4f932a8065a",
+            "69c35325dec6d4f932a8065c"
+          ],
+          "itemPlaceholders": [
+            "69c35325dec6d4f932a8065d",
+            "69c35325dec6d4f932a80660",
+            "69c35325dec6d4f932a8065e"
+          ]
+        },
+        "69c35325dec6d4f932a80663": {
+          "tag": "saleswindow.future",
+          "productPlaceholders": [
+            "69c35325dec6d4f932a8065b",
+            "69c35325dec6d4f932a8065c"
+          ],
+          "itemPlaceholders": [
+            "69c35325dec6d4f932a8065f",
+            "69c35325dec6d4f932a80660",
+            "69c35325dec6d4f932a8065d"
+          ]
+        }
+      },
+      "supplies": {
+        "69c35325dec6d4f932a8066c": {
+          "supplierPlaceholder": "69c35325dec6d4f932a80666",
+          "itemPlaceholders": [
+            "69c35325dec6d4f932a80669",
+            "69c35325dec6d4f932a8066a"
+          ]
+        },
+        "69c35325dec6d4f932a80671": {
+          "supplierPlaceholder": "69c35325dec6d4f932a80667",
+          "itemPlaceholders": [
+            "69c35325dec6d4f932a8066b"
+          ]
+        },
+        "69c35325dec6d4f932a80674": {
+          "supplierPlaceholder": "69c35325dec6d4f932a80666",
+          "itemPlaceholders": [
+            "69c35325dec6d4f932a8066a"
+          ]
+        }
+      },
+      "orders": {
+        "69c35325dec6d4f932a80681": {
+          "userPlaceholder": "69c35325dec6d4f932a8067a",
+          "itemPlaceholders": [
+            "69c35325dec6d4f932a8067d",
+            "69c35325dec6d4f932a8067e"
+          ]
+        },
+        "69c35325dec6d4f932a80682": {
+          "userPlaceholder": "69c35325dec6d4f932a8067a",
+          "itemPlaceholders": [
+            "69c35325dec6d4f932a8067f",
+            "69c35325dec6d4f932a8067e"
+          ]
+        },
+        "69c35325dec6d4f932a80683": {
+          "userPlaceholder": "69c35325dec6d4f932a8067a",
+          "itemPlaceholders": [
+            "69c35325dec6d4f932a8067d",
+            "69c35325dec6d4f932a80680"
+          ]
+        },
+        "69c35325dec6d4f932a80684": {
+          "userPlaceholder": "69c35325dec6d4f932a8067b",
+          "itemPlaceholders": [
+            "69c35325dec6d4f932a8067e",
+            "69c35325dec6d4f932a8067f"
+          ]
+        },
+        "69c35325dec6d4f932a80685": {
+          "userPlaceholder": "69c35325dec6d4f932a8067b",
+          "itemPlaceholders": [
+            "69c35325dec6d4f932a80680",
+            "69c35325dec6d4f932a8067f"
+          ]
+        },
+        "69c35325dec6d4f932a80686": {
+          "userPlaceholder": "69c35325dec6d4f932a8067b",
+          "itemPlaceholders": [
+            "69c35325dec6d4f932a8067e",
+            "69c35325dec6d4f932a8067d"
+          ]
+        },
+        "69c35325dec6d4f932a80687": {
+          "userPlaceholder": "69c35325dec6d4f932a8067c",
+          "itemPlaceholders": [
+            "69c35325dec6d4f932a8067f",
+            "69c35325dec6d4f932a80680"
+          ]
+        },
+        "69c35325dec6d4f932a80688": {
+          "userPlaceholder": "69c35325dec6d4f932a8067c",
+          "itemPlaceholders": [
+            "69c35325dec6d4f932a8067d",
+            "69c35325dec6d4f932a80680"
+          ]
+        },
+        "69c35325dec6d4f932a80689": {
+          "userPlaceholder": "69c35325dec6d4f932a8067c",
+          "itemPlaceholders": [
+            "69c35325dec6d4f932a8067f",
+            "69c35325dec6d4f932a8067e"
+          ]
+        }
+      },
+      "messages": {},
+      "regionMaps": {},
+      "reviews": {
+        "69c35325dec6d4f932a806a9": {
+          "reviewerPlaceholder": "69c35325dec6d4f932a806a1",
+          "revieweePlaceholder": "69c35325dec6d4f932a806a3",
+          "productPlaceholder": "69c35325dec6d4f932a806a4",
+          "itemPlaceholder": "69c35325dec6d4f932a806a6",
+          "orderPlaceholder": "69c35325dec6d4f932a806a8"
+        },
+        "69c35325dec6d4f932a806aa": {
+          "reviewerPlaceholder": "69c35325dec6d4f932a806a2",
+          "revieweePlaceholder": "69c35325dec6d4f932a806a3",
+          "productPlaceholder": "69c35325dec6d4f932a806a5",
+          "itemPlaceholder": "69c35325dec6d4f932a806a7",
+          "orderPlaceholder": null
+        },
+        "69c35325dec6d4f932a806ab": {
+          "reviewerPlaceholder": "69c35325dec6d4f932a806a1",
+          "revieweePlaceholder": "69c35325dec6d4f932a806a3",
+          "productPlaceholder": null,
+          "itemPlaceholder": null,
+          "orderPlaceholder": null
+        }
+      },
+      "aggregations": {
+        "69c35325dec6d4f932a806b9": {
+          "tag": null,
+          "salesWindowPlaceholder": null,
+          "itemPlaceholders": [
+            "69c35325dec6d4f932a806b1",
+            "69c35325dec6d4f932a806b2"
+          ],
+          "supplierPlaceholders": [
+            "69c35325dec6d4f932a806b5",
+            "69c35325dec6d4f932a806b6"
+          ]
+        },
+        "69c35325dec6d4f932a806ba": {
+          "tag": null,
+          "salesWindowPlaceholder": null,
+          "itemPlaceholders": [
+            "69c35325dec6d4f932a806b1",
+            "69c35325dec6d4f932a806b3"
+          ],
+          "supplierPlaceholders": [
+            "69c35325dec6d4f932a806b5",
+            "69c35325dec6d4f932a806b6"
+          ]
+        },
+        "69c35325dec6d4f932a806bb": {
+          "tag": null,
+          "salesWindowPlaceholder": null,
+          "itemPlaceholders": [
+            "69c35325dec6d4f932a806b4",
+            "69c35325dec6d4f932a806b2"
+          ],
+          "supplierPlaceholders": [
+            "69c35325dec6d4f932a806b5",
+            "69c35325dec6d4f932a806b6"
+          ]
+        }
+      }
+    },
+    "missing": [
+      {
+        "type": "supplier.allowedSupplyItems",
+        "userId": "69c35323dec6d4f932a80604",
+        "note": "Populate metadata.AllowedSupplyItems with item _ids once items are seeded",
+        "placeholderSkus": [],
+        "seedName": "users"
+      },
+      {
+        "type": "supplier.allowedSupplyItems",
+        "userId": "69c35324dec6d4f932a80616",
+        "note": "Populate metadata.AllowedSupplyItems with item _ids once items are seeded",
+        "placeholderSkus": [],
+        "seedName": "users"
+      },
+      {
+        "type": "saleswindow.placeholders",
+        "salesWindowId": "69c35325dec6d4f932a80661",
+        "tag": "saleswindow.past",
+        "productPlaceholders": [
+          "69c35325dec6d4f932a8065a",
+          "69c35325dec6d4f932a8065b"
+        ],
+        "itemPlaceholders": [
+          "69c35325dec6d4f932a8065d",
+          "69c35325dec6d4f932a8065e",
+          "69c35325dec6d4f932a8065f"
+        ],
+        "note": "Replace productPlaceholders and itemPlaceholders with real Product._id and Item._id values once those seeds run",
+        "seedName": "salesWindows"
+      },
+      {
+        "type": "saleswindow.placeholders",
+        "salesWindowId": "69c35325dec6d4f932a80662",
+        "tag": "saleswindow.current",
+        "productPlaceholders": [
+          "69c35325dec6d4f932a8065a",
+          "69c35325dec6d4f932a8065c"
+        ],
+        "itemPlaceholders": [
+          "69c35325dec6d4f932a8065d",
+          "69c35325dec6d4f932a80660",
+          "69c35325dec6d4f932a8065e"
+        ],
+        "note": "Replace productPlaceholders and itemPlaceholders with real Product._id and Item._id values once those seeds run",
+        "seedName": "salesWindows"
+      },
+      {
+        "type": "saleswindow.placeholders",
+        "salesWindowId": "69c35325dec6d4f932a80663",
+        "tag": "saleswindow.future",
+        "productPlaceholders": [
+          "69c35325dec6d4f932a8065b",
+          "69c35325dec6d4f932a8065c"
+        ],
+        "itemPlaceholders": [
+          "69c35325dec6d4f932a8065f",
+          "69c35325dec6d4f932a80660",
+          "69c35325dec6d4f932a8065d"
+        ],
+        "note": "Replace productPlaceholders and itemPlaceholders with real Product._id and Item._id values once those seeds run",
+        "seedName": "salesWindows"
+      },
+      {
+        "type": "supply.placeholders",
+        "supplyId": "69c35325dec6d4f932a8066c",
+        "supplierPlaceholder": "69c35325dec6d4f932a80666",
+        "itemPlaceholders": [
+          "69c35325dec6d4f932a80669",
+          "69c35325dec6d4f932a8066a"
+        ],
+        "note": "Replace supplierPlaceholder and itemPlaceholders with real User._id and Item._id values once those seeds run",
+        "seedName": "supplies"
+      },
+      {
+        "type": "supply.placeholders",
+        "supplyId": "69c35325dec6d4f932a80671",
+        "supplierPlaceholder": "69c35325dec6d4f932a80667",
+        "itemPlaceholders": [
+          "69c35325dec6d4f932a8066b"
+        ],
+        "note": "Replace supplierPlaceholder and itemPlaceholders with real User._id and Item._id values once those seeds run",
+        "seedName": "supplies"
+      },
+      {
+        "type": "supply.placeholders",
+        "supplyId": "69c35325dec6d4f932a80674",
+        "supplierPlaceholder": "69c35325dec6d4f932a80666",
+        "itemPlaceholders": [
+          "69c35325dec6d4f932a8066a"
+        ],
+        "note": "Replace supplierPlaceholder and itemPlaceholders with real User._id and Item._id values once those seeds run",
+        "seedName": "supplies"
+      },
+      {
+        "type": "order.placeholders",
+        "orderId": "69c35325dec6d4f932a80681",
+        "userPlaceholder": "69c35325dec6d4f932a8067a",
+        "itemPlaceholders": [
+          "69c35325dec6d4f932a8067d",
+          "69c35325dec6d4f932a8067e"
+        ],
+        "note": "Replace userPlaceholder with real User._id and itemPlaceholders with Item._id values once those seeds run",
+        "seedName": "orders"
+      },
+      {
+        "type": "order.placeholders",
+        "orderId": "69c35325dec6d4f932a80682",
+        "userPlaceholder": "69c35325dec6d4f932a8067a",
+        "itemPlaceholders": [
+          "69c35325dec6d4f932a8067f",
+          "69c35325dec6d4f932a8067e"
+        ],
+        "note": "Replace userPlaceholder with real User._id and itemPlaceholders with Item._id values once those seeds run",
+        "seedName": "orders"
+      },
+      {
+        "type": "order.placeholders",
+        "orderId": "69c35325dec6d4f932a80683",
+        "userPlaceholder": "69c35325dec6d4f932a8067a",
+        "itemPlaceholders": [
+          "69c35325dec6d4f932a8067d",
+          "69c35325dec6d4f932a80680"
+        ],
+        "note": "Replace userPlaceholder with real User._id and itemPlaceholders with Item._id values once those seeds run",
+        "seedName": "orders"
+      },
+      {
+        "type": "order.placeholders",
+        "orderId": "69c35325dec6d4f932a80684",
+        "userPlaceholder": "69c35325dec6d4f932a8067b",
+        "itemPlaceholders": [
+          "69c35325dec6d4f932a8067e",
+          "69c35325dec6d4f932a8067f"
+        ],
+        "note": "Replace userPlaceholder with real User._id and itemPlaceholders with Item._id values once those seeds run",
+        "seedName": "orders"
+      },
+      {
+        "type": "order.placeholders",
+        "orderId": "69c35325dec6d4f932a80685",
+        "userPlaceholder": "69c35325dec6d4f932a8067b",
+        "itemPlaceholders": [
+          "69c35325dec6d4f932a80680",
+          "69c35325dec6d4f932a8067f"
+        ],
+        "note": "Replace userPlaceholder with real User._id and itemPlaceholders with Item._id values once those seeds run",
+        "seedName": "orders"
+      },
+      {
+        "type": "order.placeholders",
+        "orderId": "69c35325dec6d4f932a80686",
+        "userPlaceholder": "69c35325dec6d4f932a8067b",
+        "itemPlaceholders": [
+          "69c35325dec6d4f932a8067e",
+          "69c35325dec6d4f932a8067d"
+        ],
+        "note": "Replace userPlaceholder with real User._id and itemPlaceholders with Item._id values once those seeds run",
+        "seedName": "orders"
+      },
+      {
+        "type": "order.placeholders",
+        "orderId": "69c35325dec6d4f932a80687",
+        "userPlaceholder": "69c35325dec6d4f932a8067c",
+        "itemPlaceholders": [
+          "69c35325dec6d4f932a8067f",
+          "69c35325dec6d4f932a80680"
+        ],
+        "note": "Replace userPlaceholder with real User._id and itemPlaceholders with Item._id values once those seeds run",
+        "seedName": "orders"
+      },
+      {
+        "type": "order.placeholders",
+        "orderId": "69c35325dec6d4f932a80688",
+        "userPlaceholder": "69c35325dec6d4f932a8067c",
+        "itemPlaceholders": [
+          "69c35325dec6d4f932a8067d",
+          "69c35325dec6d4f932a80680"
+        ],
+        "note": "Replace userPlaceholder with real User._id and itemPlaceholders with Item._id values once those seeds run",
+        "seedName": "orders"
+      },
+      {
+        "type": "order.placeholders",
+        "orderId": "69c35325dec6d4f932a80689",
+        "userPlaceholder": "69c35325dec6d4f932a8067c",
+        "itemPlaceholders": [
+          "69c35325dec6d4f932a8067f",
+          "69c35325dec6d4f932a8067e"
+        ],
+        "note": "Replace userPlaceholder with real User._id and itemPlaceholders with Item._id values once those seeds run",
+        "seedName": "orders"
+      },
+      {
+        "type": "review.placeholders",
+        "reviewId": "69c35325dec6d4f932a806a9",
+        "placeholders": [
+          {
+            "key": "reviewerPlaceholder",
+            "placeholder": "69c35325dec6d4f932a806a1"
+          },
+          {
+            "key": "revieweePlaceholder",
+            "placeholder": "69c35325dec6d4f932a806a3"
+          },
+          {
+            "key": "productPlaceholder",
+            "placeholder": "69c35325dec6d4f932a806a4"
+          },
+          {
+            "key": "itemPlaceholder",
+            "placeholder": "69c35325dec6d4f932a806a6"
+          },
+          {
+            "key": "orderPlaceholder",
+            "placeholder": "69c35325dec6d4f932a806a8"
+          }
+        ],
+        "note": "Replace placeholders with real User._id, Product._id, Item._id, Order._id values once those seeds run",
+        "seedName": "reviews"
+      },
+      {
+        "type": "review.placeholders",
+        "reviewId": "69c35325dec6d4f932a806aa",
+        "placeholders": [
+          {
+            "key": "reviewerPlaceholder",
+            "placeholder": "69c35325dec6d4f932a806a2"
+          },
+          {
+            "key": "revieweePlaceholder",
+            "placeholder": "69c35325dec6d4f932a806a3"
+          },
+          {
+            "key": "productPlaceholder",
+            "placeholder": "69c35325dec6d4f932a806a5"
+          },
+          {
+            "key": "itemPlaceholder",
+            "placeholder": "69c35325dec6d4f932a806a7"
+          }
+        ],
+        "note": "Replace placeholders with real User._id, Product._id, Item._id, Order._id values once those seeds run",
+        "seedName": "reviews"
+      },
+      {
+        "type": "review.placeholders",
+        "reviewId": "69c35325dec6d4f932a806ab",
+        "placeholders": [
+          {
+            "key": "reviewerPlaceholder",
+            "placeholder": "69c35325dec6d4f932a806a1"
+          },
+          {
+            "key": "revieweePlaceholder",
+            "placeholder": "69c35325dec6d4f932a806a3"
+          }
+        ],
+        "note": "Replace placeholders with real User._id, Product._id, Item._id, Order._id values once those seeds run",
+        "seedName": "reviews"
+      },
+      {
+        "type": "aggregation.placeholders",
+        "aggregationId": "69c35325dec6d4f932a806b9",
+        "salesWindowPlaceholder": null,
+        "itemPlaceholders": [
+          "69c35325dec6d4f932a806b1",
+          "69c35325dec6d4f932a806b2"
+        ],
+        "supplierPlaceholders": [
+          "69c35325dec6d4f932a806b5",
+          "69c35325dec6d4f932a806b6"
+        ],
+        "note": "Replace placeholders with real SalesWindow._id, Item._id and User._id values once those seeds run",
+        "seedName": "aggregations"
+      },
+      {
+        "type": "aggregation.placeholders",
+        "aggregationId": "69c35325dec6d4f932a806ba",
+        "salesWindowPlaceholder": null,
+        "itemPlaceholders": [
+          "69c35325dec6d4f932a806b1",
+          "69c35325dec6d4f932a806b3"
+        ],
+        "supplierPlaceholders": [
+          "69c35325dec6d4f932a806b5",
+          "69c35325dec6d4f932a806b6"
+        ],
+        "note": "Replace placeholders with real SalesWindow._id, Item._id and User._id values once those seeds run",
+        "seedName": "aggregations"
+      },
+      {
+        "type": "aggregation.placeholders",
+        "aggregationId": "69c35325dec6d4f932a806bb",
+        "salesWindowPlaceholder": null,
+        "itemPlaceholders": [
+          "69c35325dec6d4f932a806b4",
+          "69c35325dec6d4f932a806b2"
+        ],
+        "supplierPlaceholders": [
+          "69c35325dec6d4f932a806b5",
+          "69c35325dec6d4f932a806b6"
+        ],
+        "note": "Replace placeholders with real SalesWindow._id, Item._id and User._id values once those seeds run",
+        "seedName": "aggregations"
+      }
+    ],
+    "resolved": [],
+    "unresolved": [
+      {
+        "type": "supplier.allowedSupplyItems",
+        "userId": "69c35323dec6d4f932a80604",
+        "note": "Populate metadata.AllowedSupplyItems with item _ids once items are seeded",
+        "placeholderSkus": [],
+        "seedName": "users"
+      },
+      {
+        "type": "supplier.allowedSupplyItems",
+        "userId": "69c35324dec6d4f932a80616",
+        "note": "Populate metadata.AllowedSupplyItems with item _ids once items are seeded",
+        "placeholderSkus": [],
+        "seedName": "users"
+      },
+      {
+        "type": "saleswindow.placeholders",
+        "salesWindowId": "69c35325dec6d4f932a80661",
+        "tag": "saleswindow.past",
+        "productPlaceholders": [
+          "69c35325dec6d4f932a8065a",
+          "69c35325dec6d4f932a8065b"
+        ],
+        "itemPlaceholders": [
+          "69c35325dec6d4f932a8065d",
+          "69c35325dec6d4f932a8065e",
+          "69c35325dec6d4f932a8065f"
+        ],
+        "note": "Replace productPlaceholders and itemPlaceholders with real Product._id and Item._id values once those seeds run",
+        "seedName": "salesWindows"
+      },
+      {
+        "type": "saleswindow.placeholders",
+        "salesWindowId": "69c35325dec6d4f932a80662",
+        "tag": "saleswindow.current",
+        "productPlaceholders": [
+          "69c35325dec6d4f932a8065a",
+          "69c35325dec6d4f932a8065c"
+        ],
+        "itemPlaceholders": [
+          "69c35325dec6d4f932a8065d",
+          "69c35325dec6d4f932a80660",
+          "69c35325dec6d4f932a8065e"
+        ],
+        "note": "Replace productPlaceholders and itemPlaceholders with real Product._id and Item._id values once those seeds run",
+        "seedName": "salesWindows"
+      },
+      {
+        "type": "saleswindow.placeholders",
+        "salesWindowId": "69c35325dec6d4f932a80663",
+        "tag": "saleswindow.future",
+        "productPlaceholders": [
+          "69c35325dec6d4f932a8065b",
+          "69c35325dec6d4f932a8065c"
+        ],
+        "itemPlaceholders": [
+          "69c35325dec6d4f932a8065f",
+          "69c35325dec6d4f932a80660",
+          "69c35325dec6d4f932a8065d"
+        ],
+        "note": "Replace productPlaceholders and itemPlaceholders with real Product._id and Item._id values once those seeds run",
+        "seedName": "salesWindows"
+      },
+      {
+        "type": "supply.placeholders",
+        "supplyId": "69c35325dec6d4f932a8066c",
+        "supplierPlaceholder": "69c35325dec6d4f932a80666",
+        "itemPlaceholders": [
+          "69c35325dec6d4f932a80669",
+          "69c35325dec6d4f932a8066a"
+        ],
+        "note": "Replace supplierPlaceholder and itemPlaceholders with real User._id and Item._id values once those seeds run",
+        "seedName": "supplies"
+      },
+      {
+        "type": "supply.placeholders",
+        "supplyId": "69c35325dec6d4f932a80671",
+        "supplierPlaceholder": "69c35325dec6d4f932a80667",
+        "itemPlaceholders": [
+          "69c35325dec6d4f932a8066b"
+        ],
+        "note": "Replace supplierPlaceholder and itemPlaceholders with real User._id and Item._id values once those seeds run",
+        "seedName": "supplies"
+      },
+      {
+        "type": "supply.placeholders",
+        "supplyId": "69c35325dec6d4f932a80674",
+        "supplierPlaceholder": "69c35325dec6d4f932a80666",
+        "itemPlaceholders": [
+          "69c35325dec6d4f932a8066a"
+        ],
+        "note": "Replace supplierPlaceholder and itemPlaceholders with real User._id and Item._id values once those seeds run",
+        "seedName": "supplies"
+      },
+      {
+        "type": "order.placeholders",
+        "orderId": "69c35325dec6d4f932a80681",
+        "userPlaceholder": "69c35325dec6d4f932a8067a",
+        "itemPlaceholders": [
+          "69c35325dec6d4f932a8067d",
+          "69c35325dec6d4f932a8067e"
+        ],
+        "note": "Replace userPlaceholder with real User._id and itemPlaceholders with Item._id values once those seeds run",
+        "seedName": "orders"
+      },
+      {
+        "type": "order.placeholders",
+        "orderId": "69c35325dec6d4f932a80682",
+        "userPlaceholder": "69c35325dec6d4f932a8067a",
+        "itemPlaceholders": [
+          "69c35325dec6d4f932a8067f",
+          "69c35325dec6d4f932a8067e"
+        ],
+        "note": "Replace userPlaceholder with real User._id and itemPlaceholders with Item._id values once those seeds run",
+        "seedName": "orders"
+      },
+      {
+        "type": "order.placeholders",
+        "orderId": "69c35325dec6d4f932a80683",
+        "userPlaceholder": "69c35325dec6d4f932a8067a",
+        "itemPlaceholders": [
+          "69c35325dec6d4f932a8067d",
+          "69c35325dec6d4f932a80680"
+        ],
+        "note": "Replace userPlaceholder with real User._id and itemPlaceholders with Item._id values once those seeds run",
+        "seedName": "orders"
+      },
+      {
+        "type": "order.placeholders",
+        "orderId": "69c35325dec6d4f932a80684",
+        "userPlaceholder": "69c35325dec6d4f932a8067b",
+        "itemPlaceholders": [
+          "69c35325dec6d4f932a8067e",
+          "69c35325dec6d4f932a8067f"
+        ],
+        "note": "Replace userPlaceholder with real User._id and itemPlaceholders with Item._id values once those seeds run",
+        "seedName": "orders"
+      },
+      {
+        "type": "order.placeholders",
+        "orderId": "69c35325dec6d4f932a80685",
+        "userPlaceholder": "69c35325dec6d4f932a8067b",
+        "itemPlaceholders": [
+          "69c35325dec6d4f932a80680",
+          "69c35325dec6d4f932a8067f"
+        ],
+        "note": "Replace userPlaceholder with real User._id and itemPlaceholders with Item._id values once those seeds run",
+        "seedName": "orders"
+      },
+      {
+        "type": "order.placeholders",
+        "orderId": "69c35325dec6d4f932a80686",
+        "userPlaceholder": "69c35325dec6d4f932a8067b",
+        "itemPlaceholders": [
+          "69c35325dec6d4f932a8067e",
+          "69c35325dec6d4f932a8067d"
+        ],
+        "note": "Replace userPlaceholder with real User._id and itemPlaceholders with Item._id values once those seeds run",
+        "seedName": "orders"
+      },
+      {
+        "type": "order.placeholders",
+        "orderId": "69c35325dec6d4f932a80687",
+        "userPlaceholder": "69c35325dec6d4f932a8067c",
+        "itemPlaceholders": [
+          "69c35325dec6d4f932a8067f",
+          "69c35325dec6d4f932a80680"
+        ],
+        "note": "Replace userPlaceholder with real User._id and itemPlaceholders with Item._id values once those seeds run",
+        "seedName": "orders"
+      },
+      {
+        "type": "order.placeholders",
+        "orderId": "69c35325dec6d4f932a80688",
+        "userPlaceholder": "69c35325dec6d4f932a8067c",
+        "itemPlaceholders": [
+          "69c35325dec6d4f932a8067d",
+          "69c35325dec6d4f932a80680"
+        ],
+        "note": "Replace userPlaceholder with real User._id and itemPlaceholders with Item._id values once those seeds run",
+        "seedName": "orders"
+      },
+      {
+        "type": "order.placeholders",
+        "orderId": "69c35325dec6d4f932a80689",
+        "userPlaceholder": "69c35325dec6d4f932a8067c",
+        "itemPlaceholders": [
+          "69c35325dec6d4f932a8067f",
+          "69c35325dec6d4f932a8067e"
+        ],
+        "note": "Replace userPlaceholder with real User._id and itemPlaceholders with Item._id values once those seeds run",
+        "seedName": "orders"
+      },
+      {
+        "type": "review.placeholders",
+        "reviewId": "69c35325dec6d4f932a806a9",
+        "placeholders": [
+          {
+            "key": "reviewerPlaceholder",
+            "placeholder": "69c35325dec6d4f932a806a1"
+          },
+          {
+            "key": "revieweePlaceholder",
+            "placeholder": "69c35325dec6d4f932a806a3"
+          },
+          {
+            "key": "productPlaceholder",
+            "placeholder": "69c35325dec6d4f932a806a4"
+          },
+          {
+            "key": "itemPlaceholder",
+            "placeholder": "69c35325dec6d4f932a806a6"
+          },
+          {
+            "key": "orderPlaceholder",
+            "placeholder": "69c35325dec6d4f932a806a8"
+          }
+        ],
+        "note": "Replace placeholders with real User._id, Product._id, Item._id, Order._id values once those seeds run",
+        "seedName": "reviews"
+      },
+      {
+        "type": "review.placeholders",
+        "reviewId": "69c35325dec6d4f932a806aa",
+        "placeholders": [
+          {
+            "key": "reviewerPlaceholder",
+            "placeholder": "69c35325dec6d4f932a806a2"
+          },
+          {
+            "key": "revieweePlaceholder",
+            "placeholder": "69c35325dec6d4f932a806a3"
+          },
+          {
+            "key": "productPlaceholder",
+            "placeholder": "69c35325dec6d4f932a806a5"
+          },
+          {
+            "key": "itemPlaceholder",
+            "placeholder": "69c35325dec6d4f932a806a7"
+          }
+        ],
+        "note": "Replace placeholders with real User._id, Product._id, Item._id, Order._id values once those seeds run",
+        "seedName": "reviews"
+      },
+      {
+        "type": "review.placeholders",
+        "reviewId": "69c35325dec6d4f932a806ab",
+        "placeholders": [
+          {
+            "key": "reviewerPlaceholder",
+            "placeholder": "69c35325dec6d4f932a806a1"
+          },
+          {
+            "key": "revieweePlaceholder",
+            "placeholder": "69c35325dec6d4f932a806a3"
+          }
+        ],
+        "note": "Replace placeholders with real User._id, Product._id, Item._id, Order._id values once those seeds run",
+        "seedName": "reviews"
+      },
+      {
+        "type": "aggregation.placeholders",
+        "aggregationId": "69c35325dec6d4f932a806b9",
+        "salesWindowPlaceholder": null,
+        "itemPlaceholders": [
+          "69c35325dec6d4f932a806b1",
+          "69c35325dec6d4f932a806b2"
+        ],
+        "supplierPlaceholders": [
+          "69c35325dec6d4f932a806b5",
+          "69c35325dec6d4f932a806b6"
+        ],
+        "note": "Replace placeholders with real SalesWindow._id, Item._id and User._id values once those seeds run",
+        "seedName": "aggregations"
+      },
+      {
+        "type": "aggregation.placeholders",
+        "aggregationId": "69c35325dec6d4f932a806ba",
+        "salesWindowPlaceholder": null,
+        "itemPlaceholders": [
+          "69c35325dec6d4f932a806b1",
+          "69c35325dec6d4f932a806b3"
+        ],
+        "supplierPlaceholders": [
+          "69c35325dec6d4f932a806b5",
+          "69c35325dec6d4f932a806b6"
+        ],
+        "note": "Replace placeholders with real SalesWindow._id, Item._id and User._id values once those seeds run",
+        "seedName": "aggregations"
+      },
+      {
+        "type": "aggregation.placeholders",
+        "aggregationId": "69c35325dec6d4f932a806bb",
+        "salesWindowPlaceholder": null,
+        "itemPlaceholders": [
+          "69c35325dec6d4f932a806b4",
+          "69c35325dec6d4f932a806b2"
+        ],
+        "supplierPlaceholders": [
+          "69c35325dec6d4f932a806b5",
+          "69c35325dec6d4f932a806b6"
+        ],
+        "note": "Replace placeholders with real SalesWindow._id, Item._id and User._id values once those seeds run",
+        "seedName": "aggregations"
+      }
+    ],
+    "marker": {
+      "name": "seed-db-models",
+      "version": "v1",
+      "seededAt": 1774408485757,
+      "summary": {
+        "seedCount": 11,
+        "unresolvedCount": 23,
+        "errors": 0
+      },
+      "seeds": [
+        "users",
+        "items",
+        "products",
+        "salesWindows",
+        "supplies",
+        "orders",
+        "messages",
+        "regionMaps",
+        "reviews",
+        "aggregations"
+      ],
+      "updatedAt": 1774408485757
+    },
+    "errors": [],
+    "appliedSeeds": [
+      "users",
+      "items",
+      "products",
+      "salesWindows",
+      "supplies",
+      "orders",
+      "messages",
+      "regionMaps",
+      "reviews",
+      "aggregations"
+    ]
+  }
+}
+2026-03-25T11:07:38.611Z - mongoose: users.createIndex - query: {"userId":1} - doc: {"unique":true}
+2026-03-25T11:07:38.642Z - mongoose: aggregations.createIndex - query: {"status":1} - doc: {}
+2026-03-25T11:07:38.665Z - mongoose: items.createIndex - query: {"sku":1} - doc: {"unique":true}
+2026-03-25T11:07:38.686Z - mongoose: messages.createIndex - query: {"type":1} - doc: {}
+2026-03-25T11:07:38.713Z - mongoose: orders.createIndex - query: {"userId":1} - doc: {}
+2026-03-25T11:07:38.744Z - mongoose: products.createIndex - query: {"status":1} - doc: {}
+2026-03-25T11:07:38.745Z - mongoose: audits.createIndex - query: {"correlationId":1} - doc: {}
+2026-03-25T11:07:38.756Z - mongoose: configs.createIndex - query: {"userId":1} - doc: {"unique":true}
+2026-03-25T11:07:38.774Z - mongoose: saleswindows.createIndex - query: {"window.fromEpoch":1} - doc: {}
+2026-03-25T11:07:38.777Z - mongoose: supplies.createIndex - query: {"status":1} - doc: {}
+2026-03-25T11:07:38.780Z - mongoose: s3storedfiles.createIndex - query: {"key":1} - doc: {"unique":true}
+2026-03-25T11:07:38.815Z - mongoose: users.createIndex - query: {"deleted":1} - doc: {}
+2026-03-25T11:07:38.816Z - mongoose: aggregations.createIndex - query: {"ops_region":1,"status":1} - doc: {}
+2026-03-25T11:07:38.821Z - mongoose: items.createIndex - query: {"slug":1} - doc: {"unique":true}
+2026-03-25T11:07:38.858Z - mongoose: messages.createIndex - query: {"ops_region":1} - doc: {}
+2026-03-25T11:07:38.863Z - mongoose: orders.createIndex - query: {"ops_region":1} - doc: {}
+2026-03-25T11:07:38.868Z - mongoose: products.createIndex - query: {"deleted":1} - doc: {}
+2026-03-25T11:07:38.883Z - mongoose: regionmaps.createIndex - query: {"ops_region":1} - doc: {}
+2026-03-25T11:07:38.894Z - mongoose: configs.createIndex - query: {"isPrivate":1} - doc: {}
+2026-03-25T11:07:38.911Z - mongoose: reviews.createIndex - query: {"reviewerId":1} - doc: {}
+2026-03-25T11:07:38.915Z - mongoose: supplies.createIndex - query: {"ops_region":1} - doc: {}
+2026-03-25T11:07:38.919Z - mongoose: s3storedfiles.createIndex - query: {"ownerId":1} - doc: {}
+2026-03-25T11:07:38.923Z - mongoose: users.createIndex - query: {"emails.address":1} - doc: {"unique":true,"partialFilterExpression":{"emails.address":{"$exists":true,"$ne":""}}}
+2026-03-25T11:07:38.943Z - mongoose: items.createIndex - query: {"status":1} - doc: {}
+2026-03-25T11:07:38.955Z - mongoose: aggregations.createIndex - query: {"itemDtos.itemId":1} - doc: {}
+2026-03-25T11:07:38.975Z - mongoose: messages.createIndex - query: {"status":1} - doc: {}
+2026-03-25T11:07:38.978Z - mongoose: orders.createIndex - query: {"status":1} - doc: {}
+2026-03-25T11:07:38.982Z - mongoose: products.createIndex - query: {"name":"text","descriptions.title":"text","descriptions.body":"text"} - doc: {"name":"ProductTextIndex","default_language":"english"}
+2026-03-25T11:07:38.989Z - mongoose: regionmaps.createIndex - query: {"code":1} - doc: {"unique":true}
+2026-03-25T11:07:38.993Z - mongoose: configs.createIndex - query: {"deleted":1} - doc: {}
+2026-03-25T11:07:39.002Z - mongoose: reviews.createIndex - query: {"revieweeId":1} - doc: {}
+2026-03-25T11:07:39.015Z - mongoose: supplies.createIndex - query: {"deleted":1} - doc: {}
+2026-03-25T11:07:39.041Z - mongoose: users.createIndex - query: {"firstName":"text","lastName":"text"} - doc: {"name":"UserTextIndex","default_language":"english"}
+2026-03-25T11:07:39.047Z - mongoose: orders.createIndex - query: {"createdAt":1} - doc: {}
+2026-03-25T11:07:39.055Z - mongoose: saleswindows.createIndex - query: {"window.toEpoch":1} - doc: {}
+2026-03-25T11:07:39.059Z - mongoose: items.createIndex - query: {"published":1} - doc: {}
+2026-03-25T11:07:39.061Z - mongoose: messages.createIndex - query: {"deleted":1} - doc: {}
+2026-03-25T11:07:39.062Z - mongoose: regionmaps.createIndex - query: {"locations.locationId":1} - doc: {}
+2026-03-25T11:07:39.066Z - mongoose: products.createIndex - query: {"ops_region":1,"status":1} - doc: {}
+2026-03-25T11:07:39.072Z - mongoose: configs.createIndex - query: {"ops_region":1} - doc: {}
+2026-03-25T11:07:39.087Z - mongoose: reviews.createIndex - query: {"productId":1} - doc: {}
+2026-03-25T11:07:39.103Z - mongoose: supplies.createIndex - query: {"supplierId":1,"status":1,"createdAt":-1} - doc: {}
+2026-03-25T11:07:39.107Z - mongoose: orders.createIndex - query: {"deliveryLocation.geo":"2dsphere"} - doc: {}
+2026-03-25T11:07:39.108Z - mongoose: items.createIndex - query: {"title":"text","description":"text","shortDescription":"text","brand.name":"text"} - doc: {}
+2026-03-25T11:07:39.122Z - mongoose: saleswindows.createIndex - query: {"products.productId":1} - doc: {}
+2026-03-25T11:07:39.124Z - mongoose: messages.createIndex - query: {"type":1,"status":1,"createdAt":-1} - doc: {}
+2026-03-25T11:07:39.129Z - mongoose: regionmaps.createIndex - query: {"locations.geo":"2dsphere"} - doc: {"name":"locations_geo_2dsphere"}
+2026-03-25T11:07:39.158Z - mongoose: saleswindows.countDocuments - query: {} - doc: {}
+2026-03-25T11:07:39.160Z - mongoose: reviews.createIndex - query: {"itemId":1} - doc: {}
+2026-03-25T11:07:39.177Z - mongoose: messages.createIndex - query: {"recipients.users":1} - doc: {}
+2026-03-25T11:07:39.179Z - mongoose: supplies.createIndex - query: {"items.itemId":1} - doc: {}
+2026-03-25T11:07:39.206Z - mongoose: saleswindows.insertMany - query: [{"window":{"fromEpoch":1771844859185,"toEpoch":1773832059185},"products":[{"productId":"69c3c1fb0f868d7a11bedc59","items":[{"itemId":"69c3c1fb0f868d7a11bedc5c","pricing_snapshots":[{"atInstantPrice":19.99,"discountedPercentage":0,"discountBracket":{"initial":0,"final":0},"createdAt":"2026-03-25T11:07:39.185Z","updatedAt":"2026-03-25T11:07:39.185Z","metadata":{"currency":"USD","note":"list price"}},{"atInstantPrice":17.99,"discountedPercentage":10,"discountBracket":{"initial":0,"final":10},"createdAt":"2026-03-25T11:07:39.185Z","updatedAt":"2026-03-25T11:07:39.185Z","metadata":{"currency":"USD","note":"sale price"}}],"metadata":{"origin":"seed"},"createdAt":"2026-03-25T11:07:39.185Z","updatedAt":"2026-03-25T11:07:39.185Z"},{"itemId":"69c3c1fb0f868d7a11bedc5d","pricing_snapshots":[{"atInstantPrice":9.99,"discountedPercentage":0,"discountBracket":{"initial":0,"final":0},"createdAt":"2026-03-25T11:07:39.185Z","updatedAt":"2026-03-25T11:07:39.185Z","metadata":{"currency":"USD"}}],"metadata":{"origin":"seed"},"createdAt":"2026-03-25T11:07:39.185Z","updatedAt":"2026-03-25T11:07:39.185Z"}],"metadata":{"notes":"past product A"}},{"productId":"69c3c1fb0f868d7a11bedc5a","items":[{"itemId":"69c3c1fb0f868d7a11bedc5e","pricing_snapshots":[{"atInstantPrice":29.99,"discountedPercentage":0,"discountBracket":{"initial":0,"final":0},"createdAt":"2026-03-25T11:07:39.185Z","updatedAt":"2026-03-25T11:07:39.185Z","metadata":{"currency":"USD"}}],"metadata":{"notes":"past item"},"createdAt":"2026-03-25T11:07:39.185Z","updatedAt":"2026-03-25T11:07:39.185Z"}],"metadata":{"notes":"past product B"}}],"ops_region":"GTA","overflow_id":null,"metadata":{"seeded":true,"tag":"saleswindow.past"},"_id":"69c3c1fb0f868d7a11bedc60","__v":0,"createdAt":"2026-03-25T11:07:39.205Z","updatedAt":"2026-03-25T11:07:39.205Z"},{"window":{"fromEpoch":1774264059185,"toEpoch":1774868859185},"products":[{"productId":"69c3c1fb0f868d7a11bedc59","items":[{"itemId":"69c3c1fb0f868d7a11bedc5c","pricing_snapshots":[{"atInstantPrice":18.99,"discountedPercentage":5,"discountBracket":{"initial":0,"final":5},"createdAt":"2026-03-25T11:07:39.185Z","updatedAt":"2026-03-25T11:07:39.185Z","metadata":{"currency":"USD","effectiveFrom":1774264059185,"effectiveTo":1774868859185}},{"atInstantPrice":16.99,"discountedPercentage":10,"discountBracket":{"initial":5,"final":10},"createdAt":"2026-03-25T11:07:39.185Z","updatedAt":"2026-03-25T11:07:39.185Z","metadata":{"currency":"USD","promo":"spring"}}],"metadata":{"promo":"spring"},"createdAt":"2026-03-25T11:07:39.185Z","updatedAt":"2026-03-25T11:07:39.185Z"},{"itemId":"69c3c1fb0f868d7a11bedc5f","pricing_snapshots":[{"atInstantPrice":4.99,"discountedPercentage":0,"discountBracket":{"initial":0,"final":0},"createdAt":"2026-03-25T11:07:39.185Z","updatedAt":"2026-03-25T11:07:39.185Z","metadata":{"currency":"USD"}}],"metadata":{"pack":"single"},"createdAt":"2026-03-25T11:07:39.185Z","updatedAt":"2026-03-25T11:07:39.185Z"}],"metadata":{"notes":"current product A"}},{"productId":"69c3c1fb0f868d7a11bedc5b","items":[{"itemId":"69c3c1fb0f868d7a11bedc5d","pricing_snapshots":[{"atInstantPrice":11.99,"discountedPercentage":0,"discountBracket":{"initial":0,"final":0},"createdAt":"2026-03-25T11:07:39.185Z","updatedAt":"2026-03-25T11:07:39.185Z","metadata":{"currency":"USD"}}],"metadata":{"notes":"current item"},"createdAt":"2026-03-25T11:07:39.185Z","updatedAt":"2026-03-25T11:07:39.185Z"}],"metadata":{"notes":"current product C"}}],"ops_region":"Calgary","overflow_id":null,"metadata":{"seeded":true,"tag":"saleswindow.current"},"_id":"69c3c1fb0f868d7a11bedc61","__v":0,"createdAt":"2026-03-25T11:07:39.206Z","updatedAt":"2026-03-25T11:07:39.206Z"},{"window":{"fromEpoch":1775300859185,"toEpoch":1776164859185},"products":[{"productId":"69c3c1fb0f868d7a11bedc5a","items":[{"itemId":"69c3c1fb0f868d7a11bedc5e","pricing_snapshots":[{"atInstantPrice":27.99,"discountedPercentage":0,"discountBracket":{"initial":0,"final":0},"createdAt":"2026-03-25T11:07:39.185Z","updatedAt":"2026-03-25T11:07:39.185Z","metadata":{"currency":"USD"}},{"atInstantPrice":25.99,"discountedPercentage":7,"discountBracket":{"initial":0,"final":7},"createdAt":"2026-03-25T11:07:39.186Z","updatedAt":"2026-03-25T11:07:39.186Z","metadata":{"currency":"USD","planned":true}}],"metadata":{"planned":true},"createdAt":"2026-03-25T11:07:39.186Z","updatedAt":"2026-03-25T11:07:39.186Z"},{"itemId":"69c3c1fb0f868d7a11bedc5f","pricing_snapshots":[{"atInstantPrice":5.49,"discountedPercentage":0,"discountBracket":{"initial":0,"final":0},"createdAt":"2026-03-25T11:07:39.186Z","updatedAt":"2026-03-25T11:07:39.186Z","metadata":{"currency":"USD"}},{"atInstantPrice":4.99,"discountedPercentage":9,"discountBracket":{"initial":0,"final":9},"createdAt":"2026-03-25T11:07:39.186Z","updatedAt":"2026-03-25T11:07:39.186Z","metadata":{"currency":"USD","planned":true}}],"metadata":{"planned":true},"createdAt":"2026-03-25T11:07:39.186Z","updatedAt":"2026-03-25T11:07:39.186Z"}],"metadata":{"notes":"future product B"}},{"productId":"69c3c1fb0f868d7a11bedc5b","items":[{"itemId":"69c3c1fb0f868d7a11bedc5c","pricing_snapshots":[{"atInstantPrice":20.99,"discountedPercentage":0,"discountBracket":{"initial":0,"final":0},"createdAt":"2026-03-25T11:07:39.186Z","updatedAt":"2026-03-25T11:07:39.186Z","metadata":{"currency":"USD"}}],"metadata":{"planned":true},"createdAt":"2026-03-25T11:07:39.186Z","updatedAt":"2026-03-25T11:07:39.186Z"}],"metadata":{"notes":"future product C"}}],"ops_region":"Victoria","overflow_id":null,"metadata":{"seeded":true,"tag":"saleswindow.future"},"_id":"69c3c1fb0f868d7a11bedc62","__v":0,"createdAt":"2026-03-25T11:07:39.206Z","updatedAt":"2026-03-25T11:07:39.206Z"}] - doc: {"ordered":false}
+2026-03-25T11:07:39.212Z - mongoose: s3storedfiles.createIndex - query: {"status":1} - doc: {}
+2026-03-25T11:07:39.214Z - mongoose: aggregations.createIndex - query: {"createdAt":-1} - doc: {}
+2026-03-25T11:07:39.215Z - mongoose: orders.createIndex - query: {"userId":1,"createdAt":-1} - doc: {}
+2026-03-25T11:07:39.216Z - mongoose: reviews.createIndex - query: {"status":1} - doc: {}
+2026-03-25T11:07:39.217Z - mongoose: messages.createIndex - query: {"fromUserId":1} - doc: {}
+2026-03-25T11:07:39.218Z - mongoose: supplies.createIndex - query: {"ops_region":1,"status":1} - doc: {}
+2026-03-25T11:07:39.429Z - mongoose: s3storedfiles.createIndex - query: {"idempotencyKey":1} - doc: {"sparse":true}
+2026-03-25T11:07:39.437Z - mongoose: reviews.createIndex - query: {"deleted":1} - doc: {}
+2026-03-25T11:07:39.439Z - mongoose: orders.createIndex - query: {"ops_region":1,"status":1} - doc: {}
+2026-03-25T11:07:39.452Z - mongoose: items.createIndex - query: {"ops_region":1} - doc: {}
+2026-03-25T11:07:39.465Z - mongoose: s3storedfiles.createIndex - query: {"ownerId":1,"status":1,"createdAt":-1} - doc: {}
+2026-03-25T11:07:39.468Z - mongoose: regionmaps.countDocuments - query: {} - doc: {}
+2026-03-25T11:07:39.469Z - mongoose: saleswindows.createIndex - query: {"products.items.itemId":1} - doc: {}
+2026-03-25T11:07:39.473Z - mongoose: reviews.createIndex - query: {"reviewerId":1,"revieweeId":1,"productId":1} - doc: {}
+2026-03-25T11:07:39.483Z - mongoose: items.createIndex - query: {"pricingTiers.minQty":1} - doc: {}
+2026-03-25T11:07:39.490Z - mongoose: regionmaps.find - query: {"code":{"$in":["GTA-W","PEEL-E","HAM"]}} - doc: {}
+2026-03-25T11:07:39.505Z - mongoose: saleswindows.createIndex - query: {"window.fromEpoch":1,"window.toEpoch":1} - doc: {"name":"window_range_idx"}
+2026-03-25T11:07:39.525Z - mongoose: regionmaps.findOneAndUpdate - query: {"_id":"69c35325dec6d4f932a80695"} - doc: {"$setOnInsert":{"createdAt":"2026-03-25T11:07:39.511Z"},"$set":{"updatedAt":"2026-03-25T11:07:39.511Z","metadata":{"timezone":"America/Toronto"},"locations":[{"name":"Brampton Fulfillment Hub","type":"fulfillment_center","description":{"subject":"Main hub","text":"Primary fulfillment and sorting hub for GTA West.","files":[]},"address":{"line1":"123 Commerce St","line2":"Unit 4","city":"Brampton","region":"ON","postalCode":"L6T 0A1","country":"Canada"},"geo":{"type":"Point","coordinates":[-79.7624,43.7315]},"contact":{"phone":"+1-905-555-0101","email":"hub-brampton@bulkbuy.example"},"metadata":{"hours":"08:00-18:00","capacity":5000},"locationId":"69c3c1fb0f868d7a11bedc75","createdAt":"2026-03-25T11:07:39.517Z","updatedAt":"2026-03-25T11:07:39.517Z"},{"name":"Mississauga Pickup Point","type":"pickup_point","description":{"subject":"Customer pickup","text":"Convenient pickup location near Square One.","files":[]},"address":{"line1":"50 City Centre Dr","line2":"","city":"Mississauga","region":"ON","postalCode":"L5B 2C9","country":"Canada"},"geo":{"type":"Point","coordinates":[-79.6425,43.589]},"contact":{"phone":"+1-905-555-0202","email":"pickup-mississauga@bulkbuy.example"},"metadata":{"hours":"10:00-20:00"},"locationId":"69c3c1fb0f868d7a11bedc76","createdAt":"2026-03-25T11:07:39.517Z","updatedAt":"2026-03-25T11:07:39.517Z"}],"description":{"subject":"GTA West operations","text":"Operational region covering Brampton, Mississauga and surrounding suburbs.","files":[]},"name":"Greater Toronto Area West","code":"GTA-W","ops_region":"gta-west"}}
+2026-03-25T11:07:39.531Z - mongoose: reviews.createIndex - query: {"rating":-1,"createdAt":-1} - doc: {}
+2026-03-25T11:07:39.560Z - mongoose: regionmaps.findOneAndUpdate - query: {"_id":"69c35325dec6d4f932a80699"} - doc: {"$setOnInsert":{"createdAt":"2026-03-25T11:07:39.556Z"},"$set":{"updatedAt":"2026-03-25T11:07:39.556Z","metadata":{"notes":"Serves lower-density suburban routes"},"locations":[{"name":"Caledon Micro Hub","type":"micro_hub","description":{"subject":"Micro hub","text":"Small micro hub for last-mile deliveries.","files":[]},"address":{"line1":"77 Valley Rd","line2":"","city":"Caledon","region":"ON","postalCode":"L7C 0H1","country":"Canada"},"geo":{"type":"Point","coordinates":[-79.9,43.85]},"contact":{"phone":"+1-905-555-0303","email":"hub-caledon@bulkbuy.example"},"metadata":{"maxParcelSizeCm":120},"locationId":"69c3c1fb0f868d7a11bedc79","createdAt":"2026-03-25T11:07:39.558Z","updatedAt":"2026-03-25T11:07:39.558Z"}],"description":{"subject":"Peel East operations","text":"Covers eastern Peel region including Caledon and eastern Brampton.","files":[]},"name":"Peel East Region","code":"PEEL-E","ops_region":"peel-east"}}
+2026-03-25T11:07:39.598Z - mongoose: regionmaps.findOneAndUpdate - query: {"_id":"69c35325dec6d4f932a8069c"} - doc: {"$setOnInsert":{"createdAt":"2026-03-25T11:07:39.594Z"},"$set":{"updatedAt":"2026-03-25T11:07:39.594Z","metadata":{"timezone":"America/Toronto"},"locations":[{"name":"Hamilton Distribution Center","type":"distribution_center","description":{"subject":"Distribution","text":"Primary distribution center for Hamilton region.","files":[]},"address":{"line1":"200 Industrial Pkwy","line2":"","city":"Hamilton","region":"ON","postalCode":"L8H 7K6","country":"Canada"},"geo":{"type":"Point","coordinates":[-79.8662,43.2557]},"contact":{"phone":"+1-905-555-0404","email":"dc-hamilton@bulkbuy.example"},"metadata":{"dockDoors":12,"refrigerated":false},"locationId":"69c3c1fb0f868d7a11bedc7b","createdAt":"2026-03-25T11:07:39.596Z","updatedAt":"2026-03-25T11:07:39.596Z"},{"name":"Burlington Pickup Locker","type":"locker","description":{"subject":"24/7 locker","text":"Secure locker for after-hours pickups.","files":[]},"address":{"line1":"1000 Brant St","line2":"","city":"Burlington","region":"ON","postalCode":"L7R 2G8","country":"Canada"},"geo":{"type":"Point","coordinates":[-79.799,43.3255]},"contact":{"phone":"+1-905-555-0505","email":"locker-burlington@bulkbuy.example"},"metadata":{"access":"24/7","lockerCount":40},"locationId":"69c3c1fb0f868d7a11bedc7c","createdAt":"2026-03-25T11:07:39.596Z","updatedAt":"2026-03-25T11:07:39.596Z"}],"description":{"subject":"Hamilton operations","text":"Operations and pickup points across Hamilton and Burlington.","files":[]},"name":"Hamilton Region","code":"HAM","ops_region":"hamilton"}}
+2026-03-25T11:07:39.665Z - WARN - [seed-index] 3 placeholders remain unresolved after best-effort resolution.
+2026-03-25T11:07:39.688Z - {
+  "success": true,
+  "summary": {
+    "startedAt": "2026-03-25T11:07:39.688Z",
+    "seedOrder": [
+      "users",
+      "configs",
+      "items",
+      "products",
+      "salesWindows",
+      "supplies",
+      "orders",
+      "messages",
+      "regionMaps",
+      "reviews",
+      "aggregations"
+    ],
+    "seedResults": [
+      {
+        "name": "users",
+        "createdCount": 0,
+        "providedKeys": 0,
+        "missingCount": 0,
+        "skipped": true
+      },
+      {
+        "name": "configs",
+        "createdCount": 0,
+        "providedKeys": 0,
+        "missingCount": 0,
+        "skipped": true
+      },
+      {
+        "name": "items",
+        "createdCount": 0,
+        "providedKeys": 0,
+        "missingCount": 0,
+        "skipped": true
+      },
+      {
+        "name": "products",
+        "createdCount": 0,
+        "providedKeys": 0,
+        "missingCount": 0,
+        "skipped": true
+      },
+      {
+        "name": "salesWindows",
+        "createdCount": 3,
+        "providedKeys": 3,
+        "missingCount": 3,
+        "skipped": false
+      },
+      {
+        "name": "supplies",
+        "createdCount": 0,
+        "providedKeys": 0,
+        "missingCount": 0,
+        "skipped": true
+      },
+      {
+        "name": "orders",
+        "createdCount": 0,
+        "providedKeys": 0,
+        "missingCount": 0,
+        "skipped": true
+      },
+      {
+        "name": "messages",
+        "createdCount": 0,
+        "providedKeys": 0,
+        "missingCount": 0,
+        "skipped": true
+      },
+      {
+        "name": "regionMaps",
+        "createdCount": 0,
+        "providedKeys": 0,
+        "missingCount": 0,
+        "skipped": false
+      },
+      {
+        "name": "reviews",
+        "createdCount": 0,
+        "providedKeys": 0,
+        "missingCount": 0,
+        "skipped": true
+      },
+      {
+        "name": "aggregations",
+        "createdCount": 0,
+        "providedKeys": 0,
+        "missingCount": 0,
+        "skipped": true
+      }
+    ],
+    "provided": {
+      "69c3c1fb0f868d7a11bedc60": [
+        "saleswindow.past",
+        "69c3c1fb0f868d7a11bedc59",
+        "69c3c1fb0f868d7a11bedc5c"
+      ],
+      "69c3c1fb0f868d7a11bedc60Map": {
+        "tag": "saleswindow.past",
+        "productPlaceholders": "69c3c1fb0f868d7a11bedc59",
+        "itemPlaceholders": "69c3c1fb0f868d7a11bedc5c"
+      },
+      "69c3c1fb0f868d7a11bedc61": [
+        "saleswindow.current",
+        "69c3c1fb0f868d7a11bedc59",
+        "69c3c1fb0f868d7a11bedc5c"
+      ],
+      "69c3c1fb0f868d7a11bedc61Map": {
+        "tag": "saleswindow.current",
+        "productPlaceholders": "69c3c1fb0f868d7a11bedc59",
+        "itemPlaceholders": "69c3c1fb0f868d7a11bedc5c"
+      },
+      "69c3c1fb0f868d7a11bedc62": [
+        "saleswindow.future",
+        "69c3c1fb0f868d7a11bedc5a",
+        "69c3c1fb0f868d7a11bedc5e"
+      ],
+      "69c3c1fb0f868d7a11bedc62Map": {
+        "tag": "saleswindow.future",
+        "productPlaceholders": "69c3c1fb0f868d7a11bedc5a",
+        "itemPlaceholders": "69c3c1fb0f868d7a11bedc5e"
+      }
+    },
+    "perSeedProvided": {
+      "salesWindows": {
+        "69c3c1fb0f868d7a11bedc60": {
+          "tag": "saleswindow.past",
+          "productPlaceholders": [
+            "69c3c1fb0f868d7a11bedc59",
+            "69c3c1fb0f868d7a11bedc5a"
+          ],
+          "itemPlaceholders": [
+            "69c3c1fb0f868d7a11bedc5c",
+            "69c3c1fb0f868d7a11bedc5d",
+            "69c3c1fb0f868d7a11bedc5e"
+          ]
+        },
+        "69c3c1fb0f868d7a11bedc61": {
+          "tag": "saleswindow.current",
+          "productPlaceholders": [
+            "69c3c1fb0f868d7a11bedc59",
+            "69c3c1fb0f868d7a11bedc5b"
+          ],
+          "itemPlaceholders": [
+            "69c3c1fb0f868d7a11bedc5c",
+            "69c3c1fb0f868d7a11bedc5f",
+            "69c3c1fb0f868d7a11bedc5d"
+          ]
+        },
+        "69c3c1fb0f868d7a11bedc62": {
+          "tag": "saleswindow.future",
+          "productPlaceholders": [
+            "69c3c1fb0f868d7a11bedc5a",
+            "69c3c1fb0f868d7a11bedc5b"
+          ],
+          "itemPlaceholders": [
+            "69c3c1fb0f868d7a11bedc5e",
+            "69c3c1fb0f868d7a11bedc5f",
+            "69c3c1fb0f868d7a11bedc5c"
+          ]
+        }
+      },
+      "regionMaps": {}
+    },
+    "missing": [
+      {
+        "type": "saleswindow.placeholders",
+        "salesWindowId": "69c3c1fb0f868d7a11bedc60",
+        "tag": "saleswindow.past",
+        "productPlaceholders": [
+          "69c3c1fb0f868d7a11bedc59",
+          "69c3c1fb0f868d7a11bedc5a"
+        ],
+        "itemPlaceholders": [
+          "69c3c1fb0f868d7a11bedc5c",
+          "69c3c1fb0f868d7a11bedc5d",
+          "69c3c1fb0f868d7a11bedc5e"
+        ],
+        "note": "Replace productPlaceholders and itemPlaceholders with real Product._id and Item._id values once those seeds run",
+        "seedName": "salesWindows"
+      },
+      {
+        "type": "saleswindow.placeholders",
+        "salesWindowId": "69c3c1fb0f868d7a11bedc61",
+        "tag": "saleswindow.current",
+        "productPlaceholders": [
+          "69c3c1fb0f868d7a11bedc59",
+          "69c3c1fb0f868d7a11bedc5b"
+        ],
+        "itemPlaceholders": [
+          "69c3c1fb0f868d7a11bedc5c",
+          "69c3c1fb0f868d7a11bedc5f",
+          "69c3c1fb0f868d7a11bedc5d"
+        ],
+        "note": "Replace productPlaceholders and itemPlaceholders with real Product._id and Item._id values once those seeds run",
+        "seedName": "salesWindows"
+      },
+      {
+        "type": "saleswindow.placeholders",
+        "salesWindowId": "69c3c1fb0f868d7a11bedc62",
+        "tag": "saleswindow.future",
+        "productPlaceholders": [
+          "69c3c1fb0f868d7a11bedc5a",
+          "69c3c1fb0f868d7a11bedc5b"
+        ],
+        "itemPlaceholders": [
+          "69c3c1fb0f868d7a11bedc5e",
+          "69c3c1fb0f868d7a11bedc5f",
+          "69c3c1fb0f868d7a11bedc5c"
+        ],
+        "note": "Replace productPlaceholders and itemPlaceholders with real Product._id and Item._id values once those seeds run",
+        "seedName": "salesWindows"
+      }
+    ],
+    "resolved": [],
+    "unresolved": [
+      {
+        "type": "saleswindow.placeholders",
+        "salesWindowId": "69c3c1fb0f868d7a11bedc60",
+        "tag": "saleswindow.past",
+        "productPlaceholders": [
+          "69c3c1fb0f868d7a11bedc59",
+          "69c3c1fb0f868d7a11bedc5a"
+        ],
+        "itemPlaceholders": [
+          "69c3c1fb0f868d7a11bedc5c",
+          "69c3c1fb0f868d7a11bedc5d",
+          "69c3c1fb0f868d7a11bedc5e"
+        ],
+        "note": "Replace productPlaceholders and itemPlaceholders with real Product._id and Item._id values once those seeds run",
+        "seedName": "salesWindows"
+      },
+      {
+        "type": "saleswindow.placeholders",
+        "salesWindowId": "69c3c1fb0f868d7a11bedc61",
+        "tag": "saleswindow.current",
+        "productPlaceholders": [
+          "69c3c1fb0f868d7a11bedc59",
+          "69c3c1fb0f868d7a11bedc5b"
+        ],
+        "itemPlaceholders": [
+          "69c3c1fb0f868d7a11bedc5c",
+          "69c3c1fb0f868d7a11bedc5f",
+          "69c3c1fb0f868d7a11bedc5d"
+        ],
+        "note": "Replace productPlaceholders and itemPlaceholders with real Product._id and Item._id values once those seeds run",
+        "seedName": "salesWindows"
+      },
+      {
+        "type": "saleswindow.placeholders",
+        "salesWindowId": "69c3c1fb0f868d7a11bedc62",
+        "tag": "saleswindow.future",
+        "productPlaceholders": [
+          "69c3c1fb0f868d7a11bedc5a",
+          "69c3c1fb0f868d7a11bedc5b"
+        ],
+        "itemPlaceholders": [
+          "69c3c1fb0f868d7a11bedc5e",
+          "69c3c1fb0f868d7a11bedc5f",
+          "69c3c1fb0f868d7a11bedc5c"
+        ],
+        "note": "Replace productPlaceholders and itemPlaceholders with real Product._id and Item._id values once those seeds run",
+        "seedName": "salesWindows"
+      }
+    ],
+    "marker": {
+      "name": "seed-db-models",
+      "version": "v1",
+      "seededAt": 1774436859666,
+      "summary": {
+        "seedCount": 11,
+        "unresolvedCount": 3,
+        "errors": 0
+      },
+      "seeds": [
+        "users",
+        "items",
+        "products",
+        "salesWindows",
+        "supplies",
+        "orders",
+        "messages",
+        "regionMaps",
+        "reviews",
+        "aggregations"
+      ],
+      "updatedAt": 1774436859666
+    },
+    "errors": [],
+    "appliedSeeds": [
+      "users",
+      "items",
+      "products",
+      "salesWindows",
+      "supplies",
+      "orders",
+      "messages",
+      "regionMaps",
+      "reviews",
+      "aggregations"
+    ]
+  }
+}
+2026-03-25T23:25:23.625Z - mongoose: users.createIndex - query: {"userId":1} - doc: {"unique":true}
+2026-03-25T23:25:23.647Z - mongoose: aggregations.createIndex - query: {"status":1} - doc: {}
+2026-03-25T23:25:23.680Z - mongoose: items.createIndex - query: {"sku":1} - doc: {"unique":true}
+2026-03-25T23:25:23.718Z - mongoose: messages.createIndex - query: {"type":1} - doc: {}
+2026-03-25T23:25:23.746Z - mongoose: orders.createIndex - query: {"userId":1} - doc: {}
+2026-03-25T23:25:23.766Z - mongoose: configs.createIndex - query: {"userId":1} - doc: {"unique":true}
+2026-03-25T23:25:23.777Z - mongoose: audits.createIndex - query: {"correlationId":1} - doc: {}
+2026-03-25T23:25:23.779Z - mongoose: reviews.createIndex - query: {"reviewerId":1} - doc: {}
+2026-03-25T23:25:23.812Z - mongoose: saleswindows.createIndex - query: {"window.fromEpoch":1} - doc: {}
+2026-03-25T23:25:23.813Z - mongoose: s3storedfiles.createIndex - query: {"key":1} - doc: {"unique":true}
+2026-03-25T23:25:23.815Z - mongoose: supplies.createIndex - query: {"status":1} - doc: {}
+2026-03-25T23:25:23.870Z - mongoose: users.createIndex - query: {"deleted":1} - doc: {}
+2026-03-25T23:25:23.900Z - mongoose: aggregations.createIndex - query: {"ops_region":1,"status":1} - doc: {}
+2026-03-25T23:25:23.902Z - mongoose: items.createIndex - query: {"slug":1} - doc: {"unique":true}
+2026-03-25T23:25:23.907Z - mongoose: messages.createIndex - query: {"ops_region":1} - doc: {}
+2026-03-25T23:25:23.944Z - mongoose: configs.createIndex - query: {"isPrivate":1} - doc: {}
+2026-03-25T23:25:23.947Z - mongoose: orders.createIndex - query: {"ops_region":1} - doc: {}
+2026-03-25T23:25:23.956Z - mongoose: products.createIndex - query: {"status":1} - doc: {}
+2026-03-25T23:25:23.963Z - mongoose: regionmaps.createIndex - query: {"ops_region":1} - doc: {}
+2026-03-25T23:25:24.004Z - mongoose: aggregations.createIndex - query: {"itemDtos.itemId":1} - doc: {}
+2026-03-25T23:25:24.004Z - mongoose: s3storedfiles.createIndex - query: {"ownerId":1} - doc: {}
+2026-03-25T23:25:24.005Z - mongoose: users.createIndex - query: {"emails.address":1} - doc: {"unique":true,"partialFilterExpression":{"emails.address":{"$exists":true,"$ne":""}}}
+2026-03-25T23:25:24.007Z - mongoose: supplies.createIndex - query: {"ops_region":1} - doc: {}
+2026-03-25T23:25:24.023Z - mongoose: items.createIndex - query: {"status":1} - doc: {}
+2026-03-25T23:25:24.044Z - mongoose: messages.createIndex - query: {"status":1} - doc: {}
+2026-03-25T23:25:24.045Z - mongoose: configs.createIndex - query: {"deleted":1} - doc: {}
+2026-03-25T23:25:24.048Z - mongoose: products.createIndex - query: {"deleted":1} - doc: {}
+2026-03-25T23:25:24.051Z - mongoose: orders.createIndex - query: {"status":1} - doc: {}
+2026-03-25T23:25:24.059Z - mongoose: regionmaps.createIndex - query: {"code":1} - doc: {"unique":true}
+2026-03-25T23:25:24.077Z - mongoose: aggregations.createIndex - query: {"createdAt":-1} - doc: {}
+2026-03-25T23:25:24.096Z - mongoose: s3storedfiles.createIndex - query: {"status":1} - doc: {}
+2026-03-25T23:25:24.104Z - mongoose: supplies.createIndex - query: {"deleted":1} - doc: {}
+2026-03-25T23:25:24.107Z - mongoose: users.createIndex - query: {"firstName":"text","lastName":"text"} - doc: {"name":"UserTextIndex","default_language":"english"}
+2026-03-25T23:25:24.152Z - mongoose: items.createIndex - query: {"published":1} - doc: {}
+2026-03-25T23:25:24.163Z - mongoose: messages.createIndex - query: {"deleted":1} - doc: {}
+2026-03-25T23:25:24.174Z - mongoose: reviews.createIndex - query: {"revieweeId":1} - doc: {}
+2026-03-25T23:25:24.181Z - mongoose: orders.createIndex - query: {"createdAt":1} - doc: {}
+2026-03-25T23:25:24.185Z - mongoose: saleswindows.createIndex - query: {"window.toEpoch":1} - doc: {}
+2026-03-25T23:25:24.201Z - mongoose: s3storedfiles.createIndex - query: {"idempotencyKey":1} - doc: {"sparse":true}
+2026-03-25T23:25:24.204Z - mongoose: regionmaps.createIndex - query: {"locations.locationId":1} - doc: {}
+2026-03-25T23:25:24.213Z - mongoose: supplies.createIndex - query: {"supplierId":1,"status":1,"createdAt":-1} - doc: {}
+2026-03-25T23:25:24.274Z - mongoose: s3storedfiles.createIndex - query: {"ownerId":1,"status":1,"createdAt":-1} - doc: {}
+2026-03-25T23:25:24.277Z - mongoose: items.createIndex - query: {"title":"text","description":"text","shortDescription":"text","brand.name":"text"} - doc: {}
+2026-03-25T23:25:24.278Z - mongoose: saleswindows.createIndex - query: {"products.productId":1} - doc: {}
+2026-03-25T23:25:24.280Z - mongoose: orders.createIndex - query: {"deliveryLocation.geo":"2dsphere"} - doc: {}
+2026-03-25T23:25:24.282Z - mongoose: messages.createIndex - query: {"type":1,"status":1,"createdAt":-1} - doc: {}
+2026-03-25T23:25:24.283Z - mongoose: reviews.createIndex - query: {"productId":1} - doc: {}
+2026-03-25T23:25:24.288Z - mongoose: regionmaps.createIndex - query: {"locations.geo":"2dsphere"} - doc: {"name":"locations_geo_2dsphere"}
+2026-03-25T23:25:24.302Z - mongoose: supplies.createIndex - query: {"items.itemId":1} - doc: {}
+2026-03-25T23:25:24.329Z - mongoose: configs.createIndex - query: {"ops_region":1} - doc: {}
+2026-03-25T23:25:24.330Z - mongoose: items.createIndex - query: {"ops_region":1} - doc: {}
+2026-03-25T23:25:24.332Z - mongoose: saleswindows.createIndex - query: {"products.items.itemId":1} - doc: {}
+2026-03-25T23:25:24.362Z - mongoose: products.createIndex - query: {"name":"text","descriptions.title":"text","descriptions.body":"text"} - doc: {"name":"ProductTextIndex","default_language":"english"}
+2026-03-25T23:25:24.364Z - mongoose: reviews.createIndex - query: {"itemId":1} - doc: {}
+2026-03-25T23:25:24.365Z - mongoose: messages.createIndex - query: {"recipients.users":1} - doc: {}
+2026-03-25T23:25:24.366Z - mongoose: supplies.createIndex - query: {"ops_region":1,"status":1} - doc: {}
+2026-03-25T23:25:24.369Z - mongoose: saleswindows.createIndex - query: {"window.fromEpoch":1,"window.toEpoch":1} - doc: {"name":"window_range_idx"}
+2026-03-25T23:25:24.371Z - mongoose: items.createIndex - query: {"pricingTiers.minQty":1} - doc: {}
+2026-03-25T23:25:24.395Z - mongoose: messages.createIndex - query: {"fromUserId":1} - doc: {}
+2026-03-25T23:25:24.404Z - mongoose: products.createIndex - query: {"ops_region":1,"status":1} - doc: {}
+2026-03-25T23:25:24.443Z - mongoose: reviews.createIndex - query: {"status":1} - doc: {}
+2026-03-25T23:25:24.472Z - mongoose: reviews.createIndex - query: {"deleted":1} - doc: {}
+2026-03-25T23:25:24.481Z - mongoose: saleswindows.countDocuments - query: {} - doc: {}
+2026-03-25T23:25:24.502Z - mongoose: orders.createIndex - query: {"userId":1,"createdAt":-1} - doc: {}
+2026-03-25T23:25:24.525Z - mongoose: saleswindows.insertMany - query: [{"window":{"fromEpoch":1771889124505,"toEpoch":1773876324505},"products":[{"productId":"69c46ee4596b0408b64f1ee9","items":[{"itemId":"69c46ee4596b0408b64f1eec","pricing_snapshots":[{"atInstantPrice":19.99,"discountedPercentage":0,"discountBracket":{"initial":0,"final":0},"createdAt":"2026-03-25T23:25:24.505Z","updatedAt":"2026-03-25T23:25:24.505Z","metadata":{"currency":"USD","note":"list price"}},{"atInstantPrice":17.99,"discountedPercentage":10,"discountBracket":{"initial":0,"final":10},"createdAt":"2026-03-25T23:25:24.505Z","updatedAt":"2026-03-25T23:25:24.505Z","metadata":{"currency":"USD","note":"sale price"}}],"metadata":{"origin":"seed"},"createdAt":"2026-03-25T23:25:24.505Z","updatedAt":"2026-03-25T23:25:24.505Z"},{"itemId":"69c46ee4596b0408b64f1eed","pricing_snapshots":[{"atInstantPrice":9.99,"discountedPercentage":0,"discountBracket":{"initial":0,"final":0},"createdAt":"2026-03-25T23:25:24.505Z","updatedAt":"2026-03-25T23:25:24.505Z","metadata":{"currency":"USD"}}],"metadata":{"origin":"seed"},"createdAt":"2026-03-25T23:25:24.505Z","updatedAt":"2026-03-25T23:25:24.505Z"}],"metadata":{"notes":"past product A"}},{"productId":"69c46ee4596b0408b64f1eea","items":[{"itemId":"69c46ee4596b0408b64f1eee","pricing_snapshots":[{"atInstantPrice":29.99,"discountedPercentage":0,"discountBracket":{"initial":0,"final":0},"createdAt":"2026-03-25T23:25:24.505Z","updatedAt":"2026-03-25T23:25:24.505Z","metadata":{"currency":"USD"}}],"metadata":{"notes":"past item"},"createdAt":"2026-03-25T23:25:24.506Z","updatedAt":"2026-03-25T23:25:24.506Z"}],"metadata":{"notes":"past product B"}}],"ops_region":"GTA","overflow_id":null,"metadata":{"seeded":true,"tag":"saleswindow.past"},"_id":"69c46ee4596b0408b64f1ef0","__v":0,"createdAt":"2026-03-25T23:25:24.524Z","updatedAt":"2026-03-25T23:25:24.524Z"},{"window":{"fromEpoch":1774308324506,"toEpoch":1774913124506},"products":[{"productId":"69c46ee4596b0408b64f1ee9","items":[{"itemId":"69c46ee4596b0408b64f1eec","pricing_snapshots":[{"atInstantPrice":18.99,"discountedPercentage":5,"discountBracket":{"initial":0,"final":5},"createdAt":"2026-03-25T23:25:24.506Z","updatedAt":"2026-03-25T23:25:24.506Z","metadata":{"currency":"USD","effectiveFrom":1774308324506,"effectiveTo":1774913124506}},{"atInstantPrice":16.99,"discountedPercentage":10,"discountBracket":{"initial":5,"final":10},"createdAt":"2026-03-25T23:25:24.506Z","updatedAt":"2026-03-25T23:25:24.506Z","metadata":{"currency":"USD","promo":"spring"}}],"metadata":{"promo":"spring"},"createdAt":"2026-03-25T23:25:24.506Z","updatedAt":"2026-03-25T23:25:24.506Z"},{"itemId":"69c46ee4596b0408b64f1eef","pricing_snapshots":[{"atInstantPrice":4.99,"discountedPercentage":0,"discountBracket":{"initial":0,"final":0},"createdAt":"2026-03-25T23:25:24.506Z","updatedAt":"2026-03-25T23:25:24.506Z","metadata":{"currency":"USD"}}],"metadata":{"pack":"single"},"createdAt":"2026-03-25T23:25:24.506Z","updatedAt":"2026-03-25T23:25:24.506Z"}],"metadata":{"notes":"current product A"}},{"productId":"69c46ee4596b0408b64f1eeb","items":[{"itemId":"69c46ee4596b0408b64f1eed","pricing_snapshots":[{"atInstantPrice":11.99,"discountedPercentage":0,"discountBracket":{"initial":0,"final":0},"createdAt":"2026-03-25T23:25:24.506Z","updatedAt":"2026-03-25T23:25:24.506Z","metadata":{"currency":"USD"}}],"metadata":{"notes":"current item"},"createdAt":"2026-03-25T23:25:24.506Z","updatedAt":"2026-03-25T23:25:24.506Z"}],"metadata":{"notes":"current product C"}}],"ops_region":"Calgary","overflow_id":null,"metadata":{"seeded":true,"tag":"saleswindow.current"},"_id":"69c46ee4596b0408b64f1ef1","__v":0,"createdAt":"2026-03-25T23:25:24.525Z","updatedAt":"2026-03-25T23:25:24.525Z"},{"window":{"fromEpoch":1775345124506,"toEpoch":1776209124506},"products":[{"productId":"69c46ee4596b0408b64f1eea","items":[{"itemId":"69c46ee4596b0408b64f1eee","pricing_snapshots":[{"atInstantPrice":27.99,"discountedPercentage":0,"discountBracket":{"initial":0,"final":0},"createdAt":"2026-03-25T23:25:24.506Z","updatedAt":"2026-03-25T23:25:24.506Z","metadata":{"currency":"USD"}},{"atInstantPrice":25.99,"discountedPercentage":7,"discountBracket":{"initial":0,"final":7},"createdAt":"2026-03-25T23:25:24.506Z","updatedAt":"2026-03-25T23:25:24.506Z","metadata":{"currency":"USD","planned":true}}],"metadata":{"planned":true},"createdAt":"2026-03-25T23:25:24.506Z","updatedAt":"2026-03-25T23:25:24.506Z"},{"itemId":"69c46ee4596b0408b64f1eef","pricing_snapshots":[{"atInstantPrice":5.49,"discountedPercentage":0,"discountBracket":{"initial":0,"final":0},"createdAt":"2026-03-25T23:25:24.506Z","updatedAt":"2026-03-25T23:25:24.506Z","metadata":{"currency":"USD"}},{"atInstantPrice":4.99,"discountedPercentage":9,"discountBracket":{"initial":0,"final":9},"createdAt":"2026-03-25T23:25:24.506Z","updatedAt":"2026-03-25T23:25:24.506Z","metadata":{"currency":"USD","planned":true}}],"metadata":{"planned":true},"createdAt":"2026-03-25T23:25:24.506Z","updatedAt":"2026-03-25T23:25:24.506Z"}],"metadata":{"notes":"future product B"}},{"productId":"69c46ee4596b0408b64f1eeb","items":[{"itemId":"69c46ee4596b0408b64f1eec","pricing_snapshots":[{"atInstantPrice":20.99,"discountedPercentage":0,"discountBracket":{"initial":0,"final":0},"createdAt":"2026-03-25T23:25:24.506Z","updatedAt":"2026-03-25T23:25:24.506Z","metadata":{"currency":"USD"}}],"metadata":{"planned":true},"createdAt":"2026-03-25T23:25:24.506Z","updatedAt":"2026-03-25T23:25:24.506Z"}],"metadata":{"notes":"future product C"}}],"ops_region":"Victoria","overflow_id":null,"metadata":{"seeded":true,"tag":"saleswindow.future"},"_id":"69c46ee4596b0408b64f1ef2","__v":0,"createdAt":"2026-03-25T23:25:24.525Z","updatedAt":"2026-03-25T23:25:24.525Z"}] - doc: {"ordered":false}
+2026-03-25T23:25:24.529Z - mongoose: reviews.createIndex - query: {"reviewerId":1,"revieweeId":1,"productId":1} - doc: {}
+2026-03-25T23:25:24.530Z - mongoose: orders.createIndex - query: {"ops_region":1,"status":1} - doc: {}
+2026-03-25T23:25:24.572Z - mongoose: reviews.createIndex - query: {"rating":-1,"createdAt":-1} - doc: {}
+2026-03-25T23:25:24.667Z - mongoose: regionmaps.countDocuments - query: {} - doc: {}
+2026-03-25T23:25:24.690Z - mongoose: regionmaps.find - query: {"code":{"$in":["GTA-W","PEEL-E","HAM"]}} - doc: {}
+2026-03-25T23:25:24.728Z - mongoose: regionmaps.findOneAndUpdate - query: {"_id":"69c35325dec6d4f932a80695"} - doc: {"$setOnInsert":{"createdAt":"2026-03-25T23:25:24.716Z"},"$set":{"updatedAt":"2026-03-25T23:25:24.716Z","metadata":{"timezone":"America/Toronto"},"locations":[{"name":"Brampton Fulfillment Hub","type":"fulfillment_center","description":{"subject":"Main hub","text":"Primary fulfillment and sorting hub for GTA West.","files":[]},"address":{"line1":"123 Commerce St","line2":"Unit 4","city":"Brampton","region":"ON","postalCode":"L6T 0A1","country":"Canada"},"geo":{"type":"Point","coordinates":[-79.7624,43.7315]},"contact":{"phone":"+1-905-555-0101","email":"hub-brampton@bulkbuy.example"},"metadata":{"hours":"08:00-18:00","capacity":5000},"locationId":"69c46ee4596b0408b64f1ef9","createdAt":"2026-03-25T23:25:24.722Z","updatedAt":"2026-03-25T23:25:24.722Z"},{"name":"Mississauga Pickup Point","type":"pickup_point","description":{"subject":"Customer pickup","text":"Convenient pickup location near Square One.","files":[]},"address":{"line1":"50 City Centre Dr","line2":"","city":"Mississauga","region":"ON","postalCode":"L5B 2C9","country":"Canada"},"geo":{"type":"Point","coordinates":[-79.6425,43.589]},"contact":{"phone":"+1-905-555-0202","email":"pickup-mississauga@bulkbuy.example"},"metadata":{"hours":"10:00-20:00"},"locationId":"69c46ee4596b0408b64f1efa","createdAt":"2026-03-25T23:25:24.723Z","updatedAt":"2026-03-25T23:25:24.723Z"}],"description":{"subject":"GTA West operations","text":"Operational region covering Brampton, Mississauga and surrounding suburbs.","files":[]},"name":"Greater Toronto Area West","code":"GTA-W","ops_region":"gta-west"}}
+2026-03-25T23:25:24.763Z - mongoose: regionmaps.findOneAndUpdate - query: {"_id":"69c35325dec6d4f932a80699"} - doc: {"$setOnInsert":{"createdAt":"2026-03-25T23:25:24.761Z"},"$set":{"updatedAt":"2026-03-25T23:25:24.761Z","metadata":{"notes":"Serves lower-density suburban routes"},"locations":[{"name":"Caledon Micro Hub","type":"micro_hub","description":{"subject":"Micro hub","text":"Small micro hub for last-mile deliveries.","files":[]},"address":{"line1":"77 Valley Rd","line2":"","city":"Caledon","region":"ON","postalCode":"L7C 0H1","country":"Canada"},"geo":{"type":"Point","coordinates":[-79.9,43.85]},"contact":{"phone":"+1-905-555-0303","email":"hub-caledon@bulkbuy.example"},"metadata":{"maxParcelSizeCm":120},"locationId":"69c46ee4596b0408b64f1efc","createdAt":"2026-03-25T23:25:24.762Z","updatedAt":"2026-03-25T23:25:24.762Z"}],"description":{"subject":"Peel East operations","text":"Covers eastern Peel region including Caledon and eastern Brampton.","files":[]},"name":"Peel East Region","code":"PEEL-E","ops_region":"peel-east"}}
+2026-03-25T23:25:24.788Z - mongoose: regionmaps.findOneAndUpdate - query: {"_id":"69c35325dec6d4f932a8069c"} - doc: {"$setOnInsert":{"createdAt":"2026-03-25T23:25:24.786Z"},"$set":{"updatedAt":"2026-03-25T23:25:24.786Z","metadata":{"timezone":"America/Toronto"},"locations":[{"name":"Hamilton Distribution Center","type":"distribution_center","description":{"subject":"Distribution","text":"Primary distribution center for Hamilton region.","files":[]},"address":{"line1":"200 Industrial Pkwy","line2":"","city":"Hamilton","region":"ON","postalCode":"L8H 7K6","country":"Canada"},"geo":{"type":"Point","coordinates":[-79.8662,43.2557]},"contact":{"phone":"+1-905-555-0404","email":"dc-hamilton@bulkbuy.example"},"metadata":{"dockDoors":12,"refrigerated":false},"locationId":"69c46ee4596b0408b64f1efe","createdAt":"2026-03-25T23:25:24.787Z","updatedAt":"2026-03-25T23:25:24.787Z"},{"name":"Burlington Pickup Locker","type":"locker","description":{"subject":"24/7 locker","text":"Secure locker for after-hours pickups.","files":[]},"address":{"line1":"1000 Brant St","line2":"","city":"Burlington","region":"ON","postalCode":"L7R 2G8","country":"Canada"},"geo":{"type":"Point","coordinates":[-79.799,43.3255]},"contact":{"phone":"+1-905-555-0505","email":"locker-burlington@bulkbuy.example"},"metadata":{"access":"24/7","lockerCount":40},"locationId":"69c46ee4596b0408b64f1eff","createdAt":"2026-03-25T23:25:24.787Z","updatedAt":"2026-03-25T23:25:24.787Z"}],"description":{"subject":"Hamilton operations","text":"Operations and pickup points across Hamilton and Burlington.","files":[]},"name":"Hamilton Region","code":"HAM","ops_region":"hamilton"}}
+2026-03-25T23:25:24.922Z - WARN - [seed-index] 3 placeholders remain unresolved after best-effort resolution.
+2026-03-25T23:25:24.964Z - {
+  "success": true,
+  "summary": {
+    "startedAt": "2026-03-25T23:25:24.964Z",
+    "seedOrder": [
+      "users",
+      "configs",
+      "items",
+      "products",
+      "salesWindows",
+      "supplies",
+      "orders",
+      "messages",
+      "regionMaps",
+      "reviews",
+      "aggregations"
+    ],
+    "seedResults": [
+      {
+        "name": "users",
+        "createdCount": 0,
+        "providedKeys": 0,
+        "missingCount": 0,
+        "skipped": true
+      },
+      {
+        "name": "configs",
+        "createdCount": 0,
+        "providedKeys": 0,
+        "missingCount": 0,
+        "skipped": true
+      },
+      {
+        "name": "items",
+        "createdCount": 0,
+        "providedKeys": 0,
+        "missingCount": 0,
+        "skipped": true
+      },
+      {
+        "name": "products",
+        "createdCount": 0,
+        "providedKeys": 0,
+        "missingCount": 0,
+        "skipped": true
+      },
+      {
+        "name": "salesWindows",
+        "createdCount": 3,
+        "providedKeys": 3,
+        "missingCount": 3,
+        "skipped": false
+      },
+      {
+        "name": "supplies",
+        "createdCount": 0,
+        "providedKeys": 0,
+        "missingCount": 0,
+        "skipped": true
+      },
+      {
+        "name": "orders",
+        "createdCount": 0,
+        "providedKeys": 0,
+        "missingCount": 0,
+        "skipped": true
+      },
+      {
+        "name": "messages",
+        "createdCount": 0,
+        "providedKeys": 0,
+        "missingCount": 0,
+        "skipped": true
+      },
+      {
+        "name": "regionMaps",
+        "createdCount": 0,
+        "providedKeys": 0,
+        "missingCount": 0,
+        "skipped": false
+      },
+      {
+        "name": "reviews",
+        "createdCount": 0,
+        "providedKeys": 0,
+        "missingCount": 0,
+        "skipped": true
+      },
+      {
+        "name": "aggregations",
+        "createdCount": 0,
+        "providedKeys": 0,
+        "missingCount": 0,
+        "skipped": true
+      }
+    ],
+    "provided": {
+      "69c46ee4596b0408b64f1ef0": [
+        "saleswindow.past",
+        "69c46ee4596b0408b64f1ee9",
+        "69c46ee4596b0408b64f1eec"
+      ],
+      "69c46ee4596b0408b64f1ef0Map": {
+        "tag": "saleswindow.past",
+        "productPlaceholders": "69c46ee4596b0408b64f1ee9",
+        "itemPlaceholders": "69c46ee4596b0408b64f1eec"
+      },
+      "69c46ee4596b0408b64f1ef1": [
+        "saleswindow.current",
+        "69c46ee4596b0408b64f1ee9",
+        "69c46ee4596b0408b64f1eec"
+      ],
+      "69c46ee4596b0408b64f1ef1Map": {
+        "tag": "saleswindow.current",
+        "productPlaceholders": "69c46ee4596b0408b64f1ee9",
+        "itemPlaceholders": "69c46ee4596b0408b64f1eec"
+      },
+      "69c46ee4596b0408b64f1ef2": [
+        "saleswindow.future",
+        "69c46ee4596b0408b64f1eea",
+        "69c46ee4596b0408b64f1eee"
+      ],
+      "69c46ee4596b0408b64f1ef2Map": {
+        "tag": "saleswindow.future",
+        "productPlaceholders": "69c46ee4596b0408b64f1eea",
+        "itemPlaceholders": "69c46ee4596b0408b64f1eee"
+      }
+    },
+    "perSeedProvided": {
+      "salesWindows": {
+        "69c46ee4596b0408b64f1ef0": {
+          "tag": "saleswindow.past",
+          "productPlaceholders": [
+            "69c46ee4596b0408b64f1ee9",
+            "69c46ee4596b0408b64f1eea"
+          ],
+          "itemPlaceholders": [
+            "69c46ee4596b0408b64f1eec",
+            "69c46ee4596b0408b64f1eed",
+            "69c46ee4596b0408b64f1eee"
+          ]
+        },
+        "69c46ee4596b0408b64f1ef1": {
+          "tag": "saleswindow.current",
+          "productPlaceholders": [
+            "69c46ee4596b0408b64f1ee9",
+            "69c46ee4596b0408b64f1eeb"
+          ],
+          "itemPlaceholders": [
+            "69c46ee4596b0408b64f1eec",
+            "69c46ee4596b0408b64f1eef",
+            "69c46ee4596b0408b64f1eed"
+          ]
+        },
+        "69c46ee4596b0408b64f1ef2": {
+          "tag": "saleswindow.future",
+          "productPlaceholders": [
+            "69c46ee4596b0408b64f1eea",
+            "69c46ee4596b0408b64f1eeb"
+          ],
+          "itemPlaceholders": [
+            "69c46ee4596b0408b64f1eee",
+            "69c46ee4596b0408b64f1eef",
+            "69c46ee4596b0408b64f1eec"
+          ]
+        }
+      },
+      "regionMaps": {}
+    },
+    "missing": [
+      {
+        "type": "saleswindow.placeholders",
+        "salesWindowId": "69c46ee4596b0408b64f1ef0",
+        "tag": "saleswindow.past",
+        "productPlaceholders": [
+          "69c46ee4596b0408b64f1ee9",
+          "69c46ee4596b0408b64f1eea"
+        ],
+        "itemPlaceholders": [
+          "69c46ee4596b0408b64f1eec",
+          "69c46ee4596b0408b64f1eed",
+          "69c46ee4596b0408b64f1eee"
+        ],
+        "note": "Replace productPlaceholders and itemPlaceholders with real Product._id and Item._id values once those seeds run",
+        "seedName": "salesWindows"
+      },
+      {
+        "type": "saleswindow.placeholders",
+        "salesWindowId": "69c46ee4596b0408b64f1ef1",
+        "tag": "saleswindow.current",
+        "productPlaceholders": [
+          "69c46ee4596b0408b64f1ee9",
+          "69c46ee4596b0408b64f1eeb"
+        ],
+        "itemPlaceholders": [
+          "69c46ee4596b0408b64f1eec",
+          "69c46ee4596b0408b64f1eef",
+          "69c46ee4596b0408b64f1eed"
+        ],
+        "note": "Replace productPlaceholders and itemPlaceholders with real Product._id and Item._id values once those seeds run",
+        "seedName": "salesWindows"
+      },
+      {
+        "type": "saleswindow.placeholders",
+        "salesWindowId": "69c46ee4596b0408b64f1ef2",
+        "tag": "saleswindow.future",
+        "productPlaceholders": [
+          "69c46ee4596b0408b64f1eea",
+          "69c46ee4596b0408b64f1eeb"
+        ],
+        "itemPlaceholders": [
+          "69c46ee4596b0408b64f1eee",
+          "69c46ee4596b0408b64f1eef",
+          "69c46ee4596b0408b64f1eec"
+        ],
+        "note": "Replace productPlaceholders and itemPlaceholders with real Product._id and Item._id values once those seeds run",
+        "seedName": "salesWindows"
+      }
+    ],
+    "resolved": [],
+    "unresolved": [
+      {
+        "type": "saleswindow.placeholders",
+        "salesWindowId": "69c46ee4596b0408b64f1ef0",
+        "tag": "saleswindow.past",
+        "productPlaceholders": [
+          "69c46ee4596b0408b64f1ee9",
+          "69c46ee4596b0408b64f1eea"
+        ],
+        "itemPlaceholders": [
+          "69c46ee4596b0408b64f1eec",
+          "69c46ee4596b0408b64f1eed",
+          "69c46ee4596b0408b64f1eee"
+        ],
+        "note": "Replace productPlaceholders and itemPlaceholders with real Product._id and Item._id values once those seeds run",
+        "seedName": "salesWindows"
+      },
+      {
+        "type": "saleswindow.placeholders",
+        "salesWindowId": "69c46ee4596b0408b64f1ef1",
+        "tag": "saleswindow.current",
+        "productPlaceholders": [
+          "69c46ee4596b0408b64f1ee9",
+          "69c46ee4596b0408b64f1eeb"
+        ],
+        "itemPlaceholders": [
+          "69c46ee4596b0408b64f1eec",
+          "69c46ee4596b0408b64f1eef",
+          "69c46ee4596b0408b64f1eed"
+        ],
+        "note": "Replace productPlaceholders and itemPlaceholders with real Product._id and Item._id values once those seeds run",
+        "seedName": "salesWindows"
+      },
+      {
+        "type": "saleswindow.placeholders",
+        "salesWindowId": "69c46ee4596b0408b64f1ef2",
+        "tag": "saleswindow.future",
+        "productPlaceholders": [
+          "69c46ee4596b0408b64f1eea",
+          "69c46ee4596b0408b64f1eeb"
+        ],
+        "itemPlaceholders": [
+          "69c46ee4596b0408b64f1eee",
+          "69c46ee4596b0408b64f1eef",
+          "69c46ee4596b0408b64f1eec"
+        ],
+        "note": "Replace productPlaceholders and itemPlaceholders with real Product._id and Item._id values once those seeds run",
+        "seedName": "salesWindows"
+      }
+    ],
+    "marker": {
+      "name": "seed-db-models",
+      "version": "v1",
+      "seededAt": 1774481124923,
+      "summary": {
+        "seedCount": 11,
+        "unresolvedCount": 3,
+        "errors": 0
+      },
+      "seeds": [
+        "users",
+        "items",
+        "products",
+        "salesWindows",
+        "supplies",
+        "orders",
+        "messages",
+        "regionMaps",
+        "reviews",
+        "aggregations"
+      ],
+      "updatedAt": 1774481124923
+    },
+    "errors": [],
+    "appliedSeeds": [
+      "users",
+      "items",
+      "products",
+      "salesWindows",
+      "supplies",
+      "orders",
+      "messages",
+      "regionMaps",
+      "reviews",
+      "aggregations"
+    ]
+  }
+}
+2026-03-25T23:26:47.587Z - mongoose: users.createIndex - query: {"userId":1} - doc: {"unique":true}
+2026-03-25T23:26:47.632Z - mongoose: aggregations.createIndex - query: {"status":1} - doc: {}
+2026-03-25T23:26:47.676Z - mongoose: items.createIndex - query: {"sku":1} - doc: {"unique":true}
+2026-03-25T23:26:47.761Z - mongoose: messages.createIndex - query: {"type":1} - doc: {}
+2026-03-25T23:26:47.793Z - mongoose: orders.createIndex - query: {"userId":1} - doc: {}
+2026-03-25T23:26:47.829Z - mongoose: audits.createIndex - query: {"correlationId":1} - doc: {}
+2026-03-25T23:26:47.833Z - mongoose: reviews.createIndex - query: {"reviewerId":1} - doc: {}
+2026-03-25T23:26:47.834Z - mongoose: configs.createIndex - query: {"userId":1} - doc: {"unique":true}
+2026-03-25T23:26:47.865Z - mongoose: s3storedfiles.createIndex - query: {"key":1} - doc: {"unique":true}
+2026-03-25T23:26:47.869Z - mongoose: supplies.createIndex - query: {"status":1} - doc: {}
+2026-03-25T23:26:47.871Z - mongoose: saleswindows.createIndex - query: {"window.fromEpoch":1} - doc: {}
+2026-03-25T23:26:47.908Z - mongoose: users.createIndex - query: {"deleted":1} - doc: {}
+2026-03-25T23:26:47.909Z - mongoose: aggregations.createIndex - query: {"ops_region":1,"status":1} - doc: {}
+2026-03-25T23:26:47.920Z - mongoose: items.createIndex - query: {"slug":1} - doc: {"unique":true}
+2026-03-25T23:26:47.937Z - mongoose: messages.createIndex - query: {"ops_region":1} - doc: {}
+2026-03-25T23:26:47.940Z - mongoose: orders.createIndex - query: {"ops_region":1} - doc: {}
+2026-03-25T23:26:47.970Z - mongoose: reviews.createIndex - query: {"revieweeId":1} - doc: {}
+2026-03-25T23:26:47.981Z - mongoose: products.createIndex - query: {"status":1} - doc: {}
+2026-03-25T23:26:47.999Z - mongoose: regionmaps.createIndex - query: {"ops_region":1} - doc: {}
+2026-03-25T23:26:48.004Z - mongoose: supplies.createIndex - query: {"ops_region":1} - doc: {}
+2026-03-25T23:26:48.005Z - mongoose: configs.createIndex - query: {"isPrivate":1} - doc: {}
+2026-03-25T23:26:48.028Z - mongoose: items.createIndex - query: {"status":1} - doc: {}
+2026-03-25T23:26:48.038Z - mongoose: users.createIndex - query: {"emails.address":1} - doc: {"unique":true,"partialFilterExpression":{"emails.address":{"$exists":true,"$ne":""}}}
+2026-03-25T23:26:48.039Z - mongoose: messages.createIndex - query: {"status":1} - doc: {}
+2026-03-25T23:26:48.040Z - mongoose: aggregations.createIndex - query: {"itemDtos.itemId":1} - doc: {}
+2026-03-25T23:26:48.042Z - mongoose: orders.createIndex - query: {"status":1} - doc: {}
+2026-03-25T23:26:48.067Z - mongoose: reviews.createIndex - query: {"productId":1} - doc: {}
+2026-03-25T23:26:48.076Z - mongoose: regionmaps.createIndex - query: {"code":1} - doc: {"unique":true}
+2026-03-25T23:26:48.078Z - mongoose: products.createIndex - query: {"deleted":1} - doc: {}
+2026-03-25T23:26:48.083Z - mongoose: supplies.createIndex - query: {"deleted":1} - doc: {}
+2026-03-25T23:26:48.105Z - mongoose: configs.createIndex - query: {"deleted":1} - doc: {}
+2026-03-25T23:26:48.114Z - mongoose: items.createIndex - query: {"published":1} - doc: {}
+2026-03-25T23:26:48.116Z - mongoose: users.createIndex - query: {"firstName":"text","lastName":"text"} - doc: {"name":"UserTextIndex","default_language":"english"}
+2026-03-25T23:26:48.119Z - mongoose: messages.createIndex - query: {"deleted":1} - doc: {}
+2026-03-25T23:26:48.124Z - mongoose: aggregations.createIndex - query: {"createdAt":-1} - doc: {}
+2026-03-25T23:26:48.125Z - mongoose: s3storedfiles.createIndex - query: {"ownerId":1} - doc: {}
+2026-03-25T23:26:48.168Z - mongoose: saleswindows.createIndex - query: {"window.toEpoch":1} - doc: {}
+2026-03-25T23:26:48.170Z - mongoose: regionmaps.createIndex - query: {"locations.locationId":1} - doc: {}
+2026-03-25T23:26:48.171Z - mongoose: products.createIndex - query: {"name":"text","descriptions.title":"text","descriptions.body":"text"} - doc: {"name":"ProductTextIndex","default_language":"english"}
+2026-03-25T23:26:48.182Z - mongoose: items.createIndex - query: {"title":"text","description":"text","shortDescription":"text","brand.name":"text"} - doc: {}
+2026-03-25T23:26:48.183Z - mongoose: supplies.createIndex - query: {"supplierId":1,"status":1,"createdAt":-1} - doc: {}
+2026-03-25T23:26:48.184Z - mongoose: configs.createIndex - query: {"ops_region":1} - doc: {}
+2026-03-25T23:26:48.208Z - mongoose: messages.createIndex - query: {"type":1,"status":1,"createdAt":-1} - doc: {}
+2026-03-25T23:26:48.209Z - mongoose: s3storedfiles.createIndex - query: {"status":1} - doc: {}
+2026-03-25T23:26:48.232Z - mongoose: saleswindows.countDocuments - query: {} - doc: {}
+2026-03-25T23:26:48.233Z - mongoose: saleswindows.createIndex - query: {"products.productId":1} - doc: {}
+2026-03-25T23:26:48.234Z - mongoose: regionmaps.createIndex - query: {"locations.geo":"2dsphere"} - doc: {"name":"locations_geo_2dsphere"}
+2026-03-25T23:26:48.240Z - mongoose: products.createIndex - query: {"ops_region":1,"status":1} - doc: {}
+2026-03-25T23:26:48.241Z - mongoose: items.createIndex - query: {"ops_region":1} - doc: {}
+2026-03-25T23:26:48.248Z - mongoose: supplies.createIndex - query: {"items.itemId":1} - doc: {}
+2026-03-25T23:26:48.274Z - mongoose: saleswindows.insertMany - query: [{"window":{"fromEpoch":1771889208256,"toEpoch":1773876408256},"products":[{"productId":"69c46f3820f68a914e189c49","items":[{"itemId":"69c46f3820f68a914e189c4c","pricing_snapshots":[{"atInstantPrice":19.99,"discountedPercentage":0,"discountBracket":{"initial":0,"final":0},"createdAt":"2026-03-25T23:26:48.256Z","updatedAt":"2026-03-25T23:26:48.256Z","metadata":{"currency":"USD","note":"list price"}},{"atInstantPrice":17.99,"discountedPercentage":10,"discountBracket":{"initial":0,"final":10},"createdAt":"2026-03-25T23:26:48.256Z","updatedAt":"2026-03-25T23:26:48.256Z","metadata":{"currency":"USD","note":"sale price"}}],"metadata":{"origin":"seed"},"createdAt":"2026-03-25T23:26:48.256Z","updatedAt":"2026-03-25T23:26:48.256Z"},{"itemId":"69c46f3820f68a914e189c4d","pricing_snapshots":[{"atInstantPrice":9.99,"discountedPercentage":0,"discountBracket":{"initial":0,"final":0},"createdAt":"2026-03-25T23:26:48.256Z","updatedAt":"2026-03-25T23:26:48.256Z","metadata":{"currency":"USD"}}],"metadata":{"origin":"seed"},"createdAt":"2026-03-25T23:26:48.256Z","updatedAt":"2026-03-25T23:26:48.256Z"}],"metadata":{"notes":"past product A"}},{"productId":"69c46f3820f68a914e189c4a","items":[{"itemId":"69c46f3820f68a914e189c4e","pricing_snapshots":[{"atInstantPrice":29.99,"discountedPercentage":0,"discountBracket":{"initial":0,"final":0},"createdAt":"2026-03-25T23:26:48.256Z","updatedAt":"2026-03-25T23:26:48.256Z","metadata":{"currency":"USD"}}],"metadata":{"notes":"past item"},"createdAt":"2026-03-25T23:26:48.256Z","updatedAt":"2026-03-25T23:26:48.256Z"}],"metadata":{"notes":"past product B"}}],"ops_region":"GTA","overflow_id":null,"metadata":{"seeded":true,"tag":"saleswindow.past"},"_id":"69c46f3820f68a914e189c50","__v":0,"createdAt":"2026-03-25T23:26:48.272Z","updatedAt":"2026-03-25T23:26:48.272Z"},{"window":{"fromEpoch":1774308408256,"toEpoch":1774913208256},"products":[{"productId":"69c46f3820f68a914e189c49","items":[{"itemId":"69c46f3820f68a914e189c4c","pricing_snapshots":[{"atInstantPrice":18.99,"discountedPercentage":5,"discountBracket":{"initial":0,"final":5},"createdAt":"2026-03-25T23:26:48.256Z","updatedAt":"2026-03-25T23:26:48.256Z","metadata":{"currency":"USD","effectiveFrom":1774308408256,"effectiveTo":1774913208256}},{"atInstantPrice":16.99,"discountedPercentage":10,"discountBracket":{"initial":5,"final":10},"createdAt":"2026-03-25T23:26:48.256Z","updatedAt":"2026-03-25T23:26:48.256Z","metadata":{"currency":"USD","promo":"spring"}}],"metadata":{"promo":"spring"},"createdAt":"2026-03-25T23:26:48.256Z","updatedAt":"2026-03-25T23:26:48.256Z"},{"itemId":"69c46f3820f68a914e189c4f","pricing_snapshots":[{"atInstantPrice":4.99,"discountedPercentage":0,"discountBracket":{"initial":0,"final":0},"createdAt":"2026-03-25T23:26:48.256Z","updatedAt":"2026-03-25T23:26:48.256Z","metadata":{"currency":"USD"}}],"metadata":{"pack":"single"},"createdAt":"2026-03-25T23:26:48.256Z","updatedAt":"2026-03-25T23:26:48.256Z"}],"metadata":{"notes":"current product A"}},{"productId":"69c46f3820f68a914e189c4b","items":[{"itemId":"69c46f3820f68a914e189c4d","pricing_snapshots":[{"atInstantPrice":11.99,"discountedPercentage":0,"discountBracket":{"initial":0,"final":0},"createdAt":"2026-03-25T23:26:48.256Z","updatedAt":"2026-03-25T23:26:48.256Z","metadata":{"currency":"USD"}}],"metadata":{"notes":"current item"},"createdAt":"2026-03-25T23:26:48.256Z","updatedAt":"2026-03-25T23:26:48.256Z"}],"metadata":{"notes":"current product C"}}],"ops_region":"Calgary","overflow_id":null,"metadata":{"seeded":true,"tag":"saleswindow.current"},"_id":"69c46f3820f68a914e189c51","__v":0,"createdAt":"2026-03-25T23:26:48.273Z","updatedAt":"2026-03-25T23:26:48.273Z"},{"window":{"fromEpoch":1775345208256,"toEpoch":1776209208256},"products":[{"productId":"69c46f3820f68a914e189c4a","items":[{"itemId":"69c46f3820f68a914e189c4e","pricing_snapshots":[{"atInstantPrice":27.99,"discountedPercentage":0,"discountBracket":{"initial":0,"final":0},"createdAt":"2026-03-25T23:26:48.256Z","updatedAt":"2026-03-25T23:26:48.256Z","metadata":{"currency":"USD"}},{"atInstantPrice":25.99,"discountedPercentage":7,"discountBracket":{"initial":0,"final":7},"createdAt":"2026-03-25T23:26:48.256Z","updatedAt":"2026-03-25T23:26:48.256Z","metadata":{"currency":"USD","planned":true}}],"metadata":{"planned":true},"createdAt":"2026-03-25T23:26:48.256Z","updatedAt":"2026-03-25T23:26:48.256Z"},{"itemId":"69c46f3820f68a914e189c4f","pricing_snapshots":[{"atInstantPrice":5.49,"discountedPercentage":0,"discountBracket":{"initial":0,"final":0},"createdAt":"2026-03-25T23:26:48.256Z","updatedAt":"2026-03-25T23:26:48.256Z","metadata":{"currency":"USD"}},{"atInstantPrice":4.99,"discountedPercentage":9,"discountBracket":{"initial":0,"final":9},"createdAt":"2026-03-25T23:26:48.256Z","updatedAt":"2026-03-25T23:26:48.256Z","metadata":{"currency":"USD","planned":true}}],"metadata":{"planned":true},"createdAt":"2026-03-25T23:26:48.256Z","updatedAt":"2026-03-25T23:26:48.256Z"}],"metadata":{"notes":"future product B"}},{"productId":"69c46f3820f68a914e189c4b","items":[{"itemId":"69c46f3820f68a914e189c4c","pricing_snapshots":[{"atInstantPrice":20.99,"discountedPercentage":0,"discountBracket":{"initial":0,"final":0},"createdAt":"2026-03-25T23:26:48.256Z","updatedAt":"2026-03-25T23:26:48.256Z","metadata":{"currency":"USD"}}],"metadata":{"planned":true},"createdAt":"2026-03-25T23:26:48.256Z","updatedAt":"2026-03-25T23:26:48.256Z"}],"metadata":{"notes":"future product C"}}],"ops_region":"Victoria","overflow_id":null,"metadata":{"seeded":true,"tag":"saleswindow.future"},"_id":"69c46f3820f68a914e189c52","__v":0,"createdAt":"2026-03-25T23:26:48.274Z","updatedAt":"2026-03-25T23:26:48.274Z"}] - doc: {"ordered":false}
+2026-03-25T23:26:48.278Z - mongoose: messages.createIndex - query: {"recipients.users":1} - doc: {}
+2026-03-25T23:26:48.280Z - mongoose: s3storedfiles.createIndex - query: {"idempotencyKey":1} - doc: {"sparse":true}
+2026-03-25T23:26:48.284Z - mongoose: saleswindows.createIndex - query: {"products.items.itemId":1} - doc: {}
+2026-03-25T23:26:48.299Z - mongoose: supplies.createIndex - query: {"ops_region":1,"status":1} - doc: {}
+2026-03-25T23:26:48.300Z - mongoose: items.createIndex - query: {"pricingTiers.minQty":1} - doc: {}
+2026-03-25T23:26:48.341Z - mongoose: s3storedfiles.createIndex - query: {"ownerId":1,"status":1,"createdAt":-1} - doc: {}
+2026-03-25T23:26:48.344Z - mongoose: orders.createIndex - query: {"createdAt":1} - doc: {}
+2026-03-25T23:26:48.402Z - mongoose: orders.createIndex - query: {"deliveryLocation.geo":"2dsphere"} - doc: {}
+2026-03-25T23:26:48.404Z - mongoose: saleswindows.createIndex - query: {"window.fromEpoch":1,"window.toEpoch":1} - doc: {"name":"window_range_idx"}
+2026-03-25T23:26:48.406Z - mongoose: reviews.createIndex - query: {"itemId":1} - doc: {}
+2026-03-25T23:26:48.442Z - mongoose: orders.createIndex - query: {"userId":1,"createdAt":-1} - doc: {}
+2026-03-25T23:26:48.446Z - mongoose: reviews.createIndex - query: {"status":1} - doc: {}
+2026-03-25T23:26:48.463Z - mongoose: regionmaps.countDocuments - query: {} - doc: {}
+2026-03-25T23:26:48.473Z - mongoose: orders.createIndex - query: {"ops_region":1,"status":1} - doc: {}
+2026-03-25T23:26:48.477Z - mongoose: reviews.createIndex - query: {"deleted":1} - doc: {}
+2026-03-25T23:26:48.490Z - mongoose: regionmaps.find - query: {"code":{"$in":["GTA-W","PEEL-E","HAM"]}} - doc: {}
+2026-03-25T23:26:48.501Z - mongoose: messages.createIndex - query: {"fromUserId":1} - doc: {}
+2026-03-25T23:26:48.518Z - mongoose: regionmaps.findOneAndUpdate - query: {"_id":"69c35325dec6d4f932a80695"} - doc: {"$setOnInsert":{"createdAt":"2026-03-25T23:26:48.510Z"},"$set":{"updatedAt":"2026-03-25T23:26:48.510Z","metadata":{"timezone":"America/Toronto"},"locations":[{"name":"Brampton Fulfillment Hub","type":"fulfillment_center","description":{"subject":"Main hub","text":"Primary fulfillment and sorting hub for GTA West.","files":[]},"address":{"line1":"123 Commerce St","line2":"Unit 4","city":"Brampton","region":"ON","postalCode":"L6T 0A1","country":"Canada"},"geo":{"type":"Point","coordinates":[-79.7624,43.7315]},"contact":{"phone":"+1-905-555-0101","email":"hub-brampton@bulkbuy.example"},"metadata":{"hours":"08:00-18:00","capacity":5000},"locationId":"69c46f3820f68a914e189c65","createdAt":"2026-03-25T23:26:48.514Z","updatedAt":"2026-03-25T23:26:48.514Z"},{"name":"Mississauga Pickup Point","type":"pickup_point","description":{"subject":"Customer pickup","text":"Convenient pickup location near Square One.","files":[]},"address":{"line1":"50 City Centre Dr","line2":"","city":"Mississauga","region":"ON","postalCode":"L5B 2C9","country":"Canada"},"geo":{"type":"Point","coordinates":[-79.6425,43.589]},"contact":{"phone":"+1-905-555-0202","email":"pickup-mississauga@bulkbuy.example"},"metadata":{"hours":"10:00-20:00"},"locationId":"69c46f3820f68a914e189c66","createdAt":"2026-03-25T23:26:48.514Z","updatedAt":"2026-03-25T23:26:48.514Z"}],"description":{"subject":"GTA West operations","text":"Operational region covering Brampton, Mississauga and surrounding suburbs.","files":[]},"name":"Greater Toronto Area West","code":"GTA-W","ops_region":"gta-west"}}
+2026-03-25T23:26:48.520Z - mongoose: reviews.createIndex - query: {"reviewerId":1,"revieweeId":1,"productId":1} - doc: {}
+2026-03-25T23:26:48.558Z - mongoose: regionmaps.findOneAndUpdate - query: {"_id":"69c35325dec6d4f932a80699"} - doc: {"$setOnInsert":{"createdAt":"2026-03-25T23:26:48.555Z"},"$set":{"updatedAt":"2026-03-25T23:26:48.555Z","metadata":{"notes":"Serves lower-density suburban routes"},"locations":[{"name":"Caledon Micro Hub","type":"micro_hub","description":{"subject":"Micro hub","text":"Small micro hub for last-mile deliveries.","files":[]},"address":{"line1":"77 Valley Rd","line2":"","city":"Caledon","region":"ON","postalCode":"L7C 0H1","country":"Canada"},"geo":{"type":"Point","coordinates":[-79.9,43.85]},"contact":{"phone":"+1-905-555-0303","email":"hub-caledon@bulkbuy.example"},"metadata":{"maxParcelSizeCm":120},"locationId":"69c46f3820f68a914e189c69","createdAt":"2026-03-25T23:26:48.556Z","updatedAt":"2026-03-25T23:26:48.556Z"}],"description":{"subject":"Peel East operations","text":"Covers eastern Peel region including Caledon and eastern Brampton.","files":[]},"name":"Peel East Region","code":"PEEL-E","ops_region":"peel-east"}}
+2026-03-25T23:26:48.560Z - mongoose: reviews.createIndex - query: {"rating":-1,"createdAt":-1} - doc: {}
+2026-03-25T23:26:48.592Z - mongoose: regionmaps.findOneAndUpdate - query: {"_id":"69c35325dec6d4f932a8069c"} - doc: {"$setOnInsert":{"createdAt":"2026-03-25T23:26:48.588Z"},"$set":{"updatedAt":"2026-03-25T23:26:48.588Z","metadata":{"timezone":"America/Toronto"},"locations":[{"name":"Hamilton Distribution Center","type":"distribution_center","description":{"subject":"Distribution","text":"Primary distribution center for Hamilton region.","files":[]},"address":{"line1":"200 Industrial Pkwy","line2":"","city":"Hamilton","region":"ON","postalCode":"L8H 7K6","country":"Canada"},"geo":{"type":"Point","coordinates":[-79.8662,43.2557]},"contact":{"phone":"+1-905-555-0404","email":"dc-hamilton@bulkbuy.example"},"metadata":{"dockDoors":12,"refrigerated":false},"locationId":"69c46f3820f68a914e189c6c","createdAt":"2026-03-25T23:26:48.589Z","updatedAt":"2026-03-25T23:26:48.589Z"},{"name":"Burlington Pickup Locker","type":"locker","description":{"subject":"24/7 locker","text":"Secure locker for after-hours pickups.","files":[]},"address":{"line1":"1000 Brant St","line2":"","city":"Burlington","region":"ON","postalCode":"L7R 2G8","country":"Canada"},"geo":{"type":"Point","coordinates":[-79.799,43.3255]},"contact":{"phone":"+1-905-555-0505","email":"locker-burlington@bulkbuy.example"},"metadata":{"access":"24/7","lockerCount":40},"locationId":"69c46f3820f68a914e189c6d","createdAt":"2026-03-25T23:26:48.590Z","updatedAt":"2026-03-25T23:26:48.590Z"}],"description":{"subject":"Hamilton operations","text":"Operations and pickup points across Hamilton and Burlington.","files":[]},"name":"Hamilton Region","code":"HAM","ops_region":"hamilton"}}
+2026-03-25T23:26:48.674Z - WARN - [seed-index] 3 placeholders remain unresolved after best-effort resolution.
+2026-03-25T23:26:48.699Z - {
+  "success": true,
+  "summary": {
+    "startedAt": "2026-03-25T23:26:48.699Z",
+    "seedOrder": [
+      "users",
+      "configs",
+      "items",
+      "products",
+      "salesWindows",
+      "supplies",
+      "orders",
+      "messages",
+      "regionMaps",
+      "reviews",
+      "aggregations"
+    ],
+    "seedResults": [
+      {
+        "name": "users",
+        "createdCount": 0,
+        "providedKeys": 0,
+        "missingCount": 0,
+        "skipped": true
+      },
+      {
+        "name": "configs",
+        "createdCount": 0,
+        "providedKeys": 0,
+        "missingCount": 0,
+        "skipped": true
+      },
+      {
+        "name": "items",
+        "createdCount": 0,
+        "providedKeys": 0,
+        "missingCount": 0,
+        "skipped": true
+      },
+      {
+        "name": "products",
+        "createdCount": 0,
+        "providedKeys": 0,
+        "missingCount": 0,
+        "skipped": true
+      },
+      {
+        "name": "salesWindows",
+        "createdCount": 3,
+        "providedKeys": 3,
+        "missingCount": 3,
+        "skipped": false
+      },
+      {
+        "name": "supplies",
+        "createdCount": 0,
+        "providedKeys": 0,
+        "missingCount": 0,
+        "skipped": true
+      },
+      {
+        "name": "orders",
+        "createdCount": 0,
+        "providedKeys": 0,
+        "missingCount": 0,
+        "skipped": true
+      },
+      {
+        "name": "messages",
+        "createdCount": 0,
+        "providedKeys": 0,
+        "missingCount": 0,
+        "skipped": true
+      },
+      {
+        "name": "regionMaps",
+        "createdCount": 0,
+        "providedKeys": 0,
+        "missingCount": 0,
+        "skipped": false
+      },
+      {
+        "name": "reviews",
+        "createdCount": 0,
+        "providedKeys": 0,
+        "missingCount": 0,
+        "skipped": true
+      },
+      {
+        "name": "aggregations",
+        "createdCount": 0,
+        "providedKeys": 0,
+        "missingCount": 0,
+        "skipped": true
+      }
+    ],
+    "provided": {
+      "69c46f3820f68a914e189c50": [
+        "saleswindow.past",
+        "69c46f3820f68a914e189c49",
+        "69c46f3820f68a914e189c4c"
+      ],
+      "69c46f3820f68a914e189c50Map": {
+        "tag": "saleswindow.past",
+        "productPlaceholders": "69c46f3820f68a914e189c49",
+        "itemPlaceholders": "69c46f3820f68a914e189c4c"
+      },
+      "69c46f3820f68a914e189c51": [
+        "saleswindow.current",
+        "69c46f3820f68a914e189c49",
+        "69c46f3820f68a914e189c4c"
+      ],
+      "69c46f3820f68a914e189c51Map": {
+        "tag": "saleswindow.current",
+        "productPlaceholders": "69c46f3820f68a914e189c49",
+        "itemPlaceholders": "69c46f3820f68a914e189c4c"
+      },
+      "69c46f3820f68a914e189c52": [
+        "saleswindow.future",
+        "69c46f3820f68a914e189c4a",
+        "69c46f3820f68a914e189c4e"
+      ],
+      "69c46f3820f68a914e189c52Map": {
+        "tag": "saleswindow.future",
+        "productPlaceholders": "69c46f3820f68a914e189c4a",
+        "itemPlaceholders": "69c46f3820f68a914e189c4e"
+      }
+    },
+    "perSeedProvided": {
+      "salesWindows": {
+        "69c46f3820f68a914e189c50": {
+          "tag": "saleswindow.past",
+          "productPlaceholders": [
+            "69c46f3820f68a914e189c49",
+            "69c46f3820f68a914e189c4a"
+          ],
+          "itemPlaceholders": [
+            "69c46f3820f68a914e189c4c",
+            "69c46f3820f68a914e189c4d",
+            "69c46f3820f68a914e189c4e"
+          ]
+        },
+        "69c46f3820f68a914e189c51": {
+          "tag": "saleswindow.current",
+          "productPlaceholders": [
+            "69c46f3820f68a914e189c49",
+            "69c46f3820f68a914e189c4b"
+          ],
+          "itemPlaceholders": [
+            "69c46f3820f68a914e189c4c",
+            "69c46f3820f68a914e189c4f",
+            "69c46f3820f68a914e189c4d"
+          ]
+        },
+        "69c46f3820f68a914e189c52": {
+          "tag": "saleswindow.future",
+          "productPlaceholders": [
+            "69c46f3820f68a914e189c4a",
+            "69c46f3820f68a914e189c4b"
+          ],
+          "itemPlaceholders": [
+            "69c46f3820f68a914e189c4e",
+            "69c46f3820f68a914e189c4f",
+            "69c46f3820f68a914e189c4c"
+          ]
+        }
+      },
+      "regionMaps": {}
+    },
+    "missing": [
+      {
+        "type": "saleswindow.placeholders",
+        "salesWindowId": "69c46f3820f68a914e189c50",
+        "tag": "saleswindow.past",
+        "productPlaceholders": [
+          "69c46f3820f68a914e189c49",
+          "69c46f3820f68a914e189c4a"
+        ],
+        "itemPlaceholders": [
+          "69c46f3820f68a914e189c4c",
+          "69c46f3820f68a914e189c4d",
+          "69c46f3820f68a914e189c4e"
+        ],
+        "note": "Replace productPlaceholders and itemPlaceholders with real Product._id and Item._id values once those seeds run",
+        "seedName": "salesWindows"
+      },
+      {
+        "type": "saleswindow.placeholders",
+        "salesWindowId": "69c46f3820f68a914e189c51",
+        "tag": "saleswindow.current",
+        "productPlaceholders": [
+          "69c46f3820f68a914e189c49",
+          "69c46f3820f68a914e189c4b"
+        ],
+        "itemPlaceholders": [
+          "69c46f3820f68a914e189c4c",
+          "69c46f3820f68a914e189c4f",
+          "69c46f3820f68a914e189c4d"
+        ],
+        "note": "Replace productPlaceholders and itemPlaceholders with real Product._id and Item._id values once those seeds run",
+        "seedName": "salesWindows"
+      },
+      {
+        "type": "saleswindow.placeholders",
+        "salesWindowId": "69c46f3820f68a914e189c52",
+        "tag": "saleswindow.future",
+        "productPlaceholders": [
+          "69c46f3820f68a914e189c4a",
+          "69c46f3820f68a914e189c4b"
+        ],
+        "itemPlaceholders": [
+          "69c46f3820f68a914e189c4e",
+          "69c46f3820f68a914e189c4f",
+          "69c46f3820f68a914e189c4c"
+        ],
+        "note": "Replace productPlaceholders and itemPlaceholders with real Product._id and Item._id values once those seeds run",
+        "seedName": "salesWindows"
+      }
+    ],
+    "resolved": [],
+    "unresolved": [
+      {
+        "type": "saleswindow.placeholders",
+        "salesWindowId": "69c46f3820f68a914e189c50",
+        "tag": "saleswindow.past",
+        "productPlaceholders": [
+          "69c46f3820f68a914e189c49",
+          "69c46f3820f68a914e189c4a"
+        ],
+        "itemPlaceholders": [
+          "69c46f3820f68a914e189c4c",
+          "69c46f3820f68a914e189c4d",
+          "69c46f3820f68a914e189c4e"
+        ],
+        "note": "Replace productPlaceholders and itemPlaceholders with real Product._id and Item._id values once those seeds run",
+        "seedName": "salesWindows"
+      },
+      {
+        "type": "saleswindow.placeholders",
+        "salesWindowId": "69c46f3820f68a914e189c51",
+        "tag": "saleswindow.current",
+        "productPlaceholders": [
+          "69c46f3820f68a914e189c49",
+          "69c46f3820f68a914e189c4b"
+        ],
+        "itemPlaceholders": [
+          "69c46f3820f68a914e189c4c",
+          "69c46f3820f68a914e189c4f",
+          "69c46f3820f68a914e189c4d"
+        ],
+        "note": "Replace productPlaceholders and itemPlaceholders with real Product._id and Item._id values once those seeds run",
+        "seedName": "salesWindows"
+      },
+      {
+        "type": "saleswindow.placeholders",
+        "salesWindowId": "69c46f3820f68a914e189c52",
+        "tag": "saleswindow.future",
+        "productPlaceholders": [
+          "69c46f3820f68a914e189c4a",
+          "69c46f3820f68a914e189c4b"
+        ],
+        "itemPlaceholders": [
+          "69c46f3820f68a914e189c4e",
+          "69c46f3820f68a914e189c4f",
+          "69c46f3820f68a914e189c4c"
+        ],
+        "note": "Replace productPlaceholders and itemPlaceholders with real Product._id and Item._id values once those seeds run",
+        "seedName": "salesWindows"
+      }
+    ],
+    "marker": {
+      "name": "seed-db-models",
+      "version": "v1",
+      "seededAt": 1774481208674,
+      "summary": {
+        "seedCount": 11,
+        "unresolvedCount": 3,
+        "errors": 0
+      },
+      "seeds": [
+        "users",
+        "items",
+        "products",
+        "salesWindows",
+        "supplies",
+        "orders",
+        "messages",
+        "regionMaps",
+        "reviews",
+        "aggregations"
+      ],
+      "updatedAt": 1774481208674
+    },
+    "errors": [],
+    "appliedSeeds": [
+      "users",
+      "items",
+      "products",
+      "salesWindows",
+      "supplies",
+      "orders",
+      "messages",
+      "regionMaps",
+      "reviews",
+      "aggregations"
+    ]
+  }
+}

@@ -1,0 +1,252 @@
+/* src/components/AuthTabs.css
+   Polished, final stylesheet for AuthTabs (folder + markers)
+   - Name fields styled identically to other inputs (email/password)
+   - Reliable horizontal gap for two-column rows (first/last and password/confirm)
+   - Folder flap + marker tabs visuals
+   - Inputs, labels, errors, buttons, responsive rules
+   - Use .two-col on rows that must be side-by-side
+*/
+
+:root{
+  --folder-bg-top: #f6f3e8;
+  --folder-bg-bottom: #efe9d6;
+  --paper-bg-top: #fff;
+  --paper-bg-bottom: #fbfbf7;
+  --marker-green: #0adbc6;
+  --marker-teal: #0ea5a4;
+  --panel-border: #000;
+  --panel-radius: 6px;
+  --input-border: #d1d5db; /* softer than pure #ccc */
+  --gap-two-col: 20px; /* explicit gap between two-column fields */
+  --auth-width: 560px;
+  --auth-max-width: calc(100% - 24px);
+  --font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  --label-color: #111827;
+  --hint-color: #6b7280;
+  --error-color: #b91c1c;
+  --btn-radius: 6px;
+  --field-padding: 10px;
+  --field-radius: 6px;
+  --field-min-height: 40px;
+  --transition-fast: 120ms;
+}
+
+/* Container */
+.auth-tabs-folder {
+  font-family: var(--font-family);
+  width: var(--auth-width);
+  max-width: var(--auth-max-width);
+  margin: 0 auto;
+  padding: 18px;
+  border-radius: 8px;
+  /* background: linear-gradient(180deg, var(--paper-bg-top), var(--paper-bg-bottom)); */
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+  border: 1px solid rgba(0,0,0,0.06);
+  position: relative;
+  overflow: visible;
+  box-sizing: border-box;
+}
+
+/* Folder flap (top strip) */
+.folder-flap {
+  position: absolute;
+  top: -18px;
+  left: 12px;
+  right: 12px;
+  height: 36px;
+  background: linear-gradient(180deg, var(--folder-bg-top), var(--folder-bg-bottom));
+  border-radius: 8px 8px 0 0;
+  border: 1px solid rgba(0,0,0,0.06);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  padding-left: 18px;
+  padding-right: 18px;
+  gap: 12px;
+  pointer-events: none;
+  box-sizing: border-box;
+}
+
+/* Markers area (interactive) */
+.markers {
+  display: flex;
+  gap: 8px;
+  pointer-events: auto;
+}
+
+/* Marker (tab) button */
+.auth-tab {
+  --marker-color: var(--marker-green);
+  position: relative;
+  padding: 8px 12px;
+  border-radius: 4px;
+  border: 1px solid var(--panel-border);
+  background: #fff;
+  color: var(--label-color);
+  font-weight: 700;
+  cursor: pointer;
+  min-width: 96px;
+  text-align: center;
+  line-height: 1;
+  box-shadow: 0 4px 10px rgba(2,6,23,0.04);
+  transition: transform 140ms ease, box-shadow 140ms ease, background 140ms ease;
+  outline: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+  box-sizing: border-box;
+}
+
+/* Marker visual (small rounded rectangle above flap) */
+.auth-tab::before {
+  content: "";
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 56px;
+  height: 14px;
+  border-radius: 4px 4px 2px 2px;
+  background: var(--marker-color);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+  border: 1px solid rgba(0,0,0,0.06);
+  pointer-events: none;
+}
+
+/* Active marker: lifted and larger */
+.auth-tab.active {
+  background: transparent;
+  color:black;
+  transform: translateY(-6px);
+  box-shadow: 0 10px 22px rgba(0,0,0,0.12);
+}
+.auth-tab.active .auth-tab-label { color: #0adbc6; font-weight: 800; }
+.auth-tab.active::before {
+  width: 84px;
+  height: 22px;
+  top: -14px;
+  border-radius: 6px 6px 4px 4px;
+  background: var(--marker-color);
+}
+
+/* Focus ring for keyboard users */
+.auth-tab:focus {
+  box-shadow: 0 0 0 4px rgba(37,99,235,0.08);
+}
+
+/* Folder body (panel) */
+.folder-body {
+  margin-top: 12px; /* space so markers overlap visually */
+  padding: 18px;
+  border-radius: 8px;
+  background: linear-gradient(180deg, var(--paper-bg-top), var(--paper-bg-bottom));
+  border: 1px solid var(--panel-border);
+  position: relative;
+  z-index: 1;
+  box-sizing: border-box;
+}
+
+/* Form layout */
+.folder-body form { display: grid; gap: 12px; }
+
+/* Labels */
+.folder-body label {
+  display: block;
+  font-size: 13px;
+  margin-bottom: 6px;
+  color: var(--label-color);
+}
+label.required::after {
+  content: " *";
+  color: var(--error-color);
+  margin-left: 4px;
+  font-weight: 700;
+}
+
+/* Unified input styling (applies to name, email, password fields)
+   - Ensures name fields match password/email visuals exactly
+*/
+.folder-body input[type="text"],
+.folder-body input[type="email"],
+.folder-body input[type="password"] {
+  width: 100%;
+  padding: var(--field-padding);
+  border-radius: var(--field-radius);
+  border: 1px solid var(--input-border);
+  box-sizing: border-box;
+  font-size: 14px;
+  transition: border-color var(--transition-fast) ease, box-shadow var(--transition-fast) ease;
+  min-height: var(--field-min-height);
+  line-height: 1.2;
+  background: #fff;
+}
+.folder-body input::placeholder { color: #9aa0a6; }
+.folder-body input:focus {
+  border-color: rgba(37,99,235,0.6);
+  box-shadow: 0 6px 18px rgba(37,99,235,0.06);
+  outline: none;
+}
+
+/* Field error */
+.field-error {
+  color: var(--error-color);
+  font-size: 12px;
+  margin-top: 6px;
+}
+
+/* Two-column rows with explicit gap and safe shrinking
+   Ensures the gap between first/last and password/confirm is reliable.
+*/
+.two-col {
+  display: flex;
+  gap: var(--gap-two-col);
+  align-items: stretch;
+  box-sizing: border-box;
+}
+.two-col > * { flex: 1 1 0; min-width: 0; box-sizing: border-box; }
+
+/* Ensure inner field containers don't add extra margin that collapses gap */
+.two-col > div { display: flex; flex-direction: column; }
+
+/* Buttons row */
+.actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+/* Buttons */
+.btn {
+  padding: 10px 16px;
+  border-radius: var(--btn-radius);
+  font-weight: 700;
+  cursor: pointer;
+  border: 1px solid var(--panel-border);
+  background: #fff;
+  color: var(--label-color);
+}
+.btn.primary {
+  background: var(--marker-green);
+  color: #fff;
+  border: none;
+}
+
+/* Hint text */
+.hint { font-size: 12px; color: var(--hint-color); }
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .auth-tabs-folder { width: calc(100% - 24px); padding: 14px; }
+  .folder-flap { left: 8px; right: 8px; height: 32px; padding-left: 12px; padding-right: 12px; }
+  .auth-tab { min-width: 72px; padding: 6px 8px; }
+  .auth-tab::before { width: 44px; height: 12px; top: -8px; }
+  .auth-tab.active::before { width: 64px; height: 18px; top: -12px; }
+  .two-col { flex-direction: column; gap: 12px; }
+}
+
+/* Allow marker color override via inline style on the button */
+.auth-tab[style*="--marker-color"]::before { background: var(--marker-color); }
+.auth-tab[style*="--marker-color"].active::before { background: var(--marker-color); }

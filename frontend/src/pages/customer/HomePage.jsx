@@ -1,5 +1,6 @@
 // src/pages/marketplace/HomePage.jsx
 import { useState, useEffect } from "react";
+import { io } from "socket.io-client";
 import Navbar from "../../components/Navbar";
 import Sidebar from "../../components/Sidebar";
 import Footer from "../../components/Footer";
@@ -47,6 +48,7 @@ function getNearestCity(lat, lng) {
 }
 
 export default function HomePage() {
+  const [socket, setSocket] = useState(null);
   const [locationState, setLocationState] = useState("idle");
   const [detectedCity, setDetectedCity] = useState(null);
 
@@ -61,22 +63,55 @@ export default function HomePage() {
     : 0;
 
   useEffect(() => {
-    const savedCity = sessionStorage.getItem("detectedCity");
-    const dismissed = sessionStorage.getItem("locationModalDismissed");
+  // =========================
+  // 🔌 SOCKET CONNECTION
+  // =========================
+  const socketInstance = io("http://localhost:5000");
 
-    if (savedCity) {
-      setDetectedCity(savedCity);
-      if (!dismissed) {
-        setLocationState("done");
-      }
-    } else {
-      const asked = sessionStorage.getItem("askedLocation");
-      if (!asked) {
-        const timer = setTimeout(() => setLocationState("asking"), 600);
-        return () => clearTimeout(timer);
-      }
+  socketInstance.on("connect", () => {
+    console.log("🟢 Connected to server:", socketInstance.id);
+  });
+
+  socketInstance.on("order_created", (data) => {
+    console.log("🔥 Order Created:", data);
+    alert("🛒 New order created!");
+  });
+
+  setSocket(socketInstance);
+
+  // =========================
+  // 📍 LOCATION LOGIC
+  // =========================
+  const savedCity = sessionStorage.getItem("detectedCity");
+  const dismissed = sessionStorage.getItem("locationModalDismissed");
+
+  let timer = null;
+
+  if (savedCity) {
+    setDetectedCity(savedCity);
+
+    if (!dismissed) {
+      setLocationState("done");
     }
-  }, []);
+  } else {
+    const asked = sessionStorage.getItem("askedLocation");
+
+    if (!asked) {
+      timer = setTimeout(() => {
+        setLocationState("asking");
+      }, 600);
+    }
+  }
+
+  // =========================
+  // 🧹 CLEANUP
+  // =========================
+  return () => {
+    if (timer) clearTimeout(timer);
+    socketInstance.disconnect();
+  };
+
+}, []);
 
   const handleAllow = () => {
     sessionStorage.setItem("askedLocation", "true");

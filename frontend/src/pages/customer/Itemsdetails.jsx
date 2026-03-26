@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { io } from "socket.io-client";
 import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
@@ -17,6 +18,7 @@ export default function ItemDetail() {
     const [selectedImage, setSelectedImage] = useState(0);
     const [quantity, setQuantity] = useState(1);
     const [activeTab, setActiveTab] = useState("description");
+    const [socket, setSocket] = useState(null);
 
     useEffect(() => {
         async function loadItem() {
@@ -27,6 +29,8 @@ export default function ItemDetail() {
                     "Content-Type": "application/json",
                     ...(token && { Authorization: `Bearer ${token}` }),
                 };
+
+            
 
                 // ── 1. Try product API first ──────────────────────────────
                 const prodRes = await fetch(`${PRODUCTS_API}/${id}`, { headers });
@@ -132,6 +136,31 @@ export default function ItemDetail() {
 
         loadItem();
     }, [id]);
+
+    // ✅ SOCKET CONNECTION (REAL-TIME) — CORRECT PLACE
+useEffect(() => {
+    const socketInstance = io("http://localhost:5000", {
+  transports: ["websocket"],
+  reconnection: true,
+  reconnectionAttempts: 5,
+});
+
+    socketInstance.on("connect", () => {
+        console.log("🟢 Connected to server:", socketInstance.id);
+    });
+
+    socketInstance.on("order_created", (data) => {
+        console.log("🔥 Order Created:", data);
+        alert("🛒 New order created!");
+    });
+
+    setSocket(socketInstance);
+
+    return () => {
+        console.log("🧹 Cleaning socket...");
+        socketInstance.disconnect();
+    };
+}, []);
 
     if (loading) {
         return (

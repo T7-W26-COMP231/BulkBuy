@@ -28,6 +28,20 @@ const { s3Ensure } = require('./scripts/s3.ensure');
 const errorMiddleware = require('./middleware/error.middleware');
 const correlationMiddleware = require('./middleware/correlation.middleware');
 
+// ✅ Attach Socket.IO instance globally (clean architecture)
+let io = null;
+
+const setSocketIO = (socketInstance) => {
+  io = socketInstance;
+};
+
+const getSocketIO = () => {
+  if (!io) {
+    throw new Error('Socket.IO not initialized');
+  }
+  return io;
+};
+
 const createApp = async () => {
   const app = express();
 
@@ -100,4 +114,8 @@ const createApp = async () => {
   return app;
 }
 
-module.exports = createApp;
+module.exports = {
+  createApp,
+  setSocketIO,
+  getSocketIO
+};

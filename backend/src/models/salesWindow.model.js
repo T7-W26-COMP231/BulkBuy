@@ -79,6 +79,10 @@ const SalesWindowSchema = new Schema(
      */
     products: { type: [ProductSchema], default: [] },
 
+
+      // Operational region
+    ops_region: { type: String, trim: true, require: true },
+
     /**
      * overflow_id: reference to another SalesWindow document used when this doc
      * would exceed size limits. This forms a linked list of overflow windows.

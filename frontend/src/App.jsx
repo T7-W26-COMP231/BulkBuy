@@ -1,4 +1,6 @@
 import { Routes, Route, Navigate } from "react-router-dom";
+import { useEffect } from "react";
+import { io } from "socket.io-client";
 import HomePage from "./pages/customer/HomePage";
 import OrdersPage from "./pages/customer/OrdersPage";
 import SupplierDashboard from "./pages/supplier/SupplierDashboard";
@@ -26,6 +28,22 @@ function PlaceholderPage({ title }) {
 
 export default function App() {
   useAuthBootstrap(); // ← added: auto-login until real auth is built
+  useEffect(() => {
+  const socket = io("http://localhost:5000");
+
+  socket.on("connect", () => {
+    console.log("🟢 Connected to server:", socket.id);
+  });
+
+  socket.on("order_created", (data) => {
+    console.log("🔥 Order Created:", data);
+    alert("🛒 New order created!");
+  });
+
+  return () => {
+    socket.disconnect();
+  };
+}, []);
 
   return (
     <Routes>

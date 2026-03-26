@@ -1,6 +1,7 @@
 // src/controllers/order.controller.js
 const createError = require('http-errors');
 const OrderService = require('../services/order.service');
+const { getSocketIO } = require('../socket');
 
 /**
  * Standard response wrapper
@@ -32,15 +33,27 @@ function buildOpts(req = {}) {
 }
 
 const OrderController = {
-  /**
-   * POST /orders
-   */
-  createOrder: asyncHandler(async (req, res) => {
-    const payload = req.body || {};
-    const opts = buildOpts(req);
-    const created = await OrderService.createOrder(payload, opts);
-    return send(res, 201, { success: true, data: created });
-  }),
+ /**
+ * POST /orders
+ */
+createOrder: asyncHandler(async (req, res) => {
+  const payload = req.body || {};
+  const opts = buildOpts(req);
+  const created = await OrderService.createOrder(payload, opts);
+
+  // ✅ Emit real-time event (order created)
+  try {
+    const io = getSocketIO();
+    console.log("📡 order_created emitted");
+    io.emit('order_created', created);
+  } catch (err) {
+    console.warn('Socket.IO not ready:', err.message);
+  }
+
+  return send(res, 201, { success: true, data: created });
+}),
+
+  
 
   /**
    * GET /orders/:id
@@ -95,22 +108,36 @@ const OrderController = {
     return send(res, 200, { success: true, ...result });
   }),
 
-  /**
-   * PATCH /orders/:id
-   */
-  updateById: asyncHandler(async (req, res) => {
-    const { id } = req.params;
-    const update = req.body || {};
-    if (!id) throw createError(400, 'id is required');
-    if (!update || typeof update !== 'object') throw createError(400, 'update payload is required');
-    const opts = Object.assign({ new: true }, {
-      populate: req.query.populate,
-      actor: req.user,
-      correlationId: req.headers['x-correlation-id'] || null
-    });
-    const updated = await OrderService.updateById(id, update, opts);
-    return send(res, 200, { success: true, data: updated });
-  }),
+ /**
+ * PATCH /orders/:id
+ */
+updateById: asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const update = req.body || {};
+
+  if (!id) throw createError(400, 'id is required');
+  if (!update || typeof update !== 'object') {
+    throw createError(400, 'update payload is required');
+  }
+
+  const opts = Object.assign({ new: true }, {
+    populate: req.query.populate,
+    actor: req.user,
+    correlationId: req.headers['x-correlation-id'] || null
+  });
+
+  const updated = await OrderService.updateById(id, update, opts);
+
+  // ✅ Emit real-time event (order updated)
+  try {
+    const io = getSocketIO();
+    io.emit('order_updated', updated);
+  } catch (err) {
+    console.warn('Socket.IO not ready:', err.message);
+  }
+
+  return send(res, 200, { success: true, data: updated });
+}),
 
   /**
    * PATCH /orders
@@ -125,6 +152,13 @@ const OrderController = {
       correlationId: req.headers['x-correlation-id'] || null
     });
     const updated = await OrderService.updateOne(filter, update, opts);
+    // ✅ Emit real-time event (order updated)
+    try {
+      const io = getSocketIO();
+      io.emit('order_updated', updated);
+    } catch (err) {
+      console.warn('Socket.IO not ready:', err.message);
+    }
     return send(res, 200, { success: true, data: updated });
   }),
 
@@ -141,18 +175,31 @@ const OrderController = {
     return send(res, 200, { success: true, data: updated });
   }),
 
-  /**
-   * POST /orders/:id/update-status
-   * Body: { status }
-   */
-  updateStatus: asyncHandler(async (req, res) => {
-    const { id } = req.params;
-    const { status } = req.body || {};
-    if (!id || !status) throw createError(400, 'order id and status are required');
-    const opts = buildOpts(req);
-    const updated = await OrderService.updateStatus(id, status, opts);
-    return send(res, 200, { success: true, data: updated });
-  }),
+/**
+ * POST /orders/:id/update-status
+ * Body: { status }
+ */
+updateStatus: asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body || {};
+
+  if (!id || !status) {
+    throw createError(400, 'order id and status are required');
+  }
+
+  const opts = buildOpts(req);
+  const updated = await OrderService.updateStatus(id, status, opts);
+
+  // ✅ Emit status update
+  try {
+    const io = getSocketIO();
+    io.emit('order_status_updated', updated);
+  } catch (err) {
+    console.warn('Socket.IO not ready:', err.message);
+  }
+
+  return send(res, 200, { success: true, data: updated });
+}),
 
   /* -------------------------
    * Cart / item-level endpoints

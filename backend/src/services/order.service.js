@@ -13,6 +13,8 @@
 const createError = require('http-errors');
 const OrderRepo = require('../repositories/order.repo');
 const auditService = require('./audit.service');
+const { sendOrderConfirmation } = require('./email.service');
+const UserRepo = require('../repositories/user.repo');
 
 function sanitizeForClient(doc) {
   if (!doc) return doc;
@@ -50,16 +52,42 @@ class OrderService {
     if (!Array.isArray(doc.items)) doc.items = [];
 
     try {
+
       const created = await OrderRepo.create(doc, { session: opts.session });
-      await auditService.logEvent({
-        eventType: 'create.order',
-        actor,
-        target: created._id || created.id,
-        outcome: 'success',
-        correlationId,
-        details: { orderId: created._id || created.id, status: created.status }
-      });
-      return sanitizeForClient(created);
+
+await auditService.logEvent({
+  eventType: 'create.order',
+  actor,
+  target: created._id || created.id,
+  outcome: 'success',
+  correlationId,
+  details: { orderId: created._id || created.id, status: created.status }
+});
+
+// ✅ Send email notification (SAFE)
+try {
+  let userEmail = null;
+
+  if (created?.userId) {
+    const user = await UserRepo.findById(created.userId);
+
+    if (user && Array.isArray(user.emails) && user.emails.length > 0) {
+      userEmail = user.emails[0].address;
+    }
+  }
+
+  if (userEmail) {
+    await sendOrderConfirmation(userEmail, created);
+  } else {
+    console.warn('⚠ No email found for user');
+  }
+} catch (err) {
+  console.warn('Email lookup failed:', err.message);
+}
+
+return sanitizeForClient(created);
+
+
     } catch (err) {
       await auditService.logEvent({
         eventType: 'create.order',

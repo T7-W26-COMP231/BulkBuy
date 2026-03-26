@@ -57,12 +57,22 @@ class ItemRepo {
   async findById(id, opts = {}) {
     const o = normalizeOpts(opts);
     if (!id) return null;
+
     const q = Item.findById(id);
+
+    // Always explicitly select +images to override select:false on schema
+    if (o.select) {
+      const fields = o.select.includes('images') ? o.select : o.select + ' +images';
+      q.select(fields);
+    } else {
+      q.select('+images');  // ← this is the missing line
+    }
+
     if (!o.includeDeleted) q.where({ status: { $ne: 'deleted' } });
-    if (o.select) q.select(o.select);
     if (o.populate) q.populate(o.populate);
     if (o.session) q.session(o.session);
     if (o.lean) q.lean();
+
     return q.exec();
   }
 
@@ -135,6 +145,7 @@ class ItemRepo {
    * Public-facing item list for Browse Bulk Items page
    */
   async getCatalogItems(filters = {}, opts = {}) {
+    console.log('DB:', Item.db.name, '| Collection:', Item.collection.name);
     const o = normalizeOpts({ ...opts, lean: true });
 
     const page = Math.max(1, parseInt(opts.page, 10) || 1);

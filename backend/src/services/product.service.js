@@ -13,17 +13,51 @@ const auditService = require('./audit.service');
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 25;
 
+// ============================================================
+// 💰 ESTIMATED SAVINGS HELPER (FINAL FIX - PRODUCTION SAFE)
+// ============================================================
+function calculateEstimatedSavings(doc) {
+  if (!doc || typeof doc !== 'object') return 0;
+
+  // ✅ CASE 1: Product bundles (items[])
+  if (Array.isArray(doc.items) && doc.items.length > 0) {
+    const prices = doc.items
+      .map(i => Number(i?.salesPrices?.[0]?.price ?? 0))
+      .filter(p => Number.isFinite(p) && p > 0);
+
+    if (prices.length < 2) return 0;
+
+    const maxPrice = Math.max(...prices); // base
+    const minPrice = Math.min(...prices); // best deal
+
+    if (maxPrice <= minPrice) return 0;
+
+    return Number((maxPrice - minPrice).toFixed(2));
+  }
+
+  return 0;
+}
+
 /**
  * Helper to sanitize product objects returned to clients.
  * Removes internal-only fields if present.
  */
 function sanitizeForClient(doc) {
   if (!doc) return doc;
-  const copy = { ...doc };
-  if (copy.deletedAt === null) delete copy.deletedAt;
-  if (copy.deletedBy === null) delete copy.deletedBy;
-  if (copy.deleted === undefined) delete copy.deleted;
-  return copy;
+
+  const base =
+    doc && typeof doc.toObject === 'function'
+      ? doc.toObject()
+      : { ...doc };
+
+  if (base.deletedAt === null) delete base.deletedAt;
+  if (base.deletedBy === null) delete base.deletedBy;
+  if (base.deleted === undefined) delete base.deleted;
+
+  delete base.estimatedSavings;
+  base.estimatedSavings = calculateEstimatedSavings(base);
+
+  return base;
 }
 
 /**

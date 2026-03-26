@@ -142,14 +142,18 @@ function makeProductPayload(index) {
     'Beverage Variety Case',
     'Baking & Pantry Kit'
   ];
-  const name = names[index % names.length] || `Seed Product ${index + 1}`;
+  const name = names[index % names.length];
   const now = Date.now();
-
   const sku = `BB-PROD-${String(index).padStart(3, '0')}`;
   const slug = slugify(`${sku}-${name}`);
-
   const defaultFrom = now - 24 * 3600 * 1000;
   const defaultTo = now + 24 * 3600 * 1000;
+
+  // Each product gets 2 DIFFERENT items based on index
+  const itemA = `BB-ITEM-${String(index * 2).padStart(3, '0')}`;
+  const itemB = `BB-ITEM-${String(index * 2 + 1).padStart(3, '0')}`;
+  const priceA = Number((10 + index * 3).toFixed(2));  // 10, 13, 16, 19, 22
+  const priceB = Number((8 + index * 2).toFixed(2));  // 8,  10, 12, 14, 16
 
   return {
     sku,
@@ -158,15 +162,15 @@ function makeProductPayload(index) {
     descriptions: [
       { locale: 'en', title: name, body: `${name} — curated selection of high-demand items.` }
     ],
-    // placeholders; will be resolved by resolvePayloadPlaceholders
     items: [
-      { itemId: '{{items.BB-ITEM-000}}', salesPrices: [{ price: 19.99, currency: 'USD', from: defaultFrom, to: defaultTo }] },
-      { itemId: '{{items.BB-ITEM-001}}', salesPrices: [{ price: 9.99, currency: 'USD', from: defaultFrom, to: defaultTo }] }
+      { itemId: `{{items.${itemA}}}`, salesPrices: [{ price: priceA, currency: 'USD', from: defaultFrom, to: defaultTo }] },
+      { itemId: `{{items.${itemB}}}`, salesPrices: [{ price: priceB, currency: 'USD', from: defaultFrom, to: defaultTo }] }
     ],
     discountScheme: { type: 'tiered', tiers: [{ minQty: 10, discountPct: 5 }] },
     salesWindow: { fromEpoch: now - 7 * 24 * 3600 * 1000, toEpoch: now + 7 * 24 * 3600 * 1000 },
     ops_region: 'NA',
     metadata: { origin: 'seed', seededAt: now },
+    estimatedSavings: Number(((priceA + priceB) * 0.05).toFixed(2)),
     status: 'active',
     deleted: false
   };

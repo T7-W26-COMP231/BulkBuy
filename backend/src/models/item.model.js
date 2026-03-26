@@ -148,7 +148,8 @@ const ItemSchema = new Schema(
     categories: [{ type: Schema.Types.ObjectId, ref: 'Category' }],
     tags: [{ type: String, trim: true }],
 
-    images: [{ type: Schema.Types.ObjectId, ref: 'S3file' }],
+    //images: [{ type: Schema.Types.ObjectId, ref: 'S3file' }],
+    images: [{ type: String, trim: true }],
     media: { type: [MediaSchema], default: [] },
 
     price: { type: [PriceSchema], default: [] },
@@ -205,8 +206,8 @@ ItemSchema.pre('validate', function () {
   // Ensure slug exists and is unique-ish; caller should handle uniqueness collisions
   try {
     if (!this.slug && this.title) {
-    const base = slugify(this.title, { lower: true, strict: true, remove: /[*+~.()'"!:@]/g });
-    this.slug = `${base}`.slice(0, 200);
+      const base = slugify(this.title, { lower: true, strict: true, remove: /[*+~.()'"!:@]/g });
+      this.slug = `${base}`.slice(0, 200);
     }
   } catch (error) {
     throw new Error(`item alidation failed: ${error.message}`)

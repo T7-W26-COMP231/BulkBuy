@@ -36,8 +36,6 @@ const asyncHandler = (fn) => (req, res, next) => {
 router.post(
   '/',
   userValidators.create,
-  requireAuth,
-  requireRole('administrator'),
   asyncHandler(UserController.createUser)
 );
 
@@ -101,8 +99,6 @@ router.patch(
   '/:id',
   userValidators.idParam,
   userValidators.update,
-  requireAuth,
-  requireRole('administrator'),
   asyncHandler(UserController.updateUserById)
 );
 

@@ -288,8 +288,7 @@ export default function Navbar({ detectedCity, onCityChange, locationLabel, onSe
             <h2 className="text-xl font-bold tracking-tight">BulkBuy</h2>
           </Link>
 
-          {/* City Dropdown */}
-          <div className="relative hidden md:flex" ref={ref}>
+          <div className="relative hidden md:flex" ref={cityRef}>
             <button
               onClick={() => setOpen((o) => !o)}
               className="cursor-pointer flex items-center gap-2 rounded-md px-2 py-1 hover:bg-gray-100 transition-colors"
@@ -316,7 +315,9 @@ export default function Navbar({ detectedCity, onCityChange, locationLabel, onSe
                     >
                       <span
                         className="material-symbols-outlined text-base"
-                        style={{ visibility: selected === city ? "visible" : "hidden" }}
+                        style={{
+                          visibility: selected === city ? "visible" : "hidden",
+                        }}
                       >
                         check
                       </span>
@@ -337,6 +338,11 @@ export default function Navbar({ detectedCity, onCityChange, locationLabel, onSe
                 className="w-full border-none bg-transparent text-sm placeholder:text-text-muted focus:ring-0 focus:outline-none"
                 placeholder="Search bulk deals..."
                 type="text"
+                onChange={(e) => {
+                  if (typeof onSearch === "function") {
+                    onSearch(e.target.value);
+                  }
+                }}
               />
             </div>
           </div>
@@ -352,16 +358,98 @@ export default function Navbar({ detectedCity, onCityChange, locationLabel, onSe
               <span className="material-symbols-outlined">shopping_cart</span>
             </Link>
 
-            <Link
-              to="/profile"
-              className="size-10 overflow-hidden rounded-full border-2 border-primary"
-            >
-              <img
-                className="h-full w-full object-cover"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuB_b7YtfguGbEdMe3FDNfGBLbeNIwwgf8hsF5TohaBw-2Ogx-t4KlEF8ljlb3rY2ltEAL4tY9rWPr2OjxTPeuqloBDRGZ2vwcZ7y0p46ykQ9JOq_CseQgYkUDjBvsD16pXRzJ-mpoLMds_LDBfYAiJBmRll5uIH2MT4cR5liOAz0T_RyISCG3rvYxdec8asUoW8zTT7zA7chdYHdmUJPSrtHT5IrES1MiCzQns8wDHmcs4ENY7Rs_qYOFvqSx_nlYCA7ZTNn-9aUvU"
-                alt="User avatar"
-              />
-            </Link>
+            <div className="relative" ref={profileRef}>
+              {user ? (
+                <>
+                  <button
+                    onClick={() => setProfileOpen((s) => !s)}
+                    className="size-10 overflow-hidden rounded-full border-2 border-primary focus:outline-none"
+                    aria-haspopup="true"
+                    aria-expanded={profileOpen}
+                  >
+                    <img
+                      className="h-full w-full object-cover"
+                      src={avatarSrc}
+                      alt={displayName || "User avatar"}
+                    />
+                  </button>
+
+                  {profileOpen && (
+                    <div className="absolute right-0 top-full z-50 mt-2 w-56 rounded-lg border border-gray-200 bg-white shadow-lg overflow-hidden">
+                      <div className="px-4 py-3 border-b border-gray-100">
+                        <div className="flex items-center gap-3">
+                          <img
+                            src={avatarSrc}
+                            alt="avatar"
+                            className="h-10 w-10 rounded-full object-cover"
+                          />
+                          <div>
+                            <div className="text-sm font-semibold">
+                              {displayName || "User"}
+                            </div>
+                            {email && (
+                              <div className="text-xs text-text-muted truncate">
+                                {email}
+                              </div>
+                            )}
+                            {user?.role && (
+                              <div className="text-xs text-text-muted mt-1">
+                                {user.role}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="py-1">
+                        <Link
+                          to="/profile"
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                          onClick={() => setProfileOpen(false)}
+                        >
+                          Profile
+                        </Link>
+                        <Link
+                          to="/orders"
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                          onClick={() => setProfileOpen(false)}
+                        >
+                          Orders
+                        </Link>
+                        <Link
+                          to="/settings"
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                          onClick={() => setProfileOpen(false)}
+                        >
+                          Settings
+                        </Link>
+                      </div>
+
+                      <div className="border-t border-gray-100">
+                        <button
+                          onClick={() => {
+                            setProfileOpen(false);
+                            handleSignOut();
+                          }}
+                          className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-50"
+                        >
+                          Sign out
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <button
+                  onClick={openAuthToast}
+                  className="inline-flex items-center gap-2 rounded-md px-3 py-1 hover:bg-gray-100 transition-colors"
+                >
+                  <span className="text-sm font-semibold">
+                    Sign in / Register
+                  </span>
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>

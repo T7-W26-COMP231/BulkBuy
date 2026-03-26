@@ -72,7 +72,6 @@ router.get(
 /* Get item by id */
 router.get(
   '/:id',
-  requireAuth,
   validators.idParam,
   asyncHandler(ItemController.getById)
 );

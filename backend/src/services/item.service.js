@@ -81,24 +81,10 @@ function resolveTierInfo(item = {}) {
 }
 
 function resolvePrimaryImage(item = {}) {
-  // If later you populate S3/media, swap this logic accordingly.
-  // For now it safely supports a few possible locations.
-  if (item.imageUrl) return item.imageUrl;
-
-  if (Array.isArray(item.media) && item.media.length > 0) {
-    const mediaImage = item.media.find((m) => m.type === 'image' && m.url);
-    if (mediaImage?.url) return mediaImage.url;
+  if (Array.isArray(item.images) && item.images.length > 0) {
+    return item.images[0];  // ← check images array first
   }
-
-  if (item.metadata && typeof item.metadata.get === 'function') {
-    const metaImage = item.metadata.get('imageUrl');
-    if (metaImage) return metaImage;
-  }
-
-  if (item.metadata && item.metadata.imageUrl) {
-    return item.metadata.imageUrl;
-  }
-
+  if (item.metadata?.imageUrl) return item.metadata.imageUrl;
   return null;
 }
 
@@ -113,6 +99,7 @@ function mapCatalogItem(item = {}) {
     title: safe.title,
     slug: safe.slug,
     shortDescription: safe.shortDescription || safe.description || '',
+    images: safe.images || [],
     image: resolvePrimaryImage(safe),
     currentPrice: price.value,
     currency: price.currency,

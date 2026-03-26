@@ -165,6 +165,50 @@ async function list(req, res) {
   }
 }
 
+/* GET /items/catalog */
+async function catalog(req, res) {
+  const correlationId = req.headers['x-correlation-id'] || null;
+  const actor = actorFromReq(req);
+
+  try {
+    const filters = {
+      q: req.query.q || null,
+      category: req.query.category || null,
+      ops_region: req.query.ops_region || null
+    };
+
+    const page = req.query.page;
+    const limit = req.query.limit;
+
+    const result = await ItemService.getCatalog(filters, {
+      page,
+      limit,
+      correlationId,
+      actor
+    });
+
+    return res.status(200).json({
+      success: true,
+      ...result
+    });
+  } catch (err) {
+    await auditService.logEvent({
+      eventType: 'item.catalog.failed',
+      actor,
+      target: { type: 'Item', id: null },
+      outcome: 'failure',
+      severity: 'error',
+      correlationId,
+      details: { message: err.message }
+    });
+
+    return res.status(err.status || 500).json({
+      success: false,
+      message: err.message
+    });
+  }
+}
+
 /* PATCH /items/:id */
 async function updateById(req, res) {
   const correlationId = req.headers['x-correlation-id'] || null;
@@ -447,6 +491,7 @@ module.exports = {
   getById: asyncHandler(getById),
   findBySku: asyncHandler(findBySku),
   list: asyncHandler(list),
+  catalog: asyncHandler(catalog),
   updateById: asyncHandler(updateById),
   upsert: asyncHandler(upsert),
   bulkInsert: asyncHandler(bulkInsert),

@@ -33,6 +33,97 @@ function sanitize(doc) {
   return obj;
 }
 
+function resolveCurrentPrice(item = {}) {
+  const now = new Date();
+
+  const prices = Array.isArray(item.price) ? item.price : [];
+  const activePrice = prices.find((p) => {
+    const fromOk = !p.effectiveFrom || new Date(p.effectiveFrom) <= now;
+    const toOk = !p.effectiveTo || new Date(p.effectiveTo) >= now;
+    return fromOk && toOk;
+  });
+
+  if (!activePrice) {
+    return {
+      value: 0,
+      currency: 'USD'
+    };
+  }
+
+  return {
+    value: activePrice.sale ?? activePrice.list ?? 0,
+    currency: activePrice.currency || 'USD'
+  };
+}
+
+function resolveTierInfo(item = {}) {
+  const tiers = Array.isArray(item.pricingTiers)
+    ? [...item.pricingTiers].sort((a, b) => a.minQty - b.minQty)
+    : [];
+
+  if (tiers.length === 0) {
+    return {
+      currentTierLabel: 'Tier 1',
+      nextTierLabel: null,
+      nextThresholdQty: null
+    };
+  }
+
+  // For now, treat first tier as current baseline if no demand/group qty is stored yet
+  const currentTier = tiers[0];
+  const nextTier = tiers[1] || null;
+
+  return {
+    currentTierLabel: `Tier ${tiers.indexOf(currentTier) + 1}`,
+    nextTierLabel: nextTier ? `Tier ${tiers.indexOf(nextTier) + 1}` : null,
+    nextThresholdQty: nextTier ? nextTier.minQty : null
+  };
+}
+
+function resolvePrimaryImage(item = {}) {
+  // If later you populate S3/media, swap this logic accordingly.
+  // For now it safely supports a few possible locations.
+  if (item.imageUrl) return item.imageUrl;
+
+  if (Array.isArray(item.media) && item.media.length > 0) {
+    const mediaImage = item.media.find((m) => m.type === 'image' && m.url);
+    if (mediaImage?.url) return mediaImage.url;
+  }
+
+  if (item.metadata && typeof item.metadata.get === 'function') {
+    const metaImage = item.metadata.get('imageUrl');
+    if (metaImage) return metaImage;
+  }
+
+  if (item.metadata && item.metadata.imageUrl) {
+    return item.metadata.imageUrl;
+  }
+
+  return null;
+}
+
+function mapCatalogItem(item = {}) {
+  const safe = sanitize(item);
+  const price = resolveCurrentPrice(safe);
+  const tierInfo = resolveTierInfo(safe);
+
+  return {
+    _id: safe._id,
+    sku: safe.sku,
+    title: safe.title,
+    slug: safe.slug,
+    shortDescription: safe.shortDescription || safe.description || '',
+    image: resolvePrimaryImage(safe),
+    currentPrice: price.value,
+    currency: price.currency,
+    currentTierLabel: tierInfo.currentTierLabel,
+    nextTierLabel: tierInfo.nextTierLabel,
+    nextThresholdQty: tierInfo.nextThresholdQty,
+    published: safe.published,
+    status: safe.status
+  };
+}
+
 class ItemService {
   /**
    * Create an item
@@ -129,6 +220,33 @@ class ItemService {
     } catch (err) {
       await auditService.logEvent({
         eventType: 'item.list.failed',
+        actor: actorFromOpts(opts),
+        target: { type: 'Item', id: null },
+        outcome: 'failure',
+        severity: 'error',
+        correlationId,
+        details: { message: err.message }
+      });
+      throw err;
+    }
+  }
+
+  /**
+   * Public catalog for marketplace page
+   */
+  async getCatalog(filters = {}, opts = {}) {
+    const correlationId = opts.correlationId || null;
+
+    try {
+      const result = await ItemRepo.getCatalogItems(filters, opts);
+
+      return {
+        ...result,
+        items: (result.items || []).map(mapCatalogItem)
+      };
+    } catch (err) {
+      await auditService.logEvent({
+        eventType: 'item.catalog.failed',
         actor: actorFromOpts(opts),
         target: { type: 'Item', id: null },
         outcome: 'failure',

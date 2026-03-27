@@ -50,7 +50,7 @@ function getNearestCity(lat, lng) {
 export default function HomePage() {
   const [socket, setSocket] = useState(null);
   const [locationState, setLocationState] = useState("idle");
-  const [detectedCity, setDetectedCity] = useState(null);
+  const [detectedCity, setDetectedCity] = useState("Toronto");
 
   // Derive all display data from detectedCity — no loading state needed
   const activeCity = detectedCity || "Toronto";
@@ -63,55 +63,55 @@ export default function HomePage() {
     : 0;
 
   useEffect(() => {
-  // =========================
-  // 🔌 SOCKET CONNECTION
-  // =========================
-  const socketInstance = io("http://localhost:5000");
+    // =========================
+    // 🔌 SOCKET CONNECTION
+    // =========================
+    const socketInstance = io("http://localhost:5000");
 
-  socketInstance.on("connect", () => {
-    console.log("🟢 Connected to server:", socketInstance.id);
-  });
+    socketInstance.on("connect", () => {
+      console.log("🟢 Connected to server:", socketInstance.id);
+    });
 
-  socketInstance.on("order_created", (data) => {
-    console.log("🔥 Order Created:", data);
-    alert("🛒 New order created!");
-  });
+    socketInstance.on("order_created", (data) => {
+      console.log("🔥 Order Created:", data);
+      alert("🛒 New order created!");
+    });
 
-  setSocket(socketInstance);
+    setSocket(socketInstance);
 
-  // =========================
-  // 📍 LOCATION LOGIC
-  // =========================
-  const savedCity = sessionStorage.getItem("detectedCity");
-  const dismissed = sessionStorage.getItem("locationModalDismissed");
+    // =========================
+    // 📍 LOCATION LOGIC
+    // =========================
+    const savedCity = sessionStorage.getItem("detectedCity");
+    const dismissed = sessionStorage.getItem("locationModalDismissed");
 
-  let timer = null;
+    let timer = null;
 
-  if (savedCity) {
-    setDetectedCity(savedCity);
+    if (savedCity) {
+      setDetectedCity(savedCity);
 
-    if (!dismissed) {
-      setLocationState("done");
+      if (!dismissed) {
+        setLocationState("done");
+      }
+    } else {
+      const asked = sessionStorage.getItem("askedLocation");
+
+      if (!asked) {
+        timer = setTimeout(() => {
+          setLocationState("asking");
+        }, 600);
+      }
     }
-  } else {
-    const asked = sessionStorage.getItem("askedLocation");
 
-    if (!asked) {
-      timer = setTimeout(() => {
-        setLocationState("asking");
-      }, 600);
-    }
-  }
+    // =========================
+    // 🧹 CLEANUP
+    // =========================
+    return () => {
+      if (timer) clearTimeout(timer);
+      socketInstance.disconnect();
+    };
 
-  // =========================
-  // 🧹 CLEANUP
-  // =========================
-  return () => {
-    if (timer) clearTimeout(timer);
-    socketInstance.disconnect();
-  };
-
-}, []);
+  }, []);
 
   const handleAllow = () => {
     sessionStorage.setItem("askedLocation", "true");

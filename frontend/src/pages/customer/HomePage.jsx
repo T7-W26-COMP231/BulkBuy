@@ -50,7 +50,7 @@ function getNearestCity(lat, lng) {
 export default function HomePage() {
   const [socket, setSocket] = useState(null);
   const [locationState, setLocationState] = useState("idle");
-  const [detectedCity, setDetectedCity] = useState("Toronto");
+  const [detectedCity, setDetectedCity] = useState(null);
 
   // Derive all display data from detectedCity — no loading state needed
   const activeCity = detectedCity || "Toronto";
@@ -63,55 +63,88 @@ export default function HomePage() {
     : 0;
 
   useEffect(() => {
-    // =========================
-    // 🔌 SOCKET CONNECTION
-    // =========================
-    const socketInstance = io("http://localhost:5000");
+// 🔌 SOCKET CONNECTION (WITH USER REGISTRATION)
+const socketInstance = io("http://localhost:5000", {
+  transports: ["websocket"],
+  reconnection: true,
+  reconnectionAttempts: 5,
+});
 
-    socketInstance.on("connect", () => {
-      console.log("🟢 Connected to server:", socketInstance.id);
-    });
+socketInstance.on("connect", () => {
+  console.log("🟢 Connected to server:", socketInstance.id);
 
-    socketInstance.on("order_created", (data) => {
-      console.log("🔥 Order Created:", data);
-      alert("🛒 New order created!");
-    });
+  // 🧪 DEBUG: check localStorage
+  const rawUser = localStorage.getItem("user");
+  console.log("🧪 rawUser:", rawUser);
 
-    setSocket(socketInstance);
+  if (rawUser) {
+    try {
+      const parsedUser = JSON.parse(rawUser);
+      console.log("🧪 parsedUser:", parsedUser);
 
-    // =========================
-    // 📍 LOCATION LOGIC
-    // =========================
-    const savedCity = sessionStorage.getItem("detectedCity");
-    const dismissed = sessionStorage.getItem("locationModalDismissed");
+      const userId = parsedUser?._id;
 
-    let timer = null;
-
-    if (savedCity) {
-      setDetectedCity(savedCity);
-
-      if (!dismissed) {
-        setLocationState("done");
+      if (userId) {
+        socketInstance.emit("register", userId);
+        console.log("👤 Registered socket user:", userId);
+      } else {
+        console.warn("⚠ No _id in user object");
       }
-    } else {
-      const asked = sessionStorage.getItem("askedLocation");
-
-      if (!asked) {
-        timer = setTimeout(() => {
-          setLocationState("asking");
-        }, 600);
-      }
+    } catch (err) {
+      console.warn("⚠ Failed to parse user:", err.message);
     }
+  } else {
+    console.warn("⚠ No user found in localStorage");
+  }
+});
 
-    // =========================
-    // 🧹 CLEANUP
-    // =========================
-    return () => {
-      if (timer) clearTimeout(timer);
-      socketInstance.disconnect();
-    };
+// 🔥 LISTEN FOR ORDER EVENTS
+socketInstance.on("order_created", (data) => {
+    console.log("🔥 Order Created:", data);
 
-  }, []);
+    // ✅ Simple UI-safe notification (no blocking alert)
+    if (window?.dispatchEvent) {
+        window.dispatchEvent(
+            new CustomEvent("new_order_notification", { detail: data })
+        );
+    }
+});
+
+  setSocket(socketInstance);
+
+  // =========================
+  // 📍 LOCATION LOGIC
+  // =========================
+  const savedCity = sessionStorage.getItem("detectedCity");
+  const dismissed = sessionStorage.getItem("locationModalDismissed");
+
+  let timer = null;
+
+  if (savedCity) {
+    setDetectedCity(savedCity);
+
+    if (!dismissed) {
+      setLocationState("done");
+    }
+  } else {
+    const asked = sessionStorage.getItem("askedLocation");
+
+    if (!asked) {
+      timer = setTimeout(() => {
+        setLocationState("asking");
+      }, 600);
+    }
+  }
+
+  // =========================
+  // 🧹 CLEANUP
+  // =========================
+  return () => {
+    if (timer) clearTimeout(timer);
+    socketInstance.disconnect();
+  };
+
+}, []);
 
   const handleAllow = () => {
     sessionStorage.setItem("askedLocation", "true");

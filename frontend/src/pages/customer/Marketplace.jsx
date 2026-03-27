@@ -160,8 +160,8 @@ export default function Marketplace() {
                       price={price}
                       image={item.image || item.images?.[0] || ""}
                       size="large"
-                      //minTierPrice={minTierPrice}      // ← uncomment
-                      //minTierQty={item.discountScheme?.tiers?.[0]?.minQty ?? null}  // ← uncomment
+                      minTierPrice={minTierPrice}      // ← uncomment
+                      minTierQty={item.discountScheme?.tiers?.[0]?.minQty ?? null}  // ← uncomment
                       estimatedSavings={item.estimatedSavings ?? 0}
 
                     />

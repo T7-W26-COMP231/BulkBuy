@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { io } from "socket.io-client";
+//import { io } from "socket.io-client";
 import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
@@ -30,13 +30,16 @@ export default function ItemDetail() {
                     ...(token && { Authorization: `Bearer ${token}` }),
                 };
 
-            
+
 
                 // ── 1. Try product API first ──────────────────────────────
                 const prodRes = await fetch(`${PRODUCTS_API}/${id}`, { headers });
+
                 const prodData = await prodRes.json();
                 const product = prodData.data ?? prodData;
-
+                console.log(prodData)
+                console.log(prodRes)
+                console.log(product)
                 if (prodRes.ok && product?._id) {
                     const itemIds = (product.items ?? [])
                         .map((i) => i.itemId?.$oid || i.itemId?.toString?.() || i.itemId)
@@ -50,44 +53,66 @@ export default function ItemDetail() {
 
                     const items = itemsRes
                         .map((res) => res.data ?? res)
-                        .filter(Boolean);
-                    const sortedItems = [...items].sort((a, b) => {
-                        const getPrice = (item) => {
-                            const match = product.items?.find(
-                                pi => (pi.itemId?.$oid || pi.itemId) === (item._id?.$oid || item._id)
-                            );
-                            return match?.salesPrices?.find(sp => sp.currency === "USD")?.price ?? Infinity;
-                        };
-                        return getPrice(a) - getPrice(b);
-                    });
+                        .filter((res) => res?._id);
 
                     if (items.length === 0) {
                         setError("No items found in this product bundle.");
                         return;
                     }
 
-                    const mainItem = sortedItems[0];
+                    // ✅ Preserve product.items order (no sorting)
+                    const sortedItems = (product.items ?? [])
+                        .map(pi => {
+                            const piId = pi.itemId?.$oid || pi.itemId?.toString?.() || String(pi.itemId);
+                            return items.find(item => {
+                                const itemId = item._id?.$oid || item._id?.toString?.() || String(item._id);
+                                return itemId === piId;
+                            });
+                        })
+                        .filter(Boolean);
 
-                    const basePrice = mainItem?.price?.[0]?.list ?? 0;
-                    const salePrice = mainItem?.price?.[0]?.sale ?? null;
-                    const itemTiers = mainItem?.pricingTiers ?? [];
-                    // Get the salesPrice for this item from the product doc
-                    const productItemData = product.items?.[0];
+
+
+                    // ✅ mainItem is now defined
+                    const mainItem = sortedItems[0];
+                    const mainItemIdStr = mainItem._id?.$oid || mainItem._id?.toString?.() || String(mainItem._id);
+
+
+                    // ✅ Match salesPrice by item ID
+                    const productItemData = product.items?.find(pi => {
+                        const piId = pi.itemId?.$oid || pi.itemId?.toString?.() || String(pi.itemId);
+                        return piId === mainItemIdStr;
+                    });
+
                     const salesPrice = productItemData?.salesPrices?.find(
                         sp => sp.currency === "USD"
                     )?.price ?? null;
-                    let estimatedSavings = 0;
-                    if (salePrice !== null && salePrice < basePrice) {
-                        estimatedSavings = Number((basePrice - salePrice).toFixed(2));
-                    } else if (itemTiers.length > 0) {
-                        const bestTierPrice = Math.min(...itemTiers.map(t => t.price));
-                        if (basePrice > bestTierPrice) {
-                            estimatedSavings = Number((basePrice - bestTierPrice).toFixed(2));
+
+                    const effectiveBase = salesPrice ?? mainItem.price?.[0]?.list ?? 0;
+                    const itemTiers = mainItem.pricingTiers ?? [];
+
+
+                    const estimatedSavings = (() => {
+                        const base = mainItem.price?.[0]?.list ?? 0;
+                        const sale = mainItem.price?.[0]?.sale ?? null;
+                        const tiers = mainItem.pricingTiers ?? [];
+                        if (sale !== null && sale < base) return Number((base - sale).toFixed(2));
+                        if (tiers.length > 0) {
+                            const best = Math.min(...tiers.map(t => t.price));
+                            return base > best ? Number((base - best).toFixed(2)) : 0;
                         }
-                    }
+                        return 0;
+                    })();
+
+                    console.log("🛒 productItems:", sortedItems.map(it => ({
+                        id: it._id,
+                        title: it.title,
+                        price: it.price?.[0]?.list,
+                    })));
 
                     setProductData(product);
-                    setProductItems(items);
+                    setProductItems(sortedItems);
+
                     setItem({
                         ...mainItem,
                         price: salesPrice !== null
@@ -95,9 +120,9 @@ export default function ItemDetail() {
                             : mainItem.price,
                         estimatedSavings,
                         _isProduct: true,
-                        _bundleItems: items.slice(1),
+                        _bundleItems: sortedItems.slice(1),
                     });
-                    return; // ✅ stop here, don't fall through
+                    return;
                 }
 
                 // ── 2. Fallback: try plain item API ───────────────────────
@@ -137,30 +162,6 @@ export default function ItemDetail() {
         loadItem();
     }, [id]);
 
-    // ✅ SOCKET CONNECTION (REAL-TIME) — CORRECT PLACE
-useEffect(() => {
-    const socketInstance = io("http://localhost:5000", {
-  transports: ["websocket"],
-  reconnection: true,
-  reconnectionAttempts: 5,
-});
-
-    socketInstance.on("connect", () => {
-        console.log("🟢 Connected to server:", socketInstance.id);
-    });
-
-    socketInstance.on("order_created", (data) => {
-        console.log("🔥 Order Created:", data);
-        alert("🛒 New order created!");
-    });
-
-    setSocket(socketInstance);
-
-    return () => {
-        console.log("🧹 Cleaning socket...");
-        socketInstance.disconnect();
-    };
-}, []);
 
     if (loading) {
         return (
@@ -194,7 +195,9 @@ useEffect(() => {
     const listPrice = item.price?.[0]?.list ?? 0;
     const salePrice = item.price?.[0]?.sale ?? null;
     const displayPrice = salePrice ?? listPrice;
+
     console.log(displayPrice)
+
     const hasSale = salePrice !== null && salePrice < listPrice;
     const currency = item.price?.[0]?.currency ?? "USD";
     const stock = item.inventory?.stock ?? 0;
@@ -467,7 +470,9 @@ useEffect(() => {
 
                                 <div className="flex gap-4 overflow-x-auto">
                                     {productItems.map((it) => (
+
                                         <div
+
                                             key={it._id}
                                             onClick={() => {
                                                 setItem({
@@ -481,6 +486,7 @@ useEffect(() => {
                                                             const best = Math.min(...tiers.map(p => p.price));
                                                             return base > best ? Number((base - best).toFixed(2)) : 0;
                                                         }
+
                                                         return 0;
                                                     })(),
                                                     _isProduct: false, // optional: mark it as a single item now
@@ -504,13 +510,15 @@ useEffect(() => {
                                             </p>
 
                                             <p className="text-xs text-gray-500">
-                                                ${it.price?.[0]?.list ?? 0}
+                                                ${(it.price?.[0]?.sale ?? it.price?.[0]?.list ?? 0).toFixed(2)}
                                             </p>
                                         </div>
                                     ))}
                                 </div>
                             </div>
-                        )}
+
+                        )
+                        }
 
                         {/* ── Description tab — UNCHANGED ── */}
                         {activeTab === "description" && (

@@ -10,7 +10,7 @@ import ProductListPage from "./pages/customer/ProductListPage";
 import CartPage from "./pages/customer/CartPage";
 import Shop from "./pages/customer/Marketplace";
 import Item from "./pages/customer/Itemsdetails";
-import { useAuthBootstrap } from "./hooks/useAuthBootstrap"; // ← added
+//import { useAuthBootstrap } from "./hooks/useAuthBootstrap"; // ← added
 
 
 function PlaceholderPage({ title }) {
@@ -27,23 +27,23 @@ function PlaceholderPage({ title }) {
 }
 
 export default function App() {
-  useAuthBootstrap(); // ← added: auto-login until real auth is built
+  //useAuthBootstrap(); // ← added: auto-login until real auth is built
   useEffect(() => {
-  const socket = io("http://localhost:5000");
+    const socket = io("http://localhost:5000");
 
-  socket.on("connect", () => {
-    console.log("🟢 Connected to server:", socket.id);
-  });
+    socket.on("connect", () => {
+      console.log("🟢 Connected to server:", socket.id);
+    });
 
-  socket.on("order_created", (data) => {
-    console.log("🔥 Order Created:", data);
-    alert("🛒 New order created!");
-  });
+    socket.on("order_created", (data) => {
+      console.log("🔥 Order Created:", data);
+      alert("🛒 New order created!");
+    });
 
-  return () => {
-    socket.disconnect();
-  };
-}, []);
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
 
   return (
     <Routes>

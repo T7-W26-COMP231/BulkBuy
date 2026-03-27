@@ -214,9 +214,9 @@ export default function Navbar({ detectedCity, onCityChange, locationLabel, onSe
           minWidth: 420,
           position: "relative",
           textAlign: "center",
-          backgroundColor:"blur",
-          borderRight:"1px solid black",
-          borderRadius:"5px"
+          backgroundColor: "blur",
+          borderRight: "1px solid black",
+          borderRadius: "5px"
         }}
       >
         <AuthTabs

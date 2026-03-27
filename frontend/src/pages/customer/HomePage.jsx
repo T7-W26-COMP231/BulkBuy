@@ -63,19 +63,52 @@ export default function HomePage() {
     : 0;
 
   useEffect(() => {
-  // =========================
-  // 🔌 SOCKET CONNECTION
-  // =========================
-  const socketInstance = io("http://localhost:5000");
+// 🔌 SOCKET CONNECTION (WITH USER REGISTRATION)
+const socketInstance = io("http://localhost:5000", {
+  transports: ["websocket"],
+  reconnection: true,
+  reconnectionAttempts: 5,
+});
 
-  socketInstance.on("connect", () => {
-    console.log("🟢 Connected to server:", socketInstance.id);
-  });
+socketInstance.on("connect", () => {
+  console.log("🟢 Connected to server:", socketInstance.id);
 
-  socketInstance.on("order_created", (data) => {
+  // 🧪 DEBUG: check localStorage
+  const rawUser = localStorage.getItem("user");
+  console.log("🧪 rawUser:", rawUser);
+
+  if (rawUser) {
+    try {
+      const parsedUser = JSON.parse(rawUser);
+      console.log("🧪 parsedUser:", parsedUser);
+
+      const userId = parsedUser?._id;
+
+      if (userId) {
+        socketInstance.emit("register", userId);
+        console.log("👤 Registered socket user:", userId);
+      } else {
+        console.warn("⚠ No _id in user object");
+      }
+    } catch (err) {
+      console.warn("⚠ Failed to parse user:", err.message);
+    }
+  } else {
+    console.warn("⚠ No user found in localStorage");
+  }
+});
+
+// 🔥 LISTEN FOR ORDER EVENTS
+socketInstance.on("order_created", (data) => {
     console.log("🔥 Order Created:", data);
-    alert("🛒 New order created!");
-  });
+
+    // ✅ Simple UI-safe notification (no blocking alert)
+    if (window?.dispatchEvent) {
+        window.dispatchEvent(
+            new CustomEvent("new_order_notification", { detail: data })
+        );
+    }
+});
 
   setSocket(socketInstance);
 

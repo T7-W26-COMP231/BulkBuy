@@ -118,7 +118,7 @@ export default function ItemDetail() {
                         price: salesPrice !== null
                             ? [{ list: salesPrice, sale: null, currency: "USD" }]
                             : mainItem.price,
-                        estimatedSavings,
+                        estimatedSavings: Number(mainItem.estimatedSavings ?? 0),
                         _isProduct: true,
                         _bundleItems: sortedItems.slice(1),
                     });
@@ -131,21 +131,7 @@ export default function ItemDetail() {
                 const plainItem = itemData.data ?? itemData;
 
                 if (itemRes.ok && plainItem?._id) {
-                    const basePrice = plainItem?.price?.[0]?.list ?? 0;
-                    const salePrice = plainItem?.price?.[0]?.sale ?? null;
-                    const itemTiers = plainItem?.pricingTiers ?? [];
-
-                    let estimatedSavings = 0;
-                    if (salePrice !== null && salePrice < basePrice) {
-                        estimatedSavings = Number((basePrice - salePrice).toFixed(2));
-                    } else if (itemTiers.length > 0) {
-                        const bestTierPrice = Math.min(...itemTiers.map(t => t.price));
-                        if (basePrice > bestTierPrice) {
-                            estimatedSavings = Number((basePrice - bestTierPrice).toFixed(2));
-                        }
-                    }
-
-                    setItem({ ...plainItem, estimatedSavings, _isProduct: false, _bundleItems: [] });
+                    setItem({ ...plainItem, _isProduct: false, _bundleItems: [] });
                     return;
                 }
 
@@ -194,16 +180,24 @@ export default function ItemDetail() {
 
     const listPrice = item.price?.[0]?.list ?? 0;
     const salePrice = item.price?.[0]?.sale ?? null;
-    const displayPrice = salePrice ?? listPrice;
 
-    console.log(displayPrice)
+    const backendUnitPrice = item.currentUnitPrice ?? salePrice ?? listPrice;
+    const backendSavings = Number(item.estimatedSavings ?? 0);
+    const activeTier = item.activeTier ?? null;
+    const nextTier = item.nextTier ?? null;
+    const nextThresholdQty = item.nextThresholdQty ?? null;
+    const aggregatedDemand = Number(item.aggregatedDemand ?? 0);
+    const progressPercent = Number(item.progressPercent ?? 0);
+
+    const displayPrice = backendUnitPrice;
+
+    console.log(displayPrice);
 
     const hasSale = salePrice !== null && salePrice < listPrice;
-    const currency = item.price?.[0]?.currency ?? "USD";
+    const currency = item.pricingCurrency ?? item.price?.[0]?.currency ?? "USD";
     const stock = item.inventory?.stock ?? 0;
     const images = item.images?.length > 0 ? item.images : [item.metadata?.imageUrl].filter(Boolean);
     const tiers = item.pricingTiers ?? [];
-    const activeTier = [...tiers].reverse().find((t) => quantity >= t.minQty);
 
     // Tabs — add "items" tab when viewing a product
     const tabs = isProduct
@@ -271,9 +265,9 @@ export default function ItemDetail() {
                             <span className="text-4xl font-extrabold text-text-main">
                                 ${displayPrice.toFixed(2)}
                             </span>
-                            {Number(item.estimatedSavings) > 0 && (
+                            {backendSavings > 0 && (
                                 <div className="ml-2 rounded-lg bg-green-100 px-3 py-1 text-sm font-semibold text-green-700">
-                                    💰 You save ${item.estimatedSavings}
+                                    💰 You save ${backendSavings.toFixed(2)}
                                 </div>
                             )}
                             {hasSale && (
@@ -347,20 +341,25 @@ export default function ItemDetail() {
                             <div className="mb-1 flex items-center justify-between text-sm">
                                 <span className="text-text-muted">Current commitment level</span>
                                 <span className="font-extrabold text-primary">
-                                    {stock} / {stock + 200} units
+                                    {aggregatedDemand}
+                                    {nextThresholdQty ? ` / ${nextThresholdQty}` : ""} units
                                 </span>
                             </div>
                             <div className="h-2.5 w-full overflow-hidden rounded-full bg-neutral-light">
                                 <div
                                     className="h-full rounded-full bg-primary transition-all"
-                                    style={{ width: `${Math.min((stock / (stock + 200)) * 100, 100)}%` }}
+                                    style={{ width: `${Math.min(progressPercent, 100)}%` }}
                                 />
                             </div>
-                            {tiers[tiers.length - 1] && (
+                            {nextTier ? (
                                 <p className="mt-1 text-xs text-primary">
-                                    ↗ Add more units to unlock Tier {tiers.length} (${tiers[tiers.length - 1].price.toFixed(2)}) pricing!
+                                    ↗ Add more units to unlock ${nextTier.price.toFixed(2)} pricing at {nextTier.minQty} units!
                                 </p>
-                            )}
+                            ) : activeTier ? (
+                                <p className="mt-1 text-xs text-primary">
+                                    ✅ Best available bulk pricing unlocked.
+                                </p>
+                            ) : null}
                         </div>
 
                         <div className="flex items-center gap-4">
@@ -477,20 +476,8 @@ export default function ItemDetail() {
                                             onClick={() => {
                                                 setItem({
                                                     ...it,
-                                                    estimatedSavings: (() => {
-                                                        const base = it.price?.[0]?.list ?? 0;
-                                                        const sale = it.price?.[0]?.sale ?? null;
-                                                        const tiers = it.pricingTiers ?? [];
-                                                        if (sale !== null && sale < base) return Number((base - sale).toFixed(2));
-                                                        if (tiers.length > 0) {
-                                                            const best = Math.min(...tiers.map(p => p.price));
-                                                            return base > best ? Number((base - best).toFixed(2)) : 0;
-                                                        }
-
-                                                        return 0;
-                                                    })(),
-                                                    _isProduct: false, // optional: mark it as a single item now
-                                                    _bundleItems: [],  // optional: no further bundle
+                                                    _isProduct: false,
+                                                    _bundleItems: [],
                                                 });
                                                 setSelectedImage(0);
                                                 setQuantity(1);

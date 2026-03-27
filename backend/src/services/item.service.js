@@ -17,6 +17,9 @@ const createError = require('http-errors');
 const ItemRepo = require('../repositories/item.repo');
 const auditService = require('./audit.service');
 
+const Order = require('../models/order.model');
+const { computePricingTier } = require('./pricingEngine');
+
 function actorFromOpts(opts = {}) {
   if (!opts) return { userId: null, role: null };
   if (opts.actor) return opts.actor;
@@ -111,6 +114,35 @@ function mapCatalogItem(item = {}) {
   };
 }
 
+async function getAggregatedDemandForItem(itemId) {
+  const orders = await Order.find({
+    status: { $ne: 'draft' },
+    'items.itemId': itemId
+  }).lean();
+
+  return orders.reduce((sum, order) => {
+    const qty = (order.items || [])
+      .filter((it) => String(it.itemId) === String(itemId))
+      .reduce((acc, it) => acc + (Number(it.quantity) || 0), 0);
+
+    return sum + qty;
+  }, 0);
+}
+
+function enrichItemWithPricing(item, pricingState) {
+  return {
+    ...item,
+    aggregatedDemand: pricingState.aggregatedDemand,
+    currentUnitPrice: pricingState.currentUnitPrice,
+    pricingCurrency: pricingState.currency,
+    activeTier: pricingState.activeTier,
+    nextTier: pricingState.nextTier,
+    nextThresholdQty: pricingState.nextThresholdQty,
+    progressPercent: pricingState.progressPercent,
+    estimatedSavings: pricingState.estimatedSavings
+  };
+}
+
 class ItemService {
   /**
    * Create an item
@@ -154,10 +186,16 @@ class ItemService {
   async getById(id, opts = {}) {
     const correlationId = opts.correlationId || null;
     if (!id) throw createError(400, 'id is required');
+
     try {
       const doc = await ItemRepo.findById(id, opts);
       if (!doc) throw createError(404, 'Item not found');
-      return sanitize(doc);
+
+      const safeItem = sanitize(doc);
+      const aggregatedDemand = await getAggregatedDemandForItem(id);
+      const pricingState = computePricingTier(safeItem, aggregatedDemand);
+
+      return enrichItemWithPricing(safeItem, pricingState);
     } catch (err) {
       await auditService.logEvent({
         eventType: 'item.get.failed',

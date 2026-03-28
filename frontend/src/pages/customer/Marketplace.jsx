@@ -144,7 +144,7 @@ export default function Marketplace() {
               {filteredProducts.map((item, index) => {
                 const id = getId(item, index);
                 const price = getDisplayPrice(item);
-                console.log(price)
+                //console.log(price)
                 const minTierPrice = getMinTierPrice(item, price);
 
                 return (

@@ -296,7 +296,7 @@ export default function AuthTabs(props) {
     <div className={`auth-tabs-folder ${className}`} style={{ width: 520, maxWidth: "calc(100% - 24px)", ...style }}>
       <div className="folder-flap" aria-hidden="true">
         <div style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", justifyContent: "flex-start" }}>
-          <div style={{ fontSize: 15, color: "#6b6b6b", fontWeight: 700 }}> [ Account ] </div>
+          <div style={{ fontSize: 14, width:"fit-content", color: "#6b6b6b", fontWeight: 700 }}> [ Account ] </div>
           <div style={{ flex: 1 }} />
           <div className="markers" role="tablist" aria-label="Authentication tabs">
             <button

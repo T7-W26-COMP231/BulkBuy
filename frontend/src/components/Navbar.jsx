@@ -211,12 +211,12 @@ export default function Navbar({ detectedCity, onCityChange, locationLabel, onSe
     return (
       <div
         style={{
-          minWidth: 420,
+          // minWidth: 420,
           position: "relative",
           textAlign: "center",
-          backgroundColor:"blur",
-          borderRight:"1px solid black",
-          borderRadius:"5px"
+          backgroundColor:"transparent",
+          // borderRight:"1px solid black",
+          borderRadius:"10px"
         }}
       >
         <AuthTabs

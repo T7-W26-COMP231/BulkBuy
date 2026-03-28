@@ -103,62 +103,7 @@ export default function ToastProvider({ children }) {
   /* -------------------------
      Core API
      ------------------------- */
-  // const addToast = useCallback((content, opts = {}) => {
-  //   const normalized = normalizeOpts(opts);
-
-  //   // Prevent duplicates for stack toasts when AllowedMultiple === false
-  //   if (normalized.IsToStack && !normalized.AllowedMultiple) {
-  //     const existing = findExistingStackToast(normalized, content);
-  //     if (existing) {
-  //       // bring existing to front and return its id
-  //       bringToFront(existing.id);
-  //       moveStackToastToTop(existing.id);
-  //       return existing.id;
-  //     }
-  //   }
-
-  //   const id = uid("toast");
-  //   const createdAt = Date.now();
-  //   const z = ++zRef.current;
-  //   const toast = { id, content, opts: normalized, z, createdAt };
-
-  //   if (normalized.IsToStack) {
-  //     if (stackHiddenRef.current) {
-  //       const saved = savedStackRef.current || [];
-  //       // avoid re-adding duplicates from saved stack when AllowedMultiple === false
-  //       const restored = saved
-  //         .filter((s) => {
-  //           if (!normalized.AllowedMultiple && normalized.toastName) {
-  //             return s.opts.toastName !== normalized.toastName;
-  //           }
-  //           return true;
-  //         })
-  //         .map((s) => ({ ...s, z: ++zRef.current }));
-  //       savedStackRef.current = [];
-  //       stackHiddenRef.current = false;
-  //       setStackToasts((prev) => [...restored, ...prev, toast]);
-  //     } else {
-  //       setStackToasts((prev) => [...prev, toast]);
-  //     }
-  //   } else {
-  //     // non-stack: if stack visible, hide it so non-stack can overlay
-  //     if (stackToasts.length > 0 && !stackHiddenRef.current) {
-  //       savedStackRef.current = stackToasts.map((t) => ({ ...t }));
-  //       stackHiddenRef.current = true;
-  //       setStackToasts([]);
-  //     }
-  //     setToasts((prev) => [...prev, toast]);
-  //   }
-
-  //   // schedule timeout only if not sticky
-  //   if (normalized.duration != null && !normalized.IsToStick) {
-  //     setTimeout(() => dismissToast(id), normalized.duration);
-  //   }
-
-  //   return id;
-  // }, [stackToasts, findExistingStackToast]);
-
-  // Programmatic dismiss (always allowed)
+  
 
   const addToast = useCallback((content, opts = {}) => {
   const normalized = normalizeOpts(opts);
@@ -522,22 +467,6 @@ export default function ToastProvider({ children }) {
     updateBlur();
   }, [toasts, stackToasts]);
 
-  /* -------------------------
-     Render helpers
-     ------------------------- */
-  // const renderContentWithControls = (toast) => {
-  //   const { id } = toast;
-  //   const toastControls = {
-  //     dismiss: () => dismissToast(id),
-  //     bringToFront: () => bringToFront(id),
-  //     update: (patch) => updateToast(id, patch),
-  //   };
-  //   const content = toast.content;
-  //   if (React.isValidElement(content)) {
-  //     return React.cloneElement(content, { toastControls });
-  //   }
-  //   return <div>{content}</div>;
-  // };
 
   /* -------------------------
    Render helpers

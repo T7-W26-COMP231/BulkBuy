@@ -221,22 +221,61 @@ export default function ItemDetail() {
             alert("Please sign in to add items to your intent.");
             return;
         }
+
         setAddingToIntent(true);
+
         try {
             const payload = buildIntentPayload({
-                userId: user._id,
-                productId: productData?._id ?? null,
-                itemId: item._id,
-                quantity,
-                atInstantPrice: displayPrice,
-                discountedPercentage: backendSavings > 0
-                    ? Math.round((backendSavings / listPrice) * 100)
-                    : 0,
-                discountBracket: { initial: listPrice, final: displayPrice },
-                ops_region: item.ops_region ?? null,
+            userId: user._id,
+            productId: productData?._id ?? null,
+            itemId: item._id,
+            quantity,
+            atInstantPrice: displayPrice,
+            discountedPercentage:
+                backendSavings > 0 ? Math.round((backendSavings / listPrice) * 100) : 0,
+            discountBracket: { initial: listPrice, final: displayPrice },
+            ops_region: item.ops_region ?? null,
             });
+
             await createIntent(payload);
-            navigate("/cart");
+
+            const existingCartItems = JSON.parse(sessionStorage.getItem("cartItems") || "[]");
+
+            const nextItem = {
+            id: item._id,
+            productId: productData?._id ?? null,
+            itemId: item._id,
+            name: item.name || item.title || item.label || productData?.name || "Unnamed item",
+            supplier: item.supplier || productData?.brand || "BulkBuy Brand",
+            quantity,
+            unitPrice: displayPrice,
+            imageLabel: "🛒",
+            };
+
+            const existingIndex = existingCartItems.findIndex(
+            (cartItem) => cartItem.itemId === nextItem.itemId
+            );
+
+            let updatedCartItems;
+
+            if (existingIndex >= 0) {
+            updatedCartItems = [...existingCartItems];
+            updatedCartItems[existingIndex] = {
+                ...updatedCartItems[existingIndex],
+                quantity,
+                unitPrice: displayPrice,
+            };
+            } else {
+            updatedCartItems = [...existingCartItems, nextItem];
+            }
+
+            sessionStorage.setItem("cartItems", JSON.stringify(updatedCartItems));
+
+            navigate("/cart", {
+            state: {
+                cartItems: updatedCartItems,
+            },
+            });
         } catch (err) {
             console.error("Add to intent error:", err);
             alert("Could not add to intent. Please try again.");

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useLocation } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import Sidebar from "../../components/Sidebar";
 import Footer from "../../components/Footer";
@@ -8,24 +9,31 @@ import { getCityData } from "../../data/mockData";
 
 export default function CartPage() {
   const { showToast } = useToast();
+  const location = useLocation();
   const [detectedCity, setDetectedCity] = useState("Scarborough");
   const [intentConfirmed, setIntentConfirmed] = useState(false);
 
-  const [cartItem, setCartItem] = useState({
-    id: 1,
-    name: "This should be connected to backend",
-    supplier: "Supplier name should be here",
-    quantity: 12,
-    unitPrice: 1.25,
-    imageLabel: "🥑",
+  const [cartItems, setCartItems] = useState(() => {
+    const stateItems = location.state?.cartItems;
+    const savedItems = sessionStorage.getItem("cartItems");
+
+    if (stateItems?.length) return stateItems;
+    if (savedItems) return JSON.parse(savedItems);
+
+    return [];
   });
 
-  useEffect(() => {
+ useEffect(() => {
     const savedCity = sessionStorage.getItem("detectedCity");
     if (savedCity) {
       setDetectedCity(savedCity);
     }
-  }, []);
+
+    if (location.state?.cartItems?.length) {
+      sessionStorage.setItem("cartItems", JSON.stringify(location.state.cartItems));
+      setCartItems(location.state.cartItems);
+    }
+  }, [location.state]);
 
 
   const handleCityChange = (newCity) => {
@@ -34,16 +42,17 @@ export default function CartPage() {
     setIntentConfirmed(false);
   };
 
-  const handleQuantityChange = (event) => {
+  const handleQuantityChange = (itemId, event) => {
     const value = Number(event.target.value);
 
     if (!Number.isFinite(value)) return;
     if (value < 1) return;
 
-    setCartItem((prev) => ({
-      ...prev,
-      quantity: value,
-    }));
+    setCartItems((prev) =>
+      prev.map((item) =>
+        item.itemId === itemId ? { ...item, quantity: value } : item
+      )
+    );
 
     setIntentConfirmed(false);
   };
@@ -51,21 +60,30 @@ export default function CartPage() {
   const cityData = getCityData(detectedCity);
 
   const totalPrice = useMemo(() => {
-    return [cartItem].reduce((total, item) => {
-      return total + item.quantity * item.unitPrice;
+    return cartItems.reduce((total, item) => {
+      return total + (item.quantity || 0) * (item.unitPrice || 0);
     }, 0);
-  }, [cartItem]);
+  }, [cartItems]);
 
   const projectedSavings = 3.0;
   const infoMessage = intentConfirmed
-    ? "Intent confirmed successfully. You may update your request again if needed."
-    : "Existing intent detected: You already have an active request for this item. Submit again to update your quantity.";
+  ? "Intent confirmed successfully. You may update your request again if needed."
+  : "Existing intent detected: You already have an active request for one or more items. Submit again to update your quantities.";
 
   const handleConfirmIntent = () => {
-    if (cartItem.quantity < 1) {
+    if (cartItems.length === 0) {
       showToast(
         <div className="p-3 text-sm font-medium text-red-700">
-          ❌ Quantity must be at least 1
+          ❌ Your cart is empty. Please add at least one item.
+        </div>
+      );
+      return;
+    }
+
+    if (cartItems.some((item) => item.quantity < 1)) {
+      showToast(
+        <div className="p-3 text-sm font-medium text-red-700">
+          ❌ All items must have quantity of at least 1.
         </div>
       );
       return;
@@ -83,7 +101,7 @@ export default function CartPage() {
   const handleModifyQuantity = () => {
     showToast(
       <div className="p-3 text-sm font-medium text-blue-700">
-        ℹ️ You can now adjust your quantity.
+        ℹ️ You can now adjust your quantities.
       </div>
     );
   };
@@ -125,7 +143,7 @@ export default function CartPage() {
             </div>
           </div>
           {/* ⚠️ VALIDATION — Task #104 */}
-          {cartItem.quantity < 1 && (
+          {cartItems.length === 0 && (
             <p className="text-sm font-medium text-red-600 bg-red-50 border border-red-200 rounded-2xl px-5 py-4">
               ❌ Please add at least one item before confirming.
             </p>
@@ -138,42 +156,55 @@ export default function CartPage() {
               <div className="text-right">Total</div>
             </div>
 
-            <div className="grid grid-cols-[2.2fr_0.7fr_0.9fr_0.9fr] items-center gap-4 px-5 py-5">
-              <div className="flex items-center gap-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-2xl">
-                  {cartItem.imageLabel}
+            {cartItems.length === 0 ? (
+                <div className="px-5 py-6 text-center text-text-muted">
+                  No items in cart yet.
                 </div>
+              ) : (
+                cartItems.map((cartItem) => (
+                  <div
+                    key={cartItem.itemId || cartItem.id}
+                    className="grid grid-cols-[2.2fr_0.7fr_0.9fr_0.9fr] items-center gap-4 border-t border-neutral-light px-5 py-5"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-2xl">
+                        {cartItem.imageLabel || "🛒"}
+                      </div>
 
-                <div>
-                  <h2 className="text-xl font-bold leading-7">{cartItem.name}</h2>
-                  <p className="mt-1 text-sm text-text-muted">
-                    Source: {cartItem.supplier}
-                  </p>
-                  <p className="mt-1 text-sm text-text-muted">
-                    Pickup area: {detectedCity}
-                  </p>
-                </div>
-              </div>
+                      <div>
+                        <h2 className="text-xl font-bold leading-7">
+                          {cartItem.name || "Unnamed item"}
+                        </h2>
+                        <p className="mt-1 text-sm text-text-muted">
+                          Source: {cartItem.supplier || "Unknown supplier"}
+                        </p>
+                        <p className="mt-1 text-sm text-text-muted">
+                          Pickup area: {detectedCity}
+                        </p>
+                      </div>
+                    </div>
 
-              <div className="flex justify-center">
-                <input
-                  type="number"
-                  min="1"
-                  step="1"
-                  value={cartItem.quantity}
-                  onChange={handleQuantityChange}
-                  className="w-20 rounded-lg border border-neutral-light bg-white px-3 py-2 text-center text-lg font-semibold outline-none transition focus:border-primary"
-                />
-              </div>
+                    <div className="flex justify-center">
+                      <input
+                        type="number"
+                        min="1"
+                        step="1"
+                        value={cartItem.quantity}
+                        onChange={(event) => handleQuantityChange(cartItem.itemId, event)}
+                        className="w-20 rounded-lg border border-neutral-light bg-white px-3 py-2 text-center text-lg font-semibold outline-none transition focus:border-primary"
+                      />
+                    </div>
 
-              <div className="text-center text-xl font-medium">
-                ${cartItem.unitPrice.toFixed(2)}
-              </div>
+                    <div className="text-center text-xl font-medium">
+                      ${(cartItem.unitPrice ?? 0).toFixed(2)}
+                    </div>
 
-              <div className="text-right text-2xl font-extrabold">
-                ${totalPrice.toFixed(2)}
-              </div>
-            </div>
+                    <div className="text-right text-2xl font-extrabold">
+                      ${((cartItem.quantity || 0) * (cartItem.unitPrice || 0)).toFixed(2)}
+                    </div>
+                  </div>
+                ))
+              )}
           </div>
 
           {/* 🔹 GRAND TOTAL SECTION */}
@@ -236,11 +267,12 @@ export default function CartPage() {
             <button
               type="button"
               onClick={handleConfirmIntent}
-              disabled={cartItem.quantity < 1}
-              className={`flex-1 rounded-2xl px-6 py-4 text-xl font-bold shadow-md transition ${cartItem.quantity < 1
-                ? "cursor-not-allowed bg-gray-300 text-white"
-                : "bg-primary text-text-main hover:bg-primary/90"
-                }`}
+              disabled={cartItems.length === 0 || cartItems.some((item) => item.quantity < 1)}
+              className={`flex-1 rounded-2xl px-6 py-4 text-xl font-bold shadow-md transition ${
+                cartItems.length === 0 || cartItems.some((item) => item.quantity < 1)
+                  ? "cursor-not-allowed bg-gray-300 text-white"
+                  : "bg-primary text-text-main hover:bg-primary/90"
+              }`}
             >
               Confirm Intent →
             </button>

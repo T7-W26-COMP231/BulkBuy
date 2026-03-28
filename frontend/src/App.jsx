@@ -10,6 +10,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import ProductDetailsPage from "./pages/customer/ProductDetailsPage";
 import ProductListPage from "./pages/customer/ProductListPage";
 import CartPage from "./pages/customer/CartPage";
+import ReviewModifyIntentPage from "./pages/customer/ReviewModifyIntentPage";
 import Shop from "./pages/customer/Marketplace";
 import Item from "./pages/customer/Itemsdetails";
 
@@ -78,6 +79,7 @@ export default function App() {
         <Route path="/community" element={<PlaceholderPage title="Community" />} />
         <Route path="/settings" element={<PlaceholderPage title="Settings" />} />
         <Route path="/savings" element={<PlaceholderPage title="Savings Vault" />} />
+        <Route path="/review-modify-intent" element={<ReviewModifyIntentPage />} />
       </Routes>
     </ToastProvider>
   );

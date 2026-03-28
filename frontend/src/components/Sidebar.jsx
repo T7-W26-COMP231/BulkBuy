@@ -8,7 +8,6 @@ const navItems = [
   { to: "/savings", icon: "trending_up", label: "Savings Vault" },
   { to: "/community", icon: "group", label: "Community" },
   { to: "/profile", icon: "settings", label: "Settings" },
-
 ];
 
 export default function Sidebar({ showSummary = true }) {
@@ -20,18 +19,14 @@ export default function Sidebar({ showSummary = true }) {
             key={item.to}
             to={item.to}
             className={({ isActive }) =>
-              `flex items-center gap-3 rounded-xl px-4 py-3 transition-colors ${isActive
-                ? "bg-primary/10 font-semibold text-text-main"
-                : "text-text-muted hover:bg-neutral-light"
+              `flex items-center gap-3 rounded-xl px-4 py-3 transition-colors ${
+                isActive
+                  ? "bg-primary/10 font-semibold text-text-main"
+                  : "text-text-muted hover:bg-neutral-light"
               }`
             }
           >
-            <span
-              className={`material-symbols-outlined ${item.to === "/bulkbuy-recommended" ? "text-primary" : ""
-                }`}
-            >
-              {item.icon}
-            </span>
+            <span className="material-symbols-outlined">{item.icon}</span>
             <span>{item.label}</span>
           </NavLink>
         ))}

@@ -334,13 +334,13 @@ export default function Navbar({
                   {GTA_CITIES.map((city) => (
                     <button
                       key={city}
-                      onClick={() => {
-                        setSelected(city);
-                        setOpen(false);
-                        onCityChange?.(city);
-                      }}
-                      className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 transition-colors flex items-center gap-2
-                        ${selected === city ? "font-semibold text-primary bg-blue-50" : "text-gray-700"}`}
+                      type="button"
+                      onClick={() => handleCitySelect(city)}
+                      className={`flex w-full items-center gap-2 px-4 py-2 text-left text-sm transition-colors hover:bg-gray-50 ${
+                        selected === city
+                          ? "bg-blue-50 font-semibold text-primary"
+                          : "text-gray-700"
+                      }`}
                     >
                       <span
                         className="material-symbols-outlined text-base"
@@ -376,7 +376,7 @@ export default function Navbar({
             </div>
           </div>
 
-          <div className="flex gap-3 items-center">
+          <div className="flex items-center gap-3">
             <Link
               to="/notifications"
               className="flex h-10 w-10 items-center justify-center rounded-lg bg-neutral-light transition-colors hover:bg-primary/20"

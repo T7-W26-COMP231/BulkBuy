@@ -1,6 +1,8 @@
 import { Routes, Route, Navigate } from "react-router-dom";
+import ToastProvider from "./contexts/ToastProvider";
 import { useEffect } from "react";
 import { io } from "socket.io-client";
+
 import HomePage from "./pages/customer/HomePage";
 import OrdersPage from "./pages/customer/OrdersPage";
 import SupplierDashboard from "./pages/supplier/SupplierDashboard";
@@ -10,8 +12,8 @@ import ProductListPage from "./pages/customer/ProductListPage";
 import CartPage from "./pages/customer/CartPage";
 import Shop from "./pages/customer/Marketplace";
 import Item from "./pages/customer/Itemsdetails";
-//import { useAuthBootstrap } from "./hooks/useAuthBootstrap"; // ← added
 
+//import { useAuthBootstrap } from "./hooks/useAuthBootstrap";
 
 function PlaceholderPage({ title }) {
   return (
@@ -27,7 +29,8 @@ function PlaceholderPage({ title }) {
 }
 
 export default function App() {
-  //useAuthBootstrap(); // ← added: auto-login until real auth is built
+  //useAuthBootstrap();
+
   useEffect(() => {
     const socket = io(`${import.meta.env.VITE_API_URL}`);
 
@@ -37,6 +40,8 @@ export default function App() {
 
     socket.on("order_created", (data) => {
       console.log("🔥 Order Created:", data);
+
+      // 🔥 (Optional later: replace with toast too)
       alert("🛒 New order created!");
     });
 
@@ -46,31 +51,34 @@ export default function App() {
   }, []);
 
   return (
-    <Routes>
-      <Route path="/" element={<HomePage />} />
-      <Route path="/marketplace" element={<Shop />} />
-      <Route path="/orders" element={<OrdersPage />} />
-      <Route path="/supplier" element={<SupplierDashboard />} />
-      <Route path="/admin" element={<AdminDashboard />} />
-      <Route path="/cart" element={<CartPage />} />
-      <Route path="/items/:id" element={<Item />} />
+    <ToastProvider>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/marketplace" element={<Shop />} />
+        <Route path="/orders" element={<OrdersPage />} />
+        <Route path="/supplier" element={<SupplierDashboard />} />
+        <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/cart" element={<CartPage />} />
+        <Route path="/items/:id" element={<Item />} />
 
-      <Route path="/product/:id" element={<ProductDetailsPage />} />
-      <Route path="/products" element={<ProductListPage />} />
-      <Route path="/about" element={<PlaceholderPage title="About Us" />} />
-      <Route path="/careers" element={<PlaceholderPage title="Careers" />} />
-      <Route path="/partner-login" element={<PlaceholderPage title="Partner Login" />} />
-      <Route path="/how-it-works" element={<PlaceholderPage title="How It Works" />} />
-      <Route path="/help-center" element={<PlaceholderPage title="Help Center" />} />
-      <Route path="/safety" element={<PlaceholderPage title="Safety" />} />
-      <Route path="/privacy-policy" element={<PlaceholderPage title="Privacy Policy" />} />
-      <Route path="/terms-of-service" element={<PlaceholderPage title="Terms of Service" />} />
-      <Route path="/notifications" element={<PlaceholderPage title="Notifications" />} />
-      <Route path="/profile" element={<PlaceholderPage title="Profile" />} />
-      <Route path="/login" element={<PlaceholderPage title="Login" />} />
-      <Route path="/community" element={<PlaceholderPage title="Community" />} />
-      <Route path="/settings" element={<PlaceholderPage title="Settings" />} />
-      <Route path="/savings" element={<PlaceholderPage title="Savings Vault" />} />
-    </Routes>
+        <Route path="/product/:id" element={<ProductDetailsPage />} />
+        <Route path="/products" element={<ProductListPage />} />
+
+        <Route path="/about" element={<PlaceholderPage title="About Us" />} />
+        <Route path="/careers" element={<PlaceholderPage title="Careers" />} />
+        <Route path="/partner-login" element={<PlaceholderPage title="Partner Login" />} />
+        <Route path="/how-it-works" element={<PlaceholderPage title="How It Works" />} />
+        <Route path="/help-center" element={<PlaceholderPage title="Help Center" />} />
+        <Route path="/safety" element={<PlaceholderPage title="Safety" />} />
+        <Route path="/privacy-policy" element={<PlaceholderPage title="Privacy Policy" />} />
+        <Route path="/terms-of-service" element={<PlaceholderPage title="Terms of Service" />} />
+        <Route path="/notifications" element={<PlaceholderPage title="Notifications" />} />
+        <Route path="/profile" element={<PlaceholderPage title="Profile" />} />
+        <Route path="/login" element={<PlaceholderPage title="Login" />} />
+        <Route path="/community" element={<PlaceholderPage title="Community" />} />
+        <Route path="/settings" element={<PlaceholderPage title="Settings" />} />
+        <Route path="/savings" element={<PlaceholderPage title="Savings Vault" />} />
+      </Routes>
+    </ToastProvider>
   );
 }

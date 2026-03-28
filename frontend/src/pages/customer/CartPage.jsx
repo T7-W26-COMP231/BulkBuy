@@ -2,13 +2,16 @@ import { useEffect, useMemo, useState } from "react";
 import Navbar from "../../components/Navbar";
 import Sidebar from "../../components/Sidebar";
 import Footer from "../../components/Footer";
+import { useToast } from "../../contexts/ToastProvider";
 import { getCityData } from "../../data/mockData";
 
+
 export default function CartPage() {
+  const { showToast } = useToast();
   const [detectedCity, setDetectedCity] = useState("Scarborough");
   const [intentConfirmed, setIntentConfirmed] = useState(false);
 
-  const [cartItem] = useState({
+   const [cartItem, setCartItem] = useState({
     id: 1,
     name: "This should be connected to backend",
     supplier: "Supplier name should be here",
@@ -30,6 +33,20 @@ export default function CartPage() {
     setIntentConfirmed(false);
   };
 
+    const handleQuantityChange = (event) => {
+    const value = Number(event.target.value);
+
+    if (!Number.isFinite(value)) return;
+    if (value < 1) return;
+
+    setCartItem((prev) => ({
+      ...prev,
+      quantity: value,
+    }));
+
+    setIntentConfirmed(false);
+  };
+
   const cityData = getCityData(detectedCity);
 
   const totalPrice = useMemo(() => {
@@ -38,16 +55,23 @@ export default function CartPage() {
 
   const projectedSavings = 3.0;
 
-  const handleConfirmIntent = () => {
-    setIntentConfirmed(true);
-    alert(
-      `Intent confirmed for ${detectedCity}. Your quantity request has been recorded for this aggregation window. THIS NEEDS TO BE CHANGED - HARDCODED`
-    );
-  };
+const handleConfirmIntent = () => {
+  setIntentConfirmed(true);
 
-  const handleModifyQuantity = () => {
-    alert("Modify quantity flow can be connected here.");
-  };
+  showToast(
+    <div className="p-3 text-sm font-medium text-green-700">
+      ✅ Intent confirmed for {detectedCity}. Your quantity request has been recorded.
+    </div>
+  );
+};
+
+const handleModifyQuantity = () => {
+  showToast(
+    <div className="p-3 text-sm font-medium text-blue-700">
+      ℹ️ You can now adjust your quantity.
+    </div>
+  );
+};
 
   return (
     <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-background-light text-text-main font-display">
@@ -108,8 +132,15 @@ export default function CartPage() {
                 </div>
               </div>
 
-              <div className="text-center text-xl font-semibold">
-                {cartItem.quantity}
+                           <div className="flex justify-center">
+                <input
+                  type="number"
+                  min="1"
+                  step="1"
+                  value={cartItem.quantity}
+                  onChange={handleQuantityChange}
+                  className="w-20 rounded-lg border border-neutral-light bg-white px-3 py-2 text-center text-lg font-semibold outline-none transition focus:border-primary"
+                />
               </div>
 
               <div className="text-center text-xl font-medium">
@@ -122,23 +153,40 @@ export default function CartPage() {
             </div>
           </div>
 
-          <div className="grid gap-5 md:grid-cols-2">
-            <div className="rounded-2xl border border-primary/20 bg-primary/10 p-5 shadow-sm">
-              <div className="mb-4 flex items-start justify-between">
-                <p className="text-xl font-medium text-text-main">
-                  Projected Savings
-                </p>
-                <div className="text-2xl">💸</div>
-              </div>
+{/* 🔹 GRAND TOTAL SECTION */}
+<div className="flex justify-end">
+  <div className="w-full max-w-sm rounded-2xl border border-neutral-light bg-white p-5 shadow-sm">
+    <div className="flex items-center justify-between text-lg font-medium text-text-main">
+      <span>Subtotal</span>
+      <span>${totalPrice.toFixed(2)}</span>
+    </div>
 
-              <div className="flex items-end gap-2">
-                <span className="text-4xl font-extrabold">
-                  ${projectedSavings.toFixed(2)}
-                </span>
-                <span className="pb-1 text-xl font-bold text-green-600">
-                  +20% VS RETAIL  THIS SHOULD COME FROM BACKEND
-                </span>
-              </div>
+    <div className="mt-3 border-t border-neutral-light pt-3">
+      <div className="flex items-center justify-between text-2xl font-extrabold text-text-main">
+        <span>Total</span>
+        <span>${totalPrice.toFixed(2)}</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div className="grid gap-5 md:grid-cols-2">
+  <div className="rounded-2xl border border-primary/20 bg-primary/10 p-5 shadow-sm">
+    <div className="mb-4 flex items-start justify-between">
+      <p className="text-xl font-medium text-text-main">
+        Projected Savings
+      </p>
+      <div className="text-2xl">💸</div>
+    </div>
+
+    <div className="flex items-end gap-2">
+      <span className="text-4xl font-extrabold">
+        ${projectedSavings.toFixed(2)}
+      </span>
+      <span className="pb-1 text-xl font-bold text-green-600">
+        +20% VS RETAIL  THIS SHOULD COME FROM BACKEND
+      </span>
+    </div>
 
               <p className="mt-4 text-sm text-text-muted">
                 Based on current market price of $1.50/unit THIS SHOULD COME FROM BACKEND

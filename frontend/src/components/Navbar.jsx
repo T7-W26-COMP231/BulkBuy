@@ -24,8 +24,15 @@ const GTA_CITIES = [
   "Aurora",
 ];
 
-export default function Navbar({ detectedCity, onCityChange, locationLabel, onSearch }) {
-  const [selected, setSelected] = useState("Toronto");
+export default function Navbar({
+  detectedCity,
+  onCityChange,
+  locationLabel,
+  onSearch,
+}) {
+  const [selected, setSelected] = useState(() => {
+    return sessionStorage.getItem("detectedCity") || "Scarborough";
+  });
   const [open, setOpen] = useState(false);
   const cityRef = useRef(null);
 
@@ -36,19 +43,35 @@ export default function Navbar({ detectedCity, onCityChange, locationLabel, onSe
   const { showToast, clearAll } = useToast();
 
   useEffect(() => {
-    if (detectedCity) setSelected(detectedCity);
+    if (detectedCity) {
+      setSelected(detectedCity);
+      sessionStorage.setItem("detectedCity", detectedCity);
+    }
   }, [detectedCity]);
 
   useEffect(() => {
     const handler = (e) => {
-      if (cityRef.current && !cityRef.current.contains(e.target))
+      if (cityRef.current && !cityRef.current.contains(e.target)) {
         setOpen(false);
-      if (profileRef.current && !profileRef.current.contains(e.target))
+      }
+      if (profileRef.current && !profileRef.current.contains(e.target)) {
         setProfileOpen(false);
+      }
     };
+
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, []);
+
+  const handleCitySelect = (city) => {
+    setSelected(city);
+    sessionStorage.setItem("detectedCity", city);
+    setOpen(false);
+
+    if (typeof onCityChange === "function") {
+      onCityChange(city);
+    }
+  };
 
   const handleSignOut = async () => {
     try {
@@ -63,7 +86,7 @@ export default function Navbar({ detectedCity, onCityChange, locationLabel, onSe
             IsToStack: false,
             duration: 2500,
             toastName: "Signed out",
-          },
+          }
         );
       } catch (tErr) {
         console.error("showToast error:", tErr);
@@ -83,7 +106,7 @@ export default function Navbar({ detectedCity, onCityChange, locationLabel, onSe
             IsToStack: false,
             duration: 4000,
             toastName: "Sign out failed",
-          },
+          }
         );
       } catch (tErr) {
         console.error("showToast error:", tErr);
@@ -91,13 +114,11 @@ export default function Navbar({ detectedCity, onCityChange, locationLabel, onSe
     }
   };
 
-  // Toast wrapper that uses AuthProvider directly and forwards handlers into AuthTabs
   function ToastAuthWrapper({ toastcontrols }) {
     const { signIn: ctxSignIn, signUp: ctxSignUp } = useAuth();
     const { showToast: globalShow } = useToast();
     const [busy, setBusy] = useState(false);
 
-    // Prefer context signIn/signUp (should be available because AuthProvider wraps ToastProvider)
     const signInHandler = ctxSignIn ?? signIn;
     const signUpHandler = ctxSignUp ?? signUp;
 
@@ -107,26 +128,25 @@ export default function Navbar({ detectedCity, onCityChange, locationLabel, onSe
           <div style={{ padding: 12 }}>
             <strong>Auth unavailable</strong>
           </div>,
-          { value: "TR", IsToStack: false },
+          { value: "TR", IsToStack: false }
         );
         return { ok: false, error: "Auth unavailable" };
       }
+
       setBusy(true);
       try {
         const res =
           typeof payload === "function"
             ? await payload(signInHandler)
             : await signInHandler(payload);
+
         setBusy(false);
-        try {
-          toastcontrols?.dismiss?.();
-        } catch (e) {
-          /* ignore */
-        }
+        toastcontrols?.dismiss?.();
         return res;
       } catch (err) {
         setBusy(false);
         console.error("handleSignIn error:", err);
+
         try {
           toastcontrols?.update?.({
             content: (
@@ -141,6 +161,7 @@ export default function Navbar({ detectedCity, onCityChange, locationLabel, onSe
         } catch (uErr) {
           console.error("toastcontrols.update error:", uErr);
         }
+
         globalShow(
           <div style={{ padding: 12 }}>
             <strong>Sign in error</strong>
@@ -148,8 +169,9 @@ export default function Navbar({ detectedCity, onCityChange, locationLabel, onSe
               {err?.message || "Unknown error"}
             </div>
           </div>,
-          { value: "TR", IsToStack: false, duration: 4000 },
+          { value: "TR", IsToStack: false, duration: 4000 }
         );
+
         return { ok: false, error: err?.message || "Sign in error" };
       }
     };
@@ -160,26 +182,25 @@ export default function Navbar({ detectedCity, onCityChange, locationLabel, onSe
           <div style={{ padding: 12 }}>
             <strong>Auth unavailable</strong>
           </div>,
-          { value: "TR", IsToStack: false },
+          { value: "TR", IsToStack: false }
         );
         return { ok: false, error: "Auth unavailable" };
       }
+
       setBusy(true);
       try {
         const res =
           typeof payload === "function"
             ? await payload(signUpHandler)
             : await signUpHandler(payload);
+
         setBusy(false);
-        try {
-          toastcontrols?.dismiss?.();
-        } catch (e) {
-          /* ignore */
-        }
+        toastcontrols?.dismiss?.();
         return res;
       } catch (err) {
         setBusy(false);
         console.error("handleSignUp error:", err);
+
         try {
           toastcontrols?.update?.({
             content: (
@@ -194,6 +215,7 @@ export default function Navbar({ detectedCity, onCityChange, locationLabel, onSe
         } catch (uErr) {
           console.error("toastcontrols.update error:", uErr);
         }
+
         globalShow(
           <div style={{ padding: 12 }}>
             <strong>Registration error</strong>
@@ -201,8 +223,9 @@ export default function Navbar({ detectedCity, onCityChange, locationLabel, onSe
               {err?.message || "Unknown error"}
             </div>
           </div>,
-          { value: "TR", IsToStack: false, duration: 4000 },
+          { value: "TR", IsToStack: false, duration: 4000 }
         );
+
         return { ok: false, error: err?.message || "Registration error" };
       }
     };
@@ -213,9 +236,8 @@ export default function Navbar({ detectedCity, onCityChange, locationLabel, onSe
           minWidth: 420,
           position: "relative",
           textAlign: "center",
-          backgroundColor: "blur",
           borderRight: "1px solid black",
-          borderRadius: "5px"
+          borderRadius: "5px",
         }}
       >
         <AuthTabs
@@ -289,8 +311,11 @@ export default function Navbar({ detectedCity, onCityChange, locationLabel, onSe
 
           <div className="relative hidden md:flex" ref={cityRef}>
             <button
-              onClick={() => setOpen((o) => !o)}
-              className="cursor-pointer flex items-center gap-2 rounded-md px-2 py-1 hover:bg-gray-100 transition-colors"
+              type="button"
+              onClick={() => setOpen((prev) => !prev)}
+              className="city-trigger flex items-center gap-2 rounded-md px-2 py-1 transition-colors hover:bg-gray-100"
+              aria-haspopup="listbox"
+              aria-expanded={open}
             >
               <span className="material-symbols-outlined text-primary">
                 location_on
@@ -305,18 +330,18 @@ export default function Navbar({ detectedCity, onCityChange, locationLabel, onSe
             </button>
 
             {open && (
-              <div className="absolute top-full left-0 z-50 mt-1 w-48 rounded-lg border border-gray-200 bg-white shadow-lg overflow-hidden">
-                <div className="py-1 max-h-64 overflow-y-auto">
+              <div className="city-menu absolute left-0 top-full mt-1 w-48 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-lg">
+                <div className="max-h-64 overflow-y-auto py-1">
                   {GTA_CITIES.map((city) => (
                     <button
                       key={city}
-                      onClick={() => {
-                        setSelected(city);
-                        setOpen(false);
-                        onCityChange?.(city);
-                      }}
-                      className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 transition-colors flex items-center gap-2
-                        ${selected === city ? "font-semibold text-primary bg-blue-50" : "text-gray-700"}`}
+                      type="button"
+                      onClick={() => handleCitySelect(city)}
+                      className={`flex w-full items-center gap-2 px-4 py-2 text-left text-sm transition-colors hover:bg-gray-50 ${
+                        selected === city
+                          ? "bg-blue-50 font-semibold text-primary"
+                          : "text-gray-700"
+                      }`}
                     >
                       <span
                         className="material-symbols-outlined text-base"
@@ -342,7 +367,7 @@ export default function Navbar({ detectedCity, onCityChange, locationLabel, onSe
                 search
               </span>
               <input
-                className="w-full border-none bg-transparent text-sm placeholder:text-text-muted focus:ring-0 focus:outline-none"
+                className="w-full border-none bg-transparent text-sm placeholder:text-text-muted focus:outline-none focus:ring-0"
                 placeholder="Search bulk deals..."
                 type="text"
                 onChange={(e) => {
@@ -354,14 +379,18 @@ export default function Navbar({ detectedCity, onCityChange, locationLabel, onSe
             </div>
           </div>
 
-          <div className="flex gap-3 items-center">
+          <div className="flex items-center gap-3">
             <Link
               to="/notifications"
               className="flex h-10 w-10 items-center justify-center rounded-lg bg-neutral-light transition-colors hover:bg-primary/20"
             >
               <span className="material-symbols-outlined">notifications</span>
             </Link>
-            <Link to="/cart" className="flex h-10 w-10 items-center justify-center rounded-lg bg-neutral-light transition-colors hover:bg-primary/20">
+
+            <Link
+              to="/cart"
+              className="flex h-10 w-10 items-center justify-center rounded-lg bg-neutral-light transition-colors hover:bg-primary/20"
+            >
               <span className="material-symbols-outlined">shopping_cart</span>
             </Link>
 
@@ -369,6 +398,7 @@ export default function Navbar({ detectedCity, onCityChange, locationLabel, onSe
               {user ? (
                 <>
                   <button
+                    type="button"
                     onClick={() => setProfileOpen((s) => !s)}
                     className="size-10 overflow-hidden rounded-full border-2 border-primary focus:outline-none"
                     aria-haspopup="true"
@@ -382,8 +412,8 @@ export default function Navbar({ detectedCity, onCityChange, locationLabel, onSe
                   </button>
 
                   {profileOpen && (
-                    <div className="absolute right-0 top-full z-50 mt-2 w-56 rounded-lg border border-gray-200 bg-white shadow-lg overflow-hidden">
-                      <div className="px-4 py-3 border-b border-gray-100">
+                    <div className="profile-menu absolute right-0 top-full z-50 mt-2 w-56 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-lg">
+                      <div className="border-b border-gray-100 px-4 py-3">
                         <div className="flex items-center gap-3">
                           <img
                             src={avatarSrc}
@@ -395,12 +425,12 @@ export default function Navbar({ detectedCity, onCityChange, locationLabel, onSe
                               {displayName || "User"}
                             </div>
                             {email && (
-                              <div className="text-xs text-text-muted truncate">
+                              <div className="truncate text-xs text-text-muted">
                                 {email}
                               </div>
                             )}
                             {user?.role && (
-                              <div className="text-xs text-text-muted mt-1">
+                              <div className="mt-1 text-xs text-text-muted">
                                 {user.role}
                               </div>
                             )}
@@ -434,11 +464,12 @@ export default function Navbar({ detectedCity, onCityChange, locationLabel, onSe
 
                       <div className="border-t border-gray-100">
                         <button
+                          type="button"
                           onClick={() => {
                             setProfileOpen(false);
                             handleSignOut();
                           }}
-                          className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-50"
+                          className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-gray-50"
                         >
                           Sign out
                         </button>
@@ -448,8 +479,9 @@ export default function Navbar({ detectedCity, onCityChange, locationLabel, onSe
                 </>
               ) : (
                 <button
+                  type="button"
                   onClick={openAuthToast}
-                  className="inline-flex items-center gap-2 rounded-md px-3 py-1 hover:bg-gray-100 transition-colors"
+                  className="inline-flex items-center gap-2 rounded-md px-3 py-1 transition-colors hover:bg-gray-100"
                 >
                   <span className="text-sm font-semibold">
                     Sign in / Register

@@ -49,13 +49,27 @@ export default function CartPage() {
 
   const cityData = getCityData(detectedCity);
 
-  const totalPrice = useMemo(() => {
-    return cartItem.quantity * cartItem.unitPrice;
+   const totalPrice = useMemo(() => {
+    return [cartItem].reduce((total, item) => {
+      return total + item.quantity * item.unitPrice;
+    }, 0);
   }, [cartItem]);
 
   const projectedSavings = 3.0;
+    const infoMessage = intentConfirmed
+    ? "Intent confirmed successfully. You may update your request again if needed."
+    : "Existing intent detected: You already have an active request for this item. Submit again to update your quantity.";
 
 const handleConfirmIntent = () => {
+  if (cartItem.quantity < 1) {
+    showToast(
+      <div className="p-3 text-sm font-medium text-red-700">
+        ❌ Quantity must be at least 1
+      </div>
+    );
+    return;
+  }
+
   setIntentConfirmed(true);
 
   showToast(
@@ -94,15 +108,19 @@ const handleModifyQuantity = () => {
             </p>
           </div>
 
-          <div className="rounded-2xl border border-amber-300 bg-amber-50 px-5 py-4 text-amber-800 shadow-sm">
+                    <div
+            className={`rounded-2xl px-5 py-4 shadow-sm ${
+              intentConfirmed
+                ? "border border-green-300 bg-green-50 text-green-800"
+                : "border border-amber-300 bg-amber-50 text-amber-800"
+            }`}
+          >
             <div className="flex items-start gap-3">
               <div className="mt-0.5 flex h-7 w-7 items-center justify-center rounded-full bg-amber-100 text-sm font-bold">
                 i
               </div>
-              <p className="text-base font-medium leading-7">
-                {intentConfirmed
-                  ? "Intent confirmed successfully. You may update your request again if needed. THIS NEEDS TO BE CHANGED - HARDCODED - SHOULD POSSIBLY BE A TOAST / NOTIFICATION STYLE"
-                  : "Existing intent detected: You already have an active request for this item. Submit again to update your quantity. THIS NEEDS TO BE CHANGED - HARDCODED - SHOULD POSSIBLY BE A TOAST / NOTIFICATION STYLE"}
+                            <p className="text-base font-medium leading-7">
+                {infoMessage}
               </p>
             </div>
           </div>
@@ -210,10 +228,15 @@ const handleModifyQuantity = () => {
           </div>
 
           <div className="flex flex-col gap-4 pt-1 md:flex-row">
-            <button
+                        <button
               type="button"
               onClick={handleConfirmIntent}
-              className="flex-1 rounded-2xl bg-primary px-6 py-4 text-xl font-bold text-text-main shadow-md transition hover:bg-primary/90"
+              disabled={cartItem.quantity < 1}
+              className={`flex-1 rounded-2xl px-6 py-4 text-xl font-bold shadow-md transition ${
+                cartItem.quantity < 1
+                  ? "cursor-not-allowed bg-gray-300 text-white"
+                  : "bg-primary text-text-main hover:bg-primary/90"
+              }`}
             >
               Confirm Intent → 
             </button>

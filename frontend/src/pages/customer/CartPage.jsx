@@ -124,7 +124,12 @@ export default function CartPage() {
               </p>
             </div>
           </div>
-
+          {/* ⚠️ VALIDATION — Task #104 */}
+          {cartItem.quantity < 1 && (
+            <p className="text-sm font-medium text-red-600 bg-red-50 border border-red-200 rounded-2xl px-5 py-4">
+              ❌ Please add at least one item before confirming.
+            </p>
+          )}
           <div className="overflow-hidden rounded-2xl border border-neutral-light bg-white shadow-sm">
             <div className="grid grid-cols-[2.2fr_0.7fr_0.9fr_0.9fr] bg-primary/10 px-5 py-4 text-xs font-bold uppercase tracking-[0.16em] text-text-main">
               <div>Item Details</div>

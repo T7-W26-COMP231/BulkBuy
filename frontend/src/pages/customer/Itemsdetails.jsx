@@ -4,8 +4,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 
-const PRODUCTS_API = "http://localhost:5000/api/prdts";
-const ITEMS_API = "http://localhost:5000/api/items";
+const PRODUCTS_API = `${import.meta.env.VITE_API_URL}/api/prdts`;
+const ITEMS_API = `${import.meta.env.VITE_API_URL}/api/items`;
 
 export default function ItemDetail() {
     const { id } = useParams();

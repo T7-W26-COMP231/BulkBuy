@@ -32,7 +32,7 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useR
 const STORAGE_KEY = "app_auth_session_v1";
 
 const defaultConfig = {
-  apiBaseUrl: "http://localhost:5000",
+  apiBaseUrl: `${import.meta.env.VITE_API_URL}`,
   endpoints: {
     login: "/api/auth/login",
     register: "/api/auth/register",
@@ -201,7 +201,7 @@ export function AuthProvider({
       abortControllersRef.current.forEach((c) => {
         try {
           c.abort();
-        } catch {}
+        } catch { }
       });
       abortControllersRef.current.clear();
     };
@@ -409,7 +409,7 @@ export function AuthProvider({
         setLoading(false);
         try {
           localStorage.removeItem(storageKey);
-        } catch {}
+        } catch { }
       }
       return { ok: true };
     },

@@ -63,88 +63,88 @@ export default function HomePage() {
     : 0;
 
   useEffect(() => {
-// 🔌 SOCKET CONNECTION (WITH USER REGISTRATION)
-const socketInstance = io("http://localhost:5000", {
-  transports: ["websocket"],
-  reconnection: true,
-  reconnectionAttempts: 5,
-});
+    // 🔌 SOCKET CONNECTION (WITH USER REGISTRATION)
+    const socketInstance = io(`${import.meta.env.VITE_API_URL}`, {
+      transports: ["websocket"],
+      reconnection: true,
+      reconnectionAttempts: 5,
+    });
 
-socketInstance.on("connect", () => {
-  console.log("🟢 Connected to server:", socketInstance.id);
+    socketInstance.on("connect", () => {
+      console.log("🟢 Connected to server:", socketInstance.id);
 
-  // 🧪 DEBUG: check localStorage
-  const rawUser = localStorage.getItem("user");
-  console.log("🧪 rawUser:", rawUser);
+      // 🧪 DEBUG: check localStorage
+      const rawUser = localStorage.getItem("user");
+      console.log("🧪 rawUser:", rawUser);
 
-  if (rawUser) {
-    try {
-      const parsedUser = JSON.parse(rawUser);
-      console.log("🧪 parsedUser:", parsedUser);
+      if (rawUser) {
+        try {
+          const parsedUser = JSON.parse(rawUser);
+          console.log("🧪 parsedUser:", parsedUser);
 
-      const userId = parsedUser?._id;
+          const userId = parsedUser?._id;
 
-      if (userId) {
-        socketInstance.emit("register", userId);
-        console.log("👤 Registered socket user:", userId);
+          if (userId) {
+            socketInstance.emit("register", userId);
+            console.log("👤 Registered socket user:", userId);
+          } else {
+            console.warn("⚠ No _id in user object");
+          }
+        } catch (err) {
+          console.warn("⚠ Failed to parse user:", err.message);
+        }
       } else {
-        console.warn("⚠ No _id in user object");
+        console.warn("⚠ No user found in localStorage");
       }
-    } catch (err) {
-      console.warn("⚠ Failed to parse user:", err.message);
-    }
-  } else {
-    console.warn("⚠ No user found in localStorage");
-  }
-});
+    });
 
-// 🔥 LISTEN FOR ORDER EVENTS
-socketInstance.on("order_created", (data) => {
-    console.log("🔥 Order Created:", data);
+    // 🔥 LISTEN FOR ORDER EVENTS
+    socketInstance.on("order_created", (data) => {
+      console.log("🔥 Order Created:", data);
 
-    // ✅ Simple UI-safe notification (no blocking alert)
-    if (window?.dispatchEvent) {
+      // ✅ Simple UI-safe notification (no blocking alert)
+      if (window?.dispatchEvent) {
         window.dispatchEvent(
-            new CustomEvent("new_order_notification", { detail: data })
+          new CustomEvent("new_order_notification", { detail: data })
         );
+      }
+    });
+
+    setSocket(socketInstance);
+
+    // =========================
+    // 📍 LOCATION LOGIC
+    // =========================
+    const savedCity = sessionStorage.getItem("detectedCity");
+    const dismissed = sessionStorage.getItem("locationModalDismissed");
+
+    let timer = null;
+
+    if (savedCity) {
+      setDetectedCity(savedCity);
+
+      if (!dismissed) {
+        setLocationState("done");
+      }
+    } else {
+      const asked = sessionStorage.getItem("askedLocation");
+
+      if (!asked) {
+        timer = setTimeout(() => {
+          setLocationState("asking");
+        }, 600);
+      }
     }
-});
 
-  setSocket(socketInstance);
+    // =========================
+    // 🧹 CLEANUP
+    // =========================
+    return () => {
+      if (timer) clearTimeout(timer);
+      socketInstance.disconnect();
+    };
 
-  // =========================
-  // 📍 LOCATION LOGIC
-  // =========================
-  const savedCity = sessionStorage.getItem("detectedCity");
-  const dismissed = sessionStorage.getItem("locationModalDismissed");
-
-  let timer = null;
-
-  if (savedCity) {
-    setDetectedCity(savedCity);
-
-    if (!dismissed) {
-      setLocationState("done");
-    }
-  } else {
-    const asked = sessionStorage.getItem("askedLocation");
-
-    if (!asked) {
-      timer = setTimeout(() => {
-        setLocationState("asking");
-      }, 600);
-    }
-  }
-
-  // =========================
-  // 🧹 CLEANUP
-  // =========================
-  return () => {
-    if (timer) clearTimeout(timer);
-    socketInstance.disconnect();
-  };
-
-}, []);
+  }, []);
 
   const handleAllow = () => {
     sessionStorage.setItem("askedLocation", "true");

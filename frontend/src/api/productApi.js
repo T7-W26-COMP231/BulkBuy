@@ -1,4 +1,4 @@
-const API_BASE_URL = "http://localhost:5000/api/prdts";
+const API_BASE_URL = `${import.meta.env.VITE_API_URL}/api/prdts`;
 
 export async function getProducts() {
   const response = await fetch(API_BASE_URL);

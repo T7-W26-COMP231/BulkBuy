@@ -5,10 +5,10 @@ const navItems = [
   { to: "/", icon: "grid_view", label: "BulkBuy (Recommended)" },
   { to: "/marketplace", icon: "receipt_long", label: "Marketplace" },
   { to: "/orders", icon: "receipt_long", label: "My Orders" },
+  { to: "/review-modify-intent", icon: "track_changes", label: "My Intents" },
   { to: "/savings", icon: "trending_up", label: "Savings Vault" },
   { to: "/community", icon: "group", label: "Community" },
   { to: "/profile", icon: "settings", label: "Settings" },
-
 ];
 
 export default function Sidebar({ showSummary = true }) {
@@ -26,12 +26,7 @@ export default function Sidebar({ showSummary = true }) {
               }`
             }
           >
-            <span
-              className={`material-symbols-outlined ${item.to === "/bulkbuy-recommended" ? "text-primary" : ""
-                }`}
-            >
-              {item.icon}
-            </span>
+            <span className="material-symbols-outlined">{item.icon}</span>
             <span>{item.label}</span>
           </NavLink>
         ))}

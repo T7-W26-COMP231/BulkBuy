@@ -89,9 +89,10 @@ export default function Marketplace() {
 
   return (
     <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-background-light font-display text-text-main">
-      <Navbar
-        locationLabel="Organic / Produce"
-        onSearch={(value) => setSearchTerm(value)}
+      <Navbar label="Organic / Produce" showLocation={false}
+        onSearch={(value) => setSearchTerm(value)
+
+        }
       />
 
       <main className="flex flex-1 flex-col gap-8 rounded-2xl border border-neutral-light px-4 py-8 md:flex-row md:px-20 lg:px-40">

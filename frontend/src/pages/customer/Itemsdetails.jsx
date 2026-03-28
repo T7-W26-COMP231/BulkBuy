@@ -163,7 +163,7 @@ export default function ItemDetail() {
     if (loading) {
         return (
             <div className="relative flex min-h-screen w-full flex-col bg-background-light font-display text-text-main">
-                <Navbar locationLabel=" " />
+                <Navbar showLocation={false} />
                 <main className="flex flex-1 items-center justify-center">
                     <p className="text-text-muted">Loading item...</p>
                 </main>
@@ -175,7 +175,7 @@ export default function ItemDetail() {
     if (error || !item) {
         return (
             <div className="relative flex min-h-screen w-full flex-col bg-background-light font-display text-text-main">
-                <Navbar locationLabel=" " />
+                <Navbar showLocation={false} />
                 <main className="flex flex-1 items-center justify-center">
                     <p className="text-red-500">{error || "Item not found."}</p>
                 </main>
@@ -226,15 +226,15 @@ export default function ItemDetail() {
 
         try {
             const payload = buildIntentPayload({
-            userId: user._id,
-            productId: productData?._id ?? null,
-            itemId: item._id,
-            quantity,
-            atInstantPrice: displayPrice,
-            discountedPercentage:
-                backendSavings > 0 ? Math.round((backendSavings / listPrice) * 100) : 0,
-            discountBracket: { initial: listPrice, final: displayPrice },
-            ops_region: item.ops_region ?? null,
+                userId: user._id,
+                productId: productData?._id ?? null,
+                itemId: item._id,
+                quantity,
+                atInstantPrice: displayPrice,
+                discountedPercentage:
+                    backendSavings > 0 ? Math.round((backendSavings / listPrice) * 100) : 0,
+                discountBracket: { initial: listPrice, final: displayPrice },
+                ops_region: item.ops_region ?? null,
             });
 
             await createIntent(payload);
@@ -242,39 +242,39 @@ export default function ItemDetail() {
             const existingCartItems = JSON.parse(sessionStorage.getItem("cartItems") || "[]");
 
             const nextItem = {
-            id: item._id,
-            productId: productData?._id ?? null,
-            itemId: item._id,
-            name: item.name || item.title || item.label || productData?.name || "Unnamed item",
-            supplier: item.supplier || productData?.brand || "BulkBuy Brand",
-            quantity,
-            unitPrice: displayPrice,
-            imageLabel: "🛒",
+                id: item._id,
+                productId: productData?._id ?? null,
+                itemId: item._id,
+                name: item.name || item.title || item.label || productData?.name || "Unnamed item",
+                supplier: item.supplier || productData?.brand || "BulkBuy Brand",
+                quantity,
+                unitPrice: displayPrice,
+                imageLabel: "🛒",
             };
 
             const existingIndex = existingCartItems.findIndex(
-            (cartItem) => cartItem.itemId === nextItem.itemId
+                (cartItem) => cartItem.itemId === nextItem.itemId
             );
 
             let updatedCartItems;
 
             if (existingIndex >= 0) {
-            updatedCartItems = [...existingCartItems];
-            updatedCartItems[existingIndex] = {
-                ...updatedCartItems[existingIndex],
-                quantity,
-                unitPrice: displayPrice,
-            };
+                updatedCartItems = [...existingCartItems];
+                updatedCartItems[existingIndex] = {
+                    ...updatedCartItems[existingIndex],
+                    quantity,
+                    unitPrice: displayPrice,
+                };
             } else {
-            updatedCartItems = [...existingCartItems, nextItem];
+                updatedCartItems = [...existingCartItems, nextItem];
             }
 
             sessionStorage.setItem("cartItems", JSON.stringify(updatedCartItems));
 
             navigate("/cart", {
-            state: {
-                cartItems: updatedCartItems,
-            },
+                state: {
+                    cartItems: updatedCartItems,
+                },
             });
         } catch (err) {
             console.error("Add to intent error:", err);
@@ -286,7 +286,7 @@ export default function ItemDetail() {
 
     return (
         <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-background-light font-display text-text-main">
-            <Navbar locationLabel=" " />
+            <Navbar showLocation={false} />
 
             <main className="mx-auto w-full max-w-6xl px-4 py-10 md:px-10">
 

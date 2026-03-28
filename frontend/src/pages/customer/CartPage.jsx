@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import Sidebar from "../../components/Sidebar";
 import Footer from "../../components/Footer";
@@ -12,6 +12,7 @@ export default function CartPage() {
   const location = useLocation();
   const [detectedCity, setDetectedCity] = useState("Scarborough");
   const [intentConfirmed, setIntentConfirmed] = useState(false);
+  const navigate = useNavigate();  // ← add this
 
   const [cartItems, setCartItems] = useState(() => {
     const stateItems = location.state?.cartItems;
@@ -23,7 +24,7 @@ export default function CartPage() {
     return [];
   });
 
- useEffect(() => {
+  useEffect(() => {
     const savedCity = sessionStorage.getItem("detectedCity");
     if (savedCity) {
       setDetectedCity(savedCity);
@@ -66,9 +67,10 @@ export default function CartPage() {
   }, [cartItems]);
 
   const projectedSavings = 3.0;
+
   const infoMessage = intentConfirmed
-  ? "Intent confirmed successfully. You may update your request again if needed."
-  : "Existing intent detected: You already have an active request for one or more items. Submit again to update your quantities.";
+    ? "Intent confirmed successfully. You may update your request again if needed."
+    : "Existing intent detected: You already have an active request for one or more items. Submit again to update your quantities.";
 
   const handleConfirmIntent = () => {
     if (cartItems.length === 0) {
@@ -99,24 +101,20 @@ export default function CartPage() {
   };
 
   const handleModifyQuantity = () => {
-    showToast(
-      <div className="p-3 text-sm font-medium text-blue-700">
-        ℹ️ You can now adjust your quantities.
-      </div>
-    );
+    navigate("/review-modify-intent");
   };
 
   return (
-    <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-background-light text-text-main font-display">
-      <Navbar detectedCity={detectedCity} onCityChange={handleCityChange} />
+    <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-background-light font-display text-text-main">
+      <Navbar showLocation={false} />
 
-      <main className="flex flex-1 flex-col gap-8 px-4 py-8 md:flex-row md:px-16 lg:px-24">
+      <main className="flex flex-1 flex-col gap-8 rounded-2xl border border-neutral-light px-4 py-8 md:flex-row md:px-20 lg:px-40">
         <Sidebar
           totalSavings={cityData.totalSavings}
           savingsLabel={cityData.savingsLabel}
         />
 
-        <section className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6">
+        <section className="flex flex-1 flex-col gap-6">
           <div className="flex flex-col gap-2">
             <h1 className="text-3xl font-extrabold tracking-tight">
               Confirm Intent
@@ -137,9 +135,7 @@ export default function CartPage() {
               <div className="mt-0.5 flex h-7 w-7 items-center justify-center rounded-full bg-amber-100 text-sm font-bold">
                 i
               </div>
-              <p className="text-base font-medium leading-7">
-                {infoMessage}
-              </p>
+              <p className="text-base font-medium leading-7">{infoMessage}</p>
             </div>
           </div>
           {/* ⚠️ VALIDATION — Task #104 */}
@@ -157,54 +153,54 @@ export default function CartPage() {
             </div>
 
             {cartItems.length === 0 ? (
-                <div className="px-5 py-6 text-center text-text-muted">
-                  No items in cart yet.
-                </div>
-              ) : (
-                cartItems.map((cartItem) => (
-                  <div
-                    key={cartItem.itemId || cartItem.id}
-                    className="grid grid-cols-[2.2fr_0.7fr_0.9fr_0.9fr] items-center gap-4 border-t border-neutral-light px-5 py-5"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-2xl">
-                        {cartItem.imageLabel || "🛒"}
-                      </div>
-
-                      <div>
-                        <h2 className="text-xl font-bold leading-7">
-                          {cartItem.name || "Unnamed item"}
-                        </h2>
-                        <p className="mt-1 text-sm text-text-muted">
-                          Source: {cartItem.supplier || "Unknown supplier"}
-                        </p>
-                        <p className="mt-1 text-sm text-text-muted">
-                          Pickup area: {detectedCity}
-                        </p>
-                      </div>
+              <div className="px-5 py-6 text-center text-text-muted">
+                No items in cart yet.
+              </div>
+            ) : (
+              cartItems.map((cartItem) => (
+                <div
+                  key={cartItem.itemId || cartItem.id}
+                  className="grid grid-cols-[2.2fr_0.7fr_0.9fr_0.9fr] items-center gap-4 border-t border-neutral-light px-5 py-5"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-2xl">
+                      {cartItem.imageLabel || "🛒"}
                     </div>
 
-                    <div className="flex justify-center">
-                      <input
-                        type="number"
-                        min="1"
-                        step="1"
-                        value={cartItem.quantity}
-                        onChange={(event) => handleQuantityChange(cartItem.itemId, event)}
-                        className="w-20 rounded-lg border border-neutral-light bg-white px-3 py-2 text-center text-lg font-semibold outline-none transition focus:border-primary"
-                      />
-                    </div>
-
-                    <div className="text-center text-xl font-medium">
-                      ${(cartItem.unitPrice ?? 0).toFixed(2)}
-                    </div>
-
-                    <div className="text-right text-2xl font-extrabold">
-                      ${((cartItem.quantity || 0) * (cartItem.unitPrice || 0)).toFixed(2)}
+                    <div>
+                      <h2 className="text-xl font-bold leading-7">
+                        {cartItem.name || "Unnamed item"}
+                      </h2>
+                      <p className="mt-1 text-sm text-text-muted">
+                        Source: {cartItem.supplier || "Unknown supplier"}
+                      </p>
+                      <p className="mt-1 text-sm text-text-muted">
+                        Pickup area: {detectedCity}
+                      </p>
                     </div>
                   </div>
-                ))
-              )}
+
+                  <div className="flex justify-center">
+                    <input
+                      type="number"
+                      min="1"
+                      step="1"
+                      value={cartItem.quantity}
+                      onChange={(event) => handleQuantityChange(cartItem.itemId, event)}
+                      className="w-20 rounded-lg border border-neutral-light bg-white px-3 py-2 text-center text-lg font-semibold outline-none transition focus:border-primary"
+                    />
+                  </div>
+
+                  <div className="text-center text-xl font-medium">
+                    ${(cartItem.unitPrice ?? 0).toFixed(2)}
+                  </div>
+
+                  <div className="text-right text-2xl font-extrabold">
+                    ${((cartItem.quantity || 0) * (cartItem.unitPrice || 0)).toFixed(2)}
+                  </div>
+                </div>
+              ))
+            )}
           </div>
 
           {/* 🔹 GRAND TOTAL SECTION */}
@@ -238,7 +234,7 @@ export default function CartPage() {
                   ${projectedSavings.toFixed(2)}
                 </span>
                 <span className="pb-1 text-xl font-bold text-green-600">
-                  +20% VS RETAIL  THIS SHOULD COME FROM BACKEND
+                  +20% VS RETAIL THIS SHOULD COME FROM BACKEND
                 </span>
               </div>
 
@@ -268,11 +264,10 @@ export default function CartPage() {
               type="button"
               onClick={handleConfirmIntent}
               disabled={cartItems.length === 0 || cartItems.some((item) => item.quantity < 1)}
-              className={`flex-1 rounded-2xl px-6 py-4 text-xl font-bold shadow-md transition ${
-                cartItems.length === 0 || cartItems.some((item) => item.quantity < 1)
-                  ? "cursor-not-allowed bg-gray-300 text-white"
-                  : "bg-primary text-text-main hover:bg-primary/90"
-              }`}
+              className={`flex-1 rounded-2xl px-6 py-4 text-xl font-bold shadow-md transition ${cartItems.length === 0 || cartItems.some((item) => item.quantity < 1)
+                ? "cursor-not-allowed bg-gray-300 text-white"
+                : "bg-primary text-text-main hover:bg-primary/90"
+                }`}
             >
               Confirm Intent →
             </button>

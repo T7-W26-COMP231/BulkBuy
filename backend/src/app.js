@@ -10,9 +10,7 @@ const config = require('./config/env');
 // route imports
 const authRoutes = require('./routes/auth.routes');
 const auditRoutes = require('./routes/audit.routes');
-const aggregationRoutes = require('./routes/aggregation.routes');
-const configRoutes = require('./routes/config.routes');
-const itemsRoutes = require('./routes/item.routes');
+const itemRoutes = require('./routes/item.routes');
 const messageRoutes = require('./routes/message.routes');
 const orderRoutes = require('./routes/order.routes');
 const productRoutes = require('./routes/product.routes');
@@ -20,7 +18,9 @@ const regionMapRoutes = require('./routes/regionMap.routes');
 const reviewRoutes = require('./routes/review.routes');
 const salesWindowRoutes = require('./routes/salesWindow.routes');
 const supplyRoutes = require('./routes/supply.routes');
-const usersRoutes = require('./routes/user.routes');
+const userRoutes = require('./routes/user.routes');
+const aggregationRoutes = require('./routes/aggregation.routes');
+const configRoutes = require('./routes/config.routes');
 const s3storeRoutes = require('./routes/s3Storage.routes');
 
 const { s3Ensure } = require('./scripts/s3.ensure');
@@ -95,7 +95,6 @@ const createApp = async () => {
   app.use('/api/audts', auditRoutes);
   app.use('/api/aggrs', aggregationRoutes);
   app.use('/api/confg', configRoutes);
-  app.use('/api/items', itemsRoutes);
   app.use('/api/comms', messageRoutes);
   app.use('/api/ordrs', orderRoutes);
   app.use('/api/prdts', productRoutes);
@@ -103,8 +102,10 @@ const createApp = async () => {
   app.use('/api/revws', reviewRoutes);
   app.use('/api/swnds', salesWindowRoutes);
   app.use('/api/supls', supplyRoutes);
-  app.use('/api/users', usersRoutes);
-  app.use('/api/s3fgo', s3storeRoutes);
+  app.use('/api/users', userRoutes);
+  app.use('/api/items', itemRoutes);
+  app.use('/api/rvws', reviewRoutes);
+  app.use('/api/s3go', s3storeRoutes);
 
   // 404 handler
   app.use((req, res, next) => {

@@ -1,30 +1,35 @@
-/* Center the dropdown directly under the profile button (no JSX changes) */
-.relative > .absolute.top-full {
-  left: 50% !important;
-  right: auto !important;
-  transform: translateX(-50%) !important;
-  top: calc(100% + 8px) !important;   /* small gap below the button */
+/* =========================
+   PROFILE DROPDOWN ONLY
+   ========================= */
+
+/* Style ONLY the right-aligned profile dropdown */
+.relative > .absolute.right-0.top-full {
+  right: 0 !important;
+  left: auto !important;
+  transform: none !important;
+  top: calc(100% + 8px) !important;
   min-width: 14rem;
   max-width: 20rem;
-  padding: 1rem !important;            /* generous all‑round padding */
+  padding: 1rem !important;
   border-radius: 0.625rem;
-  box-shadow: 0 10px 24px rgba(15,23,42,0.08);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
   box-sizing: border-box;
   background: #fff;
-  border: 1px solid #0ea5a4 !important; /* your requested border color */
-  transform-origin: top center;
-  z-index: 1000;
+  border: 1px solid #0ea5a4 !important;
+  transform-origin: top right;
+  z-index: 50 !important;
+  pointer-events: auto;
 }
 
-/* Make header (avatar + meta) breathe inside the new padding */
-.relative > .absolute.top-full .px-4.py-3 {
-  padding: 0.9rem 0 !important;        /* vertical padding kept, horizontal handled by container */
+/* Header area inside profile dropdown */
+.relative > .absolute.right-0.top-full .px-4.py-3 {
+  padding: 0.9rem 0 !important;
   display: flex;
   align-items: center;
 }
 
-/* Ensure avatar has space and consistent size */
-.relative > .absolute.top-full img.h-10.w-10 {
+/* Profile avatar */
+.relative > .absolute.right-0.top-full img.h-10.w-10 {
   width: 48px;
   height: 48px;
   border-radius: 9999px;
@@ -33,10 +38,10 @@
   margin-right: 0.9rem !important;
 }
 
-/* Push meta away from right edge and allow truncation */
-.relative > .absolute.top-full .px-4.py-3 > div > div,
-.relative > .absolute.top-full .px-4.py-3 .text-sm,
-.relative > .absolute.top-full .px-4.py-3 .text-xs {
+/* Profile text spacing */
+.relative > .absolute.right-0.top-full .px-4.py-3 > div > div,
+.relative > .absolute.right-0.top-full .px-4.py-3 .text-sm,
+.relative > .absolute.right-0.top-full .px-4.py-3 .text-xs {
   padding-right: 0.5rem !important;
   min-width: 0 !important;
   overflow: hidden;
@@ -44,103 +49,137 @@
   white-space: nowrap;
 }
 
-/* Action items: roomy tappable targets matching container padding */
-.relative > .absolute.top-full .block.px-4.py-2,
-.relative > .absolute.top-full button.w-full.text-left.px-4.py-2 {
+/* Profile action items */
+.relative > .absolute.right-0.top-full .block.px-4.py-2,
+.relative > .absolute.right-0.top-full button.w-full.text-left.px-4.py-2 {
   padding: 0.65rem 0.75rem !important;
   border-radius: 0.5rem;
 }
 
-/* Sign out emphasis */
-.relative > .absolute.top-full button.text-red-600 {
+/* Sign out */
+.relative
+  > .absolute.right-0.top-full
+  button.w-full.text-left.px-4.py-2.text-red-600 {
   color: #dc2626;
+  background: transparent;
+  font-weight: 600;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  transition: background-color 0.12s ease, color 0.12s ease,
+    transform 0.06s ease;
 }
-.relative > .absolute.top-full button.text-red-600:hover {
+
+.relative
+  > .absolute.right-0.top-full
+  button.w-full.text-left.px-4.py-2.text-red-600:hover {
+  background: rgba(220, 38, 38, 0.06);
+  color: #b91c1c;
+  transform: translateY(-1px);
+}
+
+.relative > .absolute.right-0.top-full button.text-red-600:hover {
   background: #fff1f2;
 }
 
-/* Keep menu inside viewport on small screens */
+/* Optional separation */
+.relative
+  > .absolute.right-0.top-full
+  .border-t
+  + div
+  button.w-full.text-left.px-4.py-2.text-red-600 {
+  margin-top: 0.25rem;
+}
+
+/* Mobile profile dropdown */
 @media (max-width: 480px) {
-  .relative > .absolute.top-full {
-    left: 50% !important;
-    transform: translateX(-50%) !important;
+  .relative > .absolute.right-0.top-full {
+    right: 0 !important;
+    left: auto !important;
+    transform: none !important;
     min-width: 12rem;
     max-width: calc(100vw - 1rem);
     padding: 0.75rem !important;
     top: calc(100% + 6px) !important;
   }
-  .relative > .absolute.top-full img.h-10.w-10 { width: 44px; height: 44px; margin-right: 0.6rem !important; }
+
+  .relative > .absolute.right-0.top-full img.h-10.w-10 {
+    width: 44px;
+    height: 44px;
+    margin-right: 0.6rem !important;
+  }
 }
 
+/* =========================
+   CITY / LOCATION DROPDOWN
+   ========================= */
 
-/* Sign in / Register (header) - pill primary style */
+/* Keep the left-aligned city picker natural and clickable */
+.relative > .absolute.left-0.top-full {
+  left: 0 !important;
+  right: auto !important;
+  transform: none !important;
+  top: calc(100% + 4px) !important;
+  z-index: 40 !important;
+  pointer-events: auto;
+}
+
+/* =========================
+   SIGN IN / REGISTER BUTTON
+   ========================= */
+
 .inline-flex.items-center.gap-2.rounded-md.px-3.py-1 {
   background: linear-gradient(180deg, #0adbc6 0%, #0cd7d7 100%);
   color: black;
   font-weight: 600;
   padding: 0.45rem 0.9rem;
   border-radius: 5px;
-  box-shadow: 0 6px 18px rgba(14,165,164,0.12);
-  border: 1px solid rgba(255,255,255,0.08);
-  transition: transform .08s ease, box-shadow .12s ease, opacity .12s ease;
+  box-shadow: 0 6px 18px rgba(14, 165, 164, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: transform 0.08s ease, box-shadow 0.12s ease, opacity 0.12s ease;
+  position: relative !important;
+  z-index: 60 !important;
+  pointer-events: auto !important;
 }
+
 .inline-flex.items-center.gap-2.rounded-md.px-3.py-1:hover {
   transform: translateY(-1px);
-  box-shadow: 0 10px 26px rgba(14,165,164,0.14);
+  box-shadow: 0 10px 26px rgba(14, 165, 164, 0.14);
   opacity: 0.98;
 }
+
 .inline-flex.items-center.gap-2.rounded-md.px-3.py-1:active {
   transform: translateY(0);
-  box-shadow: 0 6px 14px rgba(14,165,164,0.10);
+  box-shadow: 0 6px 14px rgba(14, 165, 164, 0.1);
 }
 
-/* Sign out (profile menu) - full width red ghost with subtle bg on hover */
-.relative > .absolute.top-full button.w-full.text-left.px-4.py-2.text-red-600 {
-  color: #dc2626;
-  background: transparent;
-  font-weight: 600;
-  padding: 0.6rem 1rem;
-  border-radius: 8px;
-  transition: background-color .12s ease, color .12s ease, transform .06s ease;
-}
-.relative > .absolute.top-full button.w-full.text-left.px-4.py-2.text-red-600:hover {
-  background: rgba(220,38,38,0.06);
-  color: #b91c1c;
-  transform: translateY(-1px);
-}
-
-/* Optional: make sign-out visually separated (keeps it full width but lighter) */
-.relative > .absolute.top-full .border-t + div button.w-full.text-left.px-4.py-2.text-red-600 {
-  margin-top: 0.25rem;
-}
-
-/* Accessibility focus states */
 .inline-flex.items-center.gap-2.rounded-md.px-3.py-1:focus,
-.relative > .absolute.top-full button.w-full.text-left.px-4.py-2.text-red-600:focus {
-  outline: 3px solid rgba(14,165,164,0.14);
+.relative
+  > .absolute.right-0.top-full
+  button.w-full.text-left.px-4.py-2.text-red-600:focus {
+  outline: 3px solid rgba(14, 165, 164, 0.14);
   outline-offset: 2px;
 }
 
+/* =========================
+   SAFETY / BACKDROP
+   ========================= */
 
-/* Ensure sign-in button is always clickable and visually on top */
-.inline-flex.items-center.gap-2.rounded-md.px-3.py-1 {
-  position: relative !important;
-  z-index: 60 !important;           /* above most dropdowns */
-  pointer-events: auto !important;  /* ensure clicks reach it */
-}
-
-/* Make sure the profile dropdown cannot sit above the header after signout */
-.relative > .absolute.top-full {
-  z-index: 50 !important;           /* keep dropdown under header controls */
-  pointer-events: auto;             /* normal behavior while open */
-}
-
-/* If an invisible backdrop exists, make it non-blocking for header area */
-.dropdown-backdrop, .menu-backdrop {
+.dropdown-backdrop,
+.menu-backdrop {
   pointer-events: none !important;
 }
 
-/* Defensive: if something sets the header to disabled, re-enable it */
-header, .header, .flex.items-center.justify-between {
+header,
+.header,
+.flex.items-center.justify-between {
   pointer-events: auto !important;
 }
+
+/* .city-menu {
+  z-index: 999;
+}
+
+.city-trigger {
+  position: relative;
+  z-index: 1000;
+} */

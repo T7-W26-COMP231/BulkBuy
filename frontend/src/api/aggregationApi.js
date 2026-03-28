@@ -2,7 +2,7 @@
 // 📡 AGGREGATION API SERVICE
 // ============================================================
 
-const API_URL = "http://localhost:5000/api/aggregations";;
+const API_URL = `${import.meta.env.VITE_API_URL}/api/aggregations`;
 
 // GET AGGREGATIONS BY CITY
 export const fetchAggregations = async (city) => {

@@ -68,7 +68,7 @@ const createApp = async () => {
   app.use(cors({
     origin: [
       "http://localhost:5173",
-      "https://bulkbuy-nb0w.onrender.com"
+      "https://bulkbuy-production.up.railway.app"
     ],
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Correlation-Id', 'x-correlation-id'],

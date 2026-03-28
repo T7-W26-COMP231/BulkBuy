@@ -152,8 +152,8 @@ const ItemSchema = new Schema(
     images: [{ type: String, trim: true }],
     media: { type: [MediaSchema], default: [] },
 
-    price: { type: [PriceSchema], default: [] },
-    pricingTiers: { type: [PricingTierSchema], default: [] },
+    price: { type: [PriceSchema], default: [] }, // for supplier deals for stocking
+    pricingTiers: { type: [PricingTierSchema], default: [] }, // for supplier deals for stocking
 
     inventory: { type: InventorySchema, default: () => ({}) },
 

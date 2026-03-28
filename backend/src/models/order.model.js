@@ -53,18 +53,24 @@ const PricingSnapshotSchema = new Schema({
   atInstantPrice: { type: Number, default: 0 },
   discountedPercentage: { type: Number, default: 0, min: 0, max: 100 },
   discountBracket: {
-    initial: { type: Number, default: 0 },
+    initial: { type: Number, default: 0 }, // percentages per item
     final: { type: Number, default: 0 }
   },
+  createdAt: { type: Number, default: () => Date.now(), index: true },
   meta: { type: Schema.Types.Mixed, default: {} }
 }, { _id: false });
 
 const OrderItemSchema = new Schema({
   productId: { type: Schema.Types.ObjectId, ref: 'Product', required: true },
   itemId: { type: Schema.Types.ObjectId, ref: 'Item', required: true },
-  pricingSnapshot: { type: PricingSnapshotSchema, default: () => ({}) },
+  pricingSnapshot: { type: [PricingSnapshotSchema], default: [() => ({})] },
   saveForLater: { type: Boolean, default: false },
-  quantity: { type: Number, default: 1, min: 1 }
+  quantity: { type: Number, default: 1, min: 1 },
+  status: {
+    type: String,
+    enum: ['active', 'savedForLater'],
+    default: 'active',
+  },
 }, { _id: false });
 
 const SalesWindowSchema = new Schema({
@@ -79,7 +85,7 @@ const SalesWindowSchema = new Schema({
 const OrderSchema = new Schema({
   userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
 
-  items: { type: [OrderItemSchema], default: [] },
+  items: { type: [OrderItemSchema], default: [], index: true },
 
   orderLocation: { type: AddressSchema, default: undefined },
   deliveryLocation: { type: AddressSchema, default: undefined },
@@ -99,7 +105,7 @@ const OrderSchema = new Schema({
   // saveForLater items should be copied over by business logic.
   status: {
     type: String,
-    enum: ['draft', 'submitted', 'confirmed', 'cancelled', 'dispatched', 'fulfilled'],
+    enum: ['draft', 'submitted', 'cancelled', 'confirmed', 'dispatched', 'fulfilled'],
     default: 'draft',
     index: true
   },

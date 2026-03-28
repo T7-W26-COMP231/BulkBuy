@@ -8,7 +8,7 @@ import api from './api';
  */
 export const createIntent = async (intentData) => {
   try {
-    const response = await api.post('/orders', intentData);
+    const response = await api.post('/api/ordrs', intentData);
     return response.data;
   } catch (error) {
     console.error('Error creating intent:', error);

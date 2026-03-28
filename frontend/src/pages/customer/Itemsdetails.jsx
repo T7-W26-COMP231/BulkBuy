@@ -1,3 +1,7 @@
+// at the top of ItemDetail.jsx, add this import
+import { createIntent, buildIntentPayload } from "../../api/intentApi";
+import { useAuth } from "../../contexts/AuthContext.jsx"; // already imported via Navbar probably
+
 import { useEffect, useState } from "react";
 //import { io } from "socket.io-client";
 import { useParams, useNavigate } from "react-router-dom";
@@ -8,6 +12,10 @@ const PRODUCTS_API = `${import.meta.env.VITE_API_URL}/api/prdts`;
 const ITEMS_API = `${import.meta.env.VITE_API_URL}/api/items`;
 
 export default function ItemDetail() {
+    // add this with your other state
+    const [addingToIntent, setAddingToIntent] = useState(false);
+    const { user } = useAuth(); // get user for userId
+
     const { id } = useParams();
     const navigate = useNavigate();
     const [productData, setProductData] = useState(null);
@@ -122,6 +130,7 @@ export default function ItemDetail() {
                         _isProduct: true,
                         _bundleItems: sortedItems.slice(1),
                     });
+
                     return;
                 }
 
@@ -135,6 +144,7 @@ export default function ItemDetail() {
                     return;
                 }
 
+
                 setError("Item not found.");
 
             } catch (err) {
@@ -144,6 +154,7 @@ export default function ItemDetail() {
                 setLoading(false);
             }
         }
+
 
         loadItem();
     }, [id]);
@@ -203,6 +214,36 @@ export default function ItemDetail() {
     const tabs = isProduct
         ? ["items", "description", "reviews"]
         : ["description", "specifications", "reviews"];
+
+
+    const handleAddToIntent = async () => {
+        if (!user) {
+            alert("Please sign in to add items to your intent.");
+            return;
+        }
+        setAddingToIntent(true);
+        try {
+            const payload = buildIntentPayload({
+                userId: user._id,
+                productId: productData?._id ?? null,
+                itemId: item._id,
+                quantity,
+                atInstantPrice: displayPrice,
+                discountedPercentage: backendSavings > 0
+                    ? Math.round((backendSavings / listPrice) * 100)
+                    : 0,
+                discountBracket: { initial: listPrice, final: displayPrice },
+                ops_region: item.ops_region ?? null,
+            });
+            await createIntent(payload);
+            navigate("/cart");
+        } catch (err) {
+            console.error("Add to intent error:", err);
+            alert("Could not add to intent. Please try again.");
+        } finally {
+            setAddingToIntent(false);
+        }
+    };
 
     return (
         <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-background-light font-display text-text-main">
@@ -376,9 +417,13 @@ export default function ItemDetail() {
                         </div>
 
                         <div className="flex gap-3">
-                            <button className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-primary py-3 font-bold text-text-main shadow-md transition hover:bg-primary/90">
+                            <button
+                                onClick={handleAddToIntent}
+                                disabled={addingToIntent}
+                                className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-primary py-3 font-bold text-text-main shadow-md transition hover:bg-primary/90 disabled:opacity-60"
+                            >
                                 <span className="material-symbols-outlined text-base">add_shopping_cart</span>
-                                Add to Intent
+                                {addingToIntent ? "Adding..." : "Add to Intent"}
                             </button>
                             <button className="flex h-12 w-12 items-center justify-center rounded-xl border border-neutral-light bg-white transition hover:bg-neutral-light">
                                 <span className="material-symbols-outlined text-base text-red-400">favorite</span>

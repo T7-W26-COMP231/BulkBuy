@@ -26,6 +26,7 @@ export default function CartPage() {
     }
   }, []);
 
+
   const handleCityChange = (newCity) => {
     setDetectedCity(newCity);
     sessionStorage.setItem("detectedCity", newCity);
@@ -55,7 +56,6 @@ export default function CartPage() {
   }, [cartItem]);
 
   const projectedSavings = 3.0;
-
   const infoMessage = intentConfirmed
     ? "Intent confirmed successfully. You may update your request again if needed."
     : "Existing intent detected: You already have an active request for this item. Submit again to update your quantity.";
@@ -69,7 +69,17 @@ export default function CartPage() {
       );
       return;
     }
+  const handleConfirmIntent = () => {
+    if (cartItem.quantity < 1) {
+      showToast(
+        <div className="p-3 text-sm font-medium text-red-700">
+          ❌ Quantity must be at least 1
+        </div>
+      );
+      return;
+    }
 
+    setIntentConfirmed(true);
     setIntentConfirmed(true);
 
     showToast(
@@ -78,7 +88,20 @@ export default function CartPage() {
       </div>
     );
   };
+    showToast(
+      <div className="p-3 text-sm font-medium text-green-700">
+        ✅ Intent confirmed for {detectedCity}. Your quantity request has been recorded.
+      </div>
+    );
+  };
 
+  const handleModifyQuantity = () => {
+    showToast(
+      <div className="p-3 text-sm font-medium text-blue-700">
+        ℹ️ You can now adjust your quantity.
+      </div>
+    );
+  };
   const handleModifyQuantity = () => {
     showToast(
       <div className="p-3 text-sm font-medium text-blue-700">
@@ -114,12 +137,20 @@ export default function CartPage() {
                 ? "border border-green-300 bg-green-50 text-green-800"
                 : "border border-amber-300 bg-amber-50 text-amber-800"
             }`}
+          <div
+            className={`rounded-2xl px-5 py-4 shadow-sm ${intentConfirmed
+              ? "border border-green-300 bg-green-50 text-green-800"
+              : "border border-amber-300 bg-amber-50 text-amber-800"
+              }`}
           >
             <div className="flex items-start gap-3">
               <div className="mt-0.5 flex h-7 w-7 items-center justify-center rounded-full bg-amber-100 text-sm font-bold">
                 i
               </div>
               <p className="text-base font-medium leading-7">{infoMessage}</p>
+              <p className="text-base font-medium leading-7">
+                {infoMessage}
+              </p>
             </div>
           </div>
 
@@ -149,6 +180,7 @@ export default function CartPage() {
               </div>
 
               <div className="flex justify-center">
+              <div className="flex justify-center">
                 <input
                   type="number"
                   min="1"
@@ -169,6 +201,7 @@ export default function CartPage() {
             </div>
           </div>
 
+          {/* 🔹 GRAND TOTAL SECTION */}
           <div className="flex justify-end">
             <div className="w-full max-w-sm rounded-2xl border border-neutral-light bg-white p-5 shadow-sm">
               <div className="flex items-center justify-between text-lg font-medium text-text-main">
@@ -176,6 +209,14 @@ export default function CartPage() {
                 <span>${totalPrice.toFixed(2)}</span>
               </div>
 
+              <div className="mt-3 border-t border-neutral-light pt-3">
+                <div className="flex items-center justify-between text-2xl font-extrabold text-text-main">
+                  <span>Total</span>
+                  <span>${totalPrice.toFixed(2)}</span>
+                </div>
+              </div>
+            </div>
+          </div>
               <div className="mt-3 border-t border-neutral-light pt-3">
                 <div className="flex items-center justify-between text-2xl font-extrabold text-text-main">
                   <span>Total</span>
@@ -193,6 +234,14 @@ export default function CartPage() {
                 </p>
                 <div className="text-2xl">💸</div>
               </div>
+          <div className="grid gap-5 md:grid-cols-2">
+            <div className="rounded-2xl border border-primary/20 bg-primary/10 p-5 shadow-sm">
+              <div className="mb-4 flex items-start justify-between">
+                <p className="text-xl font-medium text-text-main">
+                  Projected Savings
+                </p>
+                <div className="text-2xl">💸</div>
+              </div>
 
               <div className="flex items-end gap-2">
                 <span className="text-4xl font-extrabold">
@@ -200,6 +249,14 @@ export default function CartPage() {
                 </span>
                 <span className="pb-1 text-xl font-bold text-green-600">
                   +20% VS RETAIL THIS SHOULD COME FROM BACKEND
+                </span>
+              </div>
+              <div className="flex items-end gap-2">
+                <span className="text-4xl font-extrabold">
+                  ${projectedSavings.toFixed(2)}
+                </span>
+                <span className="pb-1 text-xl font-bold text-green-600">
+                  +20% VS RETAIL  THIS SHOULD COME FROM BACKEND
                 </span>
               </div>
 
@@ -226,15 +283,16 @@ export default function CartPage() {
 
           <div className="flex flex-col gap-4 pt-1 md:flex-row">
             <button
+            <button
               type="button"
               onClick={handleConfirmIntent}
               disabled={cartItem.quantity < 1}
-              className={`flex-1 rounded-2xl px-6 py-4 text-xl font-bold shadow-md transition ${
-                cartItem.quantity < 1
-                  ? "cursor-not-allowed bg-gray-300 text-white"
-                  : "bg-primary text-text-main hover:bg-primary/90"
-              }`}
+              className={`flex-1 rounded-2xl px-6 py-4 text-xl font-bold shadow-md transition ${cartItem.quantity < 1
+                ? "cursor-not-allowed bg-gray-300 text-white"
+                : "bg-primary text-text-main hover:bg-primary/90"
+                }`}
             >
+              Confirm Intent →
               Confirm Intent →
             </button>
 

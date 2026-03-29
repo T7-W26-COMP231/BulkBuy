@@ -1,20 +1,17 @@
 // src/services/order.service.js
 //
-// Service layer for Order domain.
-// "Service layer for Order domain. - Performs input sanitization and business-level checks."
-// "Delegates persistence to Order repository. - Emits service-level audit logs via src/services/audit.service.js."
-//
-// - Returns plain objects safe for clients.
-// - Exposes item-level helpers for cart operations: addItem, setItemQuantity, updateItem, removeItem, extractSaveForLater.
-//
-// Note: status "draft" represents a user's shopping cart. When an order is submitted,
-// a new blank draft may be created and saveForLater items carried over.
+// Service layer for Order domain (polished, production-ready)
+// - Implements business flows: createOrder, submitOrder, cancelOrder, item-level guards
+// - Uses OrderRepo for persistence and SalesWindowService for sales-window interactions
+// - Emits audit events via auditService using a reusable one-line helper
+// - TODO: implement private _getEnrichedOrdersForUser (read-intensive enrichment)
 
 const createError = require('http-errors');
 const OrderRepo = require('../repositories/order.repo');
 const auditService = require('./audit.service');
-const { sendOrderConfirmation } = require('./email.service');
+const SalesWindowService = require('./salesWindow.service');
 const UserRepo = require('../repositories/user.repo');
+const { sendOrderConfirmation } = require('./email.service');
 
 function sanitizeForClient(doc) {
   if (!doc) return doc;
@@ -22,9 +19,6 @@ function sanitizeForClient(doc) {
   return copy;
 }
 
-/**
- * Build audit actor from opts (best-effort).
- */
 function actorFromOpts(opts = {}) {
   if (!opts) return {};
   if (opts.actor) return opts.actor;
@@ -32,7 +26,32 @@ function actorFromOpts(opts = {}) {
   return {};
 }
 
+const IMMUTABLE_STATUSES = new Set(['confirmed', 'dispatched', 'fulfilled']);
+
 class OrderService {
+  /* -------------------------
+   * Reusable audit helper
+   * - One-line usage: await this._audit('event.type', actor, target, 'success', 'info', correlationId, { details })
+   * - Best-effort: does not throw if audit fails
+   * ------------------------- */
+  async _audit(eventType, actor = {}, target = undefined, outcome = 'success', severity = 'info', correlationId = null, details = {}) {
+    try {
+      await auditService.logEvent({
+        eventType,
+        actor,
+        target,
+        outcome,
+        severity,
+        correlationId,
+        details
+      });
+    } catch (e) {
+      // best-effort: do not fail main flow on audit errors
+      // eslint-disable-next-line no-console
+      console.warn('auditService.logEvent failed', eventType, e && e.message);
+    }
+  }
+
   /* -------------------------
    * Core CRUD
    * ------------------------- */
@@ -52,52 +71,29 @@ class OrderService {
     if (!Array.isArray(doc.items)) doc.items = [];
 
     try {
-
       const created = await OrderRepo.create(doc, { session: opts.session });
 
-await auditService.logEvent({
-  eventType: 'create.order',
-  actor,
-  target: created._id || created.id,
-  outcome: 'success',
-  correlationId,
-  details: { orderId: created._id || created.id, status: created.status }
-});
+      await this._audit('create.order', actor, created._id || created.id, 'success', 'info', correlationId, { orderId: created._id || created.id, status: created.status });
 
-// ✅ Send email notification (SAFE)
-try {
-  let userEmail = null;
+      // best-effort email
+      try {
+        let userEmail = null;
+        if (created?.userId) {
+          const user = await UserRepo.findById(created.userId);
+          if (user && Array.isArray(user.emails) && user.emails.length > 0) {
+            userEmail = user.emails[0].address;
+          }
+        }
+        if (userEmail) await sendOrderConfirmation(userEmail, created);
+      } catch (e) {
+        // non-fatal
+        // eslint-disable-next-line no-console
+        console.warn('Email send failed', e && e.message);
+      }
 
-  if (created?.userId) {
-    const user = await UserRepo.findById(created.userId);
-
-    if (user && Array.isArray(user.emails) && user.emails.length > 0) {
-      userEmail = user.emails[0].address;
-    }
-  }
-
-  if (userEmail) {
-    await sendOrderConfirmation(userEmail, created);
-  } else {
-    console.warn('⚠ No email found for user');
-  }
-} catch (err) {
-  console.warn('Email lookup failed:', err.message);
-}
-
-return sanitizeForClient(created);
-
-
+      return sanitizeForClient(created);
     } catch (err) {
-      await auditService.logEvent({
-        eventType: 'create.order',
-        actor,
-        target: doc && doc.userId ? doc.userId : undefined,
-        outcome: 'failure',
-        severity: 'error',
-        correlationId,
-        details: { error: err && err.message }
-      });
+      await this._audit('create.order', actor, doc && doc.userId ? doc.userId : undefined, 'failure', 'error', correlationId, { error: err && err.message });
       throw err;
     }
   }
@@ -136,36 +132,13 @@ return sanitizeForClient(created);
     try {
       const updated = await OrderRepo.updateById(id, payload, opts);
       if (!updated) {
-        await auditService.logEvent({
-          eventType: 'update.order',
-          actor,
-          target: id,
-          outcome: 'failure',
-          severity: 'warn',
-          correlationId,
-          details: { reason: 'not_found' }
-        });
+        await this._audit('update.order', actor, id, 'failure', 'warn', correlationId, { reason: 'not_found' });
         throw createError(404, 'Order not found');
       }
-      await auditService.logEvent({
-        eventType: 'update.order',
-        actor,
-        target: id,
-        outcome: 'success',
-        correlationId,
-        details: { update: payload }
-      });
+      await this._audit('update.order', actor, id, 'success', 'info', correlationId, { update: payload });
       return sanitizeForClient(updated);
     } catch (err) {
-      await auditService.logEvent({
-        eventType: 'update.order',
-        actor,
-        target: id,
-        outcome: 'failure',
-        severity: 'error',
-        correlationId,
-        details: { error: err && err.message }
-      });
+      await this._audit('update.order', actor, id, 'failure', 'error', correlationId, { error: err && err.message });
       throw err;
     }
   }
@@ -184,36 +157,13 @@ return sanitizeForClient(created);
     try {
       const updated = await OrderRepo.updateOne(filter, payload, opts);
       if (!updated) {
-        await auditService.logEvent({
-          eventType: 'update.order',
-          actor,
-          target: filter,
-          outcome: 'failure',
-          severity: 'warn',
-          correlationId,
-          details: { reason: 'not_found' }
-        });
+        await this._audit('update.order', actor, filter, 'failure', 'warn', correlationId, { reason: 'not_found' });
         throw createError(404, 'Order not found');
       }
-      await auditService.logEvent({
-        eventType: 'update.order',
-        actor,
-        target: filter,
-        outcome: 'success',
-        correlationId,
-        details: { update: payload }
-      });
+      await this._audit('update.order', actor, filter, 'success', 'info', correlationId, { update: payload });
       return sanitizeForClient(updated);
     } catch (err) {
-      await auditService.logEvent({
-        eventType: 'update.order',
-        actor,
-        target: filter,
-        outcome: 'failure',
-        severity: 'error',
-        correlationId,
-        details: { error: err && err.message }
-      });
+      await this._audit('update.order', actor, filter, 'failure', 'error', correlationId, { error: err && err.message });
       throw err;
     }
   }
@@ -231,36 +181,13 @@ return sanitizeForClient(created);
     try {
       const updated = await OrderRepo.addMessage(orderId, messageId);
       if (!updated) {
-        await auditService.logEvent({
-          eventType: 'order.addMessage',
-          actor,
-          target: orderId,
-          outcome: 'failure',
-          severity: 'warn',
-          correlationId,
-          details: { reason: 'not_found' }
-        });
+        await this._audit('order.addMessage', actor, orderId, 'failure', 'warn', correlationId, { reason: 'not_found' });
         throw createError(404, 'Order not found');
       }
-      await auditService.logEvent({
-        eventType: 'order.addMessage',
-        actor,
-        target: orderId,
-        outcome: 'success',
-        correlationId,
-        details: { messageId }
-      });
+      await this._audit('order.addMessage', actor, orderId, 'success', 'info', correlationId, { messageId });
       return sanitizeForClient(updated);
     } catch (err) {
-      await auditService.logEvent({
-        eventType: 'order.addMessage',
-        actor,
-        target: orderId,
-        outcome: 'failure',
-        severity: 'error',
-        correlationId,
-        details: { error: err && err.message }
-      });
+      await this._audit('order.addMessage', actor, orderId, 'failure', 'error', correlationId, { error: err && err.message });
       throw err;
     }
   }
@@ -274,48 +201,21 @@ return sanitizeForClient(created);
     try {
       const updated = await OrderRepo.updateStatus(orderId, status);
       if (!updated) {
-        await auditService.logEvent({
-          eventType: 'order.updateStatus',
-          actor,
-          target: orderId,
-          outcome: 'failure',
-          severity: 'warn',
-          correlationId,
-          details: { reason: 'not_found' }
-        });
+        await this._audit('order.updateStatus', actor, orderId, 'failure', 'warn', correlationId, { reason: 'not_found' });
         throw createError(404, 'Order not found');
       }
-      await auditService.logEvent({
-        eventType: 'order.updateStatus',
-        actor,
-        target: orderId,
-        outcome: 'success',
-        correlationId,
-        details: { status }
-      });
+      await this._audit('order.updateStatus', actor, orderId, 'success', 'info', correlationId, { status });
       return sanitizeForClient(updated);
     } catch (err) {
-      await auditService.logEvent({
-        eventType: 'order.updateStatus',
-        actor,
-        target: orderId,
-        outcome: 'failure',
-        severity: 'error',
-        correlationId,
-        details: { error: err && err.message }
-      });
+      await this._audit('order.updateStatus', actor, orderId, 'failure', 'error', correlationId, { error: err && err.message });
       throw err;
     }
   }
 
   /* -------------------------
-   * Cart / item-level operations
+   * Cart / item-level operations with immutability guards
    * ------------------------- */
 
-  /**
-   * Add or increment an item in the order (cart).
-   * - item: { productId, itemId, pricingSnapshot?, saveForLater?, quantity? }
-   */
   async addItem(orderId, item = {}, opts = {}) {
     if (!orderId) throw createError(400, 'orderId is required');
     if (!item || typeof item !== 'object') throw createError(400, 'item is required');
@@ -324,49 +224,32 @@ return sanitizeForClient(created);
     const actor = actorFromOpts(opts);
     const correlationId = opts.correlationId || null;
 
+    // immutability guard
+    const order = await OrderRepo.findById(orderId, { lean: true });
+    if (!order) throw createError(404, 'Order not found');
+    if (IMMUTABLE_STATUSES.has(order.status)) throw createError(409, 'Order items cannot be modified in current status');
+
     try {
       const updated = await OrderRepo.addItem(orderId, item, { session: opts.session, select: opts.select, populate: opts.populate });
       if (!updated) {
-        await auditService.logEvent({
-          eventType: 'order.addItem',
-          actor,
-          target: orderId,
-          outcome: 'failure',
-          severity: 'warn',
-          correlationId,
-          details: { reason: 'not_found', itemId: item.itemId }
-        });
+        await this._audit('order.addItem', actor, orderId, 'failure', 'warn', correlationId, { reason: 'not_found', itemId: item.itemId });
         throw createError(404, 'Order not found');
       }
-      await auditService.logEvent({
-        eventType: 'order.addItem',
-        actor,
-        target: orderId,
-        outcome: 'success',
-        correlationId,
-        details: { itemId: item.itemId, quantity: item.quantity || 1, saveForLater: !!item.saveForLater }
-      });
+      await this._audit('order.addItem', actor, orderId, 'success', 'info', correlationId, { itemId: item.itemId, quantity: item.quantity || 1, saveForLater: !!item.saveForLater });
       return sanitizeForClient(updated);
     } catch (err) {
-      await auditService.logEvent({
-        eventType: 'order.addItem',
-        actor,
-        target: orderId,
-        outcome: 'failure',
-        severity: 'error',
-        correlationId,
-        details: { error: err && err.message, itemId: item && item.itemId }
-      });
+      await this._audit('order.addItem', actor, orderId, 'failure', 'error', correlationId, { error: err && err.message, itemId: item && item.itemId });
       throw err;
     }
   }
 
-  /**
-   * Set item quantity. If quantity === 0 the item is removed.
-   */
   async setItemQuantity(orderId, itemId, quantity, opts = {}) {
     if (!orderId || !itemId) throw createError(400, 'orderId and itemId are required');
     if (quantity === undefined || quantity === null) throw createError(400, 'quantity is required');
+
+    const order = await OrderRepo.findById(orderId, { lean: true });
+    if (!order) throw createError(404, 'Order not found');
+    if (IMMUTABLE_STATUSES.has(order.status)) throw createError(409, 'Order items cannot be modified in current status');
 
     const actor = actorFromOpts(opts);
     const correlationId = opts.correlationId || null;
@@ -374,47 +257,24 @@ return sanitizeForClient(created);
     try {
       const updated = await OrderRepo.setItemQuantity(orderId, itemId, quantity, { session: opts.session, select: opts.select, populate: opts.populate });
       if (!updated) {
-        await auditService.logEvent({
-          eventType: 'order.setItemQuantity',
-          actor,
-          target: orderId,
-          outcome: 'failure',
-          severity: 'warn',
-          correlationId,
-          details: { reason: 'not_found', itemId }
-        });
+        await this._audit('order.setItemQuantity', actor, orderId, 'failure', 'warn', correlationId, { reason: 'not_found', itemId });
         throw createError(404, 'Order or item not found');
       }
-      await auditService.logEvent({
-        eventType: 'order.setItemQuantity',
-        actor,
-        target: orderId,
-        outcome: 'success',
-        correlationId,
-        details: { itemId, quantity }
-      });
+      await this._audit('order.setItemQuantity', actor, orderId, 'success', 'info', correlationId, { itemId, quantity });
       return sanitizeForClient(updated);
     } catch (err) {
-      await auditService.logEvent({
-        eventType: 'order.setItemQuantity',
-        actor,
-        target: orderId,
-        outcome: 'failure',
-        severity: 'error',
-        correlationId,
-        details: { error: err && err.message, itemId, quantity }
-      });
+      await this._audit('order.setItemQuantity', actor, orderId, 'failure', 'error', correlationId, { error: err && err.message, itemId, quantity });
       throw err;
     }
   }
 
-  /**
-   * Update item attributes: quantity, saveForLater, pricingSnapshot.
-   * If quantity <= 0 the item is removed.
-   */
   async updateItem(orderId, itemId, changes = {}, opts = {}) {
     if (!orderId || !itemId) throw createError(400, 'orderId and itemId are required');
     if (!changes || typeof changes !== 'object') throw createError(400, 'changes must be an object');
+
+    const order = await OrderRepo.findById(orderId, { lean: true });
+    if (!order) throw createError(404, 'Order not found');
+    if (IMMUTABLE_STATUSES.has(order.status)) throw createError(409, 'Order items cannot be modified in current status');
 
     const actor = actorFromOpts(opts);
     const correlationId = opts.correlationId || null;
@@ -422,45 +282,23 @@ return sanitizeForClient(created);
     try {
       const updated = await OrderRepo.updateItem(orderId, itemId, changes, { session: opts.session, select: opts.select, populate: opts.populate });
       if (!updated) {
-        await auditService.logEvent({
-          eventType: 'order.updateItem',
-          actor,
-          target: orderId,
-          outcome: 'failure',
-          severity: 'warn',
-          correlationId,
-          details: { reason: 'not_found', itemId }
-        });
+        await this._audit('order.updateItem', actor, orderId, 'failure', 'warn', correlationId, { reason: 'not_found', itemId });
         throw createError(404, 'Order or item not found');
       }
-      await auditService.logEvent({
-        eventType: 'order.updateItem',
-        actor,
-        target: orderId,
-        outcome: 'success',
-        correlationId,
-        details: { itemId, changes }
-      });
+      await this._audit('order.updateItem', actor, orderId, 'success', 'info', correlationId, { itemId, changes });
       return sanitizeForClient(updated);
     } catch (err) {
-      await auditService.logEvent({
-        eventType: 'order.updateItem',
-        actor,
-        target: orderId,
-        outcome: 'failure',
-        severity: 'error',
-        correlationId,
-        details: { error: err && err.message, itemId, changes }
-      });
+      await this._audit('order.updateItem', actor, orderId, 'failure', 'error', correlationId, { error: err && err.message, itemId, changes });
       throw err;
     }
   }
 
-  /**
-   * Remove an item from the order.
-   */
   async removeItem(orderId, itemId, opts = {}) {
     if (!orderId || !itemId) throw createError(400, 'orderId and itemId are required');
+
+    const order = await OrderRepo.findById(orderId, { lean: true });
+    if (!order) throw createError(404, 'Order not found');
+    if (IMMUTABLE_STATUSES.has(order.status)) throw createError(409, 'Order items cannot be modified in current status');
 
     const actor = actorFromOpts(opts);
     const correlationId = opts.correlationId || null;
@@ -468,44 +306,17 @@ return sanitizeForClient(created);
     try {
       const updated = await OrderRepo.removeItem(orderId, itemId, { session: opts.session, select: opts.select, populate: opts.populate });
       if (!updated) {
-        await auditService.logEvent({
-          eventType: 'order.removeItem',
-          actor,
-          target: orderId,
-          outcome: 'failure',
-          severity: 'warn',
-          correlationId,
-          details: { reason: 'not_found', itemId }
-        });
+        await this._audit('order.removeItem', actor, orderId, 'failure', 'warn', correlationId, { reason: 'not_found', itemId });
         throw createError(404, 'Order or item not found');
       }
-      await auditService.logEvent({
-        eventType: 'order.removeItem',
-        actor,
-        target: orderId,
-        outcome: 'success',
-        correlationId,
-        details: { itemId }
-      });
+      await this._audit('order.removeItem', actor, orderId, 'success', 'info', correlationId, { itemId });
       return sanitizeForClient(updated);
     } catch (err) {
-      await auditService.logEvent({
-        eventType: 'order.removeItem',
-        actor,
-        target: orderId,
-        outcome: 'failure',
-        severity: 'error',
-        correlationId,
-        details: { error: err && err.message, itemId }
-      });
+      await this._audit('order.removeItem', actor, orderId, 'failure', 'error', correlationId, { error: err && err.message, itemId });
       throw err;
     }
   }
 
-  /**
-   * Extract items marked saveForLater and remove them from the order.
-   * Returns { saved, order } where order is the updated order object.
-   */
   async extractSaveForLater(orderId, opts = {}) {
     if (!orderId) throw createError(400, 'orderId is required');
 
@@ -515,43 +326,410 @@ return sanitizeForClient(created);
     try {
       const result = await OrderRepo.extractSaveForLater(orderId, { session: opts.session, select: opts.select, populate: opts.populate });
       if (!result) {
-        await auditService.logEvent({
-          eventType: 'order.extractSaveForLater',
-          actor,
-          target: orderId,
-          outcome: 'failure',
-          severity: 'warn',
-          correlationId,
-          details: { reason: 'not_found' }
-        });
+        await this._audit('order.extractSaveForLater', actor, orderId, 'failure', 'warn', correlationId, { reason: 'not_found' });
         throw createError(404, 'Order not found');
       }
-      await auditService.logEvent({
-        eventType: 'order.extractSaveForLater',
-        actor,
-        target: orderId,
-        outcome: 'success',
-        correlationId,
-        details: { savedCount: Array.isArray(result.saved) ? result.saved.length : 0 }
-      });
-      // sanitize order
+      await this._audit('order.extractSaveForLater', actor, orderId, 'success', 'info', correlationId, { savedCount: Array.isArray(result.saved) ? result.saved.length : 0 });
       return { saved: result.saved, order: sanitizeForClient(result.order) };
     } catch (err) {
-      await auditService.logEvent({
-        eventType: 'order.extractSaveForLater',
-        actor,
-        target: orderId,
-        outcome: 'failure',
-        severity: 'error',
-        correlationId,
-        details: { error: err && err.message }
-      });
+      await this._audit('order.extractSaveForLater', actor, orderId, 'failure', 'error', correlationId, { error: err && err.message });
       throw err;
     }
   }
 
   /* -------------------------
-   * Bulk / misc
+   * Submit / Cancel flows (transactional)
+   * ------------------------- */
+
+  async submitOrder(orderId, opts = {}) {
+    if (!orderId) throw createError(400, 'orderId is required');
+
+    const actor = actorFromOpts(opts);
+    const correlationId = opts.correlationId || null;
+
+    const session = await this.startSession();
+    session.startTransaction();
+    try {
+      const orderDoc = await OrderRepo._findDocById(orderId);
+      if (!orderDoc) throw createError(404, 'Order not found');
+      if (orderDoc.status !== 'draft') throw createError(409, 'Only draft orders can be submitted');
+
+      const region = orderDoc.ops_region;
+      if (!region) throw createError(400, 'order.ops_region is required to submit');
+
+      const swResult = await SalesWindowService.listAllCurrentProducts(region, { page: 1, limit: 1000, session, lean: true });
+      const swProducts = Array.isArray(swResult.products) ? swResult.products : [];
+
+      const productLookup = new Map();
+      for (const p of swProducts) {
+        const pid = String(p.productId);
+        const itemMap = new Map();
+        if (Array.isArray(p.items)) {
+          for (const it of p.items) {
+            itemMap.set(String(it.itemId), it);
+          }
+        }
+        productLookup.set(pid, { product: p, itemMap, windowId: p.windowId, window: p.window });
+      }
+
+      const missing = [];
+      for (const it of orderDoc.items || []) {
+        const pid = String(it.productId);
+        const iid = String(it.itemId);
+        const pEntry = productLookup.get(pid);
+        if (!pEntry) {
+          missing.push({ productId: pid, itemId: iid });
+          continue;
+        }
+        const swItem = pEntry.itemMap.get(iid);
+        if (!swItem) {
+          missing.push({ productId: pid, itemId: iid });
+        }
+      }
+
+      if (missing.length > 0) {
+        throw createError(409, `Some items are not available in current sales window: ${JSON.stringify(missing)}`);
+      }
+
+      for (const it of orderDoc.items || []) {
+        const pid = String(it.productId);
+        const iid = String(it.itemId);
+        const pEntry = productLookup.get(pid);
+        const swItem = pEntry.itemMap.get(iid);
+
+        let latestSnapshot = null;
+        if (Array.isArray(swItem.pricing_snapshots) && swItem.pricing_snapshots.length > 0) {
+          latestSnapshot = swItem.pricing_snapshots[swItem.pricing_snapshots.length - 1];
+        } else if (swItem.pricing_snapshot) {
+          latestSnapshot = swItem.pricing_snapshot;
+        }
+
+        if (!Array.isArray(it.pricingSnapshot)) it.pricingSnapshot = [];
+        if (latestSnapshot) {
+          const snap = Object.assign({}, latestSnapshot);
+          if (snap.createdAt && snap.createdAt instanceof Date) snap.createdAt = snap.createdAt.getTime();
+          it.pricingSnapshot.push(snap);
+        }
+
+        const currentQtySold = Number(swItem.qtySold || 0);
+        const increment = Number(it.quantity || 1);
+        const newQtySold = currentQtySold + increment;
+
+        try {
+          await SalesWindowService.addOrUpdateItem(pEntry.windowId, pid, iid, { qtySold: newQtySold }, { session, actor, correlationId });
+        } catch (e) {
+          // non-fatal for submission
+          // eslint-disable-next-line no-console
+          console.warn('Failed to update qtySold on sales window', e && e.message);
+        }
+
+        // pricing tier logic placeholder
+      }
+
+      orderDoc.status = 'submitted';
+      const firstWindow = swProducts && swProducts.length > 0 ? swProducts[0].window : null;
+      if (firstWindow) {
+        orderDoc.salesWindow = { fromEpoch: Number(firstWindow.fromEpoch), toEpoch: Number(firstWindow.toEpoch) };
+      }
+      orderDoc.updatedAt = Date.now();
+      await orderDoc.save({ session });
+
+      const draft = await OrderRepo.findOrCreateDraftForUserRegion(orderDoc.userId, region, { session });
+      await OrderRepo.moveSaveForLaterToDraft(orderDoc._id, draft._id, { session });
+
+      await session.commitTransaction();
+      session.endSession();
+
+      await this._audit('order.submit', actor, orderDoc._id, 'success', 'info', correlationId, { userId: orderDoc.userId, region });
+
+      const updatedPlain = await OrderRepo.findById(orderDoc._id, { lean: true });
+      return sanitizeForClient(updatedPlain);
+    } catch (err) {
+      await session.abortTransaction();
+      session.endSession();
+
+      await this._audit('order.submit', actor, orderId, 'failure', 'error', correlationId, { error: err && err.message });
+      throw err;
+    }
+  }
+
+  async cancelOrder(orderId, opts = {}) {
+    if (!orderId) throw createError(400, 'orderId is required');
+
+    const actor = actorFromOpts(opts);
+    const correlationId = opts.correlationId || null;
+
+    const session = await this.startSession();
+    session.startTransaction();
+    try {
+      const orderDoc = await OrderRepo._findDocById(orderId);
+      if (!orderDoc) throw createError(404, 'Order not found');
+
+      if (orderDoc.status === 'submitted') {
+        const region = orderDoc.ops_region;
+        const draft = await OrderRepo.findOrCreateDraftForUserRegion(orderDoc.userId, region, { session });
+        const targetDoc = await OrderRepo._findDocById(draft._id);
+        if (session) targetDoc.$session(session);
+
+        const existingIds = new Set((targetDoc.items || []).map((it) => String(it.itemId)));
+        for (const it of orderDoc.items || []) {
+          if (!existingIds.has(String(it.itemId))) {
+            targetDoc.items.push({
+              productId: it.productId,
+              itemId: it.itemId,
+              pricingSnapshot: it.pricingSnapshot || {},
+              saveForLater: false,
+              quantity: it.quantity || 1
+            });
+          }
+        }
+        targetDoc.updatedAt = Date.now();
+        await targetDoc.save({ session });
+      }
+
+      orderDoc.status = 'cancelled';
+      orderDoc.updatedAt = Date.now();
+      await orderDoc.save({ session });
+
+      await session.commitTransaction();
+      session.endSession();
+
+      await this._audit('order.cancel', actor, orderDoc._id, 'success', 'info', correlationId, { userId: orderDoc.userId });
+
+      const plain = await OrderRepo.findById(orderDoc._id, { lean: true });
+      return sanitizeForClient(plain);
+    } catch (err) {
+      await session.abortTransaction();
+      session.endSession();
+
+      await this._audit('order.cancel', actor, orderId, 'failure', 'error', correlationId, { error: err && err.message });
+      throw err;
+    }
+  }
+
+  /* -------------------------
+   * Read-intensive enrichment (TODO)
+   * ------------------------- */
+
+  // TODO: implement _getEnrichedOrdersForUser(userId, opts)
+  // Signature:
+  //   async _getEnrichedOrdersForUser(userId, { region, page, limit, statusFilter, includeSaveForLater, session, persist })
+  // Purpose:
+  //   - Return paginated orders for user enriched with latest sales-window pricing, availability, flags
+  //   - Use batch SalesWindowService calls to avoid N+1
+  //   - If opts.persist === true, persist updated pricing snapshots for submitted orders
+  
+  /**
+   * Private read-intensive helper
+   *
+   * Signature:
+   *   async _getEnrichedOrdersForUser(userId, opts = {})
+   *
+   * opts:
+   *   - region (string) optional: restrict to a single region
+   *   - page (number) optional
+   *   - limit (number) optional
+   *   - status (string|Array) optional: filter by order.status
+   *   - includeSaveForLater (boolean) optional: include saveForLater items in enrichment
+   *   - session (ClientSession) optional
+   *   - persist (boolean) optional: if true, persist updated pricing snapshots for submitted orders
+   *
+   * Returns:
+   *   { items: [enrichedOrder], total, page, limit, pages }
+   *
+   * Behavior:
+   *   - Paginates orders for the user (and region/status if provided)
+   *   - Batches SalesWindowService calls per region to avoid N+1
+   *   - Enriches each order item with latestSalesWindowSnapshot, availableQty, qtySold, pricing_tiers, missingInWindow
+   *   - If opts.persist === true and order.status === 'submitted', persists appended pricing snapshots (best-effort, in same session if provided)
+   *
+   * Usage:
+   *   const enriched = await this._getEnrichedOrdersForUser(userId, { region, page, limit });
+   */
+  async _getEnrichedOrdersForUser(userId, opts = {}) {
+    if (!userId) throw createError(400, 'userId is required');
+
+    const page = Math.max(1, parseInt(opts.page, 10) || 1);
+    const limit = Math.max(1, parseInt(opts.limit, 10) || 25);
+    const includeSaveForLater = !!opts.includeSaveForLater;
+    const persist = !!opts.persist;
+    const session = opts.session || null;
+
+    // Build filter for orders
+    const filter = { userId };
+    if (opts.region) filter.ops_region = opts.region;
+    if (opts.status) {
+      if (Array.isArray(opts.status)) filter.status = { $in: opts.status };
+      else filter.status = opts.status;
+    }
+
+    // 1) fetch paginated orders
+    const paged = await OrderRepo.paginate(filter, { page, limit, populate: opts.populate || '', select: opts.select || '' });
+    const orders = Array.isArray(paged.items) ? paged.items : [];
+
+    if (orders.length === 0) {
+      return { items: [], total: paged.total || 0, page, limit, pages: paged.pages || 0 };
+    }
+
+    // 2) group orders by region to batch SalesWindow calls
+    const regionToOrders = new Map();
+    for (const o of orders) {
+      const r = o.ops_region || '__null__';
+      if (!regionToOrders.has(r)) regionToOrders.set(r, []);
+      regionToOrders.get(r).push(o);
+    }
+
+    // 3) For each region, collect unique product/item ids to request from SalesWindow
+    const regionLookups = new Map(); // region -> { productId -> { itemId -> swItem } }
+    for (const [region, ordersForRegion] of regionToOrders.entries()) {
+      try {
+        // fetch all current products for region (reasonable upper limit)
+        const swRes = await SalesWindowService.listAllCurrentProducts(region === '__null__' ? null : region, { page: 1, limit: 2000, session, lean: true });
+        const swProducts = Array.isArray(swRes.products) ? swRes.products : [];
+
+        const productMap = new Map();
+        for (const p of swProducts) {
+          const pid = String(p.productId);
+          const itemMap = new Map();
+          if (Array.isArray(p.items)) {
+            for (const it of p.items) {
+              itemMap.set(String(it.itemId), it);
+            }
+          }
+          productMap.set(pid, { product: p, itemMap, window: p.window, windowId: p.windowId });
+        }
+        regionLookups.set(region, productMap);
+      } catch (e) {
+        // best-effort: set empty map so items will be marked missing
+        regionLookups.set(region, new Map());
+        // eslint-disable-next-line no-console
+        console.warn('SalesWindowService.listAllCurrentProducts failed for region', region, e && e.message);
+      }
+    }
+
+    // 4) Enrich orders in-memory; collect persistence updates if persist === true
+    const ordersToPersist = []; // { orderId, updatedItems } for submitted orders
+    const enrichedOrders = [];
+
+    for (const order of orders) {
+      const r = order.ops_region || '__null__';
+      const productMap = regionLookups.get(r) || new Map();
+
+      // clone order shallow to avoid mutating original repo result
+      const enriched = Object.assign({}, order);
+      enriched.items = (order.items || []).map((it) => {
+        const out = Object.assign({}, it);
+        out.latestPricingSnapshot = null;
+        out.availableQty = null;
+        out.qtySold = null;
+        out.pricing_tiers = null;
+        out.missingInWindow = false;
+
+        const pid = String(it.productId);
+        const iid = String(it.itemId);
+        const pEntry = productMap.get(pid);
+        if (!pEntry) {
+          out.missingInWindow = true;
+          return out;
+        }
+        const swItem = pEntry.itemMap.get(iid);
+        if (!swItem) {
+          out.missingInWindow = true;
+          return out;
+        }
+
+        // attach fields from sales window item (best-effort)
+        out.availableQty = typeof swItem.qtyAvailable === 'number' ? swItem.qtyAvailable : null;
+        out.qtySold = typeof swItem.qtySold === 'number' ? swItem.qtySold : null;
+        out.pricing_tiers = Array.isArray(swItem.pricing_tiers) ? swItem.pricing_tiers : (swItem.pricingTiers || null);
+
+        // determine latest pricing snapshot
+        let latest = null;
+        if (Array.isArray(swItem.pricing_snapshots) && swItem.pricing_snapshots.length > 0) {
+          latest = swItem.pricing_snapshots[swItem.pricing_snapshots.length - 1];
+        } else if (swItem.pricing_snapshot) {
+          latest = swItem.pricing_snapshot;
+        }
+        if (latest) {
+          // normalize createdAt to epoch ms if Date
+          const snap = Object.assign({}, latest);
+          if (snap.createdAt && snap.createdAt instanceof Date) snap.createdAt = snap.createdAt.getTime();
+          out.latestPricingSnapshot = snap;
+        }
+
+        return out;
+      });
+
+      // If persist requested and order is submitted, prepare to append snapshots where missing or stale
+      if (persist && order.status === 'submitted') {
+        const updatedItems = [];
+        for (let i = 0; i < enriched.items.length; i++) {
+          const it = enriched.items[i];
+          if (it.missingInWindow) continue;
+          if (it.latestPricingSnapshot) {
+            // decide whether to append: if order item has no pricingSnapshot or latest differs by createdAt
+            const existing = Array.isArray(order.items[i].pricingSnapshot) ? order.items[i].pricingSnapshot : (order.items[i].pricingSnapshot ? [order.items[i].pricingSnapshot] : []);
+            const lastExisting = existing.length > 0 ? existing[existing.length - 1] : null;
+            const lastExistingTs = lastExisting && lastExisting.createdAt ? Number(lastExisting.createdAt) : null;
+            const latestTs = it.latestPricingSnapshot && it.latestPricingSnapshot.createdAt ? Number(it.latestPricingSnapshot.createdAt) : null;
+            if (!lastExistingTs || (latestTs && latestTs > lastExistingTs)) {
+              // append
+              updatedItems.push({ itemId: it.itemId, pricingSnapshot: it.latestPricingSnapshot });
+            }
+          }
+        }
+        if (updatedItems.length > 0) {
+          ordersToPersist.push({ orderId: order._id, updatedItems });
+        }
+      }
+
+      enrichedOrders.push(enriched);
+    }
+
+    // 5) Persist appended snapshots for submitted orders if requested (best-effort, in provided session)
+    if (persist && ordersToPersist.length > 0) {
+      // perform updates sequentially to avoid heavy parallel writes; keep best-effort semantics
+      for (const upd of ordersToPersist) {
+        try {
+          const sessionOpts = session ? { session } : {};
+          // load doc instance to mutate pricingSnapshot arrays
+          const doc = await OrderRepo._findDocById(upd.orderId);
+          if (!doc) continue;
+          if (session) doc.$session(session);
+          let changed = false;
+          for (const ui of upd.updatedItems) {
+            const idx = (doc.items || []).findIndex((it) => String(it.itemId) === String(ui.itemId));
+            if (idx === -1) continue;
+            if (!Array.isArray(doc.items[idx].pricingSnapshot)) doc.items[idx].pricingSnapshot = [];
+            doc.items[idx].pricingSnapshot.push(ui.pricingSnapshot);
+            changed = true;
+          }
+          if (changed) {
+            doc.updatedAt = Date.now();
+            await doc.save(sessionOpts);
+          }
+        } catch (e) {
+          // swallow and continue; log for visibility
+          // eslint-disable-next-line no-console
+          console.warn('Failed to persist pricing snapshots for order', upd.orderId, e && e.message);
+        }
+      }
+    }
+
+    // 6) Return paginated enriched shape
+    return {
+      items: enrichedOrders.map(sanitizeForClient),
+      total: paged.total,
+      page: paged.page,
+      limit: paged.limit,
+      pages: paged.pages
+    };
+  }
+
+
+
+  /* -------------------------
+   * Misc / helpers
    * ------------------------- */
 
   async hardDeleteById(id, opts = {}) {
@@ -563,36 +741,13 @@ return sanitizeForClient(created);
     try {
       const removed = await OrderRepo.hardDeleteById(id);
       if (!removed) {
-        await auditService.logEvent({
-          eventType: 'delete.order.hard',
-          actor,
-          target: id,
-          outcome: 'failure',
-          severity: 'warn',
-          correlationId,
-          details: { reason: 'not_found' }
-        });
+        await this._audit('delete.order.hard', actor, id, 'failure', 'warn', correlationId, { reason: 'not_found' });
         throw createError(404, 'Order not found');
       }
-      await auditService.logEvent({
-        eventType: 'delete.order.hard',
-        actor,
-        target: id,
-        outcome: 'success',
-        correlationId,
-        details: {}
-      });
+      await this._audit('delete.order.hard', actor, id, 'success', 'info', correlationId, {});
       return sanitizeForClient(removed);
     } catch (err) {
-      await auditService.logEvent({
-        eventType: 'delete.order.hard',
-        actor,
-        target: id,
-        outcome: 'failure',
-        severity: 'error',
-        correlationId,
-        details: { error: err && err.message }
-      });
+      await this._audit('delete.order.hard', actor, id, 'failure', 'error', correlationId, { error: err && err.message });
       throw err;
     }
   }
@@ -605,26 +760,11 @@ return sanitizeForClient(created);
 
     try {
       const inserted = await OrderRepo.bulkInsert(docs, { session: opts.session });
-      await auditService.logEvent({
-        eventType: 'create.order.bulk',
-        actor,
-        target: undefined,
-        outcome: 'success',
-        correlationId,
-        details: { count: Array.isArray(inserted) ? inserted.length : 0 }
-      });
+      await this._audit('create.order.bulk', actor, undefined, 'success', 'info', correlationId, { count: Array.isArray(inserted) ? inserted.length : 0 });
       const plain = (inserted || []).map((d) => (d && d.toObject ? d.toObject() : d));
       return plain.map(sanitizeForClient);
     } catch (err) {
-      await auditService.logEvent({
-        eventType: 'create.order.bulk',
-        actor,
-        target: undefined,
-        outcome: 'failure',
-        severity: 'error',
-        correlationId,
-        details: { error: err && err.message }
-      });
+      await this._audit('create.order.bulk', actor, undefined, 'failure', 'error', correlationId, { error: err && err.message });
       throw err;
     }
   }
@@ -636,48 +776,6 @@ return sanitizeForClient(created);
 
   async startSession() {
     return OrderRepo.startSession();
-  }
-
-  async createOrderTransaction(payload = {}, transactionalWork, opts = {}) {
-    const actor = actorFromOpts(opts);
-    const correlationId = opts.correlationId || null;
-
-    const session = await this.startSession();
-    session.startTransaction();
-    try {
-      const created = await OrderRepo.create(payload, { session });
-      if (typeof transactionalWork === 'function') {
-        await transactionalWork(session, created);
-      }
-      await session.commitTransaction();
-      session.endSession();
-
-      await auditService.logEvent({
-        eventType: 'create.order.transaction',
-        actor,
-        target: created._id || created.id,
-        outcome: 'success',
-        correlationId,
-        details: {}
-      });
-
-      return sanitizeForClient(created);
-    } catch (err) {
-      await session.abortTransaction();
-      session.endSession();
-
-      await auditService.logEvent({
-        eventType: 'create.order.transaction',
-        actor,
-        target: payload && payload.userId ? payload.userId : undefined,
-        outcome: 'failure',
-        severity: 'error',
-        correlationId,
-        details: { error: err && err.message }
-      });
-
-      throw err;
-    }
   }
 }
 

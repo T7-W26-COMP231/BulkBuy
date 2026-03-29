@@ -1,10 +1,11 @@
 // src/validators/salesWindow.validators.js
 /**
- * Validators for SalesWindow endpoints
- * - Uses express-validator
- * - Exports middleware arrays for route wiring used in src/routes/salesWindow.routes.js
+ * Validators for SalesWindow endpoints (express-validator)
  *
- * Example:
+ * - Matches the optimized, payload-first routes in src/routes/salesWindow.routes.js
+ * - Exports middleware arrays and helper guards used by route wiring
+ *
+ * Usage:
  *   router.post('/', requireAuth, validators.create, SalesWindowController.create)
  */
 
@@ -29,7 +30,6 @@ function runValidation(req, res, next) {
   return next();
 }
 
-/* Admin guard (for routes that require admin) */
 function adminOnly(req, res, next) {
   const user = req.user;
   if (!user || user.role !== 'administrator') {
@@ -74,25 +74,20 @@ const create = [
     .isInt({ min: 0 }).withMessage('window.toEpoch must be an integer epoch ms')
     .custom((toEpoch, { req }) => {
       const from = Number(req.body.window && req.body.window.fromEpoch);
-      if (!Number.isFinite(from)) return true; // other validators will catch missing fromEpoch
+      if (!Number.isFinite(from)) return true;
       if (Number(toEpoch) <= Number(from)) throw new Error('window.toEpoch must be greater than window.fromEpoch');
       return true;
     }),
-
+  body('ops_region').optional().isString().withMessage('ops_region must be a string'),
   body('products').optional().isArray().withMessage('products must be an array'),
   body('products.*.productId').optional().custom((v) => isObjectId(v)).withMessage('products.*.productId must be a valid ObjectId'),
   body('products.*.items').optional().isArray().withMessage('products.*.items must be an array'),
   body('products.*.items.*.itemId').optional().custom((v) => isObjectId(v)).withMessage('products.*.items.*.itemId must be a valid ObjectId'),
-  body('products.*.items.*.pricing_snapshot').optional().isObject().withMessage('pricing_snapshot must be an object'),
-  body('products.*.metadata').optional().isObject().withMessage('product metadata must be an object'),
-
-  body('overflow_id').optional().custom((v) => isObjectId(v)).withMessage('overflow_id must be a valid ObjectId'),
   body('metadata').optional().custom((v) => {
     if (v === null) return true;
     if (typeof v === 'object' && !Array.isArray(v)) return true;
     throw new Error('metadata must be an object');
   }),
-
   runValidation
 ];
 
@@ -142,15 +137,13 @@ const range = [
 ];
 
 /* -------------------------
- * Add/Update Item validator
+ * Add/Update Item validators (payload-first)
  * ------------------------- */
 
-/**
- * addOrUpdateItem expects productId and itemId either in params or in body.
- * When used on POST /:id/items we validate body fallback.
+/* addOrUpdateItem: used for POST /:id/items and POST /:id/products/items/upsert
+ * productId and itemId may be provided in body (preferred) or params (legacy)
  */
 const addOrUpdateItem = [
-  // productId and itemId may be in body; if present validate them
   body('productId').optional().custom((v) => isObjectId(v)).withMessage('productId must be a valid ObjectId'),
   body('itemId').optional().custom((v) => isObjectId(v)).withMessage('itemId must be a valid ObjectId'),
   body('pricing_snapshot').optional().isObject().withMessage('pricing_snapshot must be an object'),
@@ -159,7 +152,6 @@ const addOrUpdateItem = [
     if (typeof v === 'object' && !Array.isArray(v)) return true;
     throw new Error('metadata must be an object');
   }),
-  // custom validator to ensure productId and itemId exist either in params or body
   body().custom((value, { req }) => {
     const productId = req.params.productId || req.body.productId;
     const itemId = req.params.itemId || req.body.itemId;
@@ -174,23 +166,95 @@ const addOrUpdateItem = [
 ];
 
 /* -------------------------
- * Upsert / bulk validators
+ * Delete item (body) validator
  * ------------------------- */
 
-const upsert = [
-  body('filter').exists().withMessage('filter is required').bail()
-    .custom((v) => v && typeof v === 'object' && !Array.isArray(v)).withMessage('filter must be an object'),
-  body('update').exists().withMessage('update is required').bail()
-    .custom((v) => v && typeof v === 'object' && !Array.isArray(v)).withMessage('update must be an object'),
+const deleteItemBody = [
+  body('productId').exists().withMessage('productId is required').bail().custom((v) => isObjectId(v)).withMessage('productId must be a valid ObjectId'),
+  body('itemId').exists().withMessage('itemId is required').bail().custom((v) => isObjectId(v)).withMessage('itemId must be a valid ObjectId'),
   runValidation
 ];
 
-const bulkInsert = [
+/* -------------------------
+ * Get item snapshot (query) validator
+ * ------------------------- */
+
+const getItemQuery = [
+  query('productId').exists().withMessage('productId is required').bail().custom((v) => isObjectId(v)).withMessage('productId must be a valid ObjectId'),
+  query('itemId').exists().withMessage('itemId is required').bail().custom((v) => isObjectId(v)).withMessage('itemId must be a valid ObjectId'),
+  query('fallback').optional().isBoolean().withMessage('fallback must be boolean').toBoolean(),
+  runValidation
+];
+
+/* -------------------------
+ * Product / ProductItem validators
+ * ------------------------- */
+
+const addProduct = [
+  body('productId').exists().withMessage('productId is required').bail().custom((v) => isObjectId(v)).withMessage('productId must be a valid ObjectId'),
+  body('metadata').optional().custom((v) => {
+    if (v === null) return true;
+    if (typeof v === 'object' && !Array.isArray(v)) return true;
+    throw new Error('metadata must be an object');
+  }),
+  runValidation
+];
+
+const addProductItemBody = [
+  body('productId').exists().withMessage('productId is required').bail().custom((v) => isObjectId(v)).withMessage('productId must be a valid ObjectId'),
+  body('itemPayload').optional().isObject().withMessage('itemPayload must be an object'),
+  // allow direct item fields in body as fallback
+  body('itemId').optional().custom((v) => isObjectId(v)).withMessage('itemId must be a valid ObjectId'),
+  runValidation
+];
+
+const listProductItemsQuery = [
+  query('productId').exists().withMessage('productId is required').bail().custom((v) => isObjectId(v)).withMessage('productId must be a valid ObjectId'),
+  query('page').optional().isInt({ min: 1 }).toInt(),
+  query('limit').optional().isInt({ min: 1, max: 200 }).toInt(),
+  query('lean').optional().isBoolean().toBoolean(),
+  runValidation
+];
+
+/* -------------------------
+ * Pricing validators
+ * ------------------------- */
+
+const pricingSnapshotBody = [
+  body('productId').exists().withMessage('productId is required').bail().custom((v) => isObjectId(v)).withMessage('productId must be a valid ObjectId'),
+  body('itemId').exists().withMessage('itemId is required').bail().custom((v) => isObjectId(v)).withMessage('itemId must be a valid ObjectId'),
+  body('snapshot').exists().withMessage('snapshot is required').bail().isObject().withMessage('snapshot must be an object'),
+  runValidation
+];
+
+const pricingSnapshotsQuery = [
+  query('productId').exists().withMessage('productId is required').bail().custom((v) => isObjectId(v)).withMessage('productId must be a valid ObjectId'),
+  query('itemId').exists().withMessage('itemId is required').bail().custom((v) => isObjectId(v)).withMessage('itemId must be a valid ObjectId'),
+  runValidation
+];
+
+const pricingTiersQuery = [
+  query('productId').exists().withMessage('productId is required').bail().custom((v) => isObjectId(v)).withMessage('productId must be a valid ObjectId'),
+  query('itemId').exists().withMessage('itemId is required').bail().custom((v) => isObjectId(v)).withMessage('itemId must be a valid ObjectId'),
+  runValidation
+];
+
+/* -------------------------
+ * Bulk validators
+ * ------------------------- */
+
+const bulkProductsBody = [
   body().custom((v) => {
     if (Array.isArray(v)) return true;
-    if (v && Array.isArray(v.docs)) return true;
-    throw new Error('body must be an array of docs or { docs: [] }');
+    if (v && Array.isArray(v.products)) return true;
+    throw new Error('body must be an array of products or { products: [] }');
   }),
+  runValidation
+];
+
+const bulkItemsBody = [
+  body('productId').exists().withMessage('productId is required').bail().custom((v) => isObjectId(v)).withMessage('productId must be a valid ObjectId'),
+  body('items').exists().withMessage('items is required').bail().isArray().withMessage('items must be an array'),
   runValidation
 ];
 
@@ -215,6 +279,18 @@ const list = [
 ];
 
 /* -------------------------
+ * Current windows validator
+ * ------------------------- */
+
+const currentQuery = [
+  query('region').exists().withMessage('region is required').bail().isString().withMessage('region must be a string'),
+  query('page').optional().isInt({ min: 1 }).toInt(),
+  query('limit').optional().isInt({ min: 1, max: 200 }).toInt(),
+  query('lean').optional().isBoolean().toBoolean(),
+  runValidation
+];
+
+/* -------------------------
  * Exports
  * ------------------------- */
 
@@ -228,12 +304,31 @@ module.exports = {
   productIdParam,
   itemIdParam,
 
-  /* actions */
+  /* core actions */
   create,
   updateById,
   range,
-  addOrUpdateItem,
+  list,
+  bulkInsert: bulkProductsBody, // reuse bulkProductsBody for route wiring of bulk-insert
   upsert,
-  bulkInsert,
-  list
+
+  /* item/product actions */
+  addOrUpdateItem,
+  deleteItemBody,
+  getItemQuery,
+  addProduct,
+  addProductItemBody,
+  listProductItemsQuery,
+
+  /* pricing */
+  pricingSnapshotBody,
+  pricingSnapshotsQuery,
+  pricingTiersQuery,
+
+  /* bulk product/item */
+  bulkProductsBody,
+  bulkItemsBody,
+
+  /* current windows */
+  currentQuery
 };

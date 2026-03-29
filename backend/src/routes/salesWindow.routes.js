@@ -230,6 +230,15 @@ router.post('/:id/products/bulk-items', requireAuth, requireRole('administrator'
  */
 router.get('/:id/overflow-chain', requireAuth, requireRole('administrator'), validators.idParam, asyncHandler(SalesWindowController.getOverflowChain));
 
+/* Get current sales window status for a customer-facing item/product check
+ * GET /api/sales-windows/public/current-status?region=...&productId=...&itemId=...
+ * Query: region (required), productId (optional), itemId (optional)
+ * Auth: not required
+ * Validator: none
+ * Note: This returns a minimal customer-safe payload (windowId, fromEpoch, toEpoch, status) instead of full SalesWindow documents.
+ */
+router.get('/public/current-status', asyncHandler(SalesWindowController.getCurrentWindowStatusForCustomer));
+
 /* List all current sales windows (head + overflow)
  * GET /api/sales-windows/current?region=...&page=&limit=
  * Query: region (required), page, limit, lean

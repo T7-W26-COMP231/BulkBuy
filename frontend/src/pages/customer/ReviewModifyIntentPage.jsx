@@ -24,6 +24,8 @@ export default function ReviewModifyIntentPage() {
   const [editedQtys, setEditedQtys] = useState({});
   const [saving, setSaving] = useState({});
   const [windowLocked, setWindowLocked] = useState(false);
+  const [windowStatusMap, setWindowStatusMap] = useState({});
+  const [windowInfoMap, setWindowInfoMap] = useState({});
   const [fetchError, setFetchError] = useState(null);
   const [itemDataMap, setItemDataMap] = useState({});
 
@@ -70,6 +72,91 @@ export default function ReviewModifyIntentPage() {
         });
 
         setItemDataMap(itemMap); // ← new state
+
+        const uniqueIntentItems = latest.flatMap((intent) =>
+          (intent.items || []).map((item) => {
+            const resolvedItemId = item.itemId?._id || item.itemId;
+            const resolvedProductId = item.productId?._id || item.productId;
+            const resolvedItemDoc = itemMap[resolvedItemId] || {};
+            const resolvedRegion = resolvedItemDoc.ops_region || item.ops_region || null;
+
+            return {
+              key: `${intent._id}::${resolvedItemId}`,
+              itemId: resolvedItemId,
+              productId: resolvedProductId,
+              region: resolvedRegion,
+            };
+          })
+        );
+
+        const windowResponses = await Promise.all(
+          uniqueIntentItems.map(async ({ key, itemId, productId, region }) => {
+            if (!region || !itemId) {
+              return {
+                key,
+                status: "unknown",
+                fromEpoch: null,
+                toEpoch: null,
+              };
+            }
+
+            try {
+              const params = new URLSearchParams({
+                region,
+                itemId,
+                ...(productId ? { productId } : {}),
+              });
+
+              const res = await fetch(
+                `${import.meta.env.VITE_API_URL}/api/swnds/public/current-status?${params.toString()}`,
+                {
+                  headers: {
+                    "Content-Type": "application/json",
+                    ...(localStorage.getItem("token") && {
+                      Authorization: `Bearer ${localStorage.getItem("token")}`,
+                    }),
+                  },
+                }
+              );
+
+              const json = await res.json();
+
+              if (!res.ok || !json.success) {
+                return {
+                  key,
+                  status: "closed",
+                  fromEpoch: null,
+                  toEpoch: null,
+                };
+              }
+
+              return {
+                key,
+                status: json.data?.status || "unknown",
+                fromEpoch: json.data?.fromEpoch ?? null,
+                toEpoch: json.data?.toEpoch ?? null,
+              };
+            } catch {
+              return {
+                key,
+                status: "closed",
+                fromEpoch: null,
+                toEpoch: null,
+              };
+            }
+          })
+        );
+
+        const nextWindowStatusMap = {};
+        const nextWindowInfoMap = {};
+
+        windowResponses.forEach(({ key, status, fromEpoch, toEpoch }) => {
+          nextWindowStatusMap[key] = status;
+          nextWindowInfoMap[key] = { fromEpoch, toEpoch };
+        });
+
+        setWindowStatusMap(nextWindowStatusMap);
+        setWindowInfoMap(nextWindowInfoMap);
 
         const initialQtys = {};
         latest.forEach((intent) => {
@@ -225,6 +312,9 @@ export default function ReviewModifyIntentPage() {
   const grandTotal = totalSubtotal - totalSavings + platformFee;
   const firstItem = allItems[0];
 
+  const formatWindowDate = (epoch) =>
+              Number.isFinite(epoch) ? new Date(epoch).toLocaleString() : "N/A";
+
   return (
     <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-background-light font-display text-text-main">
       <Navbar />
@@ -260,6 +350,9 @@ export default function ReviewModifyIntentPage() {
 
           {allItems.map((item, index) => {
             const key = `${item.intentId}::${item.itemId}`;
+            const itemWindowStatus = windowStatusMap[key] || "unknown";
+            const windowInfo = windowInfoMap[key] || {};
+            const isWindowOpen = itemWindowStatus === "open";
             const qty = editedQtys[key] ?? item.quantity;
             const isSaving = saving[key];
             const display = getDisplayData(item);
@@ -374,18 +467,18 @@ export default function ReviewModifyIntentPage() {
                       <div className="flex items-center gap-3">
                         <button
                           onClick={() => handleQtyChange(item.intentId, item.itemId, qty - 1)}
-                          disabled={windowLocked || isSaving || qty <= 1}
+                          disabled={!isWindowOpen || isSaving || qty <= 1}
                           className="flex h-9 w-9 items-center justify-center rounded-lg border border-neutral-light bg-white text-xl font-bold text-text-muted transition hover:bg-neutral-light disabled:opacity-40"
                         >−</button>
                         <input
                           type="number" min="1" step="1" value={qty}
-                          disabled={windowLocked || isSaving}
+                          disabled={!isWindowOpen || isSaving}
                           onChange={(e) => handleQtyChange(item.intentId, item.itemId, e.target.value)}
                           className="w-16 rounded-lg border border-neutral-light bg-white px-2 py-1.5 text-center text-lg font-bold outline-none transition focus:border-primary disabled:cursor-not-allowed disabled:bg-neutral-light"
                         />
                         <button
                           onClick={() => handleQtyChange(item.intentId, item.itemId, qty + 1)}
-                          disabled={windowLocked || isSaving}
+                          disabled={!isWindowOpen || isSaving}
                           className="flex h-9 w-9 items-center justify-center rounded-lg border border-neutral-light bg-white text-xl font-bold text-text-muted transition hover:bg-neutral-light disabled:opacity-40"
                         >+</button>
                       </div>
@@ -395,24 +488,35 @@ export default function ReviewModifyIntentPage() {
                     <div className="flex gap-3">
                       <button
                         onClick={() => handleSaveChanges(item.intentId, item.itemId)}
-                        disabled={windowLocked || isSaving}
+                        disabled={!isWindowOpen || isSaving}
                         className="rounded-xl bg-primary px-5 py-2.5 font-bold text-text-main disabled:opacity-50"
                       >
                         {isSaving ? "Saving…" : "Save Changes"}
                       </button>
                       <button
                         onClick={() => handleCancelIntent(item.intentId, item.itemId)}
-                        disabled={windowLocked}
+                        disabled={!isWindowOpen}
                         className="rounded-xl border border-neutral-light bg-white px-5 py-2.5 font-semibold text-text-main disabled:opacity-50"
                       >
                         Cancel
                       </button>
                     </div>
 
-                    <div className="inline-flex w-fit rounded-full bg-primary/10 px-3 py-1 text-xs font-bold text-text-main">
-                      {windowLocked ? "🔒 Window closed" : "Aggregation window open"}
+                    <div className={`inline-flex w-fit rounded-full px-3 py-1 text-xs font-bold ${
+                      itemWindowStatus === "open"
+                        ? "bg-primary/10 text-text-main"
+                        : "bg-red-100 text-red-800"
+                    }`}>
+                      {itemWindowStatus === "open"
+                        ? "Aggregation window open"
+                        : itemWindowStatus === "upcoming"
+                        ? "Aggregation window upcoming"
+                        : "🔒 Window closed"}
                     </div>
 
+                    <p className="text-xs text-text-muted">
+                      Aggregation window: {formatWindowDate(windowInfo.fromEpoch)} – {formatWindowDate(windowInfo.toEpoch)}
+                    </p>
                   </div>
                   {/* ── end CONTENT ── */}
                 </div>

@@ -330,8 +330,15 @@ export function AuthProvider({
         // update ref immediately so subsequent apiFetch calls include the header
         accessTokenRef.current = normalized.accessToken || null;
         setRefreshToken(normalized.refreshToken || null);
-        setUser(normalized.user || null);
+        setUser(() => normalized.user ?? null);
         setLoading(false);
+
+        // dispatch event after ref/state are set
+        try {
+          window.dispatchEvent(new CustomEvent("auth:signedin", {
+            detail: { user: normalized.user ?? null, accessToken: normalized.accessToken ?? null }
+          }));
+        } catch (e) { /* ignore if window not available */ }
 
         // notify listeners asynchronously
         if (typeof onSignIn === "function") {
@@ -509,6 +516,15 @@ export function AuthProvider({
         try {
           localStorage.removeItem(storageKey);
         } catch { }
+
+        // after clearing tokens/user in signOut
+        try {
+          window.dispatchEvent(new CustomEvent("auth:signedout"));
+        } catch (e) { }
+        if (typeof onSignOut === "function") {
+          Promise.resolve().then(() => { try { onSignOut(); } catch (cbErr) { } });
+        }
+
         // notify listeners asynchronously after local cleanup
         if (typeof onSignOut === "function") {
           Promise.resolve().then(() => {

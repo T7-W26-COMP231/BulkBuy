@@ -45,6 +45,7 @@ import React, {
   useState
 } from 'react';
 
+
 const DEFAULT_API_BASE = 'http://localhost:5000/api/opcs';
 const DEFAULT_ENDPOINTS = {
   getUiProducts: '/products',
@@ -93,7 +94,7 @@ export function OpsContextProvider({
   children,
   apiBase = DEFAULT_API_BASE,
   endpoints = DEFAULT_ENDPOINTS,
-  getAuthToken = null,
+  getAuthToken = null, //() => getAuthAccessToken(),
   authStorageKey = 'app_auth_session_v1'
 }) {
   /* Loading / error */
@@ -298,6 +299,7 @@ export function OpsContextProvider({
     [apiFetch, endpoints.getEnrichedOrders, ordersKey]
   );
 
+
   /* -------------------------
      Stateful wrappers (update provider state)
      ------------------------- */
@@ -373,7 +375,7 @@ export function OpsContextProvider({
     async (opts = {}) => {
       // requireAuth: default false (allow callers to decide). If caller sets requireAuth true and no token, throw.
       const requireAuth = opts.requireAuth === undefined ? false : Boolean(opts.requireAuth);
-      if (requireAuth && !resolveToken()) throw new Error('Authentication required to fetch orders');
+      if (requireAuth && ! await resolveToken()) throw new Error('Authentication required to fetch orders');
 
       setLoadingOrders(true);
       setError(null);

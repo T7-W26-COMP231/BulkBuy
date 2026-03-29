@@ -37,7 +37,7 @@ function actorFromOpts(opts = {}) {
 function tokenPayloadFromUser(user = {}) {
   const userId = user.userId || user._id || user.id || null;
   const role = user.role || null;
-  return { userId, role };
+  return { _id:user._id,  userId, role };
 }
 
 /* -------------------------

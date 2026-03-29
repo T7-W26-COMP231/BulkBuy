@@ -5,8 +5,8 @@ import Navbar from "../../components/Navbar";
 import Sidebar from "../../components/Sidebar";
 import Footer from "../../components/Footer";
 import { getCityData, getFeaturedAggregation } from "../../data/mockData";
-import { useOpsContext } from "../../contexts/OpsContex.jsx";
 import { useAuth } from "../../contexts/AuthContext.jsx";
+import { useOpsContext } from "../../contexts/OpsContex.jsx";
 
 const GTA_CITIES = [
   { name: "Toronto", lat: 43.6532, lng: -79.3832 },
@@ -50,17 +50,14 @@ function getNearestCity(lat, lng) {
 }
 
 export default function HomePage() {
-
-  // inside component
   const didInitRef = useRef(false);
   useEffect(() => {
     if (didInitRef.current) return;
     didInitRef.current = true;
-    // run one-time init (fetch products, open socket, etc.)
   }, []);
 
-
-  const { user } = useAuth();
+  // Auth + Ops contexts
+  const { user, accessToken } = useAuth();
   const {
     orders,
     products,
@@ -69,13 +66,11 @@ export default function HomePage() {
     fetchAndSetEnrichedOrders,
     clearState: clearOpsState,
     applyRealtimeUpdate,
-  } = useOpsContext(); //--------------------------------------------------
+  } = useOpsContext();
 
   const [socketConnected, setSocketConnected] = useState(false);
   const socketRef = useRef(null);
-
-  // Location modal state
-  const [locationState, setLocationState] = useState("idle"); // idle | asking | detecting | done | denied
+  const [locationState, setLocationState] = useState("idle");
   const [detectedCity, setDetectedCity] = useState(null);
 
   // Derived display city
@@ -91,87 +86,96 @@ export default function HomePage() {
       )
     : 0;
 
-  // Initial products load (runs once)
+  // PRODUCTS: run on mount and when region changes
   useEffect(() => {
     const controller = new AbortController();
     const region = productsMeta?.region || detectedCity || "Toronto";
-
     fetchAndSetUiProducts({
       region,
       page: 1,
       limit: 24,
       signal: controller.signal,
-    }).catch((err) => {
-      if (err && err.name === "AbortError") return;
-      // optional: show toast
-      // console.warn("Failed to load products", err);
-    });
-
-    console.log(`01 | these are the products --->: ${JSON.stringify(products)}`)//---------------------------
-
-    return () => controller.abort();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [products]); // run once on mount
-
-  // React to auth changes: fetch orders when signed in; clear on sign out
-  useEffect(() => {
-    const controller = new AbortController();
-
-    if (user && user._id) {
-      fetchAndSetEnrichedOrders({
-        userId: user._id,
-        region: productsMeta?.region || detectedCity || "Toronto",
-        page: 1,
-        limit: 25,
-        requireAuth: true,
-        signal: controller.signal,
-      }).catch((err) => {
+    })
+      .then((e) => {
+        // eslint-disable-next-line no-console
+        console.log("01 | products ->", products); //----------------------
+      })
+      .catch((err) => {
         if (err && err.name === "AbortError") return;
-        // console.warn("Failed to load enriched orders", err);
       });
 
-      
-
-    } else {
-      // user signed out: clear ops state (orders/products can remain if you prefer)
-      clearOpsState();
-    }
-    console.log(`02 | these are the orders --->: ${JSON.stringify(orders)}`)//---------------------------
     return () => controller.abort();
+  }, [productsMeta?.region, products, detectedCity, fetchAndSetUiProducts]);
+
+//-------------------------------------------------------------------------------------------------------
+
+  // ORDERS: ensure fetch runs only when auth is available (user._id AND accessToken)
+  // This guarantees the request includes auth headers and runs immediately after sign-in.
+  // Orders loader: busy while loop that yields to the event loop each iteration
+  useEffect(() => {
+    const controller = new AbortController();
+    let mounted = true;
+    const run = async () => {
+      try {
+         // If there's no user at all, clear ops and exit early.
+        if (!user || !user.userId) {
+          clearOpsState();
+          return;
+        }
+        if (!mounted || controller.signal.aborted) return;
+
+        const region = productsMeta?.region || detectedCity || "Toronto";
+
+        await fetchAndSetEnrichedOrders({
+          userId: user._id,
+          region,
+          page: 1,
+          limit: 25,
+          requireAuth: true,
+          signal: controller.signal,
+        }).then(() => {
+          // eslint-disable-next-line no-console
+          console.log("02 | orders ->", orders); //------------------------
+        });
+
+      } catch (err) {
+        if (err && err.name === "AbortError") return;
+        // eslint-disable-next-line no-console
+        console.warn("[HomePage] orders fetch failed or was skipped:", err);
+      }
+    };
+
+    run();
+
+    return () => {
+      mounted = false;
+      controller.abort();
+    };
   }, [
-    orders,
-    user,
-    fetchAndSetEnrichedOrders,
-    clearOpsState,
+    user?.userId,
+    accessToken,
     productsMeta?.region,
     detectedCity,
+    fetchAndSetEnrichedOrders,
+    clearOpsState,
+    orders
   ]);
-
-  // Socket.IO connection for realtime updates
+  
   useEffect(() => {
-    const socketUrl = import.meta.env.VITE_SOCKET_URL || "http://localhost:5000";
+    const socketUrl =
+      import.meta.env.VITE_SOCKET_URL || "http://localhost:5000";
     const socket = io(socketUrl, { autoConnect: true });
-
     socketRef.current = socket;
 
-    socket.on("connect", () => {
-      setSocketConnected(true);
-      // console.log("Connected to socket:", socket.id);
-    });
+    socket.on("connect", () => setSocketConnected(true));
+    socket.on("disconnect", () => setSocketConnected(false));
 
-    socket.on("disconnect", () => {
-      setSocketConnected(false);
-    });
-
-    // Example event handlers: merge updates into context state
     socket.on("product:update", (payload) => {
       try {
         applyRealtimeUpdate({
           products: Array.isArray(payload) ? payload : [payload],
         });
-      } catch (e) {
-        // swallow
-      }
+      } catch (e) {}
     });
 
     socket.on("order:update", (payload) => {
@@ -179,18 +183,13 @@ export default function HomePage() {
         applyRealtimeUpdate({
           orders: Array.isArray(payload) ? payload : [payload],
         });
-      } catch (e) {
-        // swallow
-      }
+      } catch (e) {}
     });
 
-    // lightweight notification for new orders (optional)
     socket.on("order_created", (data) => {
-      // you can call applyRealtimeUpdate or trigger a toast here
       try {
         applyRealtimeUpdate({ order: data });
       } catch (e) {}
-      // simple alert for now (replace with toast)
       // eslint-disable-next-line no-alert
       alert("New order created");
     });
@@ -201,25 +200,20 @@ export default function HomePage() {
       } catch {}
       socketRef.current = null;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [applyRealtimeUpdate]);
 
-  // Location modal logic (detect or ask)
+  // Location modal logic
   useEffect(() => {
     const savedCity = sessionStorage.getItem("detectedCity");
     const dismissed = sessionStorage.getItem("locationModalDismissed");
     let timer = null;
-
     if (savedCity) {
       setDetectedCity(savedCity);
       if (!dismissed) setLocationState("done");
     } else {
       const asked = sessionStorage.getItem("askedLocation");
-      if (!asked) {
-        timer = setTimeout(() => setLocationState("asking"), 600);
-      }
+      if (!asked) timer = setTimeout(() => setLocationState("asking"), 600);
     }
-
     return () => {
       if (timer) clearTimeout(timer);
     };
@@ -228,7 +222,6 @@ export default function HomePage() {
   const handleAllow = () => {
     sessionStorage.setItem("askedLocation", "true");
     setLocationState("detecting");
-
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const city = getNearestCity(pos.coords.latitude, pos.coords.longitude);
@@ -249,15 +242,13 @@ export default function HomePage() {
   const handleCityChange = (newCity) => {
     setDetectedCity(newCity);
     sessionStorage.setItem("detectedCity", newCity);
-    // optionally refresh products for the new city
     fetchAndSetUiProducts({ region: newCity, page: 1, limit: 24 }).catch(
-      () => {},
+      () => 0,
     );
   };
 
   return (
     <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-background-light text-text-main font-display">
-      {/* Location Modal */}
       {(locationState === "asking" ||
         locationState === "detecting" ||
         locationState === "done") &&
@@ -271,13 +262,11 @@ export default function HomePage() {
               >
                 <span className="material-symbols-outlined text-xl">close</span>
               </button>
-
               <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
                 <span className="material-symbols-outlined text-3xl text-primary">
                   {locationState === "done" ? "check_circle" : "location_on"}
                 </span>
               </div>
-
               {locationState === "asking" && (
                 <>
                   <h2 className="mb-1 text-lg font-bold">
@@ -303,11 +292,10 @@ export default function HomePage() {
                   </div>
                 </>
               )}
-
               {locationState === "detecting" && (
                 <>
                   <h2 className="mb-1 text-lg font-bold">
-                    Detecting your city …
+                    Detecting your city ...
                   </h2>
                   <p className="text-sm text-text-muted">
                     Finding the nearest GTA city to you.
@@ -320,15 +308,13 @@ export default function HomePage() {
                   </div>
                 </>
               )}
-
               {locationState === "done" && (
                 <>
                   <h2 className="mb-1 text-lg font-bold">Location set!</h2>
                   <p className="text-sm text-text-muted">
                     We've set your city to{" "}
                     <span className="font-semibold text-text-main">
-                      {" "}
-                      {detectedCity}{" "}
+                      {detectedCity}
                     </span>
                     . You can change it anytime from the navbar.
                   </p>
@@ -343,15 +329,12 @@ export default function HomePage() {
             </div>
           </div>
         )}
-
       <Navbar detectedCity={activeCity} onCityChange={handleCityChange} />
-
       <main className="flex flex-1 flex-col gap-8 px-4 py-8 md:flex-row md:px-20 lg:px-40">
         <Sidebar
           totalSavings={cityData.totalSavings}
           savingsLabel={cityData.savingsLabel}
         />
-
         <section className="flex flex-1 flex-col gap-8">
           <div className="flex flex-col gap-2">
             <h1 className="text-3xl font-extrabold tracking-tight">
@@ -361,7 +344,6 @@ export default function HomePage() {
               Join local bulk buys to unlock lower pricing tiers.
             </p>
           </div>
-
           <div className="flex flex-col overflow-hidden rounded-2xl border border-neutral-light bg-white shadow-sm lg:flex-row">
             <div className="relative h-64 w-full lg:h-auto lg:w-2/5">
               <img
@@ -370,20 +352,14 @@ export default function HomePage() {
                 src={selectedAggregation?.imageUrl}
                 alt={selectedAggregation?.title || "Aggregation image"}
               />
-
               <div
-                className={`absolute left-4 top-4 rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider ${
-                  aggregationStatus === "CLOSED"
-                    ? "bg-red-500 text-white"
-                    : "bg-primary text-text-main"
-                }`}
+                className={`absolute left-4 top-4 rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider ${aggregationStatus === "CLOSED" ? "bg-red-500 text-white" : "bg-primary text-text-main"}`}
               >
                 {aggregationStatus === "CLOSED"
                   ? "Window Closed"
                   : "Window Open"}
               </div>
             </div>
-
             <div className="flex flex-1 flex-col justify-between gap-6 p-6 md:p-8">
               <div>
                 <div className="mb-2 flex items-start justify-between">
@@ -399,7 +375,6 @@ export default function HomePage() {
                     </span>
                   </div>
                 </div>
-
                 <div className="mb-6 flex items-center gap-2 text-sm text-text-muted">
                   <span className="material-symbols-outlined text-sm">
                     schedule
@@ -424,7 +399,6 @@ export default function HomePage() {
                     Pickup: {selectedAggregation?.pickupLocation ?? activeCity}
                   </span>
                 </div>
-
                 <div className="space-y-4">
                   <div className="flex items-end justify-between">
                     <div className="flex flex-col gap-1">
@@ -443,7 +417,6 @@ export default function HomePage() {
                         : "-"}
                     </span>
                   </div>
-
                   <div className="h-3 w-full overflow-hidden rounded-full bg-neutral-light">
                     <div
                       className="h-full rounded-full bg-primary transition-all duration-500"
@@ -452,7 +425,6 @@ export default function HomePage() {
                   </div>
                 </div>
               </div>
-
               <div className="flex flex-wrap items-center justify-between gap-4 border-t border-neutral-light pt-4">
                 <div className="flex -space-x-3">
                   <img
@@ -484,8 +456,6 @@ export default function HomePage() {
               </div>
             </div>
           </div>
-
-          {/* Estimated Savings + Quality Guarantee */}
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <div className="flex items-center gap-5 rounded-2xl border border-neutral-light bg-white p-6">
               <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary">
@@ -502,7 +472,6 @@ export default function HomePage() {
                 </p>
               </div>
             </div>
-
             <div className="flex items-center gap-5 rounded-2xl border border-neutral-light bg-white p-6">
               <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary">
                 <span className="material-symbols-outlined text-3xl">
@@ -519,8 +488,6 @@ export default function HomePage() {
               </div>
             </div>
           </div>
-
-          {/* Map */}
           <div className="overflow-hidden rounded-2xl border border-neutral-light bg-white">
             <div className="flex items-center justify-between border-b border-neutral-light px-6 py-4">
               <h3 className="font-bold">Aggregations Map</h3>
@@ -528,7 +495,6 @@ export default function HomePage() {
                 Live in {activeCity}
               </span>
             </div>
-
             <div className="relative h-48 bg-neutral-light">
               <img
                 className="h-full w-full object-cover opacity-50 grayscale"
@@ -550,7 +516,6 @@ export default function HomePage() {
           </div>
         </section>
       </main>
-
       <Footer />
     </div>
   );

@@ -246,7 +246,7 @@ export default function Navbar({
     return (
       <div
         style={{
-          minWidth: 420,
+          // minWidth: 420,
           position: "relative",
           textAlign: "center",
           borderRight: "1px solid black",

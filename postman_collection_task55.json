@@ -1,0 +1,414 @@
+{
+  "info": {
+    "name": "Task 55: Retrieve User Intent Records",
+    "description": "Complete Postman collection for testing user intent retrieval and modification",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Register Test User",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"testuser@bulk.com\",\n  \"password\": \"Test@123\",\n  \"name\": \"Test User\",\n  \"role\": \"customer\"\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}/api/auth/register",
+          "host": ["{{BASE_URL}}"],
+          "path": ["api", "auth", "register"]
+        },
+        "description": "Create a test user account"
+      },
+      "response": []
+    },
+    {
+      "name": "2. Login & Get Token",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.response.code === 200) {",
+              "    var jsonData = pm.response.json();",
+              "    pm.environment.set('accessToken', jsonData.data.accessToken);",
+              "    pm.environment.set('userId', jsonData.data.user._id);",
+              "    console.log('✅ Token saved:', jsonData.data.accessToken.substring(0, 20) + '...');",
+              "    console.log('✅ UserId saved:', jsonData.data.user._id);",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"testuser@bulk.com\",\n  \"password\": \"Test@123\"\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}/api/auth/login",
+          "host": ["{{BASE_URL}}"],
+          "path": ["api", "auth", "login"]
+        },
+        "description": "Login and retrieve access token"
+      },
+      "response": []
+    },
+    {
+      "name": "3. Create Test Order (Intent)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.response.code === 201) {",
+              "    var jsonData = pm.response.json();",
+              "    pm.environment.set('orderId', jsonData.data._id);",
+              "    pm.environment.set('itemId', jsonData.data.items[0].itemId);",
+              "    console.log('✅ Order created:', jsonData.data._id);",
+              "    console.log('✅ Item ID:', jsonData.data.items[0].itemId);",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"items\": [\n    {\n      \"productId\": \"507f1f77bcf86cd799439011\",\n      \"itemId\": \"507f1f77bcf86cd799439012\",\n      \"quantity\": 50,\n      \"pricingSnapshot\": {\n        \"atInstantPrice\": 1.5,\n        \"discountedPercentage\": 10,\n        \"discountBracket\": {\n          \"initial\": 0,\n          \"final\": 100\n        }\n      }\n    }\n  ],\n  \"status\": \"submitted\",\n  \"ops_region\": \"Toronto\",\n  \"metadata\": {\n    \"source\": \"test-postman\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}/api/orders",
+          "host": ["{{BASE_URL}}"],
+          "path": ["api", "orders"]
+        },
+        "description": "Create a submitted order (customer intent)"
+      },
+      "response": []
+    },
+    {
+      "name": "⭐ TEST 1: Get Enriched User Intents",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "console.log('\\n=== TEST 1: GET Enriched User Intents ===');",
+              "console.log('Status:', pm.response.code);",
+              "",
+              "if (pm.response.code === 200) {",
+              "    var jsonData = pm.response.json();",
+              "    console.log('✅ Response success:', jsonData.success);",
+              "    ",
+              "    if (jsonData.items && jsonData.items.length > 0) {",
+              "        var order = jsonData.items[0];",
+              "        console.log('✅ Order found:', order._id);",
+              "        console.log('✅ Status:', order.status);",
+              "        console.log('✅ Region:', order.ops_region);",
+              "        ",
+              "        if (order.items && order.items.length > 0) {",
+              "            var item = order.items[0];",
+              "            console.log('✅ Item quantity:', item.quantity);",
+              "            console.log('✅ Latest pricing snapshot:', item.latestPricingSnapshot ? 'YES' : 'NO');",
+              "            console.log('✅ Available qty:', item.availableQty);",
+              "            console.log('✅ Qty sold:', item.qtySold);",
+              "            console.log('✅ Pricing tiers:', item.pricing_tiers ? 'YES' : 'NO');",
+              "        }",
+              "    } else {",
+              "        console.log('⚠️ No items found');",
+              "    }",
+              "} else {",
+              "    console.log('❌ Request failed');",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{BASE_URL}}/api/orders/user/{{userId}}/enriched?status=submitted&region=Toronto&page=1&limit=25",
+          "host": ["{{BASE_URL}}"],
+          "path": ["api", "orders", "user", "{{userId}}", "enriched"],
+          "query": [
+            {
+              "key": "status",
+              "value": "submitted"
+            },
+            {
+              "key": "region",
+              "value": "Toronto"
+            },
+            {
+              "key": "page",
+              "value": "1"
+            },
+            {
+              "key": "limit",
+              "value": "25"
+            }
+          ]
+        },
+        "description": "✅ CORE TEST: Retrieve enriched user intents with latest pricing data"
+      },
+      "response": []
+    },
+    {
+      "name": "⭐ TEST 2: Modify Quantity Before Window Closes",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "console.log('\\n=== TEST 2: MODIFY QUANTITY ===');",
+              "console.log('Status:', pm.response.code);",
+              "",
+              "if (pm.response.code === 200) {",
+              "    var jsonData = pm.response.json();",
+              "    console.log('✅ Update successful');",
+              "    console.log('✅ Order updated:', jsonData.data._id);",
+              "    ",
+              "    if (jsonData.data.items && jsonData.data.items.length > 0) {",
+              "        var item = jsonData.data.items[0];",
+              "        console.log('✅ New quantity:', item.quantity);",
+              "    }",
+              "} else {",
+              "    console.log('❌ Update failed');",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"itemId\": \"{{itemId}}\",\n  \"changes\": {\n    \"quantity\": 75\n  }\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}/api/orders/{{orderId}}/update-item",
+          "host": ["{{BASE_URL}}"],
+          "path": ["api", "orders", "{{orderId}}", "update-item"]
+        },
+        "description": "✅ TEST: Update item quantity from 50 to 75"
+      },
+      "response": []
+    },
+    {
+      "name": "⭐ TEST 3: Verify Quantity Persists (Refresh)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "console.log('\\n=== TEST 3: VERIFY PERSISTENCE ===');",
+              "console.log('Status:', pm.response.code);",
+              "",
+              "if (pm.response.code === 200) {",
+              "    var jsonData = pm.response.json();",
+              "    if (jsonData.items && jsonData.items.length > 0) {",
+              "        var item = jsonData.items[0].items[0];",
+              "        console.log('✅ Quantity persisted:', item.quantity);",
+              "        if (item.quantity === 75) {",
+              "            console.log('✅✅✅ SUCCESS: Quantity saved as 75');",
+              "        }",
+              "    }",
+              "} else {",
+              "    console.log('❌ Fetch failed');",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{BASE_URL}}/api/orders/user/{{userId}}/enriched?status=submitted",
+          "host": ["{{BASE_URL}}"],
+          "path": ["api", "orders", "user", "{{userId}}", "enriched"],
+          "query": [
+            {
+              "key": "status",
+              "value": "submitted"
+            }
+          ]
+        },
+        "description": "✅ TEST: Re-fetch intents to verify quantity persisted"
+      },
+      "response": []
+    },
+    {
+      "name": "⭐ TEST 4: Remove Intent Before Lock-in",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "console.log('\\n=== TEST 4: REMOVE INTENT ===');",
+              "console.log('Status:', pm.response.code);",
+              "",
+              "if (pm.response.code === 200) {",
+              "    console.log('✅ Item removed successfully');",
+              "} else if (pm.response.code === 404) {",
+              "    console.log('⚠️ Item not found (already removed)');",
+              "} else {",
+              "    console.log('❌ Remove failed');",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{BASE_URL}}/api/orders/{{orderId}}/items/{{itemId}}",
+          "host": ["{{BASE_URL}}"],
+          "path": ["api", "orders", "{{orderId}}", "items", "{{itemId}}"]
+        },
+        "description": "✅ TEST: Remove item from order before window closes"
+      },
+      "response": []
+    },
+    {
+      "name": "⭐ TEST 5: Verify Item Removed",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "console.log('\\n=== TEST 5: VERIFY ITEM REMOVED ===');",
+              "console.log('Status:', pm.response.code);",
+              "",
+              "if (pm.response.code === 200) {",
+              "    var jsonData = pm.response.json();",
+              "    if (jsonData.items && jsonData.items.length === 0) {",
+              "        console.log('✅✅✅ SUCCESS: Item successfully removed from intent');",
+              "    } else {",
+              "        console.log('⚠️ Order still has items:', jsonData.items.length);",
+              "    }",
+              "} else {",
+              "    console.log('❌ Fetch failed');",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{BASE_URL}}/api/orders/user/{{userId}}/enriched?status=submitted",
+          "host": ["{{BASE_URL}}"],
+          "path": ["api", "orders", "user", "{{userId}}", "enriched"],
+          "query": [
+            {
+              "key": "status",
+              "value": "submitted"
+            }
+          ]
+        },
+        "description": "✅ TEST: Verify item was removed from order"
+      },
+      "response": []
+    },
+    {
+      "name": "Summary: Run All Tests",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://postman-echo.com/get",
+          "protocol": "https",
+          "host": ["postman-echo", "com"],
+          "path": ["get"]
+        },
+        "description": "This is a placeholder. Run the collection sequentially starting from 'Register Test User'"
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "BASE_URL",
+      "value": "http://localhost:5000",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "orderId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "itemId",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}

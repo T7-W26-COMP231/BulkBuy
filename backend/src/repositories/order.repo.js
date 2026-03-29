@@ -33,7 +33,7 @@ class OrderRepository {
   /**
    * Find by Mongo _id
    * @param {String|ObjectId} id
-   * @param {Object} [opts] - { select, populate }
+   * @param {Object} [opts] - { select, populate, lean }
    * @returns {Promise<Object|null>}
    */
   async findById(id, opts = {}) {
@@ -41,6 +41,7 @@ class OrderRepository {
     const q = Order.findById(id);
     if (opts.select) q.select(opts.select);
     if (opts.populate) q.populate(opts.populate);
+    if (opts.lean) return q.lean().exec();
     return q.lean().exec();
   }
 
@@ -57,7 +58,7 @@ class OrderRepository {
   /**
    * Generic findOne
    * @param {Object} filter
-   * @param {Object} [opts] - { select, populate }
+   * @param {Object} [opts] - { select, populate, lean }
    * @returns {Promise<Object|null>}
    */
   async findOne(filter = {}, opts = {}) {
@@ -65,13 +66,14 @@ class OrderRepository {
     const q = Order.findOne(f);
     if (opts.select) q.select(opts.select);
     if (opts.populate) q.populate(opts.populate);
+    if (opts.lean) return q.lean().exec();
     return q.lean().exec();
   }
 
   /**
    * Find many with optional pagination and sorting
    * @param {Object} filter
-   * @param {Object} [opts] - { page, limit, sort, select, populate }
+   * @param {Object} [opts] - { page, limit, sort, select, populate, lean }
    * @returns {Promise<Array>}
    */
   async find(filter = {}, opts = {}) {
@@ -86,6 +88,7 @@ class OrderRepository {
     if (opts.sort) q.sort(opts.sort);
     if (opts.populate) q.populate(opts.populate);
     q.skip(skip).limit(limit);
+    if (opts.lean) return q.lean().exec();
     return q.lean().exec();
   }
 
@@ -127,7 +130,7 @@ class OrderRepository {
    * Update by _id
    * @param {String|ObjectId} id
    * @param {Object} update
-   * @param {Object} [opts] - { new: true, populate }
+   * @param {Object} [opts] - { new: true, populate, lean }
    * @returns {Promise<Object|null>}
    */
   async updateById(id, update = {}, opts = { new: true }) {
@@ -135,6 +138,7 @@ class OrderRepository {
     const payload = { ...update, updatedAt: Date.now() };
     const q = Order.findByIdAndUpdate(id, payload, { new: !!opts.new, runValidators: true });
     if (opts.populate) q.populate(opts.populate);
+    if (opts.lean) return q.lean().exec();
     return q.lean().exec();
   }
 
@@ -142,7 +146,7 @@ class OrderRepository {
    * Update one by filter
    * @param {Object} filter
    * @param {Object} update
-   * @param {Object} [opts] - { upsert: false, new: true, populate }
+   * @param {Object} [opts] - { upsert: false, new: true, populate, lean }
    * @returns {Promise<Object|null>}
    */
   async updateOne(filter = {}, update = {}, opts = { upsert: false, new: true }) {
@@ -155,6 +159,7 @@ class OrderRepository {
       setDefaultsOnInsert: true
     });
     if (opts.populate) q.populate(opts.populate);
+    if (opts.lean) return q.lean().exec();
     return q.lean().exec();
   }
 
@@ -191,7 +196,7 @@ class OrderRepository {
   /**
    * Find orders for a user with pagination
    * @param {String|ObjectId} userId
-   * @param {Object} [opts] - { page, limit, sort, select, populate }
+   * @param {Object} [opts] - { page, limit, sort, select, populate, lean }
    * @returns {Promise<Array>}
    */
   async findByUserId(userId, opts = {}) {
@@ -204,6 +209,7 @@ class OrderRepository {
     if (opts.sort) q.sort(opts.sort);
     if (opts.populate) q.populate(opts.populate);
     q.skip(skip).limit(limit);
+    if (opts.lean) return q.lean().exec();
     return q.lean().exec();
   }
 
@@ -214,7 +220,7 @@ class OrderRepository {
    * @param {String|ObjectId} orderId
    * @param {String|ObjectId} itemId
    * @param {Number} quantity
-   * @param {Object} [opts] - { session, populate }
+   * @param {Object} [opts] - { session, populate, lean }
    * @returns {Promise<Object|null>} updated order (plain)
    */
   async setItemQuantity(orderId, itemId, quantity, opts = {}) {
@@ -254,7 +260,7 @@ class OrderRepository {
    * @param {String|ObjectId} orderId
    * @param {String|ObjectId} itemId
    * @param {Object} changes - { quantity?: Number, saveForLater?: Boolean, pricingSnapshot?: Object }
-   * @param {Object} [opts] - { session, populate }
+   * @param {Object} [opts] - { session, populate, lean }
    * @returns {Promise<Object|null>} updated order (plain)
    */
   async updateItem(orderId, itemId, changes = {}, opts = {}) {
@@ -303,7 +309,7 @@ class OrderRepository {
    *
    * @param {String|ObjectId} orderId
    * @param {Object} item - { productId, itemId, pricingSnapshot?, saveForLater?, quantity? }
-   * @param {Object} [opts] - { session, populate }
+   * @param {Object} [opts] - { session, populate, lean }
    * @returns {Promise<Object|null>} updated order (plain)
    */
   async addItem(orderId, item = {}, opts = {}) {
@@ -344,7 +350,7 @@ class OrderRepository {
    *
    * @param {String|ObjectId} orderId
    * @param {String|ObjectId} itemId
-   * @param {Object} [opts] - { session, populate }
+   * @param {Object} [opts] - { session, populate, lean }
    * @returns {Promise<Object|null>} updated order (plain)
    */
   async removeItem(orderId, itemId, opts = {}) {
@@ -369,7 +375,7 @@ class OrderRepository {
    * Returns { saved: Array, order: Object } where order is the updated order (plain).
    *
    * @param {String|ObjectId} orderId
-   * @param {Object} [opts] - { session, populate }
+   * @param {Object} [opts] - { session, populate, lean }
    * @returns {Promise<Object|null>}
    */
   async extractSaveForLater(orderId, opts = {}) {
@@ -391,6 +397,128 @@ class OrderRepository {
     await doc.save({ session: opts.session });
     const plainOrder = await Order.findById(doc._id).select(opts.select || '').populate(opts.populate || '').lean().exec();
     return { saved, order: plainOrder };
+  }
+
+  /* -------------------------
+   * Item-level helpers (atomic, session-aware) - new names for clarity
+   * ------------------------- */
+
+  /**
+   * addItemToOrder(orderId, item, opts)
+   * - Uses instance helper when available; otherwise performs safe fallback.
+   * - Returns updated order (plain object) or null.
+   */
+  async addItemToOrder(orderId, item = {}, opts = {}) {
+    return this.addItem(orderId, item, opts);
+  }
+
+  /**
+   * updateOrderItem(orderId, itemId, changes, opts)
+   * - Uses instance helper when available; otherwise performs safe fallback.
+   * - Returns updated order (plain) or null.
+   */
+  async updateOrderItem(orderId, itemId, changes = {}, opts = {}) {
+    return this.updateItem(orderId, itemId, changes, opts);
+  }
+
+  /**
+   * removeOrderItem(orderId, itemId, opts)
+   * - Uses instance helper when available; otherwise performs safe fallback.
+   * - Returns updated order (plain) or null.
+   */
+  async removeOrderItem(orderId, itemId, opts = {}) {
+    return this.removeItem(orderId, itemId, opts);
+  }
+
+  /* -------------------------
+   * Draft management helpers
+   * ------------------------- */
+
+  /**
+   * findOrCreateDraftForUserRegion(userId, region, opts)
+   * - Finds latest draft for user+region or creates one atomically.
+   * - Returns plain order object.
+   */
+  async findOrCreateDraftForUserRegion(userId, region, opts = {}) {
+    if (!userId) throw new Error('userId is required');
+    const filter = { userId, ops_region: region || null, status: 'draft' };
+    // Try to find existing draft
+    const existing = await Order.findOne(filter).sort({ createdAt: -1 }).lean().exec();
+    if (existing) return existing;
+
+    // Create new draft atomically
+    const doc = {
+      userId,
+      ops_region: region || null,
+      items: [],
+      status: 'draft',
+      createdAt: Date.now(),
+      updatedAt: Date.now()
+    };
+
+    if (opts.session) {
+      const created = await Order.create([doc], { session: opts.session });
+      return created[0] && created[0].toObject ? created[0].toObject() : created[0];
+    }
+
+    const created = await Order.create(doc);
+    return created && created.toObject ? created.toObject() : created;
+  }
+
+  /**
+   * moveSaveForLaterToDraft(sourceOrderId, targetDraftId, opts)
+   * - Extracts saveForLater items from source order and appends them to target draft.
+   * - Returns { sourceOrder, targetDraft } plain objects.
+   */
+  async moveSaveForLaterToDraft(sourceOrderId, targetDraftId, opts = {}) {
+    if (!sourceOrderId || !targetDraftId) throw new Error('sourceOrderId and targetDraftId are required');
+    const session = opts.session || null;
+
+    // Load docs
+    const sourceDoc = await this._findDocById(sourceOrderId);
+    if (!sourceDoc) throw new Error('source order not found');
+    if (session) sourceDoc.$session(session);
+
+    const targetDoc = await this._findDocById(targetDraftId);
+    if (!targetDoc) throw new Error('target draft not found');
+    if (session) targetDoc.$session(session);
+
+    // Extract saveForLater
+    const saved = (sourceDoc.items || []).filter((it) => it.saveForLater);
+    if (saved.length === 0) {
+      // nothing to move
+      return {
+        sourceOrder: sourceDoc.toObject ? sourceDoc.toObject() : sourceDoc,
+        targetDraft: targetDoc.toObject ? targetDoc.toObject() : targetDoc
+      };
+    }
+
+    // Remove saved items from source
+    sourceDoc.items = (sourceDoc.items || []).filter((it) => !it.saveForLater);
+    sourceDoc.updatedAt = Date.now();
+
+    // Append to target (avoid duplicates by itemId)
+    const existingItemIds = new Set((targetDoc.items || []).map((it) => String(it.itemId)));
+    for (const it of saved) {
+      if (!existingItemIds.has(String(it.itemId))) {
+        targetDoc.items.push({
+          productId: it.productId,
+          itemId: it.itemId,
+          pricingSnapshot: it.pricingSnapshot || {},
+          saveForLater: true,
+          quantity: it.quantity || 1
+        });
+      }
+    }
+    targetDoc.updatedAt = Date.now();
+
+    // Save both
+    await sourceDoc.save({ session });
+    await targetDoc.save({ session });
+
+    const plainSource = await Order.findById(sourceDoc._id).lean().exec();
+    const plainTarget = await Order.findById(targetDoc._id).lean().exec();
+    return { sourceOrder: plainSource, targetDraft: plainTarget };
   }
 
   /**

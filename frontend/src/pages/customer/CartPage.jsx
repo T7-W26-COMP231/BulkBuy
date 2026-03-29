@@ -120,8 +120,11 @@ export default function CartPage() {
   };
 
   const handleModifyQuantity = () => {
-    navigate("/review-modify-intent");
+    navigate("/review-modify-intent", {
+      state: { cartItems },   // ← pass current cart so ReviewModifyIntentPage can show name/image/price
+    });
   };
+
 
   return (
     <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-background-light font-display text-text-main">

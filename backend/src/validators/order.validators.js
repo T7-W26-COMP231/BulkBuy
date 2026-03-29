@@ -15,7 +15,9 @@ function runValidation(req, res, next) {
   return next();
 }
 
-/* Helper to allow empty or valid JSON string in query (e.g., ?filter={...}) */
+/**
+ * Helper to allow empty or valid JSON string in query (e.g., ?filter={...})
+ */
 function isJsonString(value) {
   if (value === undefined || value === null || value === '') return true;
   try {
@@ -27,15 +29,10 @@ function isJsonString(value) {
 }
 
 /* -------------------------
- * Pricing snapshot validators (re-usable)
+ * Reusable pricing snapshot validators (used inline where needed)
  * ------------------------- */
-const pricingSnapshotValidators = [
-  body().custom((value, { path }) => {
-    // This custom validator is used in contexts where the pricingSnapshot is nested,
-    // so we don't validate the root body here. The specific checks below are applied
-    // using dot notation in the callers.
-    return true;
-  })
+const pricingSnapshotRules = [
+  body().custom(() => true) // placeholder to allow dot-notation checks in callers
 ];
 
 /* -------------------------
@@ -44,15 +41,12 @@ const pricingSnapshotValidators = [
 
 /**
  * POST /orders
- * Required: userId
- * items: optional array
- * items.*.productId: ObjectId
- * items.*.itemId: ObjectId
- * items.*.pricingSnapshot.* fields validated if present
+ * - Required: userId
+ * - Optional: items array with productId/itemId/quantity/saveForLater/pricingSnapshot
  */
 const create = [
   body('userId').exists().withMessage('userId is required').isMongoId().withMessage('userId must be a valid ObjectId'),
-  body('items').optional().isArray(),
+  body('items').optional().isArray().withMessage('items must be an array'),
   body('items.*.productId').optional().isMongoId().withMessage('items.*.productId must be a valid ObjectId'),
   body('items.*.itemId').optional().isMongoId().withMessage('items.*.itemId must be a valid ObjectId'),
   body('items.*.quantity').optional().isInt({ min: 1 }).withMessage('items.*.quantity must be an integer >= 1').toInt(),
@@ -99,8 +93,7 @@ const itemIdParam = [
 
 /**
  * PATCH /orders/:id
- * Partial update - require body to be object (non-empty)
- * Disallow modifying immutable fields
+ * Partial update - require non-empty object and disallow immutable fields
  */
 const update = [
   param('id').exists().isMongoId().withMessage('id must be a valid ObjectId'),
@@ -197,16 +190,6 @@ const updateItem = [
 ];
 
 /**
- * DELETE /orders/:id/items/:itemId
- * itemId param validated above (itemIdParam)
- */
-
-/**
- * POST /orders/:id/extract-save-for-later
- * No body required
- */
-
-/**
  * POST /orders/bulk
  * Body: array of order objects
  */
@@ -235,7 +218,6 @@ function adminOnly(req, res, next) {
 /* -------------------------
  * Exports
  * ------------------------- */
-
 module.exports = {
   create,
   query: queryValidator,
@@ -250,5 +232,6 @@ module.exports = {
   setItemQuantity,
   updateItem,
   bulkCreate,
-  adminOnly
+  adminOnly,
+  pricingSnapshotRules
 };

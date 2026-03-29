@@ -1,19 +1,29 @@
 // src/controllers/salesWindow.controller.js
 /**
- * SalesWindow controller
- * - Thin HTTP layer that delegates to src/services/salesWindow.service
- * - Propagates actor and correlationId, records audit events for failures/successes
+ * SalesWindow controller (optimized, payload-first)
  *
- * Routes should be wired to this controller from src/routes/salesWindow.routes.js
+ * - Thin HTTP layer that delegates to src/services/salesWindow.service.
+ * - Controller does NOT perform auditing; service layer handles audit.
+ * - Mutations accept productId/itemId in request body; reads accept them via query.
+ * - listAllCurrentProducts remains internal and is NOT exported.
+ *
+ * Exported handlers:
+ * - create, getById, findByWindowRange, list, updateById, upsert, bulkInsert
+ * - addProduct, addProductItem, addOrUpdateItem, removeItem
+ * - listProductItems
+ * - addPricingSnapshot, upsertPricingSnapshot, listPricingSnapshots, listPricingTiers
+ * - bulkInsertProducts, bulkInsertItems
+ * - getItemSnapshot, getOverflowChain, listAllCurrentSalesWindows, deleteById
+ *
+ * Keep this file focused on request/response mapping and minimal validation
+ * (route-level validators handle most input checks).
  */
 
 const mongoose = require('mongoose');
+const createError = require('http-errors');
 const SalesWindowService = require('../services/salesWindow.service');
-const auditService = require('../services/audit.service');
 
-const asyncHandler = (fn) => (req, res, next) => {
-  Promise.resolve(fn(req, res, next)).catch(next);
-};
+const asyncHandler = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 
 function actorFromReq(req = {}) {
   const user = req.user || null;
@@ -23,7 +33,11 @@ function actorFromReq(req = {}) {
   };
 }
 
-/* Simple ObjectId param validator */
+function correlationIdFromReq(req = {}) {
+  return (req.headers && (req.headers['x-correlation-id'] || req.headers['x-request-id'])) || req.query.correlationId || null;
+}
+
+/* Utilities for route wiring (kept for compatibility with routes) */
 const validateObjectIdParam = (paramName) => (req, res, next) => {
   const id = req.params[paramName];
   if (!id || !mongoose.Types.ObjectId.isValid(String(id))) {
@@ -34,7 +48,6 @@ const validateObjectIdParam = (paramName) => (req, res, next) => {
   return next();
 };
 
-/* Parse optional filter query param (JSON string) */
 const parseFilterQuery = (req, res, next) => {
   if (req.query && req.query.filter && typeof req.query.filter === 'string') {
     try {
@@ -48,7 +61,6 @@ const parseFilterQuery = (req, res, next) => {
   return next();
 };
 
-/* Admin guard (re-usable) */
 const adminOnly = (req, res, next) => {
   const user = req.user;
   if (!user || user.role !== 'administrator') {
@@ -59,320 +71,333 @@ const adminOnly = (req, res, next) => {
   return next();
 };
 
-/* Controller actions */
+/* -------------------------
+ * Controller actions
+ * ------------------------- */
 
-/* POST /sales-windows */
+/* POST /api/sales-windows
+ * Body: window payload
+ */
 async function create(req, res) {
-  const correlationId = req.headers['x-correlation-id'] || null;
+  const correlationId = correlationIdFromReq(req);
   const actor = actorFromReq(req);
-  try {
-    const payload = req.body || {};
-    const created = await SalesWindowService.create(payload, { actor, correlationId, session: req.mongoSession });
-    await auditService.logEvent({
-      eventType: 'salesWindow.create.success',
-      actor,
-      target: { type: 'SalesWindow', id: created._id || null },
-      outcome: 'success',
-      severity: 'info',
-      correlationId,
-      details: { window: created.window }
-    });
-    return res.status(201).json({ success: true, data: created });
-  } catch (err) {
-    await auditService.logEvent({
-      eventType: 'salesWindow.create.failed',
-      actor,
-      target: { type: 'SalesWindow', id: null },
-      outcome: 'failure',
-      severity: err.status && err.status >= 500 ? 'error' : 'warning',
-      correlationId,
-      details: { message: err.message }
-    });
-    return res.status(err.status || 500).json({ success: false, message: err.message });
-  }
+  const payload = req.body || {};
+  const opts = { actor, correlationId, session: req.mongoSession || null, useTransaction: req.useTransaction || false };
+  const created = await SalesWindowService.create(payload, opts);
+  return res.status(201).json({ success: true, data: created });
 }
 
-/* GET /sales-windows/:id */
+/* GET /api/sales-windows/:id */
 async function getById(req, res) {
-  const correlationId = req.headers['x-correlation-id'] || null;
+  const correlationId = correlationIdFromReq(req);
   const actor = actorFromReq(req);
-  try {
-    const id = req.params.id;
-    const doc = await SalesWindowService.getById(id, { actor, correlationId });
-    return res.status(200).json({ success: true, data: doc });
-  } catch (err) {
-    await auditService.logEvent({
-      eventType: 'salesWindow.get.failed',
-      actor,
-      target: { type: 'SalesWindow', id: req.params.id || null },
-      outcome: 'failure',
-      severity: err.status && err.status >= 500 ? 'error' : 'warning',
-      correlationId,
-      details: { message: err.message }
-    });
-    return res.status(err.status || 500).json({ success: false, message: err.message });
-  }
+  const id = req.params.id;
+  if (!id) throw createError(400, 'id is required');
+  const opts = { actor, correlationId, lean: req.query.lean === 'true' || req.query.lean === true };
+  const doc = await SalesWindowService.getById(id, opts);
+  return res.status(200).json({ success: true, data: doc });
 }
 
-/* GET /sales-windows/range?fromEpoch=...&toEpoch=... */
+/* GET /api/sales-windows/range?fromEpoch=...&toEpoch=... */
 async function findByWindowRange(req, res) {
-  const correlationId = req.headers['x-correlation-id'] || null;
+  const correlationId = correlationIdFromReq(req);
   const actor = actorFromReq(req);
-  try {
-    const fromEpoch = Number(req.query.fromEpoch);
-    const toEpoch = Number(req.query.toEpoch);
-    if (!Number.isFinite(fromEpoch) || !Number.isFinite(toEpoch)) {
-      const err = new Error('fromEpoch and toEpoch query parameters are required and must be numbers');
-      err.status = 400;
-      throw err;
-    }
-    const docs = await SalesWindowService.findByWindowRange(fromEpoch, toEpoch, { actor, correlationId });
-    return res.status(200).json({ success: true, data: docs });
-  } catch (err) {
-    await auditService.logEvent({
-      eventType: 'salesWindow.findByWindowRange.failed',
-      actor,
-      target: { type: 'SalesWindow', id: null },
-      outcome: 'failure',
-      severity: 'error',
-      correlationId,
-      details: { message: err.message }
-    });
-    return res.status(err.status || 500).json({ success: false, message: err.message });
+  const fromEpoch = Number(req.query.fromEpoch);
+  const toEpoch = Number(req.query.toEpoch);
+  if (!Number.isFinite(fromEpoch) || !Number.isFinite(toEpoch)) {
+    throw createError(400, 'fromEpoch and toEpoch query parameters are required and must be numbers');
   }
+  const docs = await SalesWindowService.findByWindowRange(fromEpoch, toEpoch, { actor, correlationId });
+  return res.status(200).json({ success: true, data: docs });
 }
 
-/* GET /sales-windows - paginate/list */
+/* GET /api/sales-windows
+ * Query: page, limit, filter, sort, lean
+ */
 async function list(req, res) {
-  const correlationId = req.headers['x-correlation-id'] || null;
+  const correlationId = correlationIdFromReq(req);
   const actor = actorFromReq(req);
-  try {
-    const page = req.query.page;
-    const limit = req.query.limit;
-    const filter = req.query.filter || {};
-    const result = await SalesWindowService.paginate(filter, { page, limit, correlationId, actor });
-    return res.status(200).json({ success: true, ...result });
-  } catch (err) {
-    await auditService.logEvent({
-      eventType: 'salesWindow.list.failed',
-      actor,
-      target: { type: 'SalesWindow', id: null },
-      outcome: 'failure',
-      severity: 'error',
-      correlationId,
-      details: { message: err.message }
-    });
-    return res.status(err.status || 500).json({ success: false, message: err.message });
-  }
+  const page = req.query.page ? parseInt(req.query.page, 10) : undefined;
+  const limit = req.query.limit ? parseInt(req.query.limit, 10) : undefined;
+  const filter = req.query.filter || {};
+  const opts = {
+    actor,
+    correlationId,
+    page,
+    limit,
+    sort: req.query.sort ? JSON.parse(String(req.query.sort)) : undefined,
+    lean: req.query.lean === 'true' || req.query.lean === true
+  };
+  const result = await SalesWindowService.paginate(filter, opts);
+  return res.status(200).json({ success: true, ...result });
 }
 
-/* PATCH /sales-windows/:id */
+/* PATCH /api/sales-windows/:id
+ * Body: partial update
+ */
 async function updateById(req, res) {
-  const correlationId = req.headers['x-correlation-id'] || null;
+  const correlationId = correlationIdFromReq(req);
   const actor = actorFromReq(req);
-  try {
-    const id = req.params.id;
-    const update = req.body || {};
-    const updated = await SalesWindowService.updateById(id, update, { actor, correlationId, session: req.mongoSession });
-    return res.status(200).json({ success: true, data: updated });
-  } catch (err) {
-    await auditService.logEvent({
-      eventType: 'salesWindow.update.failed',
-      actor,
-      target: { type: 'SalesWindow', id: req.params.id || null },
-      outcome: 'failure',
-      severity: 'error',
-      correlationId,
-      details: { message: err.message }
-    });
-    return res.status(err.status || 500).json({ success: false, message: err.message });
-  }
+  const id = req.params.id;
+  const update = req.body || {};
+  if (!id) throw createError(400, 'id is required');
+  const opts = { actor, correlationId, session: req.mongoSession || null, new: true };
+  const updated = await SalesWindowService.updateById(id, update, opts);
+  return res.status(200).json({ success: true, data: updated });
 }
 
-/* POST /sales-windows/upsert */
+/* POST /api/sales-windows/upsert
+ * Body: { filter, update }
+ */
 async function upsert(req, res) {
-  const correlationId = req.headers['x-correlation-id'] || null;
+  const correlationId = correlationIdFromReq(req);
   const actor = actorFromReq(req);
-  try {
-    const filter = req.body.filter || {};
-    const update = req.body.update || {};
-    const doc = await SalesWindowService.upsert(filter, update, { actor, correlationId, session: req.mongoSession });
-    return res.status(200).json({ success: true, data: doc });
-  } catch (err) {
-    await auditService.logEvent({
-      eventType: 'salesWindow.upsert.failed',
-      actor,
-      target: { type: 'SalesWindow', id: null },
-      outcome: 'failure',
-      severity: 'error',
-      correlationId,
-      details: { message: err.message }
-    });
-    return res.status(err.status || 500).json({ success: false, message: err.message });
-  }
+  const filter = req.body.filter || {};
+  const update = req.body.update || {};
+  const doc = await SalesWindowService.upsert(filter, update, { actor, correlationId, session: req.mongoSession || null });
+  return res.status(200).json({ success: true, data: doc });
 }
 
-/* POST /sales-windows/bulk-insert */
+/* POST /api/sales-windows/bulk-insert
+ * Body: array or { docs: [] }
+ */
 async function bulkInsert(req, res) {
-  const correlationId = req.headers['x-correlation-id'] || null;
+  const correlationId = correlationIdFromReq(req);
   const actor = actorFromReq(req);
-  try {
-    const docs = Array.isArray(req.body) ? req.body : (req.body.docs || []);
-    const inserted = await SalesWindowService.bulkInsert(docs, { actor, correlationId, session: req.mongoSession });
-    return res.status(200).json({ success: true, data: inserted });
-  } catch (err) {
-    await auditService.logEvent({
-      eventType: 'salesWindow.bulkInsert.failed',
-      actor,
-      target: { type: 'SalesWindow', id: null },
-      outcome: 'failure',
-      severity: 'error',
-      correlationId,
-      details: { message: err.message }
-    });
-    return res.status(err.status || 500).json({ success: false, message: err.message });
-  }
+  const docs = Array.isArray(req.body) ? req.body : (req.body.docs || []);
+  const inserted = await SalesWindowService.bulkInsert(docs, { actor, correlationId, session: req.mongoSession || null });
+  return res.status(200).json({ success: true, data: inserted });
 }
 
-/* POST /sales-windows/:id/items - add or update item snapshot
-   Accepts productId and itemId in params or body:
-   - params: /:id/items/:productId/:itemId  (route wiring may vary)
-   - body fallback: { productId, itemId, pricing_snapshot, metadata }
-*/
+/* -------------------------
+ * Product / Item / Pricing handlers (payload-first)
+ * ------------------------- */
+
+/* POST /api/sales-windows/:id/products
+ * Body: { productId, ... }
+ */
+async function addProduct(req, res) {
+  const correlationId = correlationIdFromReq(req);
+  const actor = actorFromReq(req);
+  const windowId = req.params.id;
+  const payload = req.body || {};
+  if (!windowId) throw createError(400, 'windowId is required');
+  const result = await SalesWindowService.addProduct(windowId, payload, { actor, correlationId, session: req.mongoSession || null });
+  return res.status(200).json({ success: true, data: result });
+}
+
+/* POST /api/sales-windows/:id/products/items
+ * Body: { productId, itemPayload }
+ */
+async function addProductItem(req, res) {
+  const correlationId = correlationIdFromReq(req);
+  const actor = actorFromReq(req);
+  const windowId = req.params.id;
+  const productId = req.body.productId;
+  const itemPayload = req.body.itemPayload || req.body;
+  if (!windowId) throw createError(400, 'windowId is required');
+  if (!productId) throw createError(400, 'productId is required');
+  const result = await SalesWindowService.addProductItem(windowId, productId, itemPayload, { actor, correlationId, session: req.mongoSession || null });
+  return res.status(200).json({ success: true, data: result });
+}
+
+/* POST /api/sales-windows/:id/products/items/upsert
+ * Body: { productId, itemId, ... }
+ * (alternate upsert route that uses body for ids)
+ */
 async function addOrUpdateItem(req, res) {
-  const correlationId = req.headers['x-correlation-id'] || null;
+  const correlationId = correlationIdFromReq(req);
   const actor = actorFromReq(req);
-  try {
-    const windowId = req.params.id;
-    const productId = req.params.productId || req.body.productId;
-    const itemId = req.params.itemId || req.body.itemId;
-    const payload = req.body || {};
-    if (!productId || !itemId) {
-      const err = new Error('productId and itemId are required');
-      err.status = 400;
-      throw err;
-    }
-    const result = await SalesWindowService.addOrUpdateItem(windowId, productId, itemId, payload, { actor, correlationId, session: req.mongoSession, createOverflowThresholdBytes: req.body.createOverflowThresholdBytes });
-    return res.status(200).json({ success: true, data: result });
-  } catch (err) {
-    await auditService.logEvent({
-      eventType: 'salesWindow.item.addOrUpdate.failed',
-      actor,
-      target: { type: 'SalesWindow', id: req.params.id || null },
-      outcome: 'failure',
-      severity: 'error',
-      correlationId,
-      details: { message: err.message }
-    });
-    return res.status(err.status || 500).json({ success: false, message: err.message });
-  }
+  const windowId = req.params.id;
+  const productId = req.body.productId;
+  const itemId = req.body.itemId;
+  const payload = req.body || {};
+  if (!windowId) throw createError(400, 'windowId is required');
+  if (!productId) throw createError(400, 'productId is required');
+  if (!itemId) throw createError(400, 'itemId is required');
+  const result = await SalesWindowService.addOrUpdateItem(windowId, productId, itemId, payload, { actor, correlationId, session: req.mongoSession || null });
+  return res.status(200).json({ success: true, data: result });
 }
 
-/* DELETE /sales-windows/:id/items/:productId/:itemId - remove item */
+/* DELETE /api/sales-windows/:id/items
+ * Body: { productId, itemId }
+ */
 async function removeItem(req, res) {
-  const correlationId = req.headers['x-correlation-id'] || null;
+  const correlationId = correlationIdFromReq(req);
   const actor = actorFromReq(req);
-  try {
-    const windowId = req.params.id;
-    const productId = req.params.productId;
-    const itemId = req.params.itemId;
-    if (!productId || !itemId) {
-      const err = new Error('productId and itemId are required');
-      err.status = 400;
-      throw err;
-    }
-    const removed = await SalesWindowService.removeItem(windowId, productId, itemId, { actor, correlationId, session: req.mongoSession });
-    return res.status(200).json({ success: true, data: { removed } });
-  } catch (err) {
-    await auditService.logEvent({
-      eventType: 'salesWindow.item.remove.failed',
-      actor,
-      target: { type: 'SalesWindow', id: req.params.id || null },
-      outcome: 'failure',
-      severity: 'error',
-      correlationId,
-      details: { message: err.message }
-    });
-    return res.status(err.status || 500).json({ success: false, message: err.message });
-  }
+  const windowId = req.params.id;
+  const { productId, itemId } = req.body || {};
+  if (!windowId) throw createError(400, 'windowId is required');
+  if (!productId || !itemId) throw createError(400, 'productId and itemId are required');
+  const removed = await SalesWindowService.removeItem(windowId, productId, itemId, { actor, correlationId, session: req.mongoSession || null });
+  return res.status(200).json({ success: true, data: removed });
 }
 
-/* GET /sales-windows/:id/items/:productId/:itemId - get item snapshot (optional fallback to last window via ?fallback=true) */
+/* GET /api/sales-windows/:id/products/items?productId=...&page=&limit=
+ * Query: productId, page, limit
+ */
+async function listProductItems(req, res) {
+  const correlationId = correlationIdFromReq(req);
+  const actor = actorFromReq(req);
+  const windowId = req.params.id;
+  const productId = req.query.productId;
+  if (!windowId) throw createError(400, 'windowId is required');
+  if (!productId) throw createError(400, 'productId is required');
+  const opts = { actor, correlationId, lean: req.query.lean === 'true' || req.query.lean === true, page: req.query.page, limit: req.query.limit };
+  const items = await SalesWindowService.listProductItems(windowId, productId, opts);
+  return res.status(200).json({ success: true, data: items });
+}
+
+/* POST /api/sales-windows/:id/pricing-snapshots
+ * Body: { productId, itemId, snapshot }
+ */
+async function addPricingSnapshot(req, res) {
+  const correlationId = correlationIdFromReq(req);
+  const actor = actorFromReq(req);
+  const windowId = req.params.id;
+  const productId = req.body.productId;
+  const itemId = req.body.itemId;
+  const snapshot = req.body.snapshot || req.body;
+  if (!windowId) throw createError(400, 'windowId is required');
+  if (!productId) throw createError(400, 'productId is required');
+  if (!itemId) throw createError(400, 'itemId is required');
+  const resObj = await SalesWindowService.addPricingSnapshot(windowId, productId, itemId, snapshot, { actor, correlationId, session: req.mongoSession || null });
+  return res.status(200).json({ success: true, data: resObj });
+}
+
+/* PUT /api/sales-windows/:id/pricing-snapshots
+ * Body: { productId, itemId, snapshot }
+ */
+async function upsertPricingSnapshot(req, res) {
+  const correlationId = correlationIdFromReq(req);
+  const actor = actorFromReq(req);
+  const windowId = req.params.id;
+  const productId = req.body.productId;
+  const itemId = req.body.itemId;
+  const snapshot = req.body.snapshot || req.body;
+  if (!windowId) throw createError(400, 'windowId is required');
+  if (!productId) throw createError(400, 'productId is required');
+  if (!itemId) throw createError(400, 'itemId is required');
+  const resObj = await SalesWindowService.upsertPricingSnapshot(windowId, productId, itemId, snapshot, { actor, correlationId, session: req.mongoSession || null });
+  return res.status(200).json({ success: true, data: resObj });
+}
+
+/* GET /api/sales-windows/pricing-snapshots?productId=...&itemId=... */
+async function listPricingSnapshots(req, res) {
+  const correlationId = correlationIdFromReq(req);
+  const actor = actorFromReq(req);
+  const productId = req.query.productId || req.body.productId;
+  const itemId = req.query.itemId || req.body.itemId;
+  if (!productId) throw createError(400, 'productId is required');
+  if (!itemId) throw createError(400, 'itemId is required');
+  const snapshots = await SalesWindowService.listPricingSnapshots(productId, itemId, { actor, correlationId });
+  return res.status(200).json({ success: true, data: snapshots });
+}
+
+/* GET /api/sales-windows/:id/pricing-tiers?productId=...&itemId=... */
+async function listPricingTiers(req, res) {
+  const correlationId = correlationIdFromReq(req);
+  const actor = actorFromReq(req);
+  const windowId = req.params.id;
+  const productId = req.query.productId || req.body.productId;
+  const itemId = req.query.itemId || req.body.itemId;
+  if (!windowId) throw createError(400, 'windowId is required');
+  if (!productId) throw createError(400, 'productId is required');
+  if (!itemId) throw createError(400, 'itemId is required');
+  const tiers = await SalesWindowService.listPricingTiers(windowId, productId, itemId, { actor, correlationId });
+  return res.status(200).json({ success: true, data: tiers });
+}
+
+/* POST /api/sales-windows/:id/bulk-products
+ * Body: array of products
+ */
+async function bulkInsertProducts(req, res) {
+  const correlationId = correlationIdFromReq(req);
+  const actor = actorFromReq(req);
+  const windowId = req.params.id;
+  const products = Array.isArray(req.body) ? req.body : (req.body.products || []);
+  if (!windowId) throw createError(400, 'windowId is required');
+  const inserted = await SalesWindowService.bulkInsertProducts(windowId, products, { actor, correlationId, session: req.mongoSession || null });
+  return res.status(200).json({ success: true, data: inserted });
+}
+
+/* POST /api/sales-windows/:id/products/bulk-items
+ * Body: { productId, items: [...] }
+ */
+async function bulkInsertItems(req, res) {
+  const correlationId = correlationIdFromReq(req);
+  const actor = actorFromReq(req);
+  const windowId = req.params.id;
+  const productId = req.body.productId;
+  const items = Array.isArray(req.body.items) ? req.body.items : (Array.isArray(req.body) ? req.body : (req.body.items || []));
+  if (!windowId) throw createError(400, 'windowId is required');
+  if (!productId) throw createError(400, 'productId is required');
+  const inserted = await SalesWindowService.bulkInsertItems(windowId, productId, items, { actor, correlationId, session: req.mongoSession || null });
+  return res.status(200).json({ success: true, data: inserted });
+}
+
+/* -------------------------
+ * Read helpers (query-based)
+ * ------------------------- */
+
+/* GET /api/sales-windows/:id/items?productId=...&itemId=...&fallback=true
+ * Query-based read for item snapshot
+ */
 async function getItemSnapshot(req, res) {
-  const correlationId = req.headers['x-correlation-id'] || null;
+  const correlationId = correlationIdFromReq(req);
   const actor = actorFromReq(req);
-  try {
-    const windowId = req.params.id;
-    const productId = req.params.productId;
-    const itemId = req.params.itemId;
-    const fallback = req.query.fallback === 'true' || req.query.fallback === true;
-    if (!productId || !itemId) {
-      const err = new Error('productId and itemId are required');
-      err.status = 400;
-      throw err;
-    }
-    const snapshot = await SalesWindowService.getItemSnapshot(windowId, productId, itemId, { fallbackToLastWindow: fallback, actor, correlationId });
-    if (!snapshot) return res.status(404).json({ success: false, message: 'Item snapshot not found' });
-    return res.status(200).json({ success: true, data: snapshot });
-  } catch (err) {
-    await auditService.logEvent({
-      eventType: 'salesWindow.item.get.failed',
-      actor,
-      target: { type: 'SalesWindow', id: req.params.id || null },
-      outcome: 'failure',
-      severity: 'error',
-      correlationId,
-      details: { message: err.message }
-    });
-    return res.status(err.status || 500).json({ success: false, message: err.message });
-  }
+  const windowId = req.params.id;
+  const productId = req.query.productId;
+  const itemId = req.query.itemId;
+  const fallback = req.query.fallback === 'true' || req.query.fallback === true;
+  if (!productId || !itemId) throw createError(400, 'productId and itemId are required');
+  const snapshot = await SalesWindowService.getItemSnapshot(windowId, productId, itemId, { fallbackToLastWindow: fallback, actor, correlationId });
+  if (!snapshot) return res.status(404).json({ success: false, message: 'Item snapshot not found' });
+  return res.status(200).json({ success: true, data: snapshot });
 }
 
-/* GET /sales-windows/:id/overflow-chain - returns array of linked overflow windows */
+/* GET /api/sales-windows/:id/overflow-chain */
 async function getOverflowChain(req, res) {
-  const correlationId = req.headers['x-correlation-id'] || null;
+  const correlationId = correlationIdFromReq(req);
   const actor = actorFromReq(req);
-  try {
-    const startId = req.params.id;
-    const chain = await SalesWindowService.getOverflowChain(startId, { actor, correlationId });
-    return res.status(200).json({ success: true, data: chain });
-  } catch (err) {
-    await auditService.logEvent({
-      eventType: 'salesWindow.overflowChain.failed',
-      actor,
-      target: { type: 'SalesWindow', id: req.params.id || null },
-      outcome: 'failure',
-      severity: 'error',
-      correlationId,
-      details: { message: err.message }
-    });
-    return res.status(err.status || 500).json({ success: false, message: err.message });
-  }
+  const startId = req.params.id;
+  const chain = await SalesWindowService.getOverflowChain(startId, { actor, correlationId });
+  return res.status(200).json({ success: true, data: chain });
 }
 
-/* DELETE /sales-windows/:id - hard delete (admin only) */
+/* GET /api/sales-windows/current?region=...&page=&limit=
+ * Returns SalesWindow documents as-is (head + overflow)
+ */
+async function listAllCurrentSalesWindows(req, res) {
+  const correlationId = correlationIdFromReq(req);
+  const actor = actorFromReq(req);
+  const region = req.query.region || req.body.region;
+  if (!region) throw createError(400, 'region is required');
+  const opts = {
+    actor,
+    correlationId,
+    lean: req.query.lean === 'true' || req.query.lean === true,
+    sort: req.query.sort ? JSON.parse(String(req.query.sort)) : undefined,
+    page: req.query.page ? parseInt(req.query.page, 10) : undefined,
+    limit: req.query.limit ? parseInt(req.query.limit, 10) : undefined
+  };
+  const docs = await SalesWindowService.listAllCurrentSalesWindows(region, opts);
+  return res.status(200).json({ success: true, data: docs });
+}
+
+/* DELETE /api/sales-windows/:id (hard delete, admin only) */
 async function deleteById(req, res) {
-  const correlationId = req.headers['x-correlation-id'] || null;
+  const correlationId = correlationIdFromReq(req);
   const actor = actorFromReq(req);
-  try {
-    const id = req.params.id;
-    const removed = await SalesWindowService.deleteById(id, { actor, correlationId });
-    return res.status(200).json({ success: true, data: removed });
-  } catch (err) {
-    await auditService.logEvent({
-      eventType: 'salesWindow.delete.hard.failed',
-      actor,
-      target: { type: 'SalesWindow', id: req.params.id || null },
-      outcome: 'failure',
-      severity: 'error',
-      correlationId,
-      details: { message: err.message }
-    });
-    return res.status(err.status || 500).json({ success: false, message: err.message });
-  }
+  const id = req.params.id;
+  if (!id) throw createError(400, 'id is required');
+  const removed = await SalesWindowService.deleteById(id, { actor, correlationId });
+  return res.status(200).json({ success: true, data: removed });
 }
 
-/* Exports for route wiring */
+/* -------------------------
+ * Exports
+ * ------------------------- */
 module.exports = {
   create: asyncHandler(create),
   getById: asyncHandler(getById),
@@ -381,10 +406,24 @@ module.exports = {
   updateById: asyncHandler(updateById),
   upsert: asyncHandler(upsert),
   bulkInsert: asyncHandler(bulkInsert),
+
+  /* Product / Item / Pricing */
+  addProduct: asyncHandler(addProduct),
+  addProductItem: asyncHandler(addProductItem),
   addOrUpdateItem: asyncHandler(addOrUpdateItem),
   removeItem: asyncHandler(removeItem),
+  listProductItems: asyncHandler(listProductItems),
+  addPricingSnapshot: asyncHandler(addPricingSnapshot),
+  upsertPricingSnapshot: asyncHandler(upsertPricingSnapshot),
+  listPricingSnapshots: asyncHandler(listPricingSnapshots),
+  listPricingTiers: asyncHandler(listPricingTiers),
+  bulkInsertProducts: asyncHandler(bulkInsertProducts),
+  bulkInsertItems: asyncHandler(bulkInsertItems),
+
+  /* Other */
   getItemSnapshot: asyncHandler(getItemSnapshot),
   getOverflowChain: asyncHandler(getOverflowChain),
+  listAllCurrentSalesWindows: asyncHandler(listAllCurrentSalesWindows),
   deleteById: [adminOnly, asyncHandler(deleteById)],
 
   /* Utilities for route wiring */

@@ -14,6 +14,19 @@ const asyncHandler = (fn) => (req, res, next) => {
 };
 
 /**
+ * Route annotations and definitions
+ *
+ * Each route is annotated with:
+ * - purpose: short description of intent
+ * - method: HTTP method
+ * - path: route path
+ * - params: path/query/body parameters expected
+ * - validators: validator middleware (if present)
+ * - controller: controller handler
+ */
+
+
+/**
  * Routes
  *
  * POST   /orders                      -> create order
@@ -21,10 +34,13 @@ const asyncHandler = (fn) => (req, res, next) => {
  * GET    /orders                      -> list orders (pagination/filter via query)
  * GET    /orders/:id                  -> get order by Mongo _id
  * GET    /orders/user/:userId         -> find orders by userId
+ * GET    /orders/user/:userId/enriched-> enriched, read-intensive orders for user
  * PATCH  /orders/:id                  -> update order by _id
  * PATCH  /orders                      -> update one by filter (body: { filter, update, opts })
  * POST   /orders/:id/add-message      -> add message id to order
  * POST   /orders/:id/update-status    -> update order status
+ * POST   /orders/:id/submit           -> submit a draft order
+ * POST   /orders/:id/cancel           -> cancel an order
  * POST   /orders/:id/add-item         -> add or increment item in cart
  * PATCH  /orders/:id/set-item-quantity-> set item quantity (0 removes)
  * PATCH  /orders/:id/update-item      -> update item attributes (quantity/saveForLater/pricingSnapshot)
@@ -33,42 +49,117 @@ const asyncHandler = (fn) => (req, res, next) => {
  * DELETE /orders/:id/hard             -> hard delete (admin)
  */
 
-/* Create order */
+
+/* -------------------------------------------------------------------------- */
+/* Create order
+ * purpose: Create a new order document (initial draft or prefilled)
+ * method: POST
+ * path: /orders
+ * params:
+ *   - body: order payload (userId, items[], ops_region, etc.)
+ * validators: orderValidators.create
+ * controller: OrderController.createOrder
+ */
 router.post(
   '/',
   orderValidators && orderValidators.create,
   asyncHandler(OrderController.createOrder)
 );
 
-/* Bulk create orders */
+/* -------------------------------------------------------------------------- */
+/* Bulk create orders
+ * purpose: Bulk ingest/create multiple orders (admin/ingest)
+ * method: POST
+ * path: /orders/bulk
+ * params:
+ *   - body: Array of order objects
+ * validators: orderValidators.bulkCreate
+ * controller: OrderController.bulkCreate
+ */
 router.post(
   '/bulk',
   orderValidators && orderValidators.bulkCreate,
   asyncHandler(OrderController.bulkCreate)
 );
 
-/* List orders (supports ?page=&limit=&filter= JSON) */
+/* -------------------------------------------------------------------------- */
+/* List orders (paginated)
+ * purpose: List orders with pagination, sorting and optional filter
+ * method: GET
+ * path: /orders
+ * params:
+ *   - query: page, limit, sort, select, populate, filter (JSON string)
+ * validators: orderValidators.query
+ * controller: OrderController.listOrders
+ */
 router.get(
   '/',
   orderValidators && orderValidators.query,
   asyncHandler(OrderController.listOrders)
 );
 
-/* Get order by Mongo _id */
+/* -------------------------------------------------------------------------- */
+/* Get order by id
+ * purpose: Retrieve a single order by Mongo _id
+ * method: GET
+ * path: /orders/:id
+ * params:
+ *   - path: id (Mongo ObjectId)
+ *   - query: select, populate
+ * validators: orderValidators.idParam
+ * controller: OrderController.getById
+ */
 router.get(
   '/:id',
   orderValidators && orderValidators.idParam,
   asyncHandler(OrderController.getById)
 );
 
-/* Find orders by userId */
+/* -------------------------------------------------------------------------- */
+/* Find orders by userId
+ * purpose: Return orders for a specific user (paged)
+ * method: GET
+ * path: /orders/user/:userId
+ * params:
+ *   - path: userId
+ *   - query: page, limit, sort, select, populate
+ * validators: orderValidators.userIdParam
+ * controller: OrderController.findByUserId
+ */
 router.get(
   '/user/:userId',
   orderValidators && orderValidators.userIdParam,
   asyncHandler(OrderController.findByUserId)
 );
 
-/* Update order by _id (partial update) */
+/* -------------------------------------------------------------------------- */
+/* Read-intensive enriched orders for user
+ * purpose: Return paginated, enriched orders for a user (latest sales-window data)
+ * method: GET
+ * path: /orders/user/:userId/enriched
+ * params:
+ *   - path: userId
+ *   - query: region, page, limit, status (string or JSON array), includeSaveForLater, persist
+ * validators: orderValidators.userIdParam
+ * controller: OrderController.getEnrichedByUserId
+ */
+router.get(
+  '/user/:userId/enriched',
+  orderValidators && orderValidators.userIdParam,
+  asyncHandler(OrderController.getEnrichedByUserId)
+);
+
+/* -------------------------------------------------------------------------- */
+/* Partial update by id
+ * purpose: Apply partial updates to an order document
+ * method: PATCH
+ * path: /orders/:id
+ * params:
+ *   - path: id
+ *   - body: partial update object
+ * validators: orderValidators.idParam, orderValidators.update
+ * controller: OrderController.updateById
+ */
 router.patch(
   '/:id',
   orderValidators && orderValidators.idParam,
@@ -76,14 +167,33 @@ router.patch(
   asyncHandler(OrderController.updateById)
 );
 
-/* Update one by filter: body { filter, update, opts } */
+/* -------------------------------------------------------------------------- */
+/* Update one by filter
+ * purpose: Find one order by filter and apply update (body: { filter, update, opts })
+ * method: PATCH
+ * path: /orders
+ * params:
+ *   - body: { filter, update, opts }
+ * validators: orderValidators.updateOne
+ * controller: OrderController.updateOne
+ */
 router.patch(
   '/',
   orderValidators && orderValidators.updateOne,
   asyncHandler(OrderController.updateOne)
 );
 
-/* Add message to order */
+/* -------------------------------------------------------------------------- */
+/* Add message to order
+ * purpose: Add a message id to order.messages (idempotent)
+ * method: POST
+ * path: /orders/:id/add-message
+ * params:
+ *   - path: id
+ *   - body: { messageId }
+ * validators: orderValidators.idParam, orderValidators.addMessage
+ * controller: OrderController.addMessage
+ */
 router.post(
   '/:id/add-message',
   orderValidators && orderValidators.idParam,
@@ -91,7 +201,17 @@ router.post(
   asyncHandler(OrderController.addMessage)
 );
 
-/* Update order status */
+/* -------------------------------------------------------------------------- */
+/* Update order status
+ * purpose: Atomically update order.status
+ * method: POST
+ * path: /orders/:id/update-status
+ * params:
+ *   - path: id
+ *   - body: { status }
+ * validators: orderValidators.idParam, orderValidators.updateStatus
+ * controller: OrderController.updateStatus
+ */
 router.post(
   '/:id/update-status',
   orderValidators && orderValidators.idParam,
@@ -99,7 +219,49 @@ router.post(
   asyncHandler(OrderController.updateStatus)
 );
 
-/* Add or increment item in cart */
+/* -------------------------------------------------------------------------- */
+/* Submit a draft order
+ * purpose: Submit a draft order (transactional flow: validate sales windows, update qtySold, create new draft)
+ * method: POST
+ * path: /orders/:id/submit
+ * params:
+ *   - path: id
+ * validators: orderValidators.idParam
+ * controller: OrderController.submitOrder
+ */
+router.post(
+  '/:id/submit',
+  orderValidators && orderValidators.idParam,
+  asyncHandler(OrderController.submitOrder)
+);
+
+/* -------------------------------------------------------------------------- */
+/* Cancel an order
+ * purpose: Cancel an order and move items to draft where applicable
+ * method: POST
+ * path: /orders/:id/cancel
+ * params:
+ *   - path: id
+ * validators: orderValidators.idParam
+ * controller: OrderController.cancelOrder
+ */
+router.post(
+  '/:id/cancel',
+  orderValidators && orderValidators.idParam,
+  asyncHandler(OrderController.cancelOrder)
+);
+
+/* -------------------------------------------------------------------------- */
+/* Add or increment item in cart
+ * purpose: Add an item to a draft order or increment existing quantity
+ * method: POST
+ * path: /orders/:id/add-item
+ * params:
+ *   - path: id
+ *   - body: { productId, itemId, pricingSnapshot?, saveForLater?, quantity? }
+ * validators: orderValidators.idParam, orderValidators.addItem
+ * controller: OrderController.addItem
+ */
 router.post(
   '/:id/add-item',
   orderValidators && orderValidators.idParam,
@@ -107,7 +269,17 @@ router.post(
   asyncHandler(OrderController.addItem)
 );
 
-/* Set item quantity (0 removes item) */
+/* -------------------------------------------------------------------------- */
+/* Set item quantity
+ * purpose: Set quantity for an item; quantity === 0 removes the item
+ * method: PATCH
+ * path: /orders/:id/set-item-quantity
+ * params:
+ *   - path: id
+ *   - body: { itemId, quantity }
+ * validators: orderValidators.idParam, orderValidators.setItemQuantity
+ * controller: OrderController.setItemQuantity
+ */
 router.patch(
   '/:id/set-item-quantity',
   orderValidators && orderValidators.idParam,
@@ -115,7 +287,17 @@ router.patch(
   asyncHandler(OrderController.setItemQuantity)
 );
 
-/* Update item attributes (quantity, saveForLater, pricingSnapshot) */
+/* -------------------------------------------------------------------------- */
+/* Update item attributes
+ * purpose: Update item attributes in-place (quantity, saveForLater, pricingSnapshot)
+ * method: PATCH
+ * path: /orders/:id/update-item
+ * params:
+ *   - path: id
+ *   - body: { itemId, changes: { quantity?, saveForLater?, pricingSnapshot? } }
+ * validators: orderValidators.idParam, orderValidators.updateItem
+ * controller: OrderController.updateItem
+ */
 router.patch(
   '/:id/update-item',
   orderValidators && orderValidators.idParam,
@@ -123,7 +305,16 @@ router.patch(
   asyncHandler(OrderController.updateItem)
 );
 
-/* Remove item from order */
+/* -------------------------------------------------------------------------- */
+/* Remove item from order
+ * purpose: Remove an item by itemId from an order
+ * method: DELETE
+ * path: /orders/:id/items/:itemId
+ * params:
+ *   - path: id, itemId
+ * validators: orderValidators.idParam, orderValidators.itemIdParam
+ * controller: OrderController.removeItem
+ */
 router.delete(
   '/:id/items/:itemId',
   orderValidators && orderValidators.idParam,
@@ -131,14 +322,32 @@ router.delete(
   asyncHandler(OrderController.removeItem)
 );
 
-/* Extract saveForLater items */
+/* -------------------------------------------------------------------------- */
+/* Extract saveForLater items
+ * purpose: Remove items marked saveForLater from the order and return them
+ * method: POST
+ * path: /orders/:id/extract-save-for-later
+ * params:
+ *   - path: id
+ * validators: orderValidators.idParam
+ * controller: OrderController.extractSaveForLater
+ */
 router.post(
   '/:id/extract-save-for-later',
   orderValidators && orderValidators.idParam,
   asyncHandler(OrderController.extractSaveForLater)
 );
 
-/* Hard delete (admin) */
+/* -------------------------------------------------------------------------- */
+/* Hard delete (admin)
+ * purpose: Permanently delete an order (admin only)
+ * method: DELETE
+ * path: /orders/:id/hard
+ * params:
+ *   - path: id
+ * validators: orderValidators.idParam, orderValidators.adminOnly
+ * controller: OrderController.hardDeleteById
+ */
 router.delete(
   '/:id/hard',
   orderValidators && orderValidators.idParam,

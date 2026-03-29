@@ -353,6 +353,7 @@ export default function ReviewModifyIntentPage() {
             const itemWindowStatus = windowStatusMap[key] || "unknown";
             const windowInfo = windowInfoMap[key] || {};
             const isWindowOpen = itemWindowStatus === "open";
+            const isWindowClosed = itemWindowStatus === "closed";
             const qty = editedQtys[key] ?? item.quantity;
             const isSaving = saving[key];
             const display = getDisplayData(item);
@@ -517,6 +518,11 @@ export default function ReviewModifyIntentPage() {
                     <p className="text-xs text-text-muted">
                       Aggregation window: {formatWindowDate(windowInfo.fromEpoch)} – {formatWindowDate(windowInfo.toEpoch)}
                     </p>
+                    {isWindowClosed && (
+                      <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+                        🔒 Intent locked: this aggregation window has closed, so edits are no longer allowed.
+                      </div>
+                    )}
                   </div>
                   {/* ── end CONTENT ── */}
                 </div>

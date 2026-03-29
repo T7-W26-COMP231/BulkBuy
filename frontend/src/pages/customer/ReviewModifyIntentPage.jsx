@@ -352,6 +352,7 @@ export default function ReviewModifyIntentPage() {
             const key = `${item.intentId}::${item.itemId}`;
             const itemWindowStatus = windowStatusMap[key] || "unknown";
             const windowInfo = windowInfoMap[key] || {};
+            const isWindowOpen = itemWindowStatus === "open";
             const qty = editedQtys[key] ?? item.quantity;
             const isSaving = saving[key];
             const display = getDisplayData(item);
@@ -466,18 +467,18 @@ export default function ReviewModifyIntentPage() {
                       <div className="flex items-center gap-3">
                         <button
                           onClick={() => handleQtyChange(item.intentId, item.itemId, qty - 1)}
-                          disabled={windowLocked || isSaving || qty <= 1}
+                          disabled={!isWindowOpen || isSaving || qty <= 1}
                           className="flex h-9 w-9 items-center justify-center rounded-lg border border-neutral-light bg-white text-xl font-bold text-text-muted transition hover:bg-neutral-light disabled:opacity-40"
                         >−</button>
                         <input
                           type="number" min="1" step="1" value={qty}
-                          disabled={windowLocked || isSaving}
+                          disabled={!isWindowOpen || isSaving}
                           onChange={(e) => handleQtyChange(item.intentId, item.itemId, e.target.value)}
                           className="w-16 rounded-lg border border-neutral-light bg-white px-2 py-1.5 text-center text-lg font-bold outline-none transition focus:border-primary disabled:cursor-not-allowed disabled:bg-neutral-light"
                         />
                         <button
                           onClick={() => handleQtyChange(item.intentId, item.itemId, qty + 1)}
-                          disabled={windowLocked || isSaving}
+                          disabled={!isWindowOpen || isSaving}
                           className="flex h-9 w-9 items-center justify-center rounded-lg border border-neutral-light bg-white text-xl font-bold text-text-muted transition hover:bg-neutral-light disabled:opacity-40"
                         >+</button>
                       </div>
@@ -487,14 +488,14 @@ export default function ReviewModifyIntentPage() {
                     <div className="flex gap-3">
                       <button
                         onClick={() => handleSaveChanges(item.intentId, item.itemId)}
-                        disabled={windowLocked || isSaving}
+                        disabled={!isWindowOpen || isSaving}
                         className="rounded-xl bg-primary px-5 py-2.5 font-bold text-text-main disabled:opacity-50"
                       >
                         {isSaving ? "Saving…" : "Save Changes"}
                       </button>
                       <button
                         onClick={() => handleCancelIntent(item.intentId, item.itemId)}
-                        disabled={windowLocked}
+                        disabled={!isWindowOpen}
                         className="rounded-xl border border-neutral-light bg-white px-5 py-2.5 font-semibold text-text-main disabled:opacity-50"
                       >
                         Cancel

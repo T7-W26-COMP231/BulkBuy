@@ -385,6 +385,81 @@ async function listAllCurrentSalesWindows(req, res) {
   return res.status(200).json({ success: true, data: docs });
 }
 
+/* GET /api/sales-windows/public/current-status?region=...&productId=...&itemId=...
+ * Returns only the current sales window status and timestamps needed by customer intent-edit flows.
+ */
+async function getCurrentWindowStatusForCustomer(req, res) {
+  const correlationId = correlationIdFromReq(req);
+  const actor = actorFromReq(req);
+
+  const region = req.query.region || req.body.region;
+  const productId = req.query.productId || req.body.productId;
+  const itemId = req.query.itemId || req.body.itemId;
+
+  if (!region) throw createError(400, 'region is required');
+
+  const docs = await SalesWindowService.listAllCurrentSalesWindows(region, {
+    actor,
+    correlationId,
+    lean: true
+  });
+
+  const windows = Array.isArray(docs) ? docs : [];
+  const now = Date.now();
+
+  let matchedWindow = null;
+
+  for (const win of windows) {
+    const products = Array.isArray(win.products) ? win.products : [];
+
+    for (const product of products) {
+      const sameProduct = !productId || String(product.productId) === String(productId);
+      if (!sameProduct) continue;
+
+      const items = Array.isArray(product.items) ? product.items : [];
+
+      for (const item of items) {
+        const sameItem = !itemId || String(item.itemId) === String(itemId);
+        if (sameItem) {
+          matchedWindow = win;
+          break;
+        }
+      }
+
+      if (matchedWindow) break;
+    }
+
+    if (matchedWindow) break;
+  }
+
+  if (!matchedWindow) {
+    return res.status(404).json({
+      success: false,
+      message: 'No active sales window found for this item.'
+    });
+  }
+
+  const fromEpoch = matchedWindow.window?.fromEpoch;
+  const toEpoch = matchedWindow.window?.toEpoch;
+
+  let status = 'unknown';
+  if (Number.isFinite(fromEpoch) && Number.isFinite(toEpoch)) {
+    if (now < fromEpoch) status = 'upcoming';
+    else if (now > toEpoch) status = 'closed';
+    else status = 'open';
+  }
+
+  return res.status(200).json({
+    success: true,
+    data: {
+      windowId: matchedWindow._id,
+      fromEpoch,
+      toEpoch,
+      status
+    }
+  });
+}
+
 /* DELETE /api/sales-windows/:id (hard delete, admin only) */
 async function deleteById(req, res) {
   const correlationId = correlationIdFromReq(req);
@@ -424,6 +499,7 @@ module.exports = {
   getItemSnapshot: asyncHandler(getItemSnapshot),
   getOverflowChain: asyncHandler(getOverflowChain),
   listAllCurrentSalesWindows: asyncHandler(listAllCurrentSalesWindows),
+  getCurrentWindowStatusForCustomer: asyncHandler(getCurrentWindowStatusForCustomer),
   deleteById: [adminOnly, asyncHandler(deleteById)],
 
   /* Utilities for route wiring */

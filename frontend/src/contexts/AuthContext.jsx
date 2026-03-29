@@ -2,25 +2,37 @@
 /**
  * AuthContext.jsx
  *
- * Real-API-ready authentication context.
+ * Real-API-ready authentication context (surgically enhanced).
  *
- * - Uses the real endpoints (configurable) to sign in and register users.
- * - Persists session to localStorage: { accessToken, refreshToken, user }.
- * - Schedules token refresh when JWT `exp` is present.
- * - Exposes: useAuth(), AuthProvider, and methods: signIn, signUp, signOut, refreshSession, updateProfile, clearError.
+ * Changes from the original:
+ *  - Adds optional lifecycle callbacks so other contexts (e.g., OpsContext)
+ *    can react to auth lifecycle events without tight coupling.
+ *    Props:
+ *      - onInit(session)         -> called once after provider restores session on mount
+ *      - onSignIn(session)       -> called after successful sign-in
+ *      - onSignUp(session)       -> called after successful sign-up
+ *      - onSignOut()             -> called after sign-out completes (local cleanup done)
+ *      - onRefresh(session)      -> called after successful refreshSession
  *
- * Configuration:
- *   <AuthProvider
- *     apiBaseUrl="http://localhost:5000"
- *     endpoints={{ login: "/api/auth/login", register: "/api/auth/register", refresh: "/api/auth/refresh" }}
- *   >
+ *  - These callbacks are invoked asynchronously and never block the auth flow.
+ *  - This keeps AuthProvider self-contained while allowing OpsContext (or any
+ *    other consumer) to fetch orders/products or clear state when auth changes.
+ *
+ * Usage (example):
+ *  <AuthProvider
+ *    apiBaseUrl="https://api.example.com"
+ *    endpoints={...}
+ *    onInit={(session) => { fetchInitialProducts(); }}
+ *    onSignIn={(session) => { fetchOrdersForUser(session.user); }}
+ *    onSignOut={() => { clearOrdersState(); }}
+ *  >
+ *    ...
+ *  </AuthProvider>
  *
  * Notes:
- * - This file assumes the API returns JSON and follows the payload shapes you provided:
- *     SignIn:  { accessToken, refreshToken?, user, ... }
- *     SignUp:  { accessToken?, refreshToken?, user, ... }
- * - If your API uses different field names, pass a custom `normalizeResponse` function to the provider.
- * - Replace or extend `fetchOptions` (e.g., to include credentials) as needed.
+ *  - The provider still persists session to localStorage under STORAGE_KEY.
+ *  - Callbacks are optional and will be ignored if not provided.
+ *  - Keep server-side auth enforcement in place; these callbacks are UX hooks only.
  */
 
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
@@ -29,33 +41,30 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useR
    Defaults and utilities
    ------------------------- */
 
-const STORAGE_KEY = "app_auth_session_v1";
+export const STORAGE_KEY = "app_auth_session_v1";
 
 const defaultConfig = {
   apiBaseUrl: "http://localhost:5000",
   endpoints: {
     login: "/api/auth/login",
     register: "/api/auth/register",
-    refresh: "/api/auth/refresh", // optional; provider will tolerate absence
-    signout: "/api/auth/logout", // optional
-    updateProfile: "/api/auth/me", // optional
+    refresh: "/api/auth/refresh",
+    signout: "/api/auth/logout",
+    updateProfile: "/api/auth/me"
   },
-  // default fetch options (can be overridden by provider consumer)
   fetchOptions: {
     headers: { "Content-Type": "application/json" },
-    credentials: "same-origin", // change to 'include' if your API uses cookies
+    credentials: "same-origin"
   },
-  // normalize API response into { ok, accessToken, refreshToken, user, error }
   normalizeResponse: (raw) => {
     if (!raw) return { ok: false, error: "Empty response" };
-    // If API returns { ok: true, accessToken, user } or { accessToken, user }
     const ok = raw.ok === undefined ? true : Boolean(raw.ok);
     const accessToken = raw.accessToken || raw.token || raw.access_token || null;
     const refreshToken = raw.refreshToken || raw.refresh_token || null;
     const user = raw.user || raw.data || null;
     const error = raw.error || raw.message || (ok ? null : "Unknown error");
     return { ok, accessToken, refreshToken, user, error };
-  },
+  }
 };
 
 function safeParseJSON(raw) {
@@ -101,6 +110,19 @@ export function AuthProvider({
   fetchOptions = defaultConfig.fetchOptions,
   normalizeResponse = defaultConfig.normalizeResponse,
   storageKey = STORAGE_KEY,
+  /**
+   * Optional lifecycle callbacks (all optional):
+   *  - onInit(session)    : called once after restoring session on mount
+   *  - onSignIn(session)  : called after successful sign-in
+   *  - onSignUp(session)  : called after successful sign-up
+   *  - onSignOut()        : called after sign-out completes (local cleanup done)
+   *  - onRefresh(session) : called after successful refreshSession
+   */
+  onInit = null,
+  onSignIn = null,
+  onSignUp = null,
+  onSignOut = null,
+  onRefresh = null
 }) {
   const [user, setUser] = useState(null);
   const [accessToken, setAccessToken] = useState(null);
@@ -116,13 +138,26 @@ export function AuthProvider({
   /* Restore session from localStorage */
   useEffect(() => {
     try {
-      const raw = localStorage.getItem(storageKey);
-      const parsed = safeParseJSON(raw);
+      const raw = typeof window !== "undefined" ? localStorage.getItem(storageKey) : null;
+      const parsed = raw ? safeParseJSON(raw) : null;
       if (parsed && parsed.accessToken) {
         setAccessToken(parsed.accessToken);
         setRefreshToken(parsed.refreshToken || null);
         setUser(parsed.user || null);
         accessTokenRef.current = parsed.accessToken || null;
+        // call onInit asynchronously so mount completes quickly
+        if (typeof onInit === "function") {
+          // pass the restored session object
+          Promise.resolve().then(() => {
+            try {
+              onInit({ accessToken: parsed.accessToken, refreshToken: parsed.refreshToken, user: parsed.user });
+            } catch (e) {
+              // swallow callback errors
+              // eslint-disable-next-line no-console
+              console.warn("AuthProvider.onInit callback error", e);
+            }
+          });
+        }
       } else {
         accessTokenRef.current = null;
       }
@@ -132,6 +167,7 @@ export function AuthProvider({
     } finally {
       setInitializing(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [storageKey]);
 
   /* Persist session */
@@ -172,7 +208,17 @@ export function AuthProvider({
       // token expired — attempt immediate refresh
       (async () => {
         try {
-          await refreshSession();
+          const session = await refreshSession();
+          // notify listeners if refresh succeeded
+          if (session && session.ok && typeof onRefresh === "function") {
+            try {
+              onRefresh(session);
+            } catch (e) {
+              // swallow callback errors
+              // eslint-disable-next-line no-console
+              console.warn("AuthProvider.onRefresh callback error", e);
+            }
+          }
         } catch {
           // ignore
         }
@@ -181,9 +227,20 @@ export function AuthProvider({
     }
 
     refreshTimerRef.current = setTimeout(() => {
-      refreshSession().catch(() => {
-        // ignore
-      });
+      refreshSession()
+        .then((session) => {
+          if (session && session.ok && typeof onRefresh === "function") {
+            try {
+              onRefresh(session);
+            } catch (e) {
+              // eslint-disable-next-line no-console
+              console.warn("AuthProvider.onRefresh callback error", e);
+            }
+          }
+        })
+        .catch(() => {
+          // ignore
+        });
     }, refreshIn);
 
     return () => {
@@ -225,7 +282,7 @@ export function AuthProvider({
         method: opts.method || "GET",
         headers: mergedHeaders,
         signal: controller.signal,
-        credentials: opts.credentials ?? fetchOptions.credentials,
+        credentials: opts.credentials ?? fetchOptions.credentials
       };
       if (opts.body !== undefined) {
         merged.body = typeof opts.body === "string" ? opts.body : JSON.stringify(opts.body);
@@ -236,7 +293,7 @@ export function AuthProvider({
         const json = text ? safeParseJSON(text) : null;
         return { status: res.status, ok: res.ok, raw: json, text };
       } catch (err) {
-        if (err.name === "AbortError") {
+        if (err && err.name === "AbortError") {
           return { status: 0, ok: false, error: "aborted" };
         }
         return { status: 0, ok: false, error: err.message || "Network error" };
@@ -275,6 +332,19 @@ export function AuthProvider({
         setRefreshToken(normalized.refreshToken || null);
         setUser(normalized.user || null);
         setLoading(false);
+
+        // notify listeners asynchronously
+        if (typeof onSignIn === "function") {
+          Promise.resolve().then(() => {
+            try {
+              onSignIn({ accessToken: normalized.accessToken, refreshToken: normalized.refreshToken, user: normalized.user });
+            } catch (e) {
+              // eslint-disable-next-line no-console
+              console.warn("AuthProvider.onSignIn callback error", e);
+            }
+          });
+        }
+
         return { ok: true, accessToken: normalized.accessToken, refreshToken: normalized.refreshToken, user: normalized.user };
       } catch (err) {
         const msg = err?.message || "Sign in error";
@@ -283,7 +353,7 @@ export function AuthProvider({
         return { ok: false, error: msg };
       }
     },
-    [apiFetch, endpoints.login, normalizeResponse]
+    [apiFetch, endpoints.login, normalizeResponse, onSignIn]
   );
 
   /* -------------------------
@@ -314,6 +384,19 @@ export function AuthProvider({
         setRefreshToken(normalized.refreshToken || null);
         setUser(normalized.user || null);
         setLoading(false);
+
+        // notify listeners asynchronously
+        if (typeof onSignUp === "function") {
+          Promise.resolve().then(() => {
+            try {
+              onSignUp({ accessToken: normalized.accessToken, refreshToken: normalized.refreshToken, user: normalized.user });
+            } catch (e) {
+              // eslint-disable-next-line no-console
+              console.warn("AuthProvider.onSignUp callback error", e);
+            }
+          });
+        }
+
         return { ok: true, accessToken: normalized.accessToken, refreshToken: normalized.refreshToken, user: normalized.user };
       } catch (err) {
         const msg = err?.message || "Registration error";
@@ -322,13 +405,11 @@ export function AuthProvider({
         return { ok: false, error: msg };
       }
     },
-    [apiFetch, endpoints.register, normalizeResponse]
+    [apiFetch, endpoints.register, normalizeResponse, onSignUp]
   );
 
   /* -------------------------
      refreshSession
-     - Attempts to refresh using configured refresh endpoint (if present).
-     - If no refresh endpoint is configured, returns { ok: false }.
      ------------------------- */
   const refreshSession = useCallback(
     async (opts = {}) => {
@@ -366,6 +447,19 @@ export function AuthProvider({
         setRefreshToken(normalized.refreshToken || rToken);
         if (normalized.user) setUser(normalized.user);
         setLoading(false);
+
+        // notify listeners asynchronously
+        if (typeof onRefresh === "function") {
+          Promise.resolve().then(() => {
+            try {
+              onRefresh({ accessToken: normalized.accessToken, refreshToken: normalized.refreshToken, user: normalized.user });
+            } catch (e) {
+              // eslint-disable-next-line no-console
+              console.warn("AuthProvider.onRefresh callback error", e);
+            }
+          });
+        }
+
         return { ok: true, accessToken: normalized.accessToken, refreshToken: normalized.refreshToken, user: normalized.user };
       } catch (err) {
         const msg = err?.message || "Refresh error";
@@ -378,7 +472,7 @@ export function AuthProvider({
         return { ok: false, error: msg };
       }
     },
-    [apiFetch, endpoints.refresh, normalizeResponse, refreshToken]
+    [apiFetch, endpoints.refresh, normalizeResponse, refreshToken, onRefresh]
   );
 
   /* -------------------------
@@ -410,16 +504,25 @@ export function AuthProvider({
         try {
           localStorage.removeItem(storageKey);
         } catch {}
+        // notify listeners asynchronously after local cleanup
+        if (typeof onSignOut === "function") {
+          Promise.resolve().then(() => {
+            try {
+              onSignOut();
+            } catch (e) {
+              // eslint-disable-next-line no-console
+              console.warn("AuthProvider.onSignOut callback error", e);
+            }
+          });
+        }
       }
       return { ok: true };
     },
-    [apiFetch, endpoints.signout, accessToken, refreshToken, storageKey, fetchOptions.headers]
+    [apiFetch, endpoints.signout, accessToken, refreshToken, storageKey, fetchOptions.headers, onSignOut, user]
   );
 
   /* -------------------------
      updateProfile
-     - If updateProfile endpoint is configured, calls it with Authorization header.
-     - Otherwise merges updates locally.
      ------------------------- */
   const updateProfile = useCallback(
     async (updates = {}) => {
@@ -479,7 +582,7 @@ export function AuthProvider({
       signOut,
       refreshSession,
       updateProfile,
-      clearError,
+      clearError
     }),
     [user, accessToken, refreshToken, loading, initializing, error, signIn, signUp, signOut, refreshSession, updateProfile, clearError]
   );

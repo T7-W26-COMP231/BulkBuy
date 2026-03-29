@@ -10,7 +10,7 @@ import ProductListPage from "./pages/customer/ProductListPage";
 import CartPage from "./pages/customer/CartPage";
 import Shop from "./pages/customer/Marketplace";
 import Item from "./pages/customer/Itemsdetails";
-import { useAuthBootstrap } from "./hooks/useAuthBootstrap"; // ← added
+
 
 
 function PlaceholderPage({ title }) {
@@ -27,7 +27,7 @@ function PlaceholderPage({ title }) {
 }
 
 export default function App() {
-  useAuthBootstrap(); // ← added: auto-login until real auth is built
+
   useEffect(() => {
   const socket = io("http://localhost:5000");
 

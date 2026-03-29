@@ -90,6 +90,8 @@ const UserSchema = new Schema({
   deletedAt: { type: Number, default: null },
   deletedBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
 
+  AllowedSupplyItems:{ type: [{ type: Schema.Types.ObjectId, ref: 'Item' }], default : [] },
+
   // tokens, relations, metadata
   refreshTokens: [{ tokenHash: String, createdAt: Number }],
   reviews: [{ type: Schema.Types.ObjectId, ref: 'Review' }],

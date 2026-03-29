@@ -21,6 +21,7 @@ const supplyRoutes = require('./routes/supply.routes');
 const userRoutes = require('./routes/user.routes');
 const aggregationRoutes = require('./routes/aggregation.routes');
 const configRoutes = require('./routes/config.routes');
+const opsContextRoutes = require('./routes/ops-context.routes');
 const s3storeRoutes = require('./routes/s3Storage.routes');
 
 const { s3Ensure } = require('./scripts/s3.ensure');
@@ -102,6 +103,7 @@ const createApp = async () => {
   app.use('/api/users', userRoutes);
   app.use('/api/items', itemRoutes);
   app.use('/api/rvws', reviewRoutes);
+  app.use('/api/opcs', opsContextRoutes);
   app.use('/api/s3go', s3storeRoutes);
 
   // 404 handler

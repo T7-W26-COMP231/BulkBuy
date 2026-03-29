@@ -291,6 +291,44 @@ const currentQuery = [
 ];
 
 /* -------------------------
+ * Upsert validator
+ * POST /api/sales-windows/upsert
+ * Body: { filter, update, options? }
+ * - filter: required non-empty object
+ * - update: required non-empty object
+ * - options: optional object (pass-through)
+ * ------------------------- */
+const upsert = [
+  body().custom((value) => {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) {
+      throw new Error('request body must be an object');
+    }
+    return true;
+  }),
+  body('filter')
+    .exists().withMessage('filter is required').bail()
+    .custom((v) => {
+      if (!v || typeof v !== 'object' || Array.isArray(v)) throw new Error('filter must be an object');
+      if (Object.keys(v).length === 0) throw new Error('filter must be a non-empty object');
+      return true;
+    }),
+  body('update')
+    .exists().withMessage('update is required').bail()
+    .custom((v) => {
+      if (!v || typeof v !== 'object' || Array.isArray(v)) throw new Error('update must be an object');
+      if (Object.keys(v).length === 0) throw new Error('update must be a non-empty object');
+      return true;
+    }),
+  body('options').optional().custom((v) => {
+    if (v === null) return true;
+    if (typeof v === 'object' && !Array.isArray(v)) return true;
+    throw new Error('options must be an object');
+  }),
+  runValidation
+];
+
+
+/* -------------------------
  * Exports
  * ------------------------- */
 
@@ -310,7 +348,7 @@ module.exports = {
   range,
   list,
   bulkInsert: bulkProductsBody, // reuse bulkProductsBody for route wiring of bulk-insert
-  upsert: addOrUpdateItem,
+  upsert,
 
   /* item/product actions */
   addOrUpdateItem,

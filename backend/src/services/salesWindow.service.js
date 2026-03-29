@@ -23,7 +23,21 @@ const SalesWindowRepo = require("../repositories/salesWindow.repo");
 const auditService = require("./audit.service");
 
 // ops-context cache eviction (in-process cache)
-const { evictRegionCache } = require("./ops-context/ops-context-products");
+
+const evictRegionCache = async (region) => { // lazy load to avoid the cyclic dependency issues 
+  try {
+    if (!region) return;
+    // lazy require to avoid circular dependency at module init
+    const { evictRCache } = require("./ops-context/ops-context-products");
+    if (typeof evictRCache === "function") {
+      await evictRCache(region);
+    }
+  } catch (e) {
+    // best-effort: log and continue
+    console.warn("evictRegionCache failed for region", region, e && e.message);
+  }
+}
+
 
 function actorFromOpts(opts = {}) {
   if (!opts) return { userId: null, role: null };

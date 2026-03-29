@@ -10,9 +10,7 @@ import ProductListPage from "./pages/customer/ProductListPage";
 import CartPage from "./pages/customer/CartPage";
 import Shop from "./pages/customer/Marketplace";
 import Item from "./pages/customer/Itemsdetails";
-import ReviewModifyIntentPage from "./pages/customer/ReviewModifyIntentPage";
-//import { useAuthBootstrap } from "./hooks/useAuthBootstrap"; // ← added
-
+import ReviewModifyIntentPage from './pages/customer/ReviewModifyIntentPage'
 
 
 function PlaceholderPage({ title }) {
@@ -29,7 +27,7 @@ function PlaceholderPage({ title }) {
 }
 
 export default function App() {
-  //useAuthBootstrap(); // ← added: auto-login until real auth is built
+
   useEffect(() => {
     const socket = io(`${import.meta.env.VITE_API_URL}`);
 

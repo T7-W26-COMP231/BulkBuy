@@ -34,7 +34,8 @@ const objectId = Joi.string().custom((val, helpers) => {
 const EmailSchema = Joi.object({
   address: Joi.string().email().required(),
   verified: Joi.boolean().default(false),
-  primary: Joi.boolean().default(false)
+  primary: Joi.boolean().default(false),
+  verifiedAt: Joi.any().allow(null).optional()  // ✅ ADD THIS
 });
 
 const PhoneSchema = Joi.object({

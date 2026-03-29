@@ -8,10 +8,10 @@
  */
 
 const createError = require('http-errors');
-const SalesWindowService = require('../../services/salesWindow.service');
+const SalesWindowService = require('../salesWindow.service');
 
-const DEFAULT_TTL = 60; // seconds
 const STALE_TTL = 30; // seconds served stale while revalidating
+const DEFAULT_TTL = 60; // seconds
 const MAX_CACHE_ENTRIES = 1000; // LRU capacity
 
 /* Simple LRU map with TTL metadata */
@@ -204,5 +204,6 @@ async function evictRegionCache(region) {
 
 module.exports = {
   getUiProducts,
-  evictRegionCache
+  evictRegionCache,
+  evictRCache: evictRegionCache
 };

@@ -7,47 +7,77 @@ const { requireRole, requireAnyRole } = require('../middleware/rbac.middleware')
 /**
  * POST /auth/register
  */
+// async function register(req, res) {
+//   const correlationId = req.correlationId || null;
+//   const { error, value } = registerSchema.validate(req.body);
+//   if (error || !(requireRole('administrator'))) {
+//     await auditService.logEvent({
+//       eventType: 'auth.register.failed.validation',
+//       actor: { userId: null, role: null },
+//       target: { type: 'User', id: null },
+//       outcome: 'failure',
+//       severity: 'warning',
+//       correlationId,
+//       details: { validation: error.message }
+//     });
+//     return res.status(400).json({ message: error.message });
+//   }
+
+//   try {
+//     const { user, accessToken, refreshToken } = await authService.register(value, correlationId);
+
+//     await auditService.logEvent({
+//       eventType: 'auth.register.success',
+//       actor: { userId: user.userId || user._id || null, role: user.role || null },
+//       target: { type: 'User', id: user.userId || user._id || null },
+//       outcome: 'success',
+//       severity: 'info',
+//       correlationId,
+//       details: { email: (value.email || '').toLowerCase() }
+//     });
+
+//     // Return tokens and sanitized user. Controller chooses cookie semantics.
+//     return res.status(201).json({ user, accessToken, refreshToken });
+//   } catch (err) {
+//     await auditService.logEvent({
+//       eventType: 'auth.register.failed',
+//       actor: { userId: null, role: null },
+//       target: { type: 'User', id: null },
+//       outcome: 'failure',
+//       severity: err.status && err.status >= 500 ? 'error' : 'warning',
+//       correlationId,
+//       details: { message: err.message }
+//     });
+//     return res.status(err.status || 500).json({ message: err.message });
+//   }
+// }
+
 async function register(req, res) {
   const correlationId = req.correlationId || null;
+  console.log("📨 req.body:", JSON.stringify(req.body, null, 2)); // ← ADD THIS
+
   const { error, value } = registerSchema.validate(req.body);
-  if (error || !(requireRole('administrator'))) {
-    await auditService.logEvent({
-      eventType: 'auth.register.failed.validation',
-      actor: { userId: null, role: null },
-      target: { type: 'User', id: null },
-      outcome: 'failure',
-      severity: 'warning',
-      correlationId,
-      details: { validation: error.message }
-    });
-    return res.status(400).json({ message: error.message });
+  console.log("✅ validated value:", JSON.stringify(value, null, 2)); // ← ADD THIS
+  console.log("❌ validation error:", error?.message); // ← ADD THIS
+
+  // ❌ REMOVE this broken condition
+  // if (error || !(requireRole('administrator'))) {
+
+  // ✅ CORRECT
+  if (error) {
+    return res.status(400).json({ message: error.details?.[0]?.message || error.message });
   }
 
   try {
+    // ✅ Normalize flat email → emails array before saving
+    if (value.email && (!value.emails || value.emails.length === 0)) {
+      value.emails = [{ address: value.email, primary: true, verified: false }];
+      delete value.email;
+    }
+
     const { user, accessToken, refreshToken } = await authService.register(value, correlationId);
-
-    await auditService.logEvent({
-      eventType: 'auth.register.success',
-      actor: { userId: user.userId || user._id || null, role: user.role || null },
-      target: { type: 'User', id: user.userId || user._id || null },
-      outcome: 'success',
-      severity: 'info',
-      correlationId,
-      details: { email: (value.email || '').toLowerCase() }
-    });
-
-    // Return tokens and sanitized user. Controller chooses cookie semantics.
     return res.status(201).json({ user, accessToken, refreshToken });
   } catch (err) {
-    await auditService.logEvent({
-      eventType: 'auth.register.failed',
-      actor: { userId: null, role: null },
-      target: { type: 'User', id: null },
-      outcome: 'failure',
-      severity: err.status && err.status >= 500 ? 'error' : 'warning',
-      correlationId,
-      details: { message: err.message }
-    });
     return res.status(err.status || 500).json({ message: err.message });
   }
 }

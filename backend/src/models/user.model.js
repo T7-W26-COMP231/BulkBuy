@@ -83,12 +83,14 @@ const UserSchema = new Schema({
   paymentMethods: { type: [PaymentMethodSchema], default: [] },
 
   // avatar: { type: Schema.Types.ObjectId, ref: 'S3file', default: "642f1a9b8c9f1a2b3c4d5e6f"},
-  avatar: { type: String, default: "https://cfg-j.s3.us-east-1.amazonaws.com/avataaars.png"},
+  avatar: { type: String, default: "https://cfg-j.s3.us-east-1.amazonaws.com/avataaars.png" },
 
   // soft-delete metadata (epoch ms)
   deleted: { type: Boolean, default: false, index: true },
   deletedAt: { type: Number, default: null },
   deletedBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
+
+  AllowedSupplyItems: { type: [{ type: Schema.Types.ObjectId, ref: 'Item' }], default: [] },
 
   // tokens, relations, metadata
   refreshTokens: [{ tokenHash: String, createdAt: Number }],

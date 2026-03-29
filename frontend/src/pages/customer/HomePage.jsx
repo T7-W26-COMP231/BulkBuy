@@ -1,9 +1,12 @@
-import { useState, useEffect } from "react";
+// src/pages/marketplace/HomePage.jsx
+import React, { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
 import Navbar from "../../components/Navbar";
 import Sidebar from "../../components/Sidebar";
 import Footer from "../../components/Footer";
 import { getCityData, getFeaturedAggregation } from "../../data/mockData";
+import { useOpsContext } from "../../contexts/OpsContex.jsx";
+import { useAuth } from "../../contexts/AuthContext.jsx";
 
 const GTA_CITIES = [
   { name: "Toronto", lat: 43.6532, lng: -79.3832 },
@@ -32,9 +35,8 @@ function getDistance(lat1, lng1, lat2, lng2) {
   const a =
     Math.sin(dLat / 2) ** 2 +
     Math.cos((lat1 * Math.PI) / 180) *
-      Math.cos((lat2 * Math.PI) / 180) *
-      Math.sin(dLng / 2) ** 2;
-
+    Math.cos((lat2 * Math.PI) / 180) *
+    Math.sin(dLng / 2) ** 2;
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
@@ -44,64 +46,183 @@ function getNearestCity(lat, lng) {
       const dist = getDistance(lat, lng, city.lat, city.lng);
       return dist < nearest.dist ? { city: city.name, dist } : nearest;
     },
-    { city: "Toronto", dist: Infinity }
+    { city: "Toronto", dist: Infinity },
   ).city;
 }
 
 export default function HomePage() {
-  const [socket, setSocket] = useState(null);
-  const [locationState, setLocationState] = useState("idle");
-  const [detectedCity, setDetectedCity] = useState(() => {
-    return sessionStorage.getItem("detectedCity") || "";
-  });
 
-  const activeCity = detectedCity || "Scarborough";
+  // inside component
+  const didInitRef = useRef(false);
+  useEffect(() => {
+    if (didInitRef.current) return;
+    didInitRef.current = true;
+    // run one-time init (fetch products, open socket, etc.)
+  }, []);
+
+
+  const { user } = useAuth();
+  const {
+    orders,
+    products,
+    productsMeta,
+    fetchAndSetUiProducts,
+    fetchAndSetEnrichedOrders,
+    clearState: clearOpsState,
+    applyRealtimeUpdate,
+  } = useOpsContext(); //--------------------------------------------------
+
+  const [socketConnected, setSocketConnected] = useState(false);
+  const socketRef = useRef(null);
+
+  // Location modal state
+  const [locationState, setLocationState] = useState("idle"); // idle | asking | detecting | done | denied
+  const [detectedCity, setDetectedCity] = useState(null);
+
+  // Derived display city
+  const activeCity = detectedCity || productsMeta?.region || "Toronto";
   const cityData = getCityData(activeCity);
   const selectedAggregation = getFeaturedAggregation(activeCity);
   const aggregationStatus = selectedAggregation?.status ?? "OPEN";
   const closesIn = selectedAggregation?.closesIn ?? "TBD";
   const progressPct = selectedAggregation
     ? Math.min(
-        (selectedAggregation.soldUnits / selectedAggregation.targetUnits) * 100,
-        100
-      )
+      (selectedAggregation.soldUnits / selectedAggregation.targetUnits) * 100,
+      100,
+    )
     : 0;
 
+  // Initial products load (runs once)
   useEffect(() => {
-    const socketInstance = io("http://localhost:5000");
+    const controller = new AbortController();
+    const region = productsMeta?.region || detectedCity || "Toronto";
 
-    socketInstance.on("connect", () => {
-      console.log("🟢 Connected to server:", socketInstance.id);
+    fetchAndSetUiProducts({
+      region,
+      page: 1,
+      limit: 24,
+      signal: controller.signal,
+    }).catch((err) => {
+      if (err && err.name === "AbortError") return;
+      // optional: show toast
+      // console.warn("Failed to load products", err);
     });
 
-    socketInstance.on("order_created", (data) => {
-      console.log("🔥 Order Created:", data);
-      alert("🛒 New order created!");
+    console.log(`01 | these are the products --->: ${JSON.stringify(products)}`)//---------------------------
+
+    return () => controller.abort();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [products]); // run once on mount
+
+  // React to auth changes: fetch orders when signed in; clear on sign out
+  useEffect(() => {
+    const controller = new AbortController();
+
+    if (user && user._id) {
+      fetchAndSetEnrichedOrders({
+        userId: user._id,
+        region: productsMeta?.region || detectedCity || "Toronto",
+        page: 1,
+        limit: 25,
+        requireAuth: true,
+        signal: controller.signal,
+      }).catch((err) => {
+        if (err && err.name === "AbortError") return;
+        // console.warn("Failed to load enriched orders", err);
+      });
+
+
+
+    } else {
+      // user signed out: clear ops state (orders/products can remain if you prefer)
+      clearOpsState();
+    }
+    console.log(`02 | these are the orders --->: ${JSON.stringify(orders)}`)//---------------------------
+    return () => controller.abort();
+  }, [
+    orders,
+    user,
+    fetchAndSetEnrichedOrders,
+    clearOpsState,
+    productsMeta?.region,
+    detectedCity,
+  ]);
+
+  // Socket.IO connection for realtime updates
+  useEffect(() => {
+    const socketUrl = import.meta.env.VITE_SOCKET_URL || "http://localhost:5000";
+    const socket = io(socketUrl, { autoConnect: true });
+
+    socketRef.current = socket;
+
+    socket.on("connect", () => {
+      setSocketConnected(true);
+      // console.log("Connected to socket:", socket.id);
     });
 
-    setSocket(socketInstance);
+    socket.on("disconnect", () => {
+      setSocketConnected(false);
+    });
 
+    // Example event handlers: merge updates into context state
+    socket.on("product:update", (payload) => {
+      try {
+        applyRealtimeUpdate({
+          products: Array.isArray(payload) ? payload : [payload],
+        });
+      } catch (e) {
+        // swallow
+      }
+    });
+
+    socket.on("order:update", (payload) => {
+      try {
+        applyRealtimeUpdate({
+          orders: Array.isArray(payload) ? payload : [payload],
+        });
+      } catch (e) {
+        // swallow
+      }
+    });
+
+    // lightweight notification for new orders (optional)
+    socket.on("order_created", (data) => {
+      // you can call applyRealtimeUpdate or trigger a toast here
+      try {
+        applyRealtimeUpdate({ order: data });
+      } catch (e) { }
+      // simple alert for now (replace with toast)
+      // eslint-disable-next-line no-alert
+      alert("New order created");
+    });
+
+    return () => {
+      try {
+        socket.disconnect();
+      } catch { }
+      socketRef.current = null;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [applyRealtimeUpdate]);
+
+  // Location modal logic (detect or ask)
+  useEffect(() => {
     const savedCity = sessionStorage.getItem("detectedCity");
     const dismissed = sessionStorage.getItem("locationModalDismissed");
-    const asked = sessionStorage.getItem("askedLocation");
-
     let timer = null;
 
     if (savedCity) {
       setDetectedCity(savedCity);
-
-      if (!dismissed) {
-        setLocationState("done");
+      if (!dismissed) setLocationState("done");
+    } else {
+      const asked = sessionStorage.getItem("askedLocation");
+      if (!asked) {
+        timer = setTimeout(() => setLocationState("asking"), 600);
       }
-    } else if (!asked) {
-      timer = setTimeout(() => {
-        setLocationState("asking");
-      }, 600);
     }
 
     return () => {
       if (timer) clearTimeout(timer);
-      socketInstance.disconnect();
     };
   }, []);
 
@@ -117,11 +238,7 @@ export default function HomePage() {
         sessionStorage.removeItem("locationModalDismissed");
         setLocationState("done");
       },
-      () => {
-        setDetectedCity("Scarborough");
-        sessionStorage.setItem("detectedCity", "Scarborough");
-        setLocationState("denied");
-      }
+      () => setLocationState("denied"),
     );
   };
 
@@ -134,23 +251,25 @@ export default function HomePage() {
   const handleCityChange = (newCity) => {
     setDetectedCity(newCity);
     sessionStorage.setItem("detectedCity", newCity);
-    sessionStorage.setItem("askedLocation", "true");
-    sessionStorage.setItem("locationModalDismissed", "true");
-    setLocationState("idle");
+    // optionally refresh products for the new city
+    fetchAndSetUiProducts({ region: newCity, page: 1, limit: 24 }).catch(
+      () => { },
+    );
   };
 
   return (
     <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-background-light text-text-main font-display">
+      {/* Location Modal */}
       {(locationState === "asking" ||
         locationState === "detecting" ||
-        locationState === "done" ||
-        locationState === "denied") &&
+        locationState === "done") &&
         !sessionStorage.getItem("locationModalDismissed") && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
             <div className="relative mx-4 w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl">
               <button
                 onClick={handleDismiss}
                 className="absolute right-4 top-4 text-gray-400 hover:text-gray-600"
+                aria-label="Close location modal"
               >
                 <span className="material-symbols-outlined text-xl">close</span>
               </button>
@@ -163,7 +282,9 @@ export default function HomePage() {
 
               {locationState === "asking" && (
                 <>
-                  <h2 className="mb-1 text-lg font-bold">Detect your location</h2>
+                  <h2 className="mb-1 text-lg font-bold">
+                    Detect your location
+                  </h2>
                   <p className="mb-6 text-sm text-text-muted">
                     Allow BulkBuy to detect your location so we can show bulk
                     deals near you in the GTA.
@@ -187,7 +308,9 @@ export default function HomePage() {
 
               {locationState === "detecting" && (
                 <>
-                  <h2 className="mb-1 text-lg font-bold">Detecting your city…</h2>
+                  <h2 className="mb-1 text-lg font-bold">
+                    Detecting your city …
+                  </h2>
                   <p className="text-sm text-text-muted">
                     Finding the nearest GTA city to you.
                   </p>
@@ -206,28 +329,10 @@ export default function HomePage() {
                   <p className="text-sm text-text-muted">
                     We've set your city to{" "}
                     <span className="font-semibold text-text-main">
-                      {activeCity}
+                      {" "}
+                      {detectedCity}{" "}
                     </span>
                     . You can change it anytime from the navbar.
-                  </p>
-                  <button
-                    onClick={handleDismiss}
-                    className="mt-5 w-full rounded-xl bg-primary py-2.5 text-sm font-bold text-text-main shadow-sm transition-colors hover:bg-primary/90"
-                  >
-                    Got it
-                  </button>
-                </>
-              )}
-
-              {locationState === "denied" && (
-                <>
-                  <h2 className="mb-1 text-lg font-bold">Location unavailable</h2>
-                  <p className="text-sm text-text-muted">
-                    We couldn’t access your location, so we picked{" "}
-                    <span className="font-semibold text-text-main">
-                      Scarborough
-                    </span>{" "}
-                    for now. You can still change it from the navbar.
                   </p>
                   <button
                     onClick={handleDismiss}
@@ -265,16 +370,18 @@ export default function HomePage() {
                 key={selectedAggregation?.id}
                 className="h-full w-full object-cover"
                 src={selectedAggregation?.imageUrl}
-                alt={selectedAggregation?.title}
+                alt={selectedAggregation?.title || "Aggregation image"}
               />
+
               <div
-                className={`absolute left-4 top-4 rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider ${
-                  aggregationStatus === "CLOSED"
+                className={`absolute left-4 top-4 rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider ${aggregationStatus === "CLOSED"
                     ? "bg-red-500 text-white"
                     : "bg-primary text-text-main"
-                }`}
+                  }`}
               >
-                {aggregationStatus === "CLOSED" ? "Window Closed" : "Window Open"}
+                {aggregationStatus === "CLOSED"
+                  ? "Window Closed"
+                  : "Window Open"}
               </div>
             </div>
 
@@ -282,11 +389,11 @@ export default function HomePage() {
               <div>
                 <div className="mb-2 flex items-start justify-between">
                   <h2 className="text-2xl font-bold">
-                    {selectedAggregation?.title ?? "—"}
+                    {selectedAggregation?.title ?? "-"}
                   </h2>
                   <div className="text-right">
                     <span className="text-2xl font-bold text-primary">
-                      ${selectedAggregation?.price?.toFixed(2) ?? "—"}
+                      ${selectedAggregation?.price?.toFixed(2) ?? "-"}
                     </span>
                     <span className="block text-sm text-text-muted">
                       Current Tier 2 Price
@@ -310,7 +417,7 @@ export default function HomePage() {
                       </>
                     )}
                   </span>
-                  <span className="mx-2">•</span>
+                  <span className="mx-2">.</span>
                   <span className="material-symbols-outlined text-sm">
                     local_shipping
                   </span>
@@ -323,19 +430,21 @@ export default function HomePage() {
                   <div className="flex items-end justify-between">
                     <div className="flex flex-col gap-1">
                       <span className="text-sm font-medium">
-                        Progress to {selectedAggregation?.nextTierLabel ?? "Next Tier"}
+                        Progress to{" "}
+                        {selectedAggregation?.nextTierLabel ?? "Next Tier"}
                       </span>
                       <span className="text-xs text-text-muted">
-                        {selectedAggregation?.unitsToNextTier ?? 0} units remaining
-                        to trigger next discount
+                        {selectedAggregation?.unitsToNextTier ?? 0} units
+                        remaining to trigger next discount
                       </span>
                     </div>
                     <span className="text-sm font-bold">
                       {selectedAggregation
-                        ? `${selectedAggregation.soldUnits}/${selectedAggregation.targetUnits} units`
-                        : "—"}
+                        ? `$${selectedAggregation.soldUnits}/$${selectedAggregation.targetUnits} units`
+                        : "-"}
                     </span>
                   </div>
+
                   <div className="h-3 w-full overflow-hidden rounded-full bg-neutral-light">
                     <div
                       className="h-full rounded-full bg-primary transition-all duration-500"
@@ -349,21 +458,25 @@ export default function HomePage() {
                 <div className="flex -space-x-3">
                   <img
                     className="h-10 w-10 rounded-full border-2 border-white object-cover"
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuDpdfgua5aFPlAwPtt5cfUEFEgDqMKbkk9Bm1GEEhhpBQD9TpE3WtQ_H6OkhfG7846fRpNPW1SAZYt4uaEolVo5c8Fg-TLpWTeXWQIx6wBXyWfzEtVM9c-YlOdA9uILcoubEdB9PWbWlIv6j7egNb6KAeM5HfPRRq_IUmucWPO9tWTjjt2b75HGD7J31I-d-XuyjgddMcHpFUdmYaWXamY6Z9EMT1HEjBuepehcx-s7bBhqhPe0CqmVTI6enIV0vXE3O0DiEhKRp04"
+                    src="https://via.placeholder.com/40"
                     alt="Participant 1"
                   />
                   <img
                     className="h-10 w-10 rounded-full border-2 border-white object-cover"
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuAsFULVhDcJWof7HJFmTV9SQlBsdZK2lMRvE4dSA6C6CLc3HPdtSr_UghpK3wnLAZYvYXXllRXwSQdieSCBhFSNoLqLTFIZq0GOtAq4My17dSpXxARXibYtPLZ4D7KIMlApKjxOul-iP12lVDzAxMfRBDykpSjPSrbeLFkEVKTV30b7vQ2XU0w3f0BzAsJDPEHaApyPLtCoGMouRddO-LBK-8VUupZGCCgPG9ypjpuB28rxOaI9Fd1KGgbE0EHt5tBluKUU9jyDez4"
+                    src="https://via.placeholder.com/40"
                     alt="Participant 2"
                   />
                   <img
                     className="h-10 w-10 rounded-full border-2 border-white object-cover"
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuCqEU1n3_0rGsl32BaBlsOo7qDxsdmDRSgkyxiJdNEfF2lzEPzoBc4KPn9qwNnwzzFAmfFDX5xvo3B02SxEEj8Hb2oRiA2NrSv1GHezDBik7fArh4OZ90nXltDmAgd5U57fd4HyOWvSqccHjKjt_3nsCl2IvHvcJouYl5ouKp3HR6yBAR1Cr3-1yCh4O5XXQXtESidlk-iZAZ5J3rXIjH77Fu3uNxZzntfsjD1eRY7i3uhQ5jDa4mQEuHPwaTn8JBgWZfRgZkUUyb8"
+                    src="https://via.placeholder.com/40"
                     alt="Participant 3"
                   />
                   <div className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-white bg-neutral-light text-xs font-medium">
-                    +{Math.max(0, (selectedAggregation?.participants ?? 145) - 3)}
+                    +
+                    {Math.max(
+                      0,
+                      (selectedAggregation?.participants ?? 145) - 3,
+                    )}
                   </div>
                 </div>
                 <button className="rounded-xl bg-primary px-8 py-3 font-bold text-text-main shadow-md transition-all hover:bg-primary/90">
@@ -376,14 +489,16 @@ export default function HomePage() {
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <div className="flex items-center gap-5 rounded-2xl border border-neutral-light bg-white p-6">
               <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary">
-                <span className="material-symbols-outlined text-3xl">savings</span>
+                <span className="material-symbols-outlined text-3xl">
+                  savings
+                </span>
               </div>
               <div>
                 <h4 className="text-sm font-medium text-text-muted">
                   Estimated Savings
                 </h4>
                 <p className="text-xl font-bold">
-                  {selectedAggregation?.estimatedSavings ?? "—"}
+                  {selectedAggregation?.estimatedSavings ?? "-"}
                 </p>
               </div>
             </div>
@@ -399,7 +514,7 @@ export default function HomePage() {
                   Quality Guarantee
                 </h4>
                 <p className="text-xl font-bold">
-                  {selectedAggregation?.qualityLabel ?? "—"}
+                  {selectedAggregation?.qualityLabel ?? "-"}
                 </p>
               </div>
             </div>
@@ -416,7 +531,7 @@ export default function HomePage() {
             <div className="relative h-48 bg-neutral-light">
               <img
                 className="h-full w-full object-cover opacity-50 grayscale"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuCmMtUsrVJCgccxbkNopo_TMbC9d2xxPTsVyOZkRvhjmeYhEXglAoibwJ7oaEubZvYhftt3ZS1Gb-T14g5akFnaAytM-X0DX8Hd7AJq2bGV9Oy5SInujSd1yGwrhz2yV4HXzs04PwZmZcx_kfxLwebkZfMHQpoNa6Gc5rTfbePc3C73NQIEGE0w5kG5cjq3HXWIPGvxQjuYMn_WU44jL1tbCq5rydk-A-XGSjmD0u6UdD7aoRx9OfsiEvLgkaqQ8A3iFvPc6C3nQAk"
+                src="https://via.placeholder.com/800x300"
                 alt={`${activeCity} aggregation map`}
               />
               <div className="absolute inset-0 flex items-center justify-center">

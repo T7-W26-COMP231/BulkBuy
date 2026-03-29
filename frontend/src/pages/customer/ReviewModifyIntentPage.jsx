@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { getMyIntents, updateIntentItem, removeIntentItem } from "../../api/intentApi";
 import { useAuth } from "../../contexts/AuthContext";
+import api from "../../api/api";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import Sidebar from "../../components/Sidebar";
@@ -24,6 +25,7 @@ export default function ReviewModifyIntentPage() {
   const [editedQtys, setEditedQtys] = useState({});
   const [saving, setSaving] = useState({});
   const [windowLocked, setWindowLocked] = useState(false);
+  const [windowLockedReason, setWindowLockedReason] = useState(null);
   const [fetchError, setFetchError] = useState(null);
   const [itemDataMap, setItemDataMap] = useState({});
 
@@ -40,7 +42,26 @@ export default function ReviewModifyIntentPage() {
           .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
         setIntents(latest);
-        // ✅ After fetching intents, fetch full item data for each unique itemId
+
+        // ✅ Task #61 — Check window status from order's salesWindow field (no admin API needed)
+        const salesWindow = latest[0]?.salesWindow;
+        console.log(salesWindow);
+        const now = Date.now();
+
+        if (!salesWindow) {
+          setWindowLocked(false);
+          setWindowLockedReason(null);
+        } else {
+          const isOpen = now >= salesWindow.fromEpoch && now <= salesWindow.toEpoch;
+          setWindowLocked(!isOpen);
+          setWindowLockedReason(
+            isOpen
+              ? null
+              : `This aggregation window closed on ${new Date(salesWindow.toEpoch).toLocaleDateString()}.`
+          );
+        }
+
+        // ✅ Fetch full item data for each unique itemId
         const uniqueItemIds = [...new Set(
           latest.flatMap(intent =>
             intent.items.map(i => i.itemId?._id || i.itemId)
@@ -49,18 +70,10 @@ export default function ReviewModifyIntentPage() {
 
         const itemResponses = await Promise.all(
           uniqueItemIds.map(itemId =>
-            fetch(`${import.meta.env.VITE_API_URL}/api/items/${itemId}`, {
-              headers: {
-                "Content-Type": "application/json",
-                ...(localStorage.getItem("token") && {
-                  Authorization: `Bearer ${localStorage.getItem("token")}`
-                }),
-              }
-            }).then(r => r.json())
+            api.get(`/api/items/${itemId}`).then(r => r.data)
           )
         );
 
-        // Build a lookup map: itemId → full item data
         const itemMap = {};
         itemResponses.forEach((res, i) => {
           const itemData = res.data ?? res;
@@ -69,7 +82,7 @@ export default function ReviewModifyIntentPage() {
           }
         });
 
-        setItemDataMap(itemMap); // ← new state
+        setItemDataMap(itemMap);
 
         const initialQtys = {};
         latest.forEach((intent) => {
@@ -98,12 +111,7 @@ export default function ReviewModifyIntentPage() {
   );
 
   function getDisplayData(item) {
-    const product = item.productId && typeof item.productId === "object"
-      ? item.productId : {};
-
-    // ✅ Full item from API fetch — most reliable source
     const itemDoc = itemDataMap[item.itemId] ?? {};
-
     const cartMatch = cartItems.find(
       (c) => c.itemId === item.itemId || c.id === item.itemId
     );
@@ -112,17 +120,9 @@ export default function ReviewModifyIntentPage() {
       ? item.pricingSnapshot[0]
       : item.pricingSnapshot || {};
 
-    const unitPrice =
-      snapshot?.atInstantPrice ||
-      cartMatch?.unitPrice ||
-      0;
+    const unitPrice = snapshot?.atInstantPrice || cartMatch?.unitPrice || 0;
 
-    // ✅ Tiers from fetched item data
-    const rawTiers =
-      itemDoc.pricingTiers ||
-      cartMatch?.pricingTiers ||
-      [];
-
+    const rawTiers = itemDoc.pricingTiers || cartMatch?.pricingTiers || [];
     const pricingTiers = rawTiers.map((t) => ({
       minQty: t.minQty,
       price: t.price ?? +(unitPrice * (1 - (t.discountPct || 0) / 100)).toFixed(2),
@@ -234,9 +234,25 @@ export default function ReviewModifyIntentPage() {
 
         <section className="flex flex-1 flex-col gap-6">
 
+          {/* ✅ Task #62 + #63 — Locked banner with reason */}
           {windowLocked && (
-            <div className="rounded-2xl border border-red-300 bg-red-50 px-5 py-4 font-medium text-red-800">
-              🔒 This aggregation window is locked. No further changes can be made.
+            <div className="rounded-2xl border border-red-300 bg-red-50 px-5 py-5 shadow-sm">
+              <div className="flex items-start gap-4">
+                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-red-100 text-xl">
+                  🔒
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-red-800">
+                    Aggregation Window Closed
+                  </h3>
+                  <p className="mt-1 text-sm font-medium text-red-700">
+                    {windowLockedReason || "This aggregation window is closed. No further changes can be made."}
+                  </p>
+                  <p className="mt-2 text-xs text-red-500">
+                    Your intent has been recorded. Final pricing will be confirmed once the group order is processed.
+                  </p>
+                </div>
+              </div>
             </div>
           )}
 
@@ -291,7 +307,6 @@ export default function ReviewModifyIntentPage() {
                   {/* ── CONTENT ── */}
                   <div className="flex flex-1 flex-col gap-4">
 
-                    {/* Name + price */}
                     <div className="flex items-start justify-between gap-4">
                       <h1 className="text-2xl md:text-3xl font-black leading-tight text-text-main">
                         {display.name}
@@ -309,7 +324,7 @@ export default function ReviewModifyIntentPage() {
                       </p>
                     )}
 
-                    {/* ✅ Pricing Tiers — inside the card */}
+                    {/* Pricing Tiers */}
                     {itemTiers.length > 0 && (
                       <div className="rounded-xl border border-neutral-light bg-background-light p-4">
                         <p className="mb-3 text-xs font-bold uppercase tracking-widest text-text-muted">
@@ -343,7 +358,7 @@ export default function ReviewModifyIntentPage() {
                       </div>
                     )}
 
-                    {/* ✅ Community Progress — inside the card */}
+                    {/* Community Progress */}
                     <div className="rounded-xl border border-neutral-light bg-background-light p-4">
                       <div className="mb-2 flex items-center justify-between">
                         <p className="text-xs font-bold uppercase tracking-widest text-text-muted">
@@ -409,12 +424,15 @@ export default function ReviewModifyIntentPage() {
                       </button>
                     </div>
 
-                    <div className="inline-flex w-fit rounded-full bg-primary/10 px-3 py-1 text-xs font-bold text-text-main">
-                      {windowLocked ? "🔒 Window closed" : "Aggregation window open"}
+                    {/* ✅ Task #62 — Window status badge per item */}
+                    <div className={`inline-flex w-fit rounded-full px-3 py-1 text-xs font-bold ${windowLocked
+                      ? "bg-red-100 text-red-700"
+                      : "bg-green-100 text-green-700"
+                      }`}>
+                      {windowLocked ? "🔒 Window closed — editing disabled" : "✅ Aggregation window open"}
                     </div>
 
                   </div>
-                  {/* ── end CONTENT ── */}
                 </div>
               </div>
             );

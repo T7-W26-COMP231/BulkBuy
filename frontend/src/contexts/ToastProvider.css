@@ -1,4 +1,4 @@
-/* src/utoast.css
+/* src/contexts/ToastProvider.css
    Polished stylesheet for utoast provider
    - Carousel and hamburger are adjacent and flush: [carousel track]|[hamburger]
    - Thumbnails have 2px dashed black border and centered labels/images
@@ -25,14 +25,22 @@
   --utoast-tab-linger-delay: 1s;       /* linger before tuck */
   --utoast-gap: 12px;
   --utoast-font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+
+  /* Replace this value with the exact color you want (hex, rgb, or rgba).
+     Default is near-black at 75% opacity. */
+  --utoast-blur-color: rgba(0, 0, 0, 0.75);
+  --utoast-blur-backdrop: blur(6px); /* adjust blur strength */
 }
+
 
 /* Backdrop blur when provider toggles html.utoast-blur */
 html.utoast-blur::before {
   content: "";
   position: fixed;
   inset: 0;
-  z-index: calc(var(--utoast-z-base) - 1);
+  /* z-index: calc(var(--utoast-z-base) - 1); */
+  z-index: 100;
+  margin-top: 2em;
   pointer-events: none;
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
@@ -107,7 +115,7 @@ html.utoast-theme { font-family: var(--utoast-font); }
 .utoast-card {
   width: 420px;
   max-width: calc(100% - 48px);
-  background: var(--utoast-bg);
+  /* background: var(--utoast-bg); */
   border-radius: 12px;
   padding: 16px;
   box-shadow: var(--utoast-shadow);
@@ -251,7 +259,7 @@ html.utoast-theme { font-family: var(--utoast-font); }
 /* Pinned tab base (collapsed) */
 .utoast-pinned-tab {
   position: fixed;
-  top: 12px;
+  top: 5em;
   right: 0;
   transform-origin: left center;
   background: var(--utoast-accent);
@@ -321,3 +329,67 @@ html.utoast-theme { font-family: var(--utoast-font); }
   .utoast-hamburger { width: 48px; height: 48px; }
   .utoast-thumb { width: 48px; height: 48px; }
 }
+
+
+
+/* --- */
+
+
+/* Ensure toast container and cards remain interactive above the blur */
+.utoast-root,
+.utoast-card,
+.utoast-item {
+  position: relative;
+  z-index: 900;                 /* above the blur overlay */
+  pointer-events: auto;
+}
+
+
+/* fallback if header variable not set */
+:root { --header-height: 64px; }
+
+/* top offset used by the toast system: header height + 5px gap */
+:root { --utoast-top-offset: calc(var(--header-height) + 5px); }
+
+/* push the toast root down so nothing overlaps the header */
+.utoast-root {
+  /* preserve existing rules, add padding-top driven by header height + 5px */
+  padding-top: var(--utoast-top-offset);
+  box-sizing: border-box;
+}
+
+/* ensure top-centered carousel sits below header */
+.utoast-carousel-viewport {
+  top: var(--utoast-top-offset) !important;
+  transform: translateX(-50%); /* keep horizontally centered */
+}
+
+/* top corner containers align with the offset */
+.utoast-corner.tr,
+.utoast-corner.tl {
+  top: var(--utoast-top-offset) !important;
+}
+
+/* optional: nudge HVC layer slightly down so centered modals don't overlap header on small screens */
+.utoast-hvc-layer {
+  /* keep centered but nudge down by half the offset to avoid overlap */
+  top: calc(50% + (var(--utoast-top-offset) / 2));
+  transform: translate(-50%, -50%);
+}
+
+/* keep carousel inert when there are no visible stack items (existing aria-hidden usage) */
+.utoast-carousel-viewport[aria-hidden="true"],
+.utoast-carousel-viewport[aria-hidden="true"] .utoast-carousel,
+.utoast-carousel-viewport[aria-hidden="true"] .utoast-carousel-track {
+  pointer-events: none;
+  visibility: hidden; /* optional: hide completely when aria-hidden true */
+}
+
+/* when visible, ensure it is visible and interactive */
+.utoast-carousel-viewport[aria-hidden="false"] {
+  pointer-events: auto;
+  visibility: visible;
+}
+
+
+/* --- */

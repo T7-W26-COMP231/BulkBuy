@@ -310,7 +310,7 @@ module.exports = {
   range,
   list,
   bulkInsert: bulkProductsBody, // reuse bulkProductsBody for route wiring of bulk-insert
-  upsert,
+  upsert: addOrUpdateItem,
 
   /* item/product actions */
   addOrUpdateItem,

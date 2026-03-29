@@ -64,12 +64,22 @@ const PaymentMethodSchema = Joi.object({
 /**
  * Auth-specific schemas (register / login)
  */
+// In src/validators/user.validators.js
+// Replace your existing registerSchema with this:
+
 const registerSchema = Joi.object({
   userId: Joi.string().pattern(/^\d{16}$/).optional(),
   firstName: Joi.string().trim().allow('', null),
   lastName: Joi.string().trim().allow('', null),
   role: Joi.string().valid('customer', 'administrator', 'supplier').default('customer'),
+
+  // Accept flat email string (frontend sends this)
+  // auth.controller.js normalizes it → emails: [{ address, primary: true }]
+  email: Joi.string().email().optional(),
+
+  // Also accept pre-structured emails array (API clients)
   emails: Joi.array().items(EmailSchema).max(5).unique((a, b) => a.address === b.address).optional(),
+
   phones: Joi.array().items(PhoneSchema).max(5).optional(),
   addresses: Joi.array().items(AddressSchema).max(5).optional(),
   password: Joi.string().min(8).max(128).required(),
@@ -77,7 +87,7 @@ const registerSchema = Joi.object({
   paymentMethods: Joi.array().items(PaymentMethodSchema).optional(),
   avatar: objectId.optional(),
   metadata: Joi.object().optional()
-}).or('firstName', 'lastName', 'emails');
+}).or('firstName', 'lastName', 'emails', 'email'); // ← add 'email' here too
 
 const loginSchema = Joi.object({
   email: Joi.string().email().required(),

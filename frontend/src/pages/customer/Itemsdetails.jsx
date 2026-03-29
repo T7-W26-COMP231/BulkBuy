@@ -242,6 +242,21 @@ export default function ItemDetail() {
             const cartStorageKey = user?._id ? `cartItems_${user._id}` : "cartItems_guest";
             const existingCartItems = JSON.parse(sessionStorage.getItem(cartStorageKey) || "[]");
 
+            // const nextItem = {
+            //     id: item._id,
+            //     productId: productData?._id ?? null,
+            //     itemId: item._id,
+            //     name: item.name || item.title || item.label || productData?.name || "Unnamed item",
+            //     supplier: item.supplier || productData?.brand || "BulkBuy Brand",
+            //     quantity,
+            //     unitPrice: displayPrice,
+            //     pricingTiers: tiers,           // ← the tiers array already derived above
+            //     activeTier: activeTier,
+            //     imageLabel: "🛒",
+
+            // };
+
+            // ✅ FIXED nextItem — all fields included
             const nextItem = {
                 id: item._id,
                 productId: productData?._id ?? null,
@@ -251,6 +266,17 @@ export default function ItemDetail() {
                 quantity,
                 unitPrice: displayPrice,
                 imageLabel: "🛒",
+                // ✅ display
+                image: item.images?.[0] || item.metadata?.imageUrl || null,
+                description: item.description || item.shortDescription || "",
+                city: item.ops_region || productData?.ops_region || "",
+                // ✅ tiers
+                pricingTiers: tiers,
+                activeTier: activeTier,
+                // ✅ community progress
+                aggregatedDemand: aggregatedDemand,
+                nextThresholdQty: nextThresholdQty,
+                nextTierPrice: nextTier?.price ?? null,
             };
 
             const existingIndex = existingCartItems.findIndex(

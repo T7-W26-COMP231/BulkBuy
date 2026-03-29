@@ -139,7 +139,7 @@ module.exports = function attachExtras(SalesWindowSchema, mongoose) {
   };
 
   /* -------------------------
-   * createOverflowWindow
+   * createOverflowWindow  
    * - creates an overflow document with isHead: false
    * - links source.overflow_id to the new doc
    * ------------------------- */
@@ -484,7 +484,7 @@ module.exports = function attachExtras(SalesWindowSchema, mongoose) {
       return { movedToOverflow: !!res.moved, overflowId: res.overflowId || null, item: newItem };
     }
 
-    return { movedToOverflow: false, item: newItem , ops_region: Model.ops_region };
+    return { movedToOverflow: false, item: newItem, ops_region: Model.ops_region };
   };
 
   SalesWindowSchema.statics.addPricingSnapshot = async function addPricingSnapshot(windowId, productId, itemId, snapshot = {}, opts = {}) {
@@ -681,7 +681,7 @@ module.exports = function attachExtras(SalesWindowSchema, mongoose) {
       }
     }
 
-    return { inserted: inserted.length, movedToOverflow , ops_region: Model.ops_region};
+    return { inserted: inserted.length, movedToOverflow, ops_region: Model.ops_region };
   };
 
   SalesWindowSchema.statics.bulkInsertItems = async function bulkInsertItems(windowId, productId, items = [], opts = {}) {
@@ -816,7 +816,7 @@ module.exports = function attachExtras(SalesWindowSchema, mongoose) {
             }
           }
           newProducts.push({
-            productId: p.productId, 
+            productId: p.productId,
             items: newItems,
             metadata: Object.assign({}, p.metadata || {})
           });

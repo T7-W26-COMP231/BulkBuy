@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext.jsx";
 import { useToast } from "../contexts/ToastProvider.jsx";
 import AuthTabs from "./sign-in-up/AuthTabs.jsx";
@@ -44,6 +45,7 @@ export default function Navbar({
 
   const { user, signOut, signIn, signUp } = useAuth();
   const { showToast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (detectedCity) {
@@ -76,7 +78,19 @@ export default function Navbar({
 
   const handleSignOut = async () => {
     try {
+      const user = JSON.parse(localStorage.getItem("user") || "null");
+
+      if (user?._id) {
+        sessionStorage.removeItem(`cartItems_${user._id}`);
+      }
+
+      // Optional cleanup for older generic keys used before the user-specific fix
+      sessionStorage.removeItem("cartItems");
+      sessionStorage.removeItem("cartItem");
+
       await signOut?.();
+      navigate("/");
+
       try {
         showToast(
           <div style={{ padding: 12 }}>
@@ -98,9 +112,7 @@ export default function Navbar({
         showToast(
           <div style={{ padding: 12 }}>
             <strong>Sign out failed</strong>
-            <div style={{ marginTop: 6 }}>
-              {err?.message || "Unknown error"}
-            </div>
+            <div style={{ marginTop: 6 }}>{err?.message || "Unknown error"}</div>
           </div>,
           {
             value: "TR",

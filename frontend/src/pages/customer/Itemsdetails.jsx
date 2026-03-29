@@ -239,7 +239,8 @@ export default function ItemDetail() {
 
             await createIntent(payload);
 
-            const existingCartItems = JSON.parse(sessionStorage.getItem("cartItems") || "[]");
+            const cartStorageKey = user?._id ? `cartItems_${user._id}` : "cartItems_guest";
+            const existingCartItems = JSON.parse(sessionStorage.getItem(cartStorageKey) || "[]");
 
             const nextItem = {
                 id: item._id,
@@ -269,7 +270,7 @@ export default function ItemDetail() {
                 updatedCartItems = [...existingCartItems, nextItem];
             }
 
-            sessionStorage.setItem("cartItems", JSON.stringify(updatedCartItems));
+            sessionStorage.setItem(cartStorageKey, JSON.stringify(updatedCartItems));
 
             navigate("/cart", {
                 state: {

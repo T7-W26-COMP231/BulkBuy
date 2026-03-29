@@ -10,13 +10,16 @@ import { getCityData } from "../../data/mockData";
 export default function CartPage() {
   const { showToast } = useToast();
   const location = useLocation();
+  const user = JSON.parse(localStorage.getItem("user") || "null");
+  const userId = user?._id || null;
+  const cartStorageKey = userId ? `cartItems_${userId}` : "cartItems_guest";
   const [detectedCity, setDetectedCity] = useState("Scarborough");
   const [intentConfirmed, setIntentConfirmed] = useState(false);
   const navigate = useNavigate();  // ← add this
 
   const [cartItems, setCartItems] = useState(() => {
     const stateItems = location.state?.cartItems;
-    const savedItems = sessionStorage.getItem("cartItems");
+    const savedItems = sessionStorage.getItem(cartStorageKey);
 
     if (stateItems?.length) return stateItems;
     if (savedItems) return JSON.parse(savedItems);
@@ -31,10 +34,23 @@ export default function CartPage() {
     }
 
     if (location.state?.cartItems?.length) {
-      sessionStorage.setItem("cartItems", JSON.stringify(location.state.cartItems));
+      sessionStorage.setItem(cartStorageKey, JSON.stringify(location.state.cartItems));
       setCartItems(location.state.cartItems);
+      return;
     }
-  }, [location.state]);
+
+    if (!userId) {
+      setCartItems([]);
+      return;
+    }
+
+    const savedItems = sessionStorage.getItem(cartStorageKey);
+    if (savedItems) {
+      setCartItems(JSON.parse(savedItems));
+    } else {
+      setCartItems([]);
+    }
+  }, [location.state, cartStorageKey, userId]);
 
 
   const handleCityChange = (newCity) => {
@@ -49,11 +65,14 @@ export default function CartPage() {
     if (!Number.isFinite(value)) return;
     if (value < 1) return;
 
-    setCartItems((prev) =>
-      prev.map((item) =>
+    setCartItems((prev) => {
+      const updated = prev.map((item) =>
         item.itemId === itemId ? { ...item, quantity: value } : item
-      )
-    );
+      );
+
+      sessionStorage.setItem(cartStorageKey, JSON.stringify(updated));
+      return updated;
+    });
 
     setIntentConfirmed(false);
   };

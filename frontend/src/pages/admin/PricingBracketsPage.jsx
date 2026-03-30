@@ -32,6 +32,13 @@ export default function PricingBracketsPage() {
     ]);
   };
 
+  const handleRemoveTier = (id) => {
+    setTiers((prev) => {
+      if (prev.length <= 1) return prev;
+      return prev.filter((tier) => tier.id !== id);
+    });
+  };
+
   return (
     <div className="min-h-screen bg-background-light text-text-main">
       <div className="flex min-h-screen">
@@ -63,7 +70,9 @@ export default function PricingBracketsPage() {
                     onClick={handleAddTier}
                     className="inline-flex items-center justify-center gap-2 self-start rounded-xl border border-neutral-light bg-white px-4 py-2 text-sm font-semibold text-text-main transition hover:bg-neutral-light"
                   >
-                    <span className="material-symbols-outlined text-[18px]">add</span>
+                    <span className="material-symbols-outlined text-[18px]">
+                      add
+                    </span>
                     Add Tier
                   </button>
                 </div>
@@ -84,7 +93,11 @@ export default function PricingBracketsPage() {
                           type="text"
                           value={tier.minQty}
                           onChange={(e) =>
-                            handleTierChange(tier.id, "minQty", e.target.value)
+                            handleTierChange(
+                              tier.id,
+                              "minQty",
+                              e.target.value
+                            )
                           }
                           className={`w-full rounded-xl border bg-white px-4 py-3 text-sm text-text-main outline-none transition ${
                             tier.hasError
@@ -100,14 +113,30 @@ export default function PricingBracketsPage() {
                       </div>
 
                       <div>
-                        <label className="mb-2 block text-sm font-semibold text-text-muted">
-                          Unit Price ($)
-                        </label>
+                        <div className="mb-2 flex items-center justify-between">
+                          <label className="block text-sm font-semibold text-text-muted">
+                            Unit Price ($)
+                          </label>
+
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveTier(tier.id)}
+                            disabled={tiers.length <= 1}
+                            className="rounded-lg border border-red-200 px-3 py-1 text-xs font-semibold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-40"
+                          >
+                            Remove
+                          </button>
+                        </div>
+
                         <input
                           type="text"
                           value={tier.unitPrice}
                           onChange={(e) =>
-                            handleTierChange(tier.id, "unitPrice", e.target.value)
+                            handleTierChange(
+                              tier.id,
+                              "unitPrice",
+                              e.target.value
+                            )
                           }
                           className="w-full rounded-xl border border-neutral-light bg-white px-4 py-3 text-sm text-text-main outline-none transition focus:border-primary"
                         />
@@ -145,8 +174,14 @@ export default function PricingBracketsPage() {
                   value="12.5%"
                   extra="↑+2%"
                 />
-                <AdminSummaryCard label="Total Tiers" value="03" />
-                <AdminSummaryCard label="Strategy Type" badge="Volume Based" />
+                <AdminSummaryCard
+                  label="Total Tiers"
+                  value={String(tiers.length).padStart(2, "0")}
+                />
+                <AdminSummaryCard
+                  label="Strategy Type"
+                  badge="Volume Based"
+                />
               </section>
             </div>
           </main>

@@ -420,7 +420,7 @@ class ConfigService {
     }
   }
 
-  /**
+    /**
    * Find by filter
    */
   async findByFilter(filter = {}, opts = {}) {
@@ -437,6 +437,54 @@ class ConfigService {
         correlationId: opts.correlationId || null,
         details: { message: err.message }
       });
+      throw err;
+    }
+  }
+
+  /**
+   * Save admin pricing tiers
+   */
+  async savePricingTiers(tiers = [], opts = {}) {
+    const actor = actorFromOpts(opts);
+    const correlationId = opts.correlationId || null;
+
+    if (!Array.isArray(tiers) || tiers.length === 0) {
+      throw createError(400, 'tiers array is required');
+    }
+
+    try {
+      const saved = await ConfigRepo.upsertForUser(
+        actor.userId,
+        {
+          metadata: {
+            pricingTiers: tiers
+          }
+        },
+        opts
+      );
+
+      await auditService.logEvent({
+        eventType: 'config.pricingTiers.save.success',
+        actor,
+        target: { type: 'Config', id: saved._id || null },
+        outcome: 'success',
+        severity: 'info',
+        correlationId,
+        details: { tierCount: tiers.length }
+      });
+
+      return sanitize(saved);
+    } catch (err) {
+      await auditService.logEvent({
+        eventType: 'config.pricingTiers.save.failed',
+        actor,
+        target: { type: 'Config', id: null },
+        outcome: 'failure',
+        severity: 'error',
+        correlationId,
+        details: { message: err.message }
+      });
+
       throw err;
     }
   }

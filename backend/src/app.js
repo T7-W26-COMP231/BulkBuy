@@ -95,7 +95,7 @@ const createApp = async () => {
   app.use('/api/auth', authRoutes);
   app.use('/api/audts', auditRoutes);
   app.use('/api/aggrs', aggregationRoutes);
-  app.use('/api/confg', configRoutes);
+  app.use('/api/configs', configRoutes);
   app.use('/api/comms', messageRoutes);
   app.use('/api/ordrs', orderRoutes);
   app.use('/api/prdts', productRoutes);

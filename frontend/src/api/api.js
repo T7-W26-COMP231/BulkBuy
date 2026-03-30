@@ -3,7 +3,7 @@ import axios from 'axios';
 const SESSION_KEY = 'app_auth_session_v1'; // must match AuthContext.jsx storageKey
 
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL,
+   baseURL: `${import.meta.env.VITE_API_URL}/api`,
     headers: { 'Content-Type': 'application/json' },
 });
 

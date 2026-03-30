@@ -159,7 +159,38 @@ router.get(
   asyncHandler(ConfigController.listConfigs)
 );
 
+// ✅ Save admin pricing tiers
+router.post(
+  '/pricing-tiers',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const { tiers } = req.body;
+
+    if (!Array.isArray(tiers) || tiers.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Pricing tiers are required'
+      });
+    }
+
+    const config = await ConfigController.savePricingTiers(req, tiers);
+
+    return res.status(200).json({
+      success: true,
+      message: 'Pricing tiers saved successfully',
+      config
+    });
+  })
+);
+
 /* Find by filter (returns array) */
+router.get(
+  '/find',
+  requireAuth,
+  parseFilterQuery,
+  asyncHandler(ConfigController.findByFilter)
+);
+
 router.get(
   '/find',
   requireAuth,

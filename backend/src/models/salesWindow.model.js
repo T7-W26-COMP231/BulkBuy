@@ -54,8 +54,15 @@ const PricingSnapshotSchema = new Schema({
  * PricingTierSchema
  */
 const PricingTierSchema = new Schema({
+  // New admin pricing bracket fields
+  minQty: { type: Number, required: true, min: 1 },
+  unitPrice: { type: Number, required: true, min: 0 },
+
+  // Backward-compatible legacy fields
   quantity: { type: Number, default: 0 },
-  discountPercentagePerUnitBulk: { type: Number, default: 0 }
+  discountPercentagePerUnitBulk: { type: Number, default: 0 },
+
+  metadata: { type: Schema.Types.Mixed, default: {} }
 }, { _id: false });
 
 /**

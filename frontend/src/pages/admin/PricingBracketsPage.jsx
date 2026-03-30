@@ -2,7 +2,7 @@ import { useState } from "react";
 import AdminSidebar from "../../components/admin/AdminSidebar";
 import AdminTopbar from "../../components/admin/AdminTopbar";
 import AdminSummaryCard from "../../components/admin/AdminSummaryCard";
-import { updateItemPricingTiers } from "../../api/itemApi";
+import { savePricingTiers } from "../../api/adminConfigApi";
 
 const initialTiers = [
   { id: 1, minQty: "1", unitPrice: "50.00", qtyError: false, priceError: false },
@@ -28,13 +28,11 @@ export default function PricingBracketsPage() {
       const prevPrice = Number(arr[index - 1].unitPrice);
       const currPrice = Number(tier.unitPrice);
 
-      // ✅ Task #120 — qty must strictly increase
       const qtyError =
         !tier.minQty ||
         Number.isNaN(currQty) ||
         currQty <= prevQty;
 
-      // ✅ Task #121 — price must strictly decrease (higher qty = lower price)
       const priceError =
         !tier.unitPrice ||
         Number.isNaN(currPrice) ||
@@ -54,6 +52,7 @@ export default function PricingBracketsPage() {
     });
   };
 
+  // ✅ Task #119 — add tier
   const handleAddTier = () => {
     setTiers((prev) =>
       validateTiers([
@@ -69,6 +68,7 @@ export default function PricingBracketsPage() {
     );
   };
 
+  // ✅ Task #119 — remove tier
   const handleRemoveTier = (id) => {
     setTiers((prev) => {
       if (prev.length <= 1) return prev;
@@ -80,16 +80,24 @@ export default function PricingBracketsPage() {
     setTiers(initialTiers);
   };
 
+  // ✅ Task #124 — persist pricing tiers in DB
   const handleSavePricingStrategy = async () => {
     try {
-      // Temporary hardcoded item id for quick testing
-      const itemId = "69c35324dec6d4f932a8063c";
+      if (hasAnyError) {
+        alert("Please fix validation errors before saving.");
+        return;
+      }
 
-      await updateItemPricingTiers(itemId, tiers);
+      const formattedTiers = tiers.map((tier) => ({
+        minQty: Number(tier.minQty),
+        unitPrice: Number(tier.unitPrice),
+      }));
 
-      alert("Pricing brackets saved successfully.");
+      await savePricingTiers(formattedTiers);
+
+      alert("Pricing brackets saved successfully to database.");
     } catch (error) {
-      console.error("Save error:", error);
+      console.error("Save pricing tiers error:", error);
       alert(error.message || "Failed to save pricing brackets.");
     }
   };
@@ -121,7 +129,7 @@ export default function PricingBracketsPage() {
                   <h3 className="text-sm font-bold uppercase tracking-[0.18em] text-text-muted">
                     Tier Configuration
                   </h3>
-                  {/* ✅ Task #119 — Add tier button */}
+
                   <button
                     type="button"
                     onClick={handleAddTier}
@@ -144,10 +152,10 @@ export default function PricingBracketsPage() {
                   {tiers.map((tier, index) => (
                     <div
                       key={tier.id}
-                      className={`grid grid-cols-1 gap-6 px-6 py-5 md:grid-cols-[1fr_1fr_auto] md:items-start ${index === 0 ? "bg-primary/5" : "bg-white"
-                        }`}
+                      className={`grid grid-cols-1 gap-6 px-6 py-5 md:grid-cols-[1fr_1fr_auto] md:items-start ${
+                        index === 0 ? "bg-primary/5" : "bg-white"
+                      }`}
                     >
-                      {/* ✅ Task #118 — Min Quantity input */}
                       <div>
                         <label className="mb-2 block text-sm font-semibold text-text-muted">
                           {index === 0 ? "Base Tier (Min Qty)" : `Tier ${index + 1} Min Qty`}
@@ -159,12 +167,12 @@ export default function PricingBracketsPage() {
                           value={tier.minQty}
                           onChange={(e) => handleTierChange(tier.id, "minQty", e.target.value)}
                           placeholder="e.g. 100"
-                          className={`w-full rounded-xl border bg-white px-4 py-3 text-sm text-text-main outline-none transition ${tier.qtyError
-                            ? "border-red-300 focus:border-red-400"
-                            : "border-neutral-light focus:border-primary"
-                            }`}
+                          className={`w-full rounded-xl border bg-white px-4 py-3 text-sm text-text-main outline-none transition ${
+                            tier.qtyError
+                              ? "border-red-300 focus:border-red-400"
+                              : "border-neutral-light focus:border-primary"
+                          }`}
                         />
-                        {/* ✅ Task #120 — qty validation message */}
                         {tier.qtyError && (
                           <p className="mt-2 text-xs font-medium italic text-red-500">
                             Quantity must be higher than the previous tier.
@@ -172,13 +180,14 @@ export default function PricingBracketsPage() {
                         )}
                       </div>
 
-                      {/* ✅ Task #118 — Unit Price input */}
                       <div>
                         <label className="mb-2 block text-sm font-semibold text-text-muted">
                           Unit Price ($)
                         </label>
                         <div className="relative">
-                          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-bold text-text-muted">$</span>
+                          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-bold text-text-muted">
+                            $
+                          </span>
                           <input
                             type="number"
                             min="0"
@@ -186,21 +195,20 @@ export default function PricingBracketsPage() {
                             value={tier.unitPrice}
                             onChange={(e) => handleTierChange(tier.id, "unitPrice", e.target.value)}
                             placeholder="e.g. 45.00"
-                            className={`w-full rounded-xl border bg-white py-3 pl-8 pr-4 text-sm text-text-main outline-none transition ${tier.priceError
-                              ? "border-red-300 focus:border-red-400"
-                              : "border-neutral-light focus:border-primary"
-                              }`}
+                            className={`w-full rounded-xl border bg-white py-3 pl-8 pr-4 text-sm text-text-main outline-none transition ${
+                              tier.priceError
+                                ? "border-red-300 focus:border-red-400"
+                                : "border-neutral-light focus:border-primary"
+                            }`}
                           />
                         </div>
-                        {/* ✅ Task #121 — price validation message */}
                         {tier.priceError && (
                           <p className="mt-2 text-xs font-medium italic text-red-500">
-                            Price must be lower than the previous tier (higher qty = lower price).
+                            Price must be lower than the previous tier.
                           </p>
                         )}
                       </div>
 
-                      {/* ✅ Task #119 — Remove tier button */}
                       <div className="flex items-center justify-end md:pt-8">
                         <button
                           type="button"
@@ -232,10 +240,11 @@ export default function PricingBracketsPage() {
                       type="button"
                       onClick={handleSavePricingStrategy}
                       disabled={hasAnyError}
-                      className={`rounded-xl px-5 py-3 text-sm font-bold text-text-main transition ${hasAnyError
-                        ? "cursor-not-allowed bg-neutral-light text-text-muted opacity-60"
-                        : "bg-primary hover:opacity-90"
-                        }`}
+                      className={`rounded-xl px-5 py-3 text-sm font-bold text-text-main transition ${
+                        hasAnyError
+                          ? "cursor-not-allowed bg-neutral-light text-text-muted opacity-60"
+                          : "bg-primary hover:opacity-90"
+                      }`}
                     >
                       Save Pricing Strategy
                     </button>
@@ -244,19 +253,12 @@ export default function PricingBracketsPage() {
               </section>
 
               <section className="grid grid-cols-1 gap-5 md:grid-cols-3">
-                <AdminSummaryCard
-                  label="Avg. Discount"
-                  value="12.5%"
-                  extra="↑+2%"
-                />
+                <AdminSummaryCard label="Avg. Discount" value="12.5%" extra="↑+2%" />
                 <AdminSummaryCard
                   label="Total Tiers"
                   value={String(tiers.length).padStart(2, "0")}
                 />
-                <AdminSummaryCard
-                  label="Strategy Type"
-                  badge="Volume Based"
-                />
+                <AdminSummaryCard label="Strategy Type" badge="Volume Based" />
               </section>
             </div>
           </main>

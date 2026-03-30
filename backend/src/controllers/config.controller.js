@@ -265,7 +265,10 @@ async function findByFilter(req, res) {
   const actor = actorFromReq(req);
   try {
     const filter = req.query.filter ? JSON.parse(req.query.filter) : {};
-    const items = await ConfigService.findByFilter(filter, { actor, correlationId });
+    const items = await ConfigService.findByFilter(filter, {
+      actor,
+      correlationId
+    });
     return res.status(200).json({ success: true, items });
   } catch (err) {
     await auditService.logEvent({
@@ -277,7 +280,53 @@ async function findByFilter(req, res) {
       correlationId,
       details: { message: err.message }
     });
-    return res.status(500).json({ success: false, message: err.message });
+    return res.status(500).json({
+      success: false,
+      message: err.message
+    });
+  }
+}
+
+/* POST /configs/pricing-tiers */
+async function savePricingTiers(req, res) {
+  const correlationId = req.correlationId || null;
+  const actor = actorFromReq(req);
+
+  try {
+    const { tiers = [] } = req.body || {};
+
+    if (!Array.isArray(tiers) || tiers.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'tiers array is required'
+      });
+    }
+
+    const saved = await ConfigService.savePricingTiers(tiers, {
+      actor,
+      correlationId,
+      session: req.mongoSession
+    });
+
+    return res.status(200).json({
+      success: true,
+      data: saved
+    });
+  } catch (err) {
+    await auditService.logEvent({
+      eventType: 'config.pricingTiers.save.failed',
+      actor,
+      target: { type: 'Config', id: null },
+      outcome: 'failure',
+      severity: 'error',
+      correlationId,
+      details: { message: err.message }
+    });
+
+    return res.status(err.status || 500).json({
+      success: false,
+      message: err.message
+    });
   }
 }
 
@@ -292,5 +341,6 @@ module.exports = {
   softDelete: asyncHandler(softDelete),
   hardDelete: asyncHandler(hardDelete),
   listConfigs: asyncHandler(listConfigs),
-  findByFilter: asyncHandler(findByFilter)
+  findByFilter: asyncHandler(findByFilter),
+  savePricingTiers: asyncHandler(savePricingTiers)
 };

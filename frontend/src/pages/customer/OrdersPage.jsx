@@ -12,6 +12,9 @@ const tabs = [
 ];
 
 export default function OrdersPage() {
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
   const { user } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("active-intents");
@@ -27,28 +30,22 @@ export default function OrdersPage() {
         setError(null);
         const res = await api.get(`/api/ordrs/user/${user._id}`);
         const all = res.data?.items || [];
-
         const relevantOrders = all
           .filter(o => ["submitted", "confirmed", "dispatched", "fulfilled", "cancelled"].includes(o.status))
           .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
         setOrders(relevantOrders);
-
         const uniqueItemIds = [...new Set(
           relevantOrders.flatMap(o => o.items.map(i => i.itemId?._id || i.itemId)).filter(Boolean)
         )];
-
         const itemResponses = await Promise.all(
           uniqueItemIds.map(id => api.get(`/api/items/${id}`).then(r => r.data).catch(() => null))
         );
-
         const itemMap = {};
         itemResponses.forEach((res, i) => {
           if (!res) return;
           const d = res.data ?? res;
           if (d?._id) itemMap[uniqueItemIds[i]] = d;
         });
-
         setItemDataMap(itemMap);
       } catch (err) {
         setError("Could not load your orders. Please try again.");
@@ -61,6 +58,15 @@ export default function OrdersPage() {
 
   const activeIntents = orders.filter(o => o.status === "submitted");
   const pastOrders = orders.filter(o => ["confirmed", "dispatched", "fulfilled", "cancelled"].includes(o.status));
+
+  // ✅ Task #71 + #72 — date + status filter combined
+  const filteredPastOrders = pastOrders.filter(o => {
+    if (statusFilter !== "all" && o.status !== statusFilter) return false;
+    const created = new Date(o.createdAt);
+    if (dateFrom && created < new Date(dateFrom)) return false;
+    if (dateTo && created > new Date(dateTo + "T23:59:59")) return false;
+    return true;
+  });
 
   function getItemDoc(itemId) {
     const id = itemId?._id || itemId;
@@ -94,7 +100,7 @@ export default function OrdersPage() {
       const qty = item.quantity ?? 1;
       totalQty += qty;
       totalPrice += price * qty;
-      unitPrice = price; // last item price
+      unitPrice = price;
     });
     return { totalQty, totalPrice, unitPrice };
   }
@@ -102,7 +108,6 @@ export default function OrdersPage() {
   return (
     <div className="min-h-screen bg-background-light font-display text-text-main">
       <Navbar showLocation={false} />
-
       <main className="px-6 py-8 md:px-10 lg:px-16 xl:px-20">
         <div className="mx-auto flex max-w-7xl flex-col gap-8">
 
@@ -114,12 +119,10 @@ export default function OrdersPage() {
                 Manage your active bulk commitments and view past savings in Toronto.
               </p>
             </div>
-
           </div>
 
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-[260px_minmax(0,1fr)]">
             <Sidebar showSummary={true} />
-
             <div className="flex flex-col gap-8">
 
               {/* Tabs */}
@@ -153,15 +156,25 @@ export default function OrdersPage() {
                         </button>
                       </div>
 
+                      {/* ✅ Task #74 — Empty state active intents */}
                       {activeIntents.length === 0 ? (
-                        <div className="rounded-2xl border border-neutral-light bg-white p-10 text-center text-text-muted">
-                          No active intents.{" "}
-                          <button onClick={() => navigate("/")} className="text-primary underline">Browse items</button>
+                        <div className="flex flex-col items-center gap-4 rounded-2xl border border-neutral-light bg-white p-12 text-center">
+                          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+                            <span className="material-symbols-outlined text-3xl text-primary">shopping_bag</span>
+                          </div>
+                          <div>
+                            <h3 className="text-lg font-bold">No active intents yet</h3>
+                            <p className="mt-1 text-sm text-text-muted">Browse the marketplace and join a group buy to get started.</p>
+                          </div>
+                          <button onClick={() => navigate("/")}
+                            className="rounded-xl bg-primary px-6 py-2.5 font-bold text-text-main transition hover:opacity-90">
+                            Browse Items
+                          </button>
                         </div>
                       ) : (
                         activeIntents.map(order => {
                           const { label, color } = getStatusBadge(order.status);
-                          const { totalQty, totalPrice, unitPrice } = getOrderTotals(order);
+                          const { totalQty, unitPrice } = getOrderTotals(order);
                           const firstItem = order.items?.[0];
                           const itemDoc = getItemDoc(firstItem?.itemId);
                           const image = itemDoc.images?.[0] || itemDoc.metadata?.imageUrl || null;
@@ -173,50 +186,30 @@ export default function OrdersPage() {
                             ? Math.min((aggregatedDemand / nextThresholdQty) * 100, 100)
                             : 100;
                           const nextTierPrice = firstItem?.nextTierPrice ?? itemDoc.nextTier?.price ?? null;
-                          const tierLabel = activeTier
-                            ? `Tier ${activeTier.minQty >= 50 ? 2 : 1}`
-                            : "Tier 1";
+                          const tierLabel = activeTier ? `Tier ${activeTier.minQty >= 50 ? 2 : 1}` : "Tier 1";
 
                           return (
                             <div key={order._id} className="overflow-hidden rounded-2xl border border-neutral-light bg-white shadow-sm">
-                              {/* Status badge top right */}
                               <div className="flex items-center justify-between border-b border-neutral-light px-6 py-3">
                                 <span className="text-sm font-semibold text-text-muted">Order #{order._id?.slice(-8).toUpperCase()}</span>
-                                <span className={`rounded-lg px-3 py-1 text-xs font-bold uppercase tracking-wide ${color}`}>
-                                  {label}
-                                </span>
+                                <span className={`rounded-lg px-3 py-1 text-xs font-bold uppercase tracking-wide ${color}`}>{label}</span>
                               </div>
-
                               <div className="grid grid-cols-1 lg:grid-cols-[320px_minmax(0,1fr)]">
-                                {/* Image */}
                                 <div className="relative h-64 lg:h-full">
                                   {image ? (
                                     <img src={image} alt={name} className="h-full w-full object-cover" />
                                   ) : (
                                     <div className="flex h-full min-h-[200px] items-center justify-center bg-neutral-light text-6xl">🛒</div>
                                   )}
-                                  {itemDoc.badge && (
-                                    <div className="absolute bottom-4 left-4">
-                                      <span className="rounded-lg bg-primary px-3 py-1 text-xs font-bold text-text-main shadow">
-                                        {itemDoc.badge}
-                                      </span>
-                                    </div>
-                                  )}
                                 </div>
-
-                                {/* Content */}
                                 <div className="flex flex-col gap-5 p-6">
                                   <div className="flex items-start justify-between gap-4">
                                     <h3 className="text-2xl font-bold leading-tight">{name}</h3>
-                                    <div className="text-right">
-                                      <p className="text-3xl font-bold text-primary">
-                                        ${unitPrice.toFixed(2)}
-                                        <span className="ml-1 text-sm font-medium text-text-muted">/unit</span>
-                                      </p>
-                                    </div>
+                                    <p className="text-3xl font-bold text-primary">
+                                      ${unitPrice.toFixed(2)}
+                                      <span className="ml-1 text-sm font-medium text-text-muted">/unit</span>
+                                    </p>
                                   </div>
-
-                                  {/* Stats row */}
                                   <div className="flex flex-wrap gap-4 text-sm text-text-muted">
                                     <div className="flex items-center gap-2">
                                       <span className="material-symbols-outlined text-base">inventory_2</span>
@@ -233,35 +226,25 @@ export default function OrdersPage() {
                                       </div>
                                     )}
                                   </div>
-
-                                  {/* Progress bar */}
                                   {nextThresholdQty > 0 && (
                                     <div>
                                       <div className="mb-2 flex items-center justify-between text-sm">
                                         <span className="font-semibold text-text-muted">
-                                          Progress to next tier
-                                          {nextTierPrice ? ` ($${nextTierPrice.toFixed(2)}/unit)` : ""}
+                                          Progress to next tier{nextTierPrice ? ` ($${nextTierPrice.toFixed(2)}/unit)` : ""}
                                         </span>
                                         <span className="font-bold text-primary">{Math.round(progress)}%</span>
                                       </div>
                                       <div className="h-3 w-full rounded-full bg-neutral-light">
-                                        <div
-                                          className="h-3 rounded-full bg-primary transition-all duration-500"
-                                          style={{ width: `${progress}%` }}
-                                        />
+                                        <div className="h-3 rounded-full bg-primary transition-all duration-500" style={{ width: `${progress}%` }} />
                                       </div>
                                     </div>
                                   )}
-
-                                  {/* Action buttons */}
                                   <div className="flex flex-col gap-3 border-t border-neutral-light pt-4 sm:flex-row">
-                                    <button
-                                      onClick={() => navigate("/review-modify-intent")}
+                                    <button onClick={() => navigate("/review-modify-intent")}
                                       className="flex-1 rounded-xl bg-primary px-5 py-3 font-bold text-text-main transition hover:opacity-90">
                                       View Batch Progress
                                     </button>
-                                    <button
-                                      onClick={() => navigate("/review-modify-intent")}
+                                    <button onClick={() => navigate("/review-modify-intent")}
                                       className="rounded-xl border border-neutral-light bg-white px-5 py-3 font-bold text-text-main transition hover:bg-neutral-light">
                                       Edit Intent
                                     </button>
@@ -272,28 +255,81 @@ export default function OrdersPage() {
                           );
                         })
                       )}
-
                     </section>
                   )}
 
                   {/* ── Order History ── */}
                   {activeTab === "order-history" && (
                     <section className="flex flex-col gap-6">
-                      <div className="flex items-center justify-between">
-                        <h2 className="text-2xl font-bold">Past Orders</h2>
-                        <span className="text-sm text-text-muted">{pastOrders.length} orders</span>
+                      <div className="flex flex-col gap-4">
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                          <div className="flex items-center gap-3">
+                            <h2 className="text-2xl font-bold">Past Orders</h2>
+                            <span className="text-sm text-text-muted">{filteredPastOrders.length} orders</span>
+                          </div>
+                          {/* ✅ Task #71 — Date range filter */}
+                          <div className="flex flex-wrap items-center gap-2">
+                            <div className="flex items-center gap-2 rounded-xl border border-neutral-light bg-white px-3 py-2">
+                              <span className="material-symbols-outlined text-base text-text-muted">calendar_today</span>
+                              <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)}
+                                className="bg-transparent text-sm text-text-main outline-none" />
+                            </div>
+                            <span className="text-sm text-text-muted">to</span>
+                            <div className="flex items-center gap-2 rounded-xl border border-neutral-light bg-white px-3 py-2">
+                              <span className="material-symbols-outlined text-base text-text-muted">calendar_today</span>
+                              <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)}
+                                className="bg-transparent text-sm text-text-main outline-none" />
+                            </div>
+                            {(dateFrom || dateTo) && (
+                              <button onClick={() => { setDateFrom(""); setDateTo(""); }}
+                                className="rounded-xl bg-neutral-light px-3 py-2 text-xs font-semibold text-text-muted hover:bg-primary/10 hover:text-primary transition">
+                                Clear
+                              </button>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* ✅ Task #72 — Status filter pills */}
+                        <div className="flex flex-wrap gap-2">
+                          {["all", "confirmed", "dispatched", "fulfilled", "cancelled"].map(s => (
+                            <button key={s} type="button" onClick={() => setStatusFilter(s)}
+                              className={`rounded-full px-4 py-1.5 text-xs font-bold transition ${statusFilter === s
+                                ? "bg-primary text-text-main"
+                                : "bg-neutral-light text-text-muted hover:bg-primary/15"
+                                }`}>
+                              {s === "all" ? "All" : s === "fulfilled" ? "Delivered" : s.charAt(0).toUpperCase() + s.slice(1)}
+                            </button>
+                          ))}
+                        </div>
                       </div>
 
+                      {/* ✅ Task #74 — Empty states */}
                       {pastOrders.length === 0 ? (
-                        <div className="rounded-2xl border border-neutral-light bg-white p-10 text-center text-text-muted">
-                          No past orders yet.
+                        <div className="flex flex-col items-center gap-4 rounded-2xl border border-neutral-light bg-white p-12 text-center">
+                          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+                            <span className="material-symbols-outlined text-3xl text-primary">receipt_long</span>
+                          </div>
+                          <div>
+                            <h3 className="text-lg font-bold">No past orders yet</h3>
+                            <p className="mt-1 text-sm text-text-muted">Your completed orders will appear here once fulfilled.</p>
+                          </div>
+                          <button onClick={() => navigate("/")}
+                            className="rounded-xl bg-primary px-6 py-2.5 font-bold text-text-main transition hover:opacity-90">
+                            Browse Items
+                          </button>
+                        </div>
+                      ) : filteredPastOrders.length === 0 ? (
+                        <div className="rounded-2xl border border-neutral-light bg-white p-8 text-center text-text-muted">
+                          No orders match your current filters.{" "}
+                          <button onClick={() => { setStatusFilter("all"); setDateFrom(""); setDateTo(""); }}
+                            className="font-semibold text-primary hover:underline">
+                            Clear filters
+                          </button>
                         </div>
                       ) : (
                         <div className="flex flex-col gap-4">
-                          {pastOrders.map(order => {
+                          {filteredPastOrders.map(order => {
                             const { label, color } = getStatusBadge(order.status);
-                            const { totalPrice } = getOrderTotals(order);
-
                             return (
                               <div key={order._id} className="overflow-hidden rounded-2xl border border-neutral-light bg-white shadow-sm">
                                 {order.items?.map((item, i) => {
@@ -302,25 +338,19 @@ export default function OrdersPage() {
                                   const price = snap?.atInstantPrice ?? 0;
                                   const image = itemDoc.images?.[0] || itemDoc.metadata?.imageUrl || null;
                                   const name = itemDoc.title || itemDoc.name || "Item";
-
                                   return (
                                     <div key={i} className="flex flex-col gap-5 border-b border-neutral-light p-6 last:border-0 md:flex-row md:items-center md:justify-between">
                                       <div className="flex min-w-0 items-center gap-4">
-                                        {/* Image */}
                                         <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-xl bg-neutral-light">
                                           {image
                                             ? <img src={image} alt={name} className="h-full w-full object-cover" />
                                             : <div className="flex h-full items-center justify-center text-3xl">🛒</div>
                                           }
                                         </div>
-
-                                        {/* Info */}
                                         <div className="min-w-0">
                                           <h3 className="truncate text-xl font-bold">{name}</h3>
                                           <div className="mt-2 flex flex-wrap items-center gap-2">
-                                            <span className={`rounded-md px-2 py-1 text-xs font-bold uppercase ${color}`}>
-                                              {label}
-                                            </span>
+                                            <span className={`rounded-md px-2 py-1 text-xs font-bold uppercase ${color}`}>{label}</span>
                                             <span className="text-sm text-text-muted">
                                               {new Date(order.createdAt).toLocaleDateString()} · {order.ops_region || ""}
                                             </span>
@@ -337,8 +367,6 @@ export default function OrdersPage() {
                                           </div>
                                         </div>
                                       </div>
-
-                                      {/* Total + Invoice */}
                                       <div className="flex flex-col items-end gap-2">
                                         <div className="text-right">
                                           <p className="text-xs font-semibold uppercase tracking-wide text-text-muted">Total Paid</p>
@@ -356,14 +384,21 @@ export default function OrdersPage() {
                                   );
                                 })}
 
-                                {/* Footer */}
+                                {/* ✅ Task #73 — Navigate to order details */}
                                 <div className="flex flex-col gap-3 border-t border-neutral-light bg-neutral-light/40 px-6 py-4 text-sm md:flex-row md:items-center md:justify-between">
                                   <p className="text-text-muted">Order Ref: <span className="font-mono font-semibold">#{order._id?.slice(-8).toUpperCase()}</span></p>
-                                  <button onClick={() => navigate("/")}
-                                    className="inline-flex items-center gap-2 font-semibold text-primary hover:underline">
-                                    <span className="material-symbols-outlined text-base">refresh</span>
-                                    Buy Again at Best Price
-                                  </button>
+                                  <div className="flex items-center gap-4">
+                                    <button onClick={() => navigate("/order-details")}
+                                      className="inline-flex items-center gap-1 font-semibold text-text-main hover:text-primary">
+                                      <span className="material-symbols-outlined text-base">open_in_new</span>
+                                      View Details
+                                    </button>
+                                    <button onClick={() => navigate("/")}
+                                      className="inline-flex items-center gap-2 font-semibold text-primary hover:underline">
+                                      <span className="material-symbols-outlined text-base">refresh</span>
+                                      Buy Again
+                                    </button>
+                                  </div>
                                 </div>
                               </div>
                             );
@@ -378,7 +413,6 @@ export default function OrdersPage() {
           </div>
         </div>
       </main>
-
       <Footer />
     </div>
   );

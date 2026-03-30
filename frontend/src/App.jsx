@@ -2,7 +2,6 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { useEffect } from "react";
 import { io } from "socket.io-client";
 import HomePage from "./pages/customer/HomePage";
-import OrdersPage from "./pages/customer/OrdersPage";
 import SupplierDashboard from "./pages/supplier/SupplierDashboard";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import ProductDetailsPage from "./pages/customer/ProductDetailsPage";
@@ -10,7 +9,15 @@ import ProductListPage from "./pages/customer/ProductListPage";
 import CartPage from "./pages/customer/CartPage";
 import Shop from "./pages/customer/Marketplace";
 import Item from "./pages/customer/Itemsdetails";
-import ReviewModifyIntentPage from './pages/customer/ReviewModifyIntentPage'
+import ReviewModifyIntentPage from "./pages/customer/ReviewModifyIntentPage";
+import PricingBracketsPage from "./pages/admin/PricingBracketsPage"
+import AdminInventoryPage from "./pages/admin/AdminInventoryPage";
+import AdminBulkOrdersPage from "./pages/admin/AdminBulkOrdersPage";
+import AdminSettingsPage from "./pages/admin/AdminSettingsPage";
+import OrdersPage from "./pages/customer/OrdersPage";
+import OrderDetailsPage from "./pages/customer/OrderDetails";
+//import { useAuthBootstrap } from "./hooks/useAuthBootstrap"; // ← added
+
 
 
 function PlaceholderPage({ title }) {
@@ -49,16 +56,27 @@ export default function App() {
 
   return (
     <Routes>
+      {/* Customer routes */}
       <Route path="/" element={<HomePage />} />
       <Route path="/marketplace" element={<Shop />} />
       <Route path="/orders" element={<OrdersPage />} />
-      <Route path="/supplier" element={<SupplierDashboard />} />
-      <Route path="/admin" element={<AdminDashboard />} />
       <Route path="/cart" element={<CartPage />} />
       <Route path="/items/:id" element={<Item />} />
-
       <Route path="/product/:id" element={<ProductDetailsPage />} />
       <Route path="/products" element={<ProductListPage />} />
+      <Route path="/review-modify-intent" element={<ReviewModifyIntentPage />} />
+
+      {/* Supplier routes */}
+      <Route path="/supplier" element={<SupplierDashboard />} />
+
+      {/* Admin routes */}
+      <Route path="/admin" element={<AdminDashboard />} />
+      <Route path="/admin/inventory" element={<AdminInventoryPage />} />
+      <Route path="/admin/bulk-orders" element={<AdminBulkOrdersPage />} />
+      <Route path="/admin/pricing-brackets" element={<PricingBracketsPage />} />
+      <Route path="/admin/settings" element={<AdminSettingsPage />} />
+
+      {/* General placeholder routes */}
       <Route path="/about" element={<PlaceholderPage title="About Us" />} />
       <Route path="/careers" element={<PlaceholderPage title="Careers" />} />
       <Route path="/partner-login" element={<PlaceholderPage title="Partner Login" />} />
@@ -73,7 +91,8 @@ export default function App() {
       <Route path="/community" element={<PlaceholderPage title="Community" />} />
       <Route path="/settings" element={<PlaceholderPage title="Settings" />} />
       <Route path="/savings" element={<PlaceholderPage title="Savings Vault" />} />
-      <Route path="/review-modify-intent" element={<ReviewModifyIntentPage />} />
+      <Route path="/orders" element={<OrdersPage />} />
+      <Route path="/order-details" element={<OrderDetailsPage />} />
     </Routes>
   );
 }

@@ -1,8 +1,8 @@
 // src/utils/jwt.helper.js
 const jwt = require('jsonwebtoken');
 
-const ACCESS_EXPIRES = process.env.ACCESS_EXPIRES || '15m';
-const REFRESH_EXPIRES = process.env.REFRESH_EXPIRES || '7d';
+const ACCESS_EXPIRES = '15m' || process.env.ACCESS_EXPIRES;
+const REFRESH_EXPIRES = '7d' || process.env.REFRESH_EXPIRES;
 const ACCESS_SECRET = process.env.ACCESS_SECRET || 'change_this_access_secret';
 const REFRESH_SECRET = process.env.REFRESH_SECRET || 'change_this_refresh_secret';
 

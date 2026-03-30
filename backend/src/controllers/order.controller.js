@@ -1,7 +1,6 @@
 // src/controllers/order.controller.js
 const createError = require('http-errors');
 const OrderService = require('../services/order.service');
-const { getSocketIO } = require('../socket');
 
 /**
  * Standard response wrapper
@@ -40,15 +39,6 @@ const OrderController = {
     const payload = req.body || {};
     const opts = buildOpts(req);
     const created = await OrderService.createOrder(payload, opts);
-
-    // Emit real-time event (order created) - best-effort
-    try {
-      const io = getSocketIO();
-      io.emit('order_created', created);
-    } catch (err) {
-      console.warn('Socket.IO not ready:', err && err.message);
-    }
-
     return send(res, 201, { success: true, data: created });
   }),
 
@@ -153,15 +143,6 @@ const OrderController = {
     });
 
     const updated = await OrderService.updateById(id, update, opts);
-
-    // Emit real-time event (order updated)
-    try {
-      const io = getSocketIO();
-      io.emit('order_updated', updated);
-    } catch (err) {
-      console.warn('Socket.IO not ready:', err && err.message);
-    }
-
     return send(res, 200, { success: true, data: updated });
   }),
 
@@ -178,13 +159,7 @@ const OrderController = {
       correlationId: req.headers['x-correlation-id'] || null
     });
     const updated = await OrderService.updateOne(filter, update, opts);
-    // Emit real-time event (order updated)
-    try {
-      const io = getSocketIO();
-      io.emit('order_updated', updated);
-    } catch (err) {
-      console.warn('Socket.IO not ready:', err && err.message);
-    }
+   
     return send(res, 200, { success: true, data: updated });
   }),
 
@@ -213,15 +188,6 @@ const OrderController = {
 
     const opts = buildOpts(req);
     const updated = await OrderService.updateStatus(id, status, opts);
-
-    // Emit status update
-    try {
-      const io = getSocketIO();
-      io.emit('order_status_updated', updated);
-    } catch (err) {
-      console.warn('Socket.IO not ready:', err && err.message);
-    }
-
     return send(res, 200, { success: true, data: updated });
   }),
 
@@ -234,15 +200,6 @@ const OrderController = {
     if (!id) throw createError(400, 'order id is required');
     const opts = buildOpts(req);
     const updated = await OrderService.submitOrder(id, opts);
-
-    // Emit submission event
-    try {
-      const io = getSocketIO();
-      io.emit('order_submitted', updated);
-    } catch (err) {
-      console.warn('Socket.IO not ready:', err && err.message);
-    }
-
     return send(res, 200, { success: true, data: updated });
   }),
 
@@ -255,15 +212,6 @@ const OrderController = {
     if (!id) throw createError(400, 'order id is required');
     const opts = buildOpts(req);
     const updated = await OrderService.cancelOrder(id, opts);
-
-    // Emit cancellation event
-    try {
-      const io = getSocketIO();
-      io.emit('order_cancelled', updated);
-    } catch (err) {
-      console.warn('Socket.IO not ready:', err && err.message);
-    }
-
     return send(res, 200, { success: true, data: updated });
   }),
 

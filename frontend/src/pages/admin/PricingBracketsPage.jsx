@@ -6,30 +6,53 @@ import AdminSummaryCard from "../../components/admin/AdminSummaryCard";
 const initialTiers = [
   { id: 1, minQty: "1", unitPrice: "50.00", hasError: false },
   { id: 2, minQty: "100", unitPrice: "45.00", hasError: false },
-  { id: 3, minQty: "500", unitPrice: "40.00", hasError: true },
+  { id: 3, minQty: "500", unitPrice: "40.00", hasError: false },
 ];
 
 export default function PricingBracketsPage() {
   const [tiers, setTiers] = useState(initialTiers);
+  const hasAnyThresholdError = tiers.some((tier) => tier.hasError);
+
+  const validateThresholds = (tiersToValidate) => {
+    return tiersToValidate.map((tier, index, arr) => {
+      if (index === 0) {
+        return { ...tier, hasError: false };
+      }
+
+      const prevQty = Number(arr[index - 1].minQty);
+      const currQty = Number(tier.minQty);
+
+      const hasError =
+        !tier.minQty ||
+        Number.isNaN(currQty) ||
+        currQty <= prevQty;
+
+      return { ...tier, hasError };
+    });
+  };
 
   const handleTierChange = (id, field, value) => {
-    setTiers((prev) =>
-      prev.map((tier) =>
+    setTiers((prev) => {
+      const updated = prev.map((tier) =>
         tier.id === id ? { ...tier, [field]: value } : tier
-      )
-    );
+      );
+
+      return field === "minQty" ? validateThresholds(updated) : updated;
+    });
   };
 
   const handleAddTier = () => {
-    setTiers((prev) => [
-      ...prev,
-      {
-        id: Date.now(),
-        minQty: "",
-        unitPrice: "",
-        hasError: false,
-      },
-    ]);
+    setTiers((prev) =>
+      validateThresholds([
+        ...prev,
+        {
+          id: Date.now(),
+          minQty: "",
+          unitPrice: "",
+          hasError: false,
+        },
+      ])
+    );
   };
 
   const handleRemoveTier = (id) => {
@@ -160,7 +183,12 @@ export default function PricingBracketsPage() {
 
                     <button
                       type="button"
-                      className="rounded-xl bg-primary px-5 py-3 text-sm font-bold text-text-main transition hover:opacity-90"
+                      disabled={hasAnyThresholdError}
+                      className={`rounded-xl px-5 py-3 text-sm font-bold text-text-main transition ${
+                        hasAnyThresholdError
+                          ? "cursor-not-allowed bg-neutral-light text-text-muted opacity-60"
+                          : "bg-primary hover:opacity-90"
+                      }`}
                     >
                       Save Pricing Strategy
                     </button>

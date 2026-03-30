@@ -33,3 +33,32 @@ export const fetchItemCatalog = async (params = {}) => {
     return { success: false, items: [], total: 0, page: 1, limit: 24, pages: 1 };
   }
 };
+
+export const updateItemPricingTiers = async (itemId, tiers) => {
+  const token = localStorage.getItem("token");
+
+  const payload = {
+    pricingTiers: tiers.map((tier) => ({
+      minQty: Number(tier.minQty),
+      price: Number(tier.unitPrice),
+      currency: "USD",
+    })),
+  };
+
+  const res = await fetch(`${import.meta.env.VITE_API_URL}/api/items/${itemId}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(data.message || "Failed to save pricing tiers");
+  }
+
+  return data;
+};

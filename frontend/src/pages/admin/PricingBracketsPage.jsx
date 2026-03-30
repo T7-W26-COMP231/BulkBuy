@@ -2,6 +2,7 @@ import { useState } from "react";
 import AdminSidebar from "../../components/admin/AdminSidebar";
 import AdminTopbar from "../../components/admin/AdminTopbar";
 import AdminSummaryCard from "../../components/admin/AdminSummaryCard";
+import { updateItemPricingTiers } from "../../api/itemApi";
 
 const initialTiers = [
   { id: 1, minQty: "1", unitPrice: "50.00", qtyError: false, priceError: false },
@@ -79,10 +80,18 @@ export default function PricingBracketsPage() {
     setTiers(initialTiers);
   };
 
-  const handleSave = () => {
-    if (hasAnyError) return;
-    // TODO: Task #123 — call API to save pricing brackets
-    alert("Pricing brackets saved successfully!");
+  const handleSavePricingStrategy = async () => {
+    try {
+      // Temporary hardcoded item id for quick testing
+      const itemId = "69c35324dec6d4f932a8063c";
+
+      await updateItemPricingTiers(itemId, tiers);
+
+      alert("Pricing brackets saved successfully.");
+    } catch (error) {
+      console.error("Save error:", error);
+      alert(error.message || "Failed to save pricing brackets.");
+    }
   };
 
   return (
@@ -221,7 +230,7 @@ export default function PricingBracketsPage() {
                     </button>
                     <button
                       type="button"
-                      onClick={handleSave}
+                      onClick={handleSavePricingStrategy}
                       disabled={hasAnyError}
                       className={`rounded-xl px-5 py-3 text-sm font-bold text-text-main transition ${hasAnyError
                         ? "cursor-not-allowed bg-neutral-light text-text-muted opacity-60"

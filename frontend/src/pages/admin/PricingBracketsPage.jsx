@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AdminSidebar from "../../components/admin/AdminSidebar";
 import AdminTopbar from "../../components/admin/AdminTopbar";
 import AdminSummaryCard from "../../components/admin/AdminSummaryCard";
@@ -10,8 +10,13 @@ const initialTiers = [
   { id: 3, minQty: "500", unitPrice: "40.00", qtyError: false, priceError: false },
 ];
 
+// Temporary hardcoded item id for quick testing
+const testItemId = "69c35324dec6d4f932a8063c";
+
 export default function PricingBracketsPage() {
   const [tiers, setTiers] = useState(initialTiers);
+  const [activeTierLabel, setActiveTierLabel] = useState("Loading...");
+  const [aggregatedDemand, setAggregatedDemand] = useState(0);
 
   const hasAnyError = tiers.some((tier) => tier.qtyError || tier.priceError);
 
@@ -101,6 +106,29 @@ export default function PricingBracketsPage() {
       alert(error.message || "Failed to save pricing brackets.");
     }
   };
+
+  useEffect(() => {
+    const loadPricingState = async () => {
+      try {
+        const item = await fetchItemById(testItemId);
+
+        setAggregatedDemand(item.aggregatedDemand ?? 0);
+
+        if (item.activeTier) {
+          setActiveTierLabel(
+            `Min ${item.activeTier.minQty}+ • $${Number(item.activeTier.price).toFixed(2)}`
+          );
+        } else {
+          setActiveTierLabel("No active tier");
+        }
+      } catch (error) {
+        console.error("Failed to load active tier:", error);
+        setActiveTierLabel("Unavailable");
+      }
+    };
+
+    loadPricingState();
+  }, []);
 
   return (
     <div className="min-h-screen bg-background-light text-text-main">

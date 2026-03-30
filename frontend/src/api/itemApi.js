@@ -62,3 +62,14 @@ export const updateItemPricingTiers = async (itemId, tiers) => {
 
   return data;
 };
+
+export const fetchItemById = async (itemId) => {
+  const res = await fetch(`${import.meta.env.VITE_API_URL}/api/items/${itemId}`);
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(data.message || "Failed to fetch item");
+  }
+
+  return data.data;
+};

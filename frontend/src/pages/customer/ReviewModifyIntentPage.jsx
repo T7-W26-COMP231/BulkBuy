@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { getMyIntents, updateIntentItem, removeIntentItem } from "../../api/intentApi";
 import { useAuth } from "../../contexts/AuthContext";
-import api from "../../api/api";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import Sidebar from "../../components/Sidebar";
@@ -43,26 +42,7 @@ export default function ReviewModifyIntentPage() {
           .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
         setIntents(latest);
-
-        // ✅ Task #61 — Check window status from order's salesWindow field (no admin API needed)
-        const salesWindow = latest[0]?.salesWindow;
-        console.log(salesWindow);
-        const now = Date.now();
-
-        if (!salesWindow) {
-          setWindowLocked(false);
-          setWindowLockedReason(null);
-        } else {
-          const isOpen = now >= salesWindow.fromEpoch && now <= salesWindow.toEpoch;
-          setWindowLocked(!isOpen);
-          setWindowLockedReason(
-            isOpen
-              ? null
-              : `This aggregation window closed on ${new Date(salesWindow.toEpoch).toLocaleDateString()}.`
-          );
-        }
-
-        // ✅ Fetch full item data for each unique itemId
+        // ✅ After fetching intents, fetch full item data for each unique itemId
         const uniqueItemIds = [...new Set(
           latest.flatMap(intent =>
             intent.items.map(i => i.itemId?._id || i.itemId)
@@ -71,10 +51,18 @@ export default function ReviewModifyIntentPage() {
 
         const itemResponses = await Promise.all(
           uniqueItemIds.map(itemId =>
-            api.get(`/api/items/${itemId}`).then(r => r.data)
+            fetch(`${import.meta.env.VITE_API_URL}/api/items/${itemId}`, {
+              headers: {
+                "Content-Type": "application/json",
+                ...(localStorage.getItem("token") && {
+                  Authorization: `Bearer ${localStorage.getItem("token")}`
+                }),
+              }
+            }).then(r => r.json())
           )
         );
 
+        // Build a lookup map: itemId → full item data
         const itemMap = {};
         itemResponses.forEach((res, i) => {
           const itemData = res.data ?? res;
@@ -197,7 +185,12 @@ export default function ReviewModifyIntentPage() {
   );
 
   function getDisplayData(item) {
+    const product = item.productId && typeof item.productId === "object"
+      ? item.productId : {};
+
+    // ✅ Full item from API fetch — most reliable source
     const itemDoc = itemDataMap[item.itemId] ?? {};
+
     const cartMatch = cartItems.find(
       (c) => c.itemId === item.itemId || c.id === item.itemId
     );
@@ -206,9 +199,17 @@ export default function ReviewModifyIntentPage() {
       ? item.pricingSnapshot[0]
       : item.pricingSnapshot || {};
 
-    const unitPrice = snapshot?.atInstantPrice || cartMatch?.unitPrice || 0;
+    const unitPrice =
+      snapshot?.atInstantPrice ||
+      cartMatch?.unitPrice ||
+      0;
 
-    const rawTiers = itemDoc.pricingTiers || cartMatch?.pricingTiers || [];
+    // ✅ Tiers from fetched item data
+    const rawTiers =
+      itemDoc.pricingTiers ||
+      cartMatch?.pricingTiers ||
+      [];
+
     const pricingTiers = rawTiers.map((t) => ({
       minQty: t.minQty,
       price: t.price ?? +(unitPrice * (1 - (t.discountPct || 0) / 100)).toFixed(2),
@@ -312,7 +313,7 @@ export default function ReviewModifyIntentPage() {
   const firstItem = allItems[0];
 
   const formatWindowDate = (epoch) =>
-    Number.isFinite(epoch) ? new Date(epoch).toLocaleString() : "N/A";
+              Number.isFinite(epoch) ? new Date(epoch).toLocaleString() : "N/A";
 
   return (
     <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-background-light font-display text-text-main">
@@ -323,25 +324,9 @@ export default function ReviewModifyIntentPage() {
 
         <section className="flex flex-1 flex-col gap-6">
 
-          {/* ✅ Task #62 + #63 — Locked banner with reason */}
           {windowLocked && (
-            <div className="rounded-2xl border border-red-300 bg-red-50 px-5 py-5 shadow-sm">
-              <div className="flex items-start gap-4">
-                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-red-100 text-xl">
-                  🔒
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold text-red-800">
-                    Aggregation Window Closed
-                  </h3>
-                  <p className="mt-1 text-sm font-medium text-red-700">
-                    {windowLockedReason || "This aggregation window is closed. No further changes can be made."}
-                  </p>
-                  <p className="mt-2 text-xs text-red-500">
-                    Your intent has been recorded. Final pricing will be confirmed once the group order is processed.
-                  </p>
-                </div>
-              </div>
+            <div className="rounded-2xl border border-red-300 bg-red-50 px-5 py-4 font-medium text-red-800">
+              🔒 This aggregation window is locked. No further changes can be made.
             </div>
           )}
 
@@ -367,6 +352,8 @@ export default function ReviewModifyIntentPage() {
             const key = `${item.intentId}::${item.itemId}`;
             const itemWindowStatus = windowStatusMap[key] || "unknown";
             const windowInfo = windowInfoMap[key] || {};
+            const isWindowOpen = itemWindowStatus === "open";
+            const isWindowClosed = itemWindowStatus === "closed";
             const qty = editedQtys[key] ?? item.quantity;
             const isSaving = saving[key];
             const display = getDisplayData(item);
@@ -398,6 +385,7 @@ export default function ReviewModifyIntentPage() {
                   {/* ── CONTENT ── */}
                   <div className="flex flex-1 flex-col gap-4">
 
+                    {/* Name + price */}
                     <div className="flex items-start justify-between gap-4">
                       <h1 className="text-2xl md:text-3xl font-black leading-tight text-text-main">
                         {display.name}
@@ -415,7 +403,7 @@ export default function ReviewModifyIntentPage() {
                       </p>
                     )}
 
-                    {/* Pricing Tiers */}
+                    {/* ✅ Pricing Tiers — inside the card */}
                     {itemTiers.length > 0 && (
                       <div className="rounded-xl border border-neutral-light bg-background-light p-4">
                         <p className="mb-3 text-xs font-bold uppercase tracking-widest text-text-muted">
@@ -449,7 +437,7 @@ export default function ReviewModifyIntentPage() {
                       </div>
                     )}
 
-                    {/* Community Progress */}
+                    {/* ✅ Community Progress — inside the card */}
                     <div className="rounded-xl border border-neutral-light bg-background-light p-4">
                       <div className="mb-2 flex items-center justify-between">
                         <p className="text-xs font-bold uppercase tracking-widest text-text-muted">
@@ -480,18 +468,18 @@ export default function ReviewModifyIntentPage() {
                       <div className="flex items-center gap-3">
                         <button
                           onClick={() => handleQtyChange(item.intentId, item.itemId, qty - 1)}
-                          disabled={windowLocked || isSaving || qty <= 1}
+                          disabled={!isWindowOpen || isSaving || qty <= 1}
                           className="flex h-9 w-9 items-center justify-center rounded-lg border border-neutral-light bg-white text-xl font-bold text-text-muted transition hover:bg-neutral-light disabled:opacity-40"
                         >−</button>
                         <input
                           type="number" min="1" step="1" value={qty}
-                          disabled={windowLocked || isSaving}
+                          disabled={!isWindowOpen || isSaving}
                           onChange={(e) => handleQtyChange(item.intentId, item.itemId, e.target.value)}
                           className="w-16 rounded-lg border border-neutral-light bg-white px-2 py-1.5 text-center text-lg font-bold outline-none transition focus:border-primary disabled:cursor-not-allowed disabled:bg-neutral-light"
                         />
                         <button
                           onClick={() => handleQtyChange(item.intentId, item.itemId, qty + 1)}
-                          disabled={windowLocked || isSaving}
+                          disabled={!isWindowOpen || isSaving}
                           className="flex h-9 w-9 items-center justify-center rounded-lg border border-neutral-light bg-white text-xl font-bold text-text-muted transition hover:bg-neutral-light disabled:opacity-40"
                         >+</button>
                       </div>
@@ -501,35 +489,42 @@ export default function ReviewModifyIntentPage() {
                     <div className="flex gap-3">
                       <button
                         onClick={() => handleSaveChanges(item.intentId, item.itemId)}
-                        disabled={windowLocked || isSaving}
+                        disabled={!isWindowOpen || isSaving}
                         className="rounded-xl bg-primary px-5 py-2.5 font-bold text-text-main disabled:opacity-50"
                       >
                         {isSaving ? "Saving…" : "Save Changes"}
                       </button>
                       <button
                         onClick={() => handleCancelIntent(item.intentId, item.itemId)}
-                        disabled={windowLocked}
+                        disabled={!isWindowOpen}
                         className="rounded-xl border border-neutral-light bg-white px-5 py-2.5 font-semibold text-text-main disabled:opacity-50"
                       >
                         Cancel
                       </button>
                     </div>
 
-                    <div className={`inline-flex w-fit rounded-full px-3 py-1 text-xs font-bold ${itemWindowStatus === "open"
+                    <div className={`inline-flex w-fit rounded-full px-3 py-1 text-xs font-bold ${
+                      itemWindowStatus === "open"
                         ? "bg-primary/10 text-text-main"
                         : "bg-red-100 text-red-800"
-                      }`}>
+                    }`}>
                       {itemWindowStatus === "open"
                         ? "Aggregation window open"
                         : itemWindowStatus === "upcoming"
-                          ? "Aggregation window upcoming"
-                          : "🔒 Window closed"}
+                        ? "Aggregation window upcoming"
+                        : "🔒 Window closed"}
                     </div>
 
                     <p className="text-xs text-text-muted">
                       Aggregation window: {formatWindowDate(windowInfo.fromEpoch)} – {formatWindowDate(windowInfo.toEpoch)}
                     </p>
+                    {isWindowClosed && (
+                      <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+                        🔒 Intent locked: this aggregation window has closed, so edits are no longer allowed.
+                      </div>
+                    )}
                   </div>
+                  {/* ── end CONTENT ── */}
                 </div>
               </div>
             );

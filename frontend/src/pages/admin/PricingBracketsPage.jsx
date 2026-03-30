@@ -7,6 +7,7 @@ const initialTiers = [
   { id: 1, minQty: "1", unitPrice: "50.00", hasError: false },
   { id: 2, minQty: "100", unitPrice: "45.00", hasError: false },
   { id: 3, minQty: "500", unitPrice: "40.00", hasError: false },
+  { id: 3, minQty: "500", unitPrice: "40.00", hasError: false },
 ];
 
 export default function PricingBracketsPage() {
@@ -34,7 +35,13 @@ export default function PricingBracketsPage() {
   const handleTierChange = (id, field, value) => {
     setTiers((prev) => {
       const updated = prev.map((tier) =>
+    setTiers((prev) => {
+      const updated = prev.map((tier) =>
         tier.id === id ? { ...tier, [field]: value } : tier
+      );
+
+      return field === "minQty" ? validateThresholds(updated) : updated;
+    });
       );
 
       return field === "minQty" ? validateThresholds(updated) : updated;
@@ -183,6 +190,12 @@ export default function PricingBracketsPage() {
 
                     <button
                       type="button"
+                      disabled={hasAnyThresholdError}
+                      className={`rounded-xl px-5 py-3 text-sm font-bold text-text-main transition ${
+                        hasAnyThresholdError
+                          ? "cursor-not-allowed bg-neutral-light text-text-muted opacity-60"
+                          : "bg-primary hover:opacity-90"
+                      }`}
                       disabled={hasAnyThresholdError}
                       className={`rounded-xl px-5 py-3 text-sm font-bold text-text-main transition ${
                         hasAnyThresholdError

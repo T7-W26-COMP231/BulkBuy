@@ -11,6 +11,10 @@ import CartPage from "./pages/customer/CartPage";
 import Shop from "./pages/customer/Marketplace";
 import Item from "./pages/customer/Itemsdetails";
 import ReviewModifyIntentPage from "./pages/customer/ReviewModifyIntentPage";
+import PricingBracketsPage from "./pages/admin/PricingBracketsPage"
+import AdminInventoryPage from "./pages/admin/AdminInventoryPage";
+import AdminBulkOrdersPage from "./pages/admin/AdminBulkOrdersPage";
+import AdminSettingsPage from "./pages/admin/AdminSettingsPage";
 //import { useAuthBootstrap } from "./hooks/useAuthBootstrap"; // ← added
 
 
@@ -49,33 +53,43 @@ export default function App() {
     };
   }, []);
 
-  return (
-    <Routes>
-      <Route path="/" element={<HomePage />} />
-      <Route path="/marketplace" element={<Shop />} />
-      <Route path="/orders" element={<OrdersPage />} />
-      <Route path="/supplier" element={<SupplierDashboard />} />
-      <Route path="/admin" element={<AdminDashboard />} />
-      <Route path="/cart" element={<CartPage />} />
-      <Route path="/items/:id" element={<Item />} />
+ return (
+  <Routes>
+    {/* Customer routes */}
+    <Route path="/" element={<HomePage />} />
+    <Route path="/marketplace" element={<Shop />} />
+    <Route path="/orders" element={<OrdersPage />} />
+    <Route path="/cart" element={<CartPage />} />
+    <Route path="/items/:id" element={<Item />} />
+    <Route path="/product/:id" element={<ProductDetailsPage />} />
+    <Route path="/products" element={<ProductListPage />} />
+    <Route path="/review-modify-intent" element={<ReviewModifyIntentPage />} />
 
-      <Route path="/product/:id" element={<ProductDetailsPage />} />
-      <Route path="/products" element={<ProductListPage />} />
-      <Route path="/about" element={<PlaceholderPage title="About Us" />} />
-      <Route path="/careers" element={<PlaceholderPage title="Careers" />} />
-      <Route path="/partner-login" element={<PlaceholderPage title="Partner Login" />} />
-      <Route path="/how-it-works" element={<PlaceholderPage title="How It Works" />} />
-      <Route path="/help-center" element={<PlaceholderPage title="Help Center" />} />
-      <Route path="/safety" element={<PlaceholderPage title="Safety" />} />
-      <Route path="/privacy-policy" element={<PlaceholderPage title="Privacy Policy" />} />
-      <Route path="/terms-of-service" element={<PlaceholderPage title="Terms of Service" />} />
-      <Route path="/notifications" element={<PlaceholderPage title="Notifications" />} />
-      <Route path="/profile" element={<PlaceholderPage title="Profile" />} />
-      <Route path="/login" element={<PlaceholderPage title="Login" />} />
-      <Route path="/community" element={<PlaceholderPage title="Community" />} />
-      <Route path="/settings" element={<PlaceholderPage title="Settings" />} />
-      <Route path="/savings" element={<PlaceholderPage title="Savings Vault" />} />
-      <Route path="/review-modify-intent" element={<ReviewModifyIntentPage />} />
-    </Routes>
-  );
+    {/* Supplier routes */}
+    <Route path="/supplier" element={<SupplierDashboard />} />
+
+    {/* Admin routes */}
+    <Route path="/admin" element={<AdminDashboard />} />
+    <Route path="/admin/inventory" element={<AdminInventoryPage />} />
+    <Route path="/admin/bulk-orders" element={<AdminBulkOrdersPage />} />
+    <Route path="/admin/pricing-brackets" element={<PricingBracketsPage />} />
+    <Route path="/admin/settings" element={<AdminSettingsPage />} />
+
+    {/* General placeholder routes */}
+    <Route path="/about" element={<PlaceholderPage title="About Us" />} />
+    <Route path="/careers" element={<PlaceholderPage title="Careers" />} />
+    <Route path="/partner-login" element={<PlaceholderPage title="Partner Login" />} />
+    <Route path="/how-it-works" element={<PlaceholderPage title="How It Works" />} />
+    <Route path="/help-center" element={<PlaceholderPage title="Help Center" />} />
+    <Route path="/safety" element={<PlaceholderPage title="Safety" />} />
+    <Route path="/privacy-policy" element={<PlaceholderPage title="Privacy Policy" />} />
+    <Route path="/terms-of-service" element={<PlaceholderPage title="Terms of Service" />} />
+    <Route path="/notifications" element={<PlaceholderPage title="Notifications" />} />
+    <Route path="/profile" element={<PlaceholderPage title="Profile" />} />
+    <Route path="/login" element={<PlaceholderPage title="Login" />} />
+    <Route path="/community" element={<PlaceholderPage title="Community" />} />
+    <Route path="/settings" element={<PlaceholderPage title="Settings" />} />
+    <Route path="/savings" element={<PlaceholderPage title="Savings Vault" />} />
+  </Routes>
+);
 }

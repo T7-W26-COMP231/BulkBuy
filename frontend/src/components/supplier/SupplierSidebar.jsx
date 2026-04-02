@@ -1,4 +1,5 @@
 import { NavLink } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
 
 const sidebarItems = [
   { label: "Dashboard", icon: "dashboard", to: "/supplier" },
@@ -7,10 +8,20 @@ const sidebarItems = [
   { label: "Quotes", icon: "description", to: "/supplier/quotes" },
   { label: "Orders", icon: "shopping_cart", to: "/supplier/orders" },
   { label: "Demand Status", icon: "bar_chart", to: "/supplier/demand-status" },
-  { label: "Reports", icon: "download" , to: "/supplier/reports" },
+  { label: "Reports", icon: "download", to: "/supplier/reports" },
 ];
 
 export default function SupplierSidebar() {
+  const { user } = useAuth();
+
+  const supplierName =
+    user?.companyName ||
+    user?.company ||
+    `${user?.firstName || ""} ${user?.lastName || ""}`.trim() ||
+    "Supplier Account";
+
+  const supplierInitial = supplierName?.charAt(0)?.toUpperCase() || "S";
+
   return (
     <aside className="hidden w-64 shrink-0 bg-[#062f29] px-3 py-4 text-white lg:flex lg:flex-col">
       <div className="px-3 pb-6 pt-2">
@@ -52,15 +63,16 @@ export default function SupplierSidebar() {
         ))}
       </nav>
 
+      {/* ✅ Task #78 - Supplier company name */}
       <div className="mt-6 rounded-2xl bg-white/10 p-3">
         <div className="flex items-center gap-3">
           <div className="flex size-10 items-center justify-center rounded-full bg-white text-sm font-bold text-[#062f29]">
-            A
+            {supplierInitial}
           </div>
 
           <div className="min-w-0">
             <p className="truncate text-sm font-semibold text-white">
-              Alex Rivera
+              {supplierName}
             </p>
             <p className="truncate text-xs text-white/60">
               Supplier Account

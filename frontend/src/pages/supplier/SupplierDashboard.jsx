@@ -69,6 +69,7 @@ export default function SupplierDashboard() {
   const [dashboardSummary, setDashboardSummary] = useState({
     activeQuotes: "0",
     activeAggregationWindows: "0",
+    criticalAlerts: "0",
   });
 
   useEffect(() => {
@@ -79,6 +80,7 @@ export default function SupplierDashboard() {
         setDashboardSummary({
           activeQuotes: String(summary.activeQuotes ?? 0),
           activeAggregationWindows: String(summary.activeAggregationWindows ?? 0),
+          criticalAlerts: String(summary.criticalAlerts ?? 0),
         });
       } catch (error) {
         console.error("Failed to load supplier dashboard summary:", error);
@@ -117,7 +119,7 @@ export default function SupplierDashboard() {
     },
     {
       label: "Critical Alerts",
-      value: "03",
+      value: dashboardSummary.criticalAlerts,
       extra: "Critical",
       icon: "error",
       accent: "text-red-500",

@@ -1,6 +1,7 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import AdminSidebar from "../../components/admin/AdminSidebar";
 import AdminTopbar from "../../components/admin/AdminTopbar";
+import { fetchQuoteCounts, fetchQuotesByStatus } from "../../api/supplyApi";
 
 const mockQuoteRows = [
   {
@@ -151,15 +152,62 @@ export default function AdminQuotesReviewPage() {
   const [notifySupplier, setNotifySupplier] = useState(false);
 
   // Ready for backend later
-  const [supplies] = useState([]);
-  const [isLoading] = useState(false);
-  const [error] = useState("");
+  const [supplies, setSupplies] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(""); 
 
+  const [tabCounts, setTabCounts] = useState({
+    Pending: 0,
+    Approved: 0,
+    Rejected: 0,
+  });
+
+  useEffect(() => {
+    const loadQuotes = async () => {
+      try {
+        setIsLoading(true);
+        setError("");
+
+        const statusMap = {
+          Pending: "quote",
+          Approved: "accepted",
+          Rejected: "cancelled",
+        };
+
+        const response = await fetchQuotesByStatus(statusMap[activeFilter]);
+        setSupplies(response.items || response.data || []);
+      } catch (err) {
+        console.error("Failed to load supplier quotes:", err);
+        setError("Failed to load supplier quotes.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadQuotes();
+  }, [activeFilter]);
+
+  useEffect(() => {
+    const loadCounts = async () => {
+      try {
+        const counts = await fetchQuoteCounts();
+        setTabCounts(counts);
+      } catch (err) {
+        console.error("Failed to load quote counts:", err);
+      }
+    };
+
+    loadCounts();
+  }, []);
+
+  // const quoteRows = useMemo(() => {
+  //   if (supplies.length > 0) {
+  //     return supplies.flatMap(mapSupplyToQuoteRows);
+  //   }
+  //   return mockQuoteRows;
+  // }, [supplies]);
   const quoteRows = useMemo(() => {
-    if (supplies.length > 0) {
-      return supplies.flatMap(mapSupplyToQuoteRows);
-    }
-    return mockQuoteRows;
+    return supplies.flatMap(mapSupplyToQuoteRows);
   }, [supplies]);
 
   const filteredQuotes = useMemo(() => {
@@ -218,9 +266,7 @@ export default function AdminQuotesReviewPage() {
 
               <section className="flex flex-wrap gap-3">
                 {filters.map((filter) => {
-                  const count = quoteRows.filter(
-                    (quote) => quote.status === filter
-                  ).length;
+                  const count = tabCounts[filter] ?? 0;
 
                   const isActive = activeFilter === filter;
 

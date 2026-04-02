@@ -53,12 +53,38 @@ async function createSupply(req, res) {
 async function listSupplies(req, res) {
   const correlationId = req.correlationId || null;
   const actor = actorFromReq(req);
+
   try {
-    const page = req.query.page;
-    const limit = req.query.limit;
-    const filter = req.query.filter ? JSON.parse(req.query.filter) : {};
-    const result = await supplyService.listSupplies(filter, { page, limit, correlationId, actor });
-    return res.status(200).json({ success: true, ...result });
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 20;
+
+    let filter = {};
+
+    // Keep existing JSON filter support
+    if (req.query.filter) {
+      filter = JSON.parse(req.query.filter);
+    }
+
+    // Add direct query param support
+    if (req.query.status) {
+      filter.status = req.query.status;
+    }
+
+    if (req.query.supplierId) {
+      filter.supplierId = req.query.supplierId;
+    }
+
+    const result = await supplyService.listSupplies(filter, {
+      page,
+      limit,
+      correlationId,
+      actor,
+    });
+
+    return res.status(200).json({
+      success: true,
+      ...result,
+    });
   } catch (err) {
     await auditService.logEvent({
       eventType: 'supply.list.failed',
@@ -69,7 +95,11 @@ async function listSupplies(req, res) {
       correlationId,
       details: { message: err.message }
     });
-    return res.status(500).json({ success: false, message: err.message });
+
+    return res.status(err.status || 500).json({
+      success: false,
+      message: err.message
+    });
   }
 }
 

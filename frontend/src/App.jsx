@@ -3,6 +3,12 @@ import { useEffect } from "react";
 import { io } from "socket.io-client";
 import HomePage from "./pages/customer/HomePage";
 import SupplierDashboard from "./pages/supplier/SupplierDashboard";
+import SupplierProfilePage from "./pages/supplier/SupplierProfilePage";
+import SupplierApprovedItemsPage from "./pages/supplier/SupplierApprovedItemsPage";
+import SupplierQuotesPage from "./pages/supplier/SupplierQuotesPage";
+import SupplierOrdersPage from "./pages/supplier/SupplierOrdersPage";
+import SupplierDemandStatusPage from "./pages/supplier/SupplierDemandStatusPage";
+import SupplierReportsPage from "./pages/supplier/SupplierReportsPage";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import ProductDetailsPage from "./pages/customer/ProductDetailsPage";
 import ProductListPage from "./pages/customer/ProductListPage";
@@ -70,6 +76,13 @@ export default function App() {
 
       {/* Supplier routes */}
       <Route path="/supplier" element={<SupplierDashboard />} />
+      <Route path="/supplier" element={<SupplierDashboard />} />
+      <Route path="/supplier/profile" element={<SupplierProfilePage />} />
+      <Route path="/supplier/approved-items" element={<SupplierApprovedItemsPage />} />
+      <Route path="/supplier/quotes" element={<SupplierQuotesPage />} />
+      <Route path="/supplier/orders" element={<SupplierOrdersPage />} />
+      <Route path="/supplier/demand-status" element={<SupplierDemandStatusPage />} />
+      <Route path="/supplier/reports" element={<SupplierReportsPage />} />
 
       {/* Admin routes */}
       <Route path="/admin" element={<AdminDashboard />} />

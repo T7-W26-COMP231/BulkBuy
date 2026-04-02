@@ -1,0 +1,73 @@
+import { NavLink } from "react-router-dom";
+
+const sidebarItems = [
+  { label: "Dashboard", icon: "dashboard", to: "/supplier" },
+  { label: "Profile", icon: "person", to: "/supplier/profile" },
+  { label: "Approved Items", icon: "verified", to: "/supplier/approved-items" },
+  { label: "Quotes", icon: "description", to: "/supplier/quotes" },
+  { label: "Orders", icon: "shopping_cart", to: "/supplier/orders" },
+  { label: "Demand Status", icon: "bar_chart", to: "/supplier/demand-status" },
+  { label: "Reports", icon: "download" , to: "/supplier/reports" },
+];
+
+export default function SupplierSidebar() {
+  return (
+    <aside className="hidden w-64 shrink-0 bg-[#062f29] px-3 py-4 text-white lg:flex lg:flex-col">
+      <div className="px-3 pb-6 pt-2">
+        <div className="flex items-center gap-3">
+          <div className="flex size-11 items-center justify-center rounded-2xl bg-primary text-text-main">
+            <span className="material-symbols-outlined text-[22px]">
+              shopping_cart
+            </span>
+          </div>
+
+          <div>
+            <h2 className="text-xl font-bold text-white">BulkBuy</h2>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/65">
+              Supplier Portal
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <nav className="flex flex-1 flex-col gap-2 px-1">
+        {sidebarItems.map((item) => (
+          <NavLink
+            key={item.to}
+            to={item.to}
+            end={item.to === "/supplier"}
+            className={({ isActive }) =>
+              `flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition ${
+                isActive
+                  ? "bg-primary text-text-main shadow-sm"
+                  : "text-white/75 hover:bg-white/10 hover:text-white"
+              }`
+            }
+          >
+            <span className="material-symbols-outlined text-[20px]">
+              {item.icon}
+            </span>
+            <span>{item.label}</span>
+          </NavLink>
+        ))}
+      </nav>
+
+      <div className="mt-6 rounded-2xl bg-white/10 p-3">
+        <div className="flex items-center gap-3">
+          <div className="flex size-10 items-center justify-center rounded-full bg-white text-sm font-bold text-[#062f29]">
+            A
+          </div>
+
+          <div className="min-w-0">
+            <p className="truncate text-sm font-semibold text-white">
+              Alex Rivera
+            </p>
+            <p className="truncate text-xs text-white/60">
+              Supplier Account
+            </p>
+          </div>
+        </div>
+      </div>
+    </aside>
+  );
+}

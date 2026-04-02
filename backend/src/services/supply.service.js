@@ -15,6 +15,7 @@
 
 const createError = require('http-errors');
 const SupplyRepo = require('../repositories/supply.repo');
+const AggregationRepo = require('../repositories/aggregation.repo');
 const auditService = require('./audit.service');
 
 const STATUS = ['quote', 'accepted', 'dispatched', 'cancelled', 'delivered', 'received'];
@@ -94,6 +95,69 @@ class SupplyService {
       await auditService.logEvent({
         eventType: 'supply.list.failed',
         actor: actorFromOpts(opts),
+        target: { type: 'Supply', id: null },
+        outcome: 'failure',
+        severity: 'error',
+        correlationId,
+        details: { message: err.message }
+      });
+      throw err;
+    }
+  }
+
+  /**
+   * Get dashboard summary metrics for a supplier
+   * @param {String} supplierId
+   * @param {Object} opts
+   */
+  async getDashboardSummary(supplierId, opts = {}) {
+    const actor = actorFromOpts(opts);
+    const correlationId = opts.correlationId || null;
+
+    if (!supplierId) throw createError(400, 'supplierId is required');
+
+    try {
+      const [
+        activeQuotes,
+        activeAggregationWindows,
+        cancelledSupplies,
+        suspendedAggregations
+      ] = await Promise.all([
+        SupplyRepo.count(
+          {
+            supplierId,
+            status: 'accepted',
+          },
+          opts
+        ),
+        AggregationRepo.count({
+          'itemDtos.supplierId': supplierId,
+          status: { $in: ['pending', 'in_process'] }
+        }),
+        SupplyRepo.count(
+          {
+            supplierId,
+            status: 'cancelled',
+          },
+          opts
+        ),
+        AggregationRepo.count({
+          'itemDtos.supplierId': supplierId,
+          status: 'suspended'
+        })
+      ]);
+
+      const criticalAlerts = cancelledSupplies + suspendedAggregations;
+
+      return {
+        activeQuotes,
+        activeAggregationWindows,
+        criticalAlerts,
+      };
+    } catch (err) {
+      await auditService.logEvent({
+        eventType: 'supply.dashboardSummary.failed',
+        actor,
         target: { type: 'Supply', id: null },
         outcome: 'failure',
         severity: 'error',

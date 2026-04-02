@@ -106,6 +106,48 @@ async function listSupplies(req, res) {
   }
 }
 
+// Fetches and returns the authenticated supplier's dashboard summary.
+async function getDashboardSummary(req, res) {
+  const correlationId = req.correlationId || null;
+  const actor = actorFromReq(req);
+
+  try {
+    const supplierId = req.user && (req.user.userId || req.user._id);
+
+    if (!supplierId) {
+      return res.status(401).json({
+        success: false,
+        message: 'Unauthorized',
+      });
+    }
+
+    const summary = await supplyService.getDashboardSummary(supplierId, {
+      actor,
+      correlationId,
+    });
+
+    return res.status(200).json({
+      success: true,
+      data: summary,
+    });
+  } catch (err) {
+    await auditService.logEvent({
+      eventType: 'supply.dashboardSummary.failed',
+      actor,
+      target: { type: 'Supply', id: null },
+      outcome: 'failure',
+      severity: err.status && err.status >= 500 ? 'error' : 'warning',
+      correlationId,
+      details: { message: err.message }
+    });
+
+    return res.status(err.status || 500).json({
+      success: false,
+      message: err.message
+    });
+  }
+}
+
 /**
  * GET /supplies/:id
  */
@@ -499,6 +541,7 @@ async function removeItem(req, res) {
 module.exports = {
   createSupply,
   listSupplies,
+  getDashboardSummary,
   getById,
   updateById,
   addQuote,

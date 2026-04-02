@@ -228,8 +228,12 @@ async function updateStatus(req, res) {
   const actor = actorFromReq(req);
   try {
     const id = req.params.id;
-    const { status } = req.body;
-    const updated = await supplyService.updateStatus(id, status, { actor, correlationId });
+    const { status, rejectionReason } = req.body;
+    const updated = await supplyService.updateStatus(id, status, {
+      actor,
+      correlationId,
+      rejectionReason,
+    });
     await auditService.logEvent({
       eventType: 'supply.updateStatus.success',
       actor,

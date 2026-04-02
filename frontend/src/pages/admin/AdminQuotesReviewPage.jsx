@@ -1,7 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import AdminSidebar from "../../components/admin/AdminSidebar";
 import AdminTopbar from "../../components/admin/AdminTopbar";
-import { fetchQuoteCounts, fetchQuotesByStatus } from "../../api/supplyApi";
+import {
+  approveQuote,
+  fetchQuoteCounts,
+  fetchQuotesByStatus,
+  rejectQuote,
+} from "../../api/supplyApi";
 
 const mockQuoteRows = [
   {
@@ -162,41 +167,41 @@ export default function AdminQuotesReviewPage() {
     Rejected: 0,
   });
 
+  const statusMap = {
+    Pending: "quote",
+    Approved: "accepted",
+    Rejected: "cancelled",
+  };
+
+  const loadQuotes = async (statusLabel = activeFilter) => {
+    try {
+      setIsLoading(true);
+      setError("");
+
+      const response = await fetchQuotesByStatus(statusMap[statusLabel]);
+      setSupplies(response.items || response.data || []);
+    } catch (err) {
+      console.error("Failed to load supplier quotes:", err);
+      setError("Failed to load supplier quotes.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const loadCounts = async () => {
+    try {
+      const counts = await fetchQuoteCounts();
+      setTabCounts(counts);
+    } catch (err) {
+      console.error("Failed to load quote counts:", err);
+    }
+  };
+
   useEffect(() => {
-    const loadQuotes = async () => {
-      try {
-        setIsLoading(true);
-        setError("");
-
-        const statusMap = {
-          Pending: "quote",
-          Approved: "accepted",
-          Rejected: "cancelled",
-        };
-
-        const response = await fetchQuotesByStatus(statusMap[activeFilter]);
-        setSupplies(response.items || response.data || []);
-      } catch (err) {
-        console.error("Failed to load supplier quotes:", err);
-        setError("Failed to load supplier quotes.");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadQuotes();
+    loadQuotes(activeFilter);
   }, [activeFilter]);
 
   useEffect(() => {
-    const loadCounts = async () => {
-      try {
-        const counts = await fetchQuoteCounts();
-        setTabCounts(counts);
-      } catch (err) {
-        console.error("Failed to load quote counts:", err);
-      }
-    };
-
     loadCounts();
   }, []);
 
@@ -234,14 +239,41 @@ export default function AdminQuotesReviewPage() {
     setNotifySupplier(false);
   };
 
-  const handleConfirmApproval = () => {
-    console.log("Approved:", selectedQuote, "Notify supplier:", notifySupplier);
-    handleCloseModals();
+  const handleConfirmApproval = async () => {
+    if (!selectedQuote) return;
+
+    try {
+      await approveQuote({
+        supplyId: selectedQuote.supplyId,
+        itemId: selectedQuote.itemId,
+        quoteId: selectedQuote.quoteId,
+      });
+
+      handleCloseModals();
+      await loadCounts();
+      await loadQuotes(activeFilter);
+    } catch (err) {
+      console.error("Failed to approve quote:", err);
+      setError("Failed to approve quote.");
+    }
   };
 
-  const handleConfirmReject = () => {
-    console.log("Rejected:", selectedQuote, "Reason:", rejectionReason);
-    handleCloseModals();
+  const handleConfirmReject = async () => {
+    if (!selectedQuote || !rejectionReason.trim()) return;
+
+    try {
+      await rejectQuote({
+        supplyId: selectedQuote.supplyId,
+        rejectionReason: rejectionReason.trim(),
+      });
+
+      handleCloseModals();
+      await loadCounts();
+      await loadQuotes(activeFilter);
+    } catch (err) {
+      console.error("Failed to reject quote:", err);
+      setError("Failed to reject quote.");
+    }
   };
 
   return (
@@ -414,23 +446,29 @@ export default function AdminQuotesReviewPage() {
                             </td>
 
                             <td className="px-6 py-5 align-top">
-                              <div className="flex justify-end gap-2">
-                                <button
-                                  type="button"
-                                  onClick={() => handleApproveClick(quote)}
-                                  className="rounded-xl border border-primary/30 bg-primary/15 px-4 py-2 text-sm font-bold text-text-main transition hover:bg-primary/25"
-                                >
-                                  Approve
-                                </button>
+                              {quote.status === "Pending" ? (
+                                <div className="flex justify-end gap-2">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleApproveClick(quote)}
+                                    className="rounded-xl border border-primary/30 bg-primary/15 px-4 py-2 text-sm font-bold text-text-main transition hover:bg-primary/25"
+                                  >
+                                    Approve
+                                  </button>
 
-                                <button
-                                  type="button"
-                                  onClick={() => handleRejectClick(quote)}
-                                  className="rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-sm font-bold text-red-600 transition hover:bg-red-100"
-                                >
-                                  Reject
-                                </button>
-                              </div>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleRejectClick(quote)}
+                                    className="rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-sm font-bold text-red-600 transition hover:bg-red-100"
+                                  >
+                                    Reject
+                                  </button>
+                                </div>
+                              ) : (
+                                <span className="block text-right text-sm text-text-muted">
+                                  —
+                                </span>
+                              )}
                             </td>
                           </tr>
                         ))

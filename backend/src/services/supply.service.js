@@ -399,12 +399,26 @@ class SupplyService {
   async updateStatus(supplyId, status, opts = {}) {
     const actor = actorFromOpts(opts);
     const correlationId = opts.correlationId || null;
+    const rejectionReason = opts.rejectionReason || null;
+
     if (!supplyId) throw createError(400, 'supplyId is required');
     if (!STATUS.includes(status)) throw createError(400, `invalid status: ${status}`);
 
     try {
-      const updated = await SupplyRepo.updateById(supplyId, { status }, { ...opts, new: true });
+      const updatePayload = { status };
+
+      if (status === 'cancelled' && rejectionReason) {
+        updatePayload['metadata.rejectionReason'] = rejectionReason;
+      }
+
+      const updated = await SupplyRepo.updateById(
+        supplyId,
+        updatePayload,
+        { ...opts, new: true }
+      );
+
       if (!updated) throw createError(404, 'Supply not found');
+
       await auditService.logEvent({
         eventType: 'supply.updateStatus.success',
         actor,
@@ -412,8 +426,12 @@ class SupplyService {
         outcome: 'success',
         severity: 'info',
         correlationId,
-        details: { status }
+        details: {
+          status,
+          ...(rejectionReason ? { rejectionReason } : {})
+        }
       });
+
       return sanitize(updated);
     } catch (err) {
       await auditService.logEvent({

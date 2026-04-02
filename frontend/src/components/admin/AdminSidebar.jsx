@@ -9,6 +9,7 @@ const sidebarItems = [
   { label: "Bulk Orders", icon: "local_shipping", to: "/admin/bulk-orders" },
   { label: "Supplier Quotes", icon: "request_quote", to: "/admin/supplier-quotes" },
   { label: "Pricing Brackets", icon: "sell", to: "/admin/pricing-brackets" },
+  { label: "Sales Window", icon: "sell", to: "/admin/sales-window" },
   { label: "Settings", icon: "settings", to: "/admin/settings" },
 ];
 

@@ -8,71 +8,7 @@ import {
   rejectQuote,
 } from "../../api/supplyApi";
 
-const mockQuoteRows = [
-  {
-    id: "1",
-    supplyId: "supply-1",
-    itemId: "item-1",
-    quoteId: "quote-1",
-    supplier: "Global Logistics Ltd.",
-    contactEmail: "contact@globallog.com",
-    contactPhone: "+1 (555) 012-3456",
-    product: "Organic Hass Avocados",
-    submittedOn: "Apr 2, 2026",
-    tiers: [
-      { minQty: 100, unitPrice: 2.5, discountPercent: null, description: "" },
-      { minQty: 500, unitPrice: 2.0, discountPercent: null, description: "" },
-    ],
-    status: "Pending",
-  },
-  {
-    id: "2",
-    supplyId: "supply-2",
-    itemId: "item-2",
-    quoteId: "quote-2",
-    supplier: "Apex Manufacturing",
-    contactEmail: "orders@apexmf.com",
-    contactPhone: "+1 (555) 987-6543",
-    product: "Bamboo Fiber Straws",
-    submittedOn: "Apr 1, 2026",
-    tiers: [
-      { minQty: 1000, unitPrice: 0.05, discountPercent: null, description: "" },
-      { minQty: 5000, unitPrice: 0.03, discountPercent: null, description: "" },
-    ],
-    status: "Pending",
-  },
-  {
-    id: "3",
-    supplyId: "supply-3",
-    itemId: "item-3",
-    quoteId: "quote-3",
-    supplier: "Fresh Select",
-    contactEmail: "sales@freshselect.com",
-    contactPhone: "+1 (555) 777-1000",
-    product: "Baby Spinach",
-    submittedOn: "Mar 30, 2026",
-    tiers: [
-      { minQty: 150, unitPrice: 3.2, discountPercent: null, description: "" },
-    ],
-    status: "Approved",
-  },
-  {
-    id: "4",
-    supplyId: "supply-4",
-    itemId: "item-4",
-    quoteId: "quote-4",
-    supplier: "North Coast Produce",
-    contactEmail: "hello@northcoastproduce.com",
-    contactPhone: "+1 (555) 440-2222",
-    product: "Navel Oranges",
-    submittedOn: "Mar 29, 2026",
-    tiers: [
-      { minQty: 200, unitPrice: 1.85, discountPercent: null, description: "" },
-      { minQty: 600, unitPrice: 1.55, discountPercent: null, description: "" },
-    ],
-    status: "Rejected",
-  },
-];
+
 
 const filters = ["Pending", "Approved", "Rejected"];
 
@@ -159,7 +95,7 @@ export default function AdminQuotesReviewPage() {
   // Ready for backend later
   const [supplies, setSupplies] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(""); 
+  const [error, setError] = useState("");
 
   const [tabCounts, setTabCounts] = useState({
     Pending: 0,
@@ -308,8 +244,8 @@ export default function AdminQuotesReviewPage() {
                       type="button"
                       onClick={() => setActiveFilter(filter)}
                       className={`rounded-full px-5 py-2.5 text-sm font-semibold transition ${isActive
-                          ? "bg-primary text-text-main shadow-sm"
-                          : "border border-neutral-light bg-white text-text-muted hover:bg-neutral-light"
+                        ? "bg-primary text-text-main shadow-sm"
+                        : "border border-neutral-light bg-white text-text-muted hover:bg-neutral-light"
                         }`}
                     >
                       {filter}
@@ -366,8 +302,8 @@ export default function AdminQuotesReviewPage() {
                           <tr
                             key={quote.id}
                             className={`transition hover:bg-neutral-light/40 ${selectedQuote?.id === quote.id
-                                ? "bg-primary/5"
-                                : ""
+                              ? "bg-primary/5"
+                              : ""
                               }`}
                           >
                             <td className="px-6 py-5 align-top">
@@ -533,8 +469,8 @@ export default function AdminQuotesReviewPage() {
                       <div
                         key={`${selectedQuote.id}-${index}`}
                         className={`flex items-center justify-between text-sm ${index !== selectedQuote.tiers.length - 1
-                            ? "border-b border-neutral-light pb-3"
-                            : ""
+                          ? "border-b border-neutral-light pb-3"
+                          : ""
                           }`}
                       >
                         <span className="text-text-muted">
@@ -662,8 +598,8 @@ export default function AdminQuotesReviewPage() {
                   disabled={!rejectionReason.trim()}
                   onClick={handleConfirmReject}
                   className={`rounded-xl px-5 py-3 text-sm font-bold text-white transition ${rejectionReason.trim()
-                      ? "bg-red-600 hover:bg-red-700"
-                      : "cursor-not-allowed bg-red-300"
+                    ? "bg-red-600 hover:bg-red-700"
+                    : "cursor-not-allowed bg-red-300"
                     }`}
                 >
                   Confirm Reject

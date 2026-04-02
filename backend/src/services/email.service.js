@@ -76,7 +76,50 @@ const sendOrderConfirmation = async (userEmail, order) => {
   });
 };
 
+// ============================================================
+// ✅ QUOTE APPROVED EMAIL
+// ============================================================
+
+const sendQuoteApproved = async (supplierEmail, supplierName, quoteDetails) => {
+  await sendEmail({
+    to: supplierEmail,
+    subject: '✅ Your Quote Has Been Approved - BulkBuy',
+    html: `
+      <h2>Quote Approved 🎉</h2>
+      <p>Hi ${supplierName},</p>
+      <p>Your quote has been <strong style="color:green">approved</strong> by our team.</p>
+      ${quoteDetails?.productName ? `<p><strong>Product:</strong> ${quoteDetails.productName}</p>` : ''}
+      ${quoteDetails?.pricePerBulkUnit ? `<p><strong>Price per unit:</strong> $${quoteDetails.pricePerBulkUnit}</p>` : ''}
+      ${quoteDetails?.numberOfBulkUnits ? `<p><strong>Units:</strong> ${quoteDetails.numberOfBulkUnits}</p>` : ''}
+      <p>Your listing is now available in the active aggregation window.</p>
+      <p>— BulkBuy Team</p>
+    `
+  });
+};
+
+// ============================================================
+// ❌ QUOTE REJECTED EMAIL
+// ============================================================
+
+const sendQuoteRejected = async (supplierEmail, supplierName, quoteDetails, reason) => {
+  await sendEmail({
+    to: supplierEmail,
+    subject: '❌ Your Quote Has Been Rejected - BulkBuy',
+    html: `
+      <h2>Quote Rejected</h2>
+      <p>Hi ${supplierName},</p>
+      <p>Unfortunately your quote has been <strong style="color:red">rejected</strong>.</p>
+      ${quoteDetails?.productName ? `<p><strong>Product:</strong> ${quoteDetails.productName}</p>` : ''}
+      <p><strong>Reason:</strong> ${reason || 'No reason provided'}</p>
+      <p>Please review your submission and resubmit if needed.</p>
+      <p>— BulkBuy Team</p>
+    `
+  });
+};
+
 module.exports = {
   sendEmail,
-  sendOrderConfirmation
+  sendOrderConfirmation,
+  sendQuoteApproved,   // 👈 add
+  sendQuoteRejected    // 👈 add
 };

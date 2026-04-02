@@ -4,6 +4,9 @@
  * - Thin HTTP layer that delegates to supply.service
  * - Consistent audit logging and correlationId propagation
  */
+const { sendQuoteApproved, sendQuoteRejected } = require('../services/email.service');
+
+const userService = require('../services/user.service');
 
 const supplyService = require('../services/supply.service');
 const auditService = require('../services/audit.service');
@@ -223,6 +226,7 @@ async function acceptQuote(req, res) {
 /**
  * POST /supplies/:id/update-status
  */
+/*
 async function updateStatus(req, res) {
   const correlationId = req.correlationId || null;
   const actor = actorFromReq(req);
@@ -243,6 +247,71 @@ async function updateStatus(req, res) {
       correlationId,
       details: { status }
     });
+    return res.status(200).json({ success: true, data: updated });
+  } catch (err) {
+    await auditService.logEvent({
+      eventType: 'supply.updateStatus.failed',
+      actor,
+      target: { type: 'Supply', id: req.params.id || null },
+      outcome: 'failure',
+      severity: err.status && err.status >= 500 ? 'error' : 'warning',
+      correlationId,
+      details: { message: err.message }
+    });
+    return res.status(err.status || 500).json({ success: false, message: err.message });
+  }
+}*/
+
+//modified by Sahil
+async function updateStatus(req, res) {
+  const correlationId = req.correlationId || null;
+  const actor = actorFromReq(req);
+  try {
+    const id = req.params.id;
+    const { status, rejectionReason } = req.body;
+    console.log("🔔 updateStatus called with status:", status, "for supply:", id); // 👈 add this
+
+
+    const updated = await supplyService.updateStatus(id, status, {
+      actor,
+      correlationId,
+      rejectionReason,
+    });
+
+    // 👇 send email notification (best-effort, never fails the request)
+    try {
+      const supply = await supplyService.getById(id, { correlationId });
+      const supplier = await userService.getUserById(supply.supplierId);
+      const supplierEmail = supplier?.emails?.[0]?.address;
+      const supplierName = `${supplier?.firstName || ''} ${supplier?.lastName || ''}`.trim() || 'Supplier';
+
+      if (supplierEmail) {
+        const quoteDetails = {
+          productName: supply?.items?.[0]?.meta?.productName || null,
+          pricePerBulkUnit: supply?.items?.[0]?.quotes?.[0]?.pricePerBulkUnit || null,
+          numberOfBulkUnits: supply?.items?.[0]?.quotes?.[0]?.numberOfBulkUnits || null,
+        };
+
+        if (status === 'accepted') {
+          await sendQuoteApproved(supplierEmail, supplierName, quoteDetails);
+        } else if (status === 'cancelled') {
+          await sendQuoteRejected(supplierEmail, supplierName, quoteDetails, rejectionReason);
+        }
+      }
+    } catch (emailErr) {
+      console.warn('⚠ Email notification failed:', emailErr.message);
+    }
+
+    await auditService.logEvent({
+      eventType: 'supply.updateStatus.success',
+      actor,
+      target: { type: 'Supply', id },
+      outcome: 'success',
+      severity: 'info',
+      correlationId,
+      details: { status }
+    });
+
     return res.status(200).json({ success: true, data: updated });
   } catch (err) {
     await auditService.logEvent({

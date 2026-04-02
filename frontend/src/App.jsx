@@ -17,6 +17,7 @@ import AdminSettingsPage from "./pages/admin/AdminSettingsPage";
 import AdminQuotesReviewPage from "./pages/admin/AdminQuotesReviewPage"
 import OrdersPage from "./pages/customer/OrdersPage";
 import OrderDetailsPage from "./pages/customer/OrderDetails";
+import CreateSalesWindowForm from "./pages/admin/Createsaleswindowform";
 //import { useAuthBootstrap } from "./hooks/useAuthBootstrap"; // ← added
 
 
@@ -75,7 +76,10 @@ export default function App() {
       <Route path="/admin/inventory" element={<AdminInventoryPage />} />
       <Route path="/admin/bulk-orders" element={<AdminBulkOrdersPage />} />
       <Route path="/admin/pricing-brackets" element={<PricingBracketsPage />} />
+
       <Route path="/admin/supplier-quotes" element={<AdminQuotesReviewPage />} />
+
+      <Route path="/admin/sales-window" element={<CreateSalesWindowForm />} />
       <Route path="/admin/settings" element={<AdminSettingsPage />} />
 
       {/* General placeholder routes */}

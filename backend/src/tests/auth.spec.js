@@ -39,7 +39,7 @@ describe('Auth API', () => {
   // Optional: spy on auditService.logEvent to assert audit calls
   beforeAll(() => {
     if (auditService && typeof auditService.logEvent === 'function') {
-      jest.spyOn(auditService, 'logEvent').mockImplementation(async () => {});
+      jest.spyOn(auditService, 'logEvent').mockImplementation(async () => { });
     }
   });
 

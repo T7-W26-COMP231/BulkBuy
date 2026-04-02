@@ -37,7 +37,7 @@ function actorFromOpts(opts = {}) {
 function tokenPayloadFromUser(user = {}) {
   const userId = user.userId || user._id || user.id || null;
   const role = user.role || null;
-  return { _id:user._id,  userId, role };
+  return { _id: user._id, userId, role };
 }
 
 /* -------------------------
@@ -102,10 +102,12 @@ function verifyRefreshToken(token) {
  * @param {String|null} correlationId
  * @returns {Promise<{user, accessToken, refreshToken}>}
  */
-async function register(userData = {}, correlationId = null) {
-  const actor = { userId: null, role: null };
+
+async function register(userData = {}, correlationId = null, opts = {}) {
+  const actor = opts.actor || { userId: null, role: null }; // 👈 changed
+
   try {
-    const created = await userService.createUser(userData, {actor, correlationId});
+    const created = await userService.createUser(userData, { actor, correlationId });
 
     const payload = tokenPayloadFromUser(created);
     const accessToken = generateAccessToken(payload);

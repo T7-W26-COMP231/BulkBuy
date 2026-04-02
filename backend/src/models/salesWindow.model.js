@@ -53,14 +53,14 @@ const PricingSnapshotSchema = new Schema({
 /**
  * PricingTierSchema
  */
-const PricingTierSchema = new Schema({
+const PricingTierSchema = new Schema({//pricing tier are set before product go live 
   // New admin pricing bracket fields
   minQty: { type: Number, required: true, min: 1 },
   unitPrice: { type: Number, required: true, min: 0 },
 
   // Backward-compatible legacy fields
   quantity: { type: Number, default: 0 },
-  discountPercentagePerUnitBulk: { type: Number, default: 0 },
+  discountPercentagePerUnitBulk: { type: Number, default: 0 },// this should be rellfected in frontend, the only change is changining in frontend is pricing sncapshots and quanityt
 
   metadata: { type: Schema.Types.Mixed, default: {} }
 }, { _id: false });
@@ -68,12 +68,15 @@ const PricingTierSchema = new Schema({
 /**
  * ProductItemSchema
  */
+
 const ProductItemSchema = new Schema({
   itemId: { type: Schema.Types.ObjectId, required: true, index: true },
   productId: { type: Schema.Types.ObjectId, required: true, index: true },
-  pricing_snapshots: { type: [PricingSnapshotSchema], default: [] }, // the first one is the initial price setter
-  qtySold: { type: Number, default: 0 },
+  pricing_snapshots: { type: [PricingSnapshotSchema], default: [] }, // the first one is the initial price setter, first pricing snapshot initial one 
+
+  qtySold: { type: Number, default: 0 }, //
   qtyAvailable: { type: Number, default: 0 },
+
   pricing_tiers: { type: [PricingTierSchema], default: [] },
   metadata: { type: Schema.Types.Mixed, default: {} },
   createdAt: { type: Date, default: Date.now },
@@ -98,11 +101,18 @@ const SalesWindowSchema = new Schema({
     fromEpoch: { type: Number, required: true, index: true },
     toEpoch: { type: Number, required: true, index: true }
   },
-  products: { type: [ProductSchema], default: [] },
+  products: { type: [ProductSchema], default: [] },//this is just referece it doesn't have all info
   ops_region: { type: String, trim: true, required: true },
   overflow_id: { type: Schema.Types.ObjectId, ref: 'SalesWindow', default: null },
-  isHead: { type: Boolean, default: true, index: true },
+
+  // overflow_id: is  
+  // when mongodb document 
+  // let says we have 2000 products then mongo limit changed then we gonna create new document but to connect them we can use it
+
+  isHead: { type: Boolean, default: true, index: true }, //first sales window created is head, all other refrence them is like overflow 
+
   metadata: { type: Schema.Types.Mixed, default: {} }
+
 }, {
   timestamps: true,
   toJSON: { virtuals: true, versionKey: false },
@@ -179,7 +189,7 @@ SalesWindowSchema.statics.upsertPricingSnapshot = async function (windowId, prod
   const item = (prod.items || []).find((it) => String(it.itemId) === String(itemId));
   if (!item) throw createError(404, 'item not found after update');
 
-  return {...item,  ops_region : this.ops_region };
+  return { ...item, ops_region: this.ops_region };
 };
 
 /**
@@ -206,7 +216,7 @@ SalesWindowSchema.statics.removeItem = async function (productId, itemId, opts =
   return {
     matchedCount: res.matchedCount !== undefined ? res.matchedCount : (res.n || 0),
     modifiedCount: res.modifiedCount !== undefined ? res.modifiedCount : (res.nModified || 0),
-    ops_region : this.ops_region
+    ops_region: this.ops_region
   };
 };
 

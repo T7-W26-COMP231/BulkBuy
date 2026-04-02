@@ -129,7 +129,7 @@ class SalesWindowService {
       // evict cache for the region of the created window (best-effort)
       try {
         await this._safeEvictRegion(created && created.ops_region);
-      } catch (e) {}
+      } catch (e) { }
 
       await this._audit(
         "salesWindow.create.success",
@@ -237,7 +237,7 @@ class SalesWindowService {
       // evict cache for the region affected (best-effort)
       try {
         await this._safeEvictRegion(updated && updated.ops_region);
-      } catch (e) {}
+      } catch (e) { }
 
       await this._audit(
         "salesWindow.update.success",
@@ -277,7 +277,7 @@ class SalesWindowService {
     try {
       const res = await SalesWindowRepo.addProduct(windowId, payload, opts);
 
-      try { await this._safeEvictRegion(res && res.ops_region || payload && payload.ops_region || opts && opts.region); } catch (e) {}
+      try { await this._safeEvictRegion(res && res.ops_region || payload && payload.ops_region || opts && opts.region); } catch (e) { }
 
       await this._audit(
         "salesWindow.addProduct.success",
@@ -320,7 +320,7 @@ class SalesWindowService {
       );
 
       // evict by region if available on opts or itemPayload
-      try { await this._safeEvictRegion( res && res.ops_region || opts && opts.region || itemPayload && itemPayload.ops_region); } catch (e) {}
+      try { await this._safeEvictRegion(res && res.ops_region || opts && opts.region || itemPayload && itemPayload.ops_region); } catch (e) { }
 
       await this._audit(
         "salesWindow.addProductItem.success",
@@ -363,7 +363,7 @@ class SalesWindowService {
       );
 
       // evict region (opts.region preferred; fallback to payload.ops_region)
-      try { await this._safeEvictRegion(result && result.ops_region || opts && opts.region || payload && payload.ops_region); } catch (e) {}
+      try { await this._safeEvictRegion(result && result.ops_region || opts && opts.region || payload && payload.ops_region); } catch (e) { }
 
       await this._audit(
         "salesWindow.item.addOrUpdate.success",
@@ -408,7 +408,7 @@ class SalesWindowService {
         opts,
       );
 
-      try { await this._safeEvictRegion(removed && removed.ops_region || opts && opts.region); } catch (e) {}
+      try { await this._safeEvictRegion(removed && removed.ops_region || opts && opts.region); } catch (e) { }
 
       await this._audit(
         "salesWindow.item.remove.success",
@@ -458,7 +458,7 @@ class SalesWindowService {
         opts,
       );
 
-      try { await this._safeEvictRegion(res && res.ops_region || opts && opts.region); } catch (e) {}
+      try { await this._safeEvictRegion(res && res.ops_region || opts && opts.region); } catch (e) { }
 
       await this._audit(
         "salesWindow.pricingSnapshot.add.success",
@@ -508,7 +508,7 @@ class SalesWindowService {
         opts,
       );
 
-      try { await this._safeEvictRegion(res && res.ops_region || opts && opts.region); } catch (e) {}
+      try { await this._safeEvictRegion(res && res.ops_region || opts && opts.region); } catch (e) { }
 
       await this._audit(
         "salesWindow.pricingSnapshot.upsert.success",
@@ -579,7 +579,7 @@ class SalesWindowService {
     if (!windowId) throw createError(400, "windowId is required");
     if (!productId) throw createError(400, "productId is required");
     return SalesWindowRepo.listProductItems(windowId, productId, opts);
-  }
+  }//you can provide item id in opts--> opts means options
 
   async getItemSnapshot(windowId, productId, itemId, opts = {}) {
     const correlationId = opts.correlationId || null;
@@ -622,7 +622,7 @@ class SalesWindowService {
     try {
       const doc = await SalesWindowRepo.upsert(filter, update, opts);
 
-      try { await this._safeEvictRegion(doc && doc.ops_region || opts && opts.region); } catch (e) {}
+      try { await this._safeEvictRegion(doc && doc.ops_region || opts && opts.region); } catch (e) { }
 
       await this._audit(
         "salesWindow.upsert.success",
@@ -660,7 +660,7 @@ class SalesWindowService {
       try {
         const regions = new Set((inserted || []).map((d) => d && d.ops_region).filter(Boolean));
         for (const r of regions) await this._safeEvictRegion(r);
-      } catch (e) {}
+      } catch (e) { }
 
       await this._audit(
         "salesWindow.bulkInsert.success",
@@ -701,7 +701,7 @@ class SalesWindowService {
       );
 
       // evict region for the window (opts.region preferred)
-      try { await this._safeEvictRegion(res && res.ops_region || opts && opts.region); } catch (e) {}
+      try { await this._safeEvictRegion(res && res.ops_region || opts && opts.region); } catch (e) { }
 
       await this._audit(
         "salesWindow.bulkInsertProducts.success",
@@ -743,7 +743,7 @@ class SalesWindowService {
       );
 
       // evict region for the window (opts.region preferred)
-      try { await this._safeEvictRegion(res && res.ops_region || opts && opts.region); } catch (e) {}
+      try { await this._safeEvictRegion(res && res.ops_region || opts && opts.region); } catch (e) { }
 
       await this._audit(
         "salesWindow.bulkInsertItems.success",
@@ -781,7 +781,7 @@ class SalesWindowService {
       // evict cache for the region of the deleted window (best-effort)
       try {
         await this._safeEvictRegion(removed && removed.ops_region);
-      } catch (e) {}
+      } catch (e) { }
 
       await this._audit(
         "salesWindow.delete.hard.success",

@@ -140,83 +140,55 @@ export default function Navbar({
   };
 
   // Toast-auth wrapper used inside the toast
-  function ToastAuthWrapper({ toastControls }) {
+  function ToastAuthWrapper({ toastControls, navigate }) {
     const { signIn: ctxSignIn, signUp: ctxSignUp } = useAuth();
     const { showToast: globalShow } = useToast();
     const [busy, setBusy] = useState(false);
 
-    const signInHandler = ctxSignIn;
-    const signUpHandler = ctxSignUp;
-
     const handleSignIn = async (payload) => {
-      if (!signInHandler) {
-        globalShow(() => <div style={{ padding: 12 }}><strong>Auth unavailable</strong></div>, { value: "TR", mt: '2em', IsToStack: false, mt: '2em' });
-        return { ok: false, error: "Auth unavailable" };
-      }
-
+      if (!ctxSignIn) return { ok: false, error: "Auth unavailable" };
       setBusy(true);
       try {
-        const res = typeof payload === "function" ? await payload(signInHandler) : await signInHandler(payload);
+        const res = await ctxSignIn(payload);
         setBusy(false);
         try { toastControls?.dismiss?.(); } catch { }
+
+        if (res?.user?.role === "administrator") {
+          try { clearAll(); } catch { }
+          navigate("/admin");
+          return { ok: true, user: res.user };
+        }
+
         return res;
       } catch (err) {
         setBusy(false);
-        console.error("handleSignIn error:", err);
-
-        try {
-          toastControls?.update?.({
-            content: (
-              <div style={{ padding: 12 }}>
-                <strong>Sign in error</strong>
-                <div style={{ marginTop: 6 }}>{(err && err.message) ?? "Unknown error"}</div>
-              </div>
-            ),
-          });
-        } catch (uErr) { console.error("toastcontrols.update error:", uErr); }
         globalShow(() => (
           <div style={{ padding: 12 }}>
             <strong>Sign in error</strong>
-            <div style={{ marginTop: 6 }}>{(err && err.message) ?? "Unknown error"}</div>
+            <div style={{ marginTop: 6 }}>{err?.message ?? "Unknown error"}</div>
           </div>
         ), { value: "TR", IsToStack: false, duration: 4000, mt: '2em' });
-        return { ok: false, error: (err && err.message) ?? "Sign in error" };
+        return { ok: false, error: err?.message ?? "Sign in error" };
       }
     };
 
     const handleSignUp = async (payload) => {
-      if (!signUpHandler) {
-        globalShow(() => <div style={{ padding: 12 }}><strong>Auth unavailable</strong></div>, { value: "TR", IsToStack: false, mt: '2em' });
-        return { ok: false, error: "Auth unavailable" };
-      }
-
+      if (!ctxSignUp) return { ok: false, error: "Auth unavailable" };
       setBusy(true);
       try {
-        const res = typeof payload === "function" ? await payload(signUpHandler) : await signUpHandler(payload);
+        const res = await ctxSignUp(payload);
         setBusy(false);
         try { toastControls?.dismiss?.(); } catch { }
         return res;
       } catch (err) {
         setBusy(false);
-        console.error("handleSignUp error:", err);
-
-        try {
-          toastControls?.update?.({
-            content: (
-              <div style={{ padding: 12 }}>
-                <strong>Registration error</strong>
-                <div style={{ marginTop: 6 }}>{(err && err.message) ?? "Unknown error"}</div>
-              </div>
-            ),
-          });
-        } catch (uErr) { console.error("toastcontrols.update error:", uErr); }
         globalShow(() => (
           <div style={{ padding: 12 }}>
             <strong>Registration error</strong>
-            <div style={{ marginTop: 6 }}>{(err && err.message) ?? "Unknown error"}</div>
+            <div style={{ marginTop: 6 }}>{err?.message ?? "Unknown error"}</div>
           </div>
         ), { value: "TR", IsToStack: false, duration: 4000, mt: '2em' });
-        return { ok: false, error: (err && err.message) ?? "Registration error" };
+        return { ok: false, error: err?.message ?? "Registration error" };
       }
     };
 
@@ -235,7 +207,7 @@ export default function Navbar({
   const openAuthToast = () => {
     try {
       showToast(
-        ({ toastControls }) => <ToastAuthWrapper toastControls={toastControls} />,
+        ({ toastControls }) => <ToastAuthWrapper toastControls={toastControls} navigate={navigate} />,
         { value: "HVC", IsToStack: true, toastName: "Auth", AllowedMultiple: false, IsToStick: true, blurBg: true, duration: null, animate: "TR" }
       );
     } catch (err) {

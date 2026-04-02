@@ -82,6 +82,29 @@ async function register(req, res) {
   }
 }
 
+async function createUser(req, res) {
+  const correlationId = req.correlationId || null;
+  const { error, value } = registerSchema.validate(req.body);
+  if (error) {
+    return res.status(400).json({ message: error.details?.[0]?.message || error.message });
+  }
+  try {
+    if (value.email && (!value.emails || value.emails.length === 0)) {
+      value.emails = [{ address: value.email, primary: true, verified: false }];
+      delete value.email;
+    }
+    const { user, accessToken, refreshToken } = await authService.register(
+      value,
+      correlationId,
+      { actor: req.user } // 👈 req.user guaranteed by requireAuth on this route
+    );
+    return res.status(201).json({ user, accessToken, refreshToken });
+  } catch (err) {
+    return res.status(err.status || 500).json({ message: err.message });
+  }
+}
+
+
 /**
  * POST /auth/login
  */
@@ -281,4 +304,5 @@ async function me(req, res) {
   return res.status(200).json({ user });
 }
 
-module.exports = { register, login, refresh, logout, me };
+module.exports = { register, login, refresh, logout, me, createUser }; // 👈 export it
+

@@ -328,7 +328,7 @@ export function AuthProvider({
         }
         setAccessToken(normalized.accessToken || null);
         // update ref immediately so subsequent apiFetch calls include the header
-        accessTokenRef.current = normalized.accessToken || null;
+        accessTokenRef.current = normalized.accessToken || null; //sets auth header
         setRefreshToken(normalized.refreshToken || null);
         setUser(() => normalized.user ?? null);
         setLoading(false);

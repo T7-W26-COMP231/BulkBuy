@@ -275,11 +275,10 @@ export default function AdminQuotesReviewPage() {
                       key={filter}
                       type="button"
                       onClick={() => setActiveFilter(filter)}
-                      className={`rounded-full px-5 py-2.5 text-sm font-semibold transition ${
-                        isActive
+                      className={`rounded-full px-5 py-2.5 text-sm font-semibold transition ${isActive
                           ? "bg-primary text-text-main shadow-sm"
                           : "border border-neutral-light bg-white text-text-muted hover:bg-neutral-light"
-                      }`}
+                        }`}
                     >
                       {filter}
                       <span className="ml-2 opacity-70">{count}</span>
@@ -334,11 +333,10 @@ export default function AdminQuotesReviewPage() {
                         filteredQuotes.map((quote) => (
                           <tr
                             key={quote.id}
-                            className={`transition hover:bg-neutral-light/40 ${
-                              selectedQuote?.id === quote.id
+                            className={`transition hover:bg-neutral-light/40 ${selectedQuote?.id === quote.id
                                 ? "bg-primary/5"
                                 : ""
-                            }`}
+                              }`}
                           >
                             <td className="px-6 py-5 align-top">
                               <div className="flex items-start gap-3">
@@ -393,8 +391,8 @@ export default function AdminQuotesReviewPage() {
                                       {tier.discountPercent != null
                                         ? `${tier.discountPercent}% off`
                                         : tier.unitPrice != null
-                                        ? `$${tier.unitPrice.toFixed(2)}`
-                                        : "Tier"}
+                                          ? `$${tier.unitPrice.toFixed(2)}`
+                                          : "Tier"}
                                     </span>
                                   ))
                                 ) : (
@@ -496,11 +494,10 @@ export default function AdminQuotesReviewPage() {
                     selectedQuote.tiers.map((tier, index) => (
                       <div
                         key={`${selectedQuote.id}-${index}`}
-                        className={`flex items-center justify-between text-sm ${
-                          index !== selectedQuote.tiers.length - 1
+                        className={`flex items-center justify-between text-sm ${index !== selectedQuote.tiers.length - 1
                             ? "border-b border-neutral-light pb-3"
                             : ""
-                        }`}
+                          }`}
                       >
                         <span className="text-text-muted">
                           {tier.minQty}+ units
@@ -509,8 +506,8 @@ export default function AdminQuotesReviewPage() {
                           {tier.discountPercent != null
                             ? `${tier.discountPercent}% off`
                             : tier.unitPrice != null
-                            ? `$${tier.unitPrice.toFixed(2)} / unit`
-                            : "Tier"}
+                              ? `$${tier.unitPrice.toFixed(2)} / unit`
+                              : "Tier"}
                         </span>
                       </div>
                     ))
@@ -626,11 +623,10 @@ export default function AdminQuotesReviewPage() {
                   type="button"
                   disabled={!rejectionReason.trim()}
                   onClick={handleConfirmReject}
-                  className={`rounded-xl px-5 py-3 text-sm font-bold text-white transition ${
-                    rejectionReason.trim()
+                  className={`rounded-xl px-5 py-3 text-sm font-bold text-white transition ${rejectionReason.trim()
                       ? "bg-red-600 hover:bg-red-700"
                       : "cursor-not-allowed bg-red-300"
-                  }`}
+                    }`}
                 >
                   Confirm Reject
                 </button>

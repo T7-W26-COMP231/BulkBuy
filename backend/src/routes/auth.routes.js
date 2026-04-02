@@ -3,6 +3,7 @@ const express = require('express');
 const router = express.Router();
 const authCtrl = require('../controllers/auth.controller');
 const { requireAuth } = require('../middleware/auth.middleware');
+const { requireRole } = require('../middleware/rbac.middleware');
 
 /**
  * Async wrapper to forward errors to express error handler
@@ -16,6 +17,8 @@ const asyncHandler = (fn) => (req, res, next) => {
  */
 router.post('/register', asyncHandler(authCtrl.register));
 router.post('/login', asyncHandler(authCtrl.login));
+//belwo route will help to create supplier 
+router.post('/users', requireAuth, requireRole('administrator'), asyncHandler(authCtrl.createUser)); // 👈 new
 
 /**
  * Token refresh (expects refresh token in cookie or body)

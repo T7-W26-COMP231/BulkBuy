@@ -4,6 +4,7 @@ const sidebarItems = [
   { label: "Dashboard", icon: "dashboard", to: "/admin" },
   { label: "Inventory", icon: "inventory_2", to: "/admin/inventory" },
   { label: "Bulk Orders", icon: "local_shipping", to: "/admin/bulk-orders" },
+  { label: "Supplier Quotes", icon: "request_quote", to: "/admin/supplier-quotes" },
   { label: "Pricing Brackets", icon: "sell", to: "/admin/pricing-brackets" },
   { label: "Settings", icon: "settings", to: "/admin/settings" },
 ];

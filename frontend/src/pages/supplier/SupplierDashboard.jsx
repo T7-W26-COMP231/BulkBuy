@@ -66,7 +66,32 @@ function SupplierStatCard({ icon, label, value, extra, accent, extraColor }) {
 export default function SupplierDashboard() {
   const { user, accessToken } = useAuth();
 
-  // supplier authentication guard
+  const [dashboardSummary, setDashboardSummary] = useState({
+    activeQuotes: "0",
+    activeAggregationWindows: "0",
+    criticalAlerts: "0",
+  });
+
+  useEffect(() => {
+    const loadDashboardSummary = async () => {
+      try {
+        const response = await fetchSupplierDashboardSummary();
+        const summary = response?.data || {};
+        setDashboardSummary({
+          activeQuotes: String(summary.activeQuotes ?? 0),
+          activeAggregationWindows: String(summary.activeAggregationWindows ?? 0),
+          criticalAlerts: String(summary.criticalAlerts ?? 0),
+        });
+      } catch (error) {
+        console.error("Failed to load supplier dashboard summary:", error);
+      }
+    };
+
+    if (accessToken && user?.role === "supplier") {
+      loadDashboardSummary();
+    }
+  }, [accessToken, user]);
+
   if (!accessToken || !user) {
     return <Navigate to="/login" replace />;
   }
@@ -74,26 +99,11 @@ export default function SupplierDashboard() {
   if (user.role !== "supplier") {
     return <Navigate to="/" replace />;
   }
-  const [activeQuotes, setActiveQuotes] = useState("0");
-
-  useEffect(() => {
-    const loadDashboardSummary = async () => {
-      try {
-        const response = await fetchSupplierDashboardSummary();
-        const summary = response?.data || {};
-        setActiveQuotes(String(summary.activeQuotes ?? 0));
-      } catch (error) {
-        console.error("Failed to load supplier dashboard summary:", error);
-      }
-    };
-
-    loadDashboardSummary();
-  }, []);
 
   const summaryCards = [
     {
       label: "Active Quotes",
-      value: activeQuotes,
+      value: dashboardSummary.activeQuotes,
       extra: "Current total",
       icon: "description",
       accent: "text-primary",
@@ -101,7 +111,7 @@ export default function SupplierDashboard() {
     },
     {
       label: "Active Aggregation Windows",
-      value: "42",
+      value: dashboardSummary.activeAggregationWindows,
       extra: "Active",
       icon: "schedule",
       accent: "text-emerald-600",
@@ -109,7 +119,7 @@ export default function SupplierDashboard() {
     },
     {
       label: "Critical Alerts",
-      value: "03",
+      value: dashboardSummary.criticalAlerts,
       extra: "Critical",
       icon: "error",
       accent: "text-red-500",

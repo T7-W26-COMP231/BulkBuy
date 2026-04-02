@@ -75,8 +75,8 @@ export default function App() {
       <Route path="/review-modify-intent" element={<ReviewModifyIntentPage />} />
 
       {/* Supplier routes */}
-      <Route path="/supplier" element={<SupplierDashboard />} />
-      <Route path="/supplier" element={<SupplierDashboard />} />
+      <Route path="/supplier" element={<Navigate to="/supplier/dashboard" replace />} />
+<Route path="/supplier/dashboard" element={<SupplierDashboard />} />
       <Route path="/supplier/profile" element={<SupplierProfilePage />} />
       <Route path="/supplier/approved-items" element={<SupplierApprovedItemsPage />} />
       <Route path="/supplier/quotes" element={<SupplierQuotesPage />} />

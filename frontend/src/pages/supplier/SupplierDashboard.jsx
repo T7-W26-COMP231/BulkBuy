@@ -1,3 +1,5 @@
+import { Navigate } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
 import SupplierLayout from "../../components/supplier/SupplierLayout";
 
 const summaryCards = [
@@ -87,6 +89,16 @@ function SupplierStatCard({ icon, label, value, extra, accent, extraColor }) {
 }
 
 export default function SupplierDashboard() {
+  const { user, accessToken } = useAuth();
+
+  // supplier authentication guard
+  if (!accessToken || !user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (user.role !== "supplier") {
+    return <Navigate to="/" replace />;
+  }
   return (
     <SupplierLayout>
       <div className="mx-auto flex max-w-7xl flex-col gap-5">

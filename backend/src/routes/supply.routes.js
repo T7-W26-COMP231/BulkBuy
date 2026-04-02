@@ -49,6 +49,7 @@ function validateItemId(req, res, next) {
 /* Public */
 router.post('/', requireAuth, supplyValidators.create, asyncHandler(SupplyController.createSupply));
 router.get('/', requireAuth, supplyValidators.query, asyncHandler(SupplyController.listSupplies));
+router.get('/dashboard/summary', requireAuth, asyncHandler(SupplyController.getDashboardSummary));
 router.get('/:id', requireAuth, supplyValidators.idParam, asyncHandler(SupplyController.getById));
 
 /* Supply modifications */

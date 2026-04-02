@@ -43,3 +43,8 @@ export const rejectQuote = async ({ supplyId, rejectionReason }) => {
 
   return response.data;
 };
+
+export const fetchSupplierDashboardSummary = async () => {
+  const response = await api.get("/supls/dashboard/summary");
+  return response.data;
+};

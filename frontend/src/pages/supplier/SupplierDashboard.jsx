@@ -1,31 +1,6 @@
+import { useEffect, useState } from "react";
 import SupplierLayout from "../../components/supplier/SupplierLayout";
-
-const summaryCards = [
-  {
-    label: "Active Quotes",
-    value: "1,482",
-    extra: "+12% vs last week",
-    icon: "description",
-    accent: "text-primary",
-    extraColor: "text-text-muted",
-  },
-  {
-    label: "Active Aggregation Windows",
-    value: "42",
-    extra: "Active",
-    icon: "schedule",
-    accent: "text-emerald-600",
-    extraColor: "text-emerald-600",
-  },
-  {
-    label: "Critical Alerts",
-    value: "03",
-    extra: "Critical",
-    icon: "error",
-    accent: "text-red-500",
-    extraColor: "text-red-500",
-  },
-];
+import { fetchSupplierDashboardSummary } from "../../api/supplyApi";
 
 const activityRows = [
   {
@@ -87,6 +62,49 @@ function SupplierStatCard({ icon, label, value, extra, accent, extraColor }) {
 }
 
 export default function SupplierDashboard() {
+  const [activeQuotes, setActiveQuotes] = useState("0");
+
+  useEffect(() => {
+    const loadDashboardSummary = async () => {
+      try {
+        const response = await fetchSupplierDashboardSummary();
+        const summary = response?.data || {};
+        setActiveQuotes(String(summary.activeQuotes ?? 0));
+      } catch (error) {
+        console.error("Failed to load supplier dashboard summary:", error);
+      }
+    };
+
+    loadDashboardSummary();
+  }, []);
+
+  const summaryCards = [
+    {
+      label: "Active Quotes",
+      value: activeQuotes,
+      extra: "Current total",
+      icon: "description",
+      accent: "text-primary",
+      extraColor: "text-text-muted",
+    },
+    {
+      label: "Active Aggregation Windows",
+      value: "42",
+      extra: "Active",
+      icon: "schedule",
+      accent: "text-emerald-600",
+      extraColor: "text-emerald-600",
+    },
+    {
+      label: "Critical Alerts",
+      value: "03",
+      extra: "Critical",
+      icon: "error",
+      accent: "text-red-500",
+      extraColor: "text-red-500",
+    },
+  ];
+
   return (
     <SupplierLayout>
       <div className="mx-auto flex max-w-7xl flex-col gap-5">

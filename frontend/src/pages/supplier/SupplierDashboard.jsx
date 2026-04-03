@@ -2,7 +2,7 @@ import { Navigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { useEffect, useState } from "react";
 import SupplierLayout from "../../components/supplier/SupplierLayout";
-import { fetchSupplierDashboardSummary } from "../../api/supplyApi";
+import { fetchSupplierDashboardSummary, fetchSupplierAggregations, fetchSupplierSuppliesByStatus } from "../../api/supplyApi";
 
 const activityRows = [
   {
@@ -67,24 +67,56 @@ export default function SupplierDashboard() {
   const { user, accessToken } = useAuth();
 
   const [dashboardSummary, setDashboardSummary] = useState({
-  activeQuotes: "0",
-  activeAggregationWindows: "0",
-  orderRequests: "0",
-  criticalAlerts: "0",
-});
+    activeQuotes: "0",
+    activeAggregationWindows: "0",
+    orderRequests: "0",
+    criticalAlerts: "0",
+  });
+  const [demandSummary, setDemandSummary] = useState({
+    quote: 0,
+    received: 0,
+    accepted: 0,
+    dispatched: 0,
+    delivered: 0,
+    cancelled: 0,
+  });
 
   useEffect(() => {
     const loadDashboardSummary = async () => {
       try {
-        const response = await fetchSupplierDashboardSummary();
-        const summary = response?.data || {};
-       setDashboardSummary({
-  activeQuotes: String(summary.activeQuotes ?? 0),
-  activeAggregationWindows: String(summary.activeAggregationWindows ?? 0),
-  orderRequests: String(summary.orderRequests ?? 0),
-  criticalAlerts: String(summary.criticalAlerts ?? 0),
-});
+        const [summaryRes, aggrRes, quoteRes, receivedRes, acceptedRes, dispatchedRes, deliveredRes, cancelledRes] = await Promise.all([
+          fetchSupplierDashboardSummary(),
+          fetchSupplierAggregations(user._id),
+          fetchSupplierSuppliesByStatus(user._id, "quote"),
+          fetchSupplierSuppliesByStatus(user._id, "received"),
+          fetchSupplierSuppliesByStatus(user._id, "accepted"),
+          fetchSupplierSuppliesByStatus(user._id, "dispatched"),
+          fetchSupplierSuppliesByStatus(user._id, "delivered"),
+          fetchSupplierSuppliesByStatus(user._id, "cancelled"),
+        ]);
 
+        const summary = summaryRes?.data || {};
+        const activeAggregationWindows = aggrRes?.items?.filter(
+          (a) => a.status === "in_process" || a.status === "pending"
+        ).length ?? 0;
+
+        setDashboardSummary({
+          activeQuotes: String(summary.activeQuotes ?? 0),
+          activeAggregationWindows: String(activeAggregationWindows),
+          orderRequests: String(summary.orderRequests ?? 0),
+          criticalAlerts: String(summary.criticalAlerts ?? 0),
+        });
+
+        setDemandSummary({
+          quote: quoteRes?.total ?? 0,
+          received: receivedRes?.total ?? 0,
+          accepted: acceptedRes?.total ?? 0,
+          dispatched: dispatchedRes?.total ?? 0,
+          delivered: deliveredRes?.total ?? 0,
+          cancelled: cancelledRes?.total ?? 0,
+        });
+        console.log("user._id:", user._id);
+        console.log("quoteRes:", quoteRes);
       } catch (error) {
         console.error("Failed to load supplier dashboard summary:", error);
       }
@@ -103,7 +135,7 @@ export default function SupplierDashboard() {
     return <Navigate to="/" replace />;
   }
 
-  const summaryCards = [
+  const summaryCards = [// this is need to change
     {
       label: "Active Quotes",
       value: dashboardSummary.activeQuotes,
@@ -121,13 +153,13 @@ export default function SupplierDashboard() {
       extraColor: "text-emerald-600",
     },
     {
-  label: "Total Order Requests",
-  value: dashboardSummary.orderRequests,
-  extra: "Pending + current",
-  icon: "shopping_cart",
-  accent: "text-sky-600",
-  extraColor: "text-sky-600",
-},
+      label: "Total Order Requests",
+      value: dashboardSummary.orderRequests,
+      extra: "Pending + current",
+      icon: "shopping_cart",
+      accent: "text-sky-600",
+      extraColor: "text-sky-600",
+    },
     {
       label: "Critical Alerts",
       value: dashboardSummary.criticalAlerts,
@@ -193,6 +225,30 @@ export default function SupplierDashboard() {
           {summaryCards.map((card) => (
             <SupplierStatCard key={card.label} {...card} />
           ))}
+        </section>
+
+        {/* 👇 ADD THIS SECTION HERE */}
+        <section className="rounded-2xl border border-neutral-light bg-white p-6 shadow-sm">
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold text-text-main">Demand Monitoring Summary</h2>
+            <p className="mt-1 text-sm text-text-muted">Breakdown of supply requests by status</p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-6">
+            {[
+              { label: "Quote", key: "quote", color: "bg-blue-50 text-blue-700" },
+              { label: "Received", key: "received", color: "bg-emerald-50 text-emerald-700" },
+              { label: "Accepted", key: "accepted", color: "bg-green-50 text-green-700" },
+              { label: "Dispatched", key: "dispatched", color: "bg-orange-50 text-orange-700" },
+              { label: "Delivered", key: "delivered", color: "bg-purple-50 text-purple-700" },
+              { label: "Cancelled", key: "cancelled", color: "bg-red-50 text-red-700" },
+            ].map(({ label, key, color }) => (
+              <div key={key} className={`rounded-2xl p-4 ${color}`}>
+                <p className="text-xs font-bold uppercase tracking-widest opacity-70">{label}</p>
+                <p className="mt-2 text-4xl font-bold">{demandSummary[key]}</p>
+              </div>
+            ))}
+          </div>
         </section>
 
         <section className="overflow-hidden rounded-2xl border border-neutral-light bg-white shadow-sm">

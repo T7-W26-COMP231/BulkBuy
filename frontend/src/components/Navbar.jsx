@@ -153,9 +153,19 @@ export default function Navbar({
         setBusy(false);
         try { toastControls?.dismiss?.(); } catch { }
 
+        // added this for supplier
+
         if (res?.user?.role === "administrator") {
           try { clearAll(); } catch { }
           navigate("/admin");
+          return { ok: true, user: res.user };
+        }
+
+        // added this for supplier
+
+        if (res?.user?.role === "supplier") {
+          try { clearAll(); } catch { }
+          navigate("/supplier");
           return { ok: true, user: res.user };
         }
 

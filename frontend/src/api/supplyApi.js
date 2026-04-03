@@ -48,3 +48,17 @@ export const fetchSupplierDashboardSummary = async () => {
   const response = await api.get("/supls/dashboard/summary");
   return response.data;
 };
+
+// to get aggregation window by supplierID
+export const fetchSupplierAggregations = async (supplierId) => {
+  const response = await api.get("/aggrs", {
+    params: { supplierId },
+  });
+  return response.data;
+};
+export const fetchSupplierSuppliesByStatus = async (supplierId, status) => {
+  const response = await api.get("/supls", {
+    params: { supplierId, status },
+  });
+  return response.data;
+};

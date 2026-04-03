@@ -45,12 +45,18 @@ function QuoteStatusBadge({ status }) {
 }
 
 function ActionButton({ status, onCreateQuote, onResumeQuote, onViewDetails }) {
+  // #111 disabled state — active quote exists
   if (status === "approved") {
     return (
-      <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-text-muted">
-        Active
+      <button
+        type="button"
+        disabled
+        title="An active quote already exists for this item"
+        className="inline-flex items-center gap-1.5 rounded-xl bg-neutral-light px-4 py-2 text-sm font-semibold text-text-muted cursor-not-allowed opacity-60"
+      >
         <span className="material-symbols-outlined text-[16px]">lock</span>
-      </span>
+        Quote Active
+      </button>
     );
   }
   if (status === "draft") {
@@ -82,10 +88,10 @@ function ActionButton({ status, onCreateQuote, onResumeQuote, onViewDetails }) {
     <button
       type="button"
       onClick={onCreateQuote}
-      className="inline-flex items-center gap-1.5 text-sm font-bold text-primary transition hover:opacity-75"
+      className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-sm font-bold text-text-main transition hover:opacity-90"
     >
+      <span className="material-symbols-outlined text-[16px]">add</span>
       Create Quote
-      <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
     </button>
   );
 }

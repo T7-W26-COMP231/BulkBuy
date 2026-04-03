@@ -8,6 +8,25 @@ export default function SupplierQuotesPage() {
     { id: 3, minQty: "1000", unitPrice: "2.00" },
   ]);
 
+  const [draftStatus, setDraftStatus] = useState("");
+
+  const handleSaveDraft = () => {
+    const draftPayload = {
+      productName: "Organic Avocados (Hass)",
+      skuId: "AVO-ORG-4402-XL",
+      tiers,
+      savedAt: new Date().toISOString(),
+      status: "draft",
+    };
+
+    localStorage.setItem(
+      "supplier-quote-draft",
+      JSON.stringify(draftPayload)
+    );
+
+    setDraftStatus("Draft saved successfully.");
+  };
+
   const handleTierChange = (id, field, value) => {
     setTiers((current) =>
       current.map((tier) =>
@@ -81,10 +100,23 @@ export default function SupplierQuotesPage() {
             </p>
           </div>
 
-          <button className="rounded-xl border border-neutral-light bg-white px-5 py-3 text-sm font-semibold text-text-main shadow-sm transition hover:shadow-md">
-            Save Draft
-          </button>
+          <button
+  type="button"
+  onClick={handleSaveDraft}
+  className="rounded-xl border border-neutral-light bg-white px-5 py-3 text-sm font-semibold text-text-main shadow-sm transition hover:shadow-md"
+>
+  Save Draft
+</button>
         </div>
+
+        {draftStatus && (
+  <div className="rounded-xl border border-green-200 bg-green-50 p-4">
+    <p className="text-sm font-semibold text-green-700">{draftStatus}</p>
+    <p className="mt-1 text-xs text-green-600">
+      Quote draft stored locally and can be resumed later.
+    </p>
+  </div>
+)}
 
         {/* Main layout */}
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">

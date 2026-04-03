@@ -1,13 +1,168 @@
 import SupplierLayout from "../../components/supplier/SupplierLayout";
 
-export default function SupplierApprovedItemsPage() {
+export default function SupplierQuotesPage() {
   return (
     <SupplierLayout>
-      <div className="rounded-2xl border border-neutral-light bg-white p-8 shadow-sm">
-        <h1 className="text-3xl font-bold text-text-main"> Supplier Quote</h1>
-        <p className="mt-3 text-text-muted">
-          This page is connected through routing and can be built out later.
-        </p>
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-start justify-between">
+          <div>
+            <p className="text-sm text-text-muted">Quotes &gt; New Proposal</p>
+            <h1 className="mt-2 text-3xl font-bold text-text-main">
+              Quote Builder
+            </h1>
+            <p className="mt-2 text-text-muted">
+              Create a dynamic pricing proposal for supplier catalog.
+            </p>
+          </div>
+
+          <button className="rounded-xl border border-neutral-light bg-white px-5 py-3 text-sm font-semibold text-text-main shadow-sm transition hover:shadow-md">
+            Save Draft
+          </button>
+        </div>
+
+        {/* Main layout */}
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
+          {/* Left side */}
+          <div className="space-y-6 xl:col-span-2">
+            {/* Product information */}
+            <div className="rounded-2xl border border-neutral-light bg-white p-6 shadow-sm">
+              <div className="mb-6 flex items-center gap-3">
+                <div className="h-3 w-3 rounded-full bg-primary"></div>
+                <h2 className="text-xl font-bold text-text-main">
+                  Product Information
+                </h2>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-text-main">
+                    Product Name
+                  </label>
+                  <input
+                    type="text"
+                    value="Organic Avocados (Hass)"
+                    readOnly
+                    className="w-full rounded-xl border border-neutral-light bg-neutral-light px-4 py-3"
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-text-main">
+                    SKU ID
+                  </label>
+                  <input
+                    type="text"
+                    value="AVO-ORG-4402-XL"
+                    readOnly
+                    className="w-full rounded-xl border border-neutral-light bg-neutral-light px-4 py-3"
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-text-main">
+                    Base Unit Price ($)
+                  </label>
+                  <input
+                    type="number"
+                    placeholder="2.50"
+                    className="w-full rounded-xl border border-neutral-light px-4 py-3"
+                  />
+                  <p className="mt-2 text-xs text-text-muted">
+                    Price per unit before discounts.
+                  </p>
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-text-main">
+                    Total Capacity (Units)
+                  </label>
+                  <input
+                    type="number"
+                    placeholder="5000"
+                    className="w-full rounded-xl border border-neutral-light px-4 py-3"
+                  />
+                  <p className="mt-2 text-xs text-text-muted">
+                    Max available stock for this batch.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Tier placeholder */}
+            <div className="rounded-2xl border border-neutral-light bg-white p-6 shadow-sm">
+              <div className="mb-4 flex items-center justify-between">
+                <h2 className="text-xl font-bold text-text-main">
+                  Volume Pricing Tiers
+                </h2>
+                <button className="text-sm font-semibold text-primary">
+                  + Add Tier
+                </button>
+              </div>
+
+              <div className="rounded-xl border border-dashed border-neutral-light p-8 text-center">
+                <p className="text-text-muted">
+                  Dynamic pricing tier table will be implemented here.
+                </p>
+                <p className="mt-2 text-sm text-text-muted">
+                  Reserved for teammate task #136 and #137.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Right side summary */}
+          <div className="rounded-2xl border border-neutral-light bg-white p-6 shadow-sm">
+            <h2 className="text-xl font-bold text-text-main">
+              Quote Summary
+            </h2>
+
+            <div className="mt-6 overflow-hidden rounded-2xl bg-neutral-light">
+              <div className="flex h-48 items-center justify-center text-text-muted">
+                Product Image
+              </div>
+            </div>
+
+            <div className="mt-6 space-y-4">
+              <div className="flex justify-between text-sm">
+                <span className="text-text-muted">Product</span>
+                <span className="font-semibold text-text-main">
+                  Organic Avocados
+                </span>
+              </div>
+
+              <div className="flex justify-between text-sm">
+                <span className="text-text-muted">Base Price</span>
+                <span className="font-semibold text-text-main">
+                  $2.50 / unit
+                </span>
+              </div>
+
+              <div className="flex justify-between text-sm">
+                <span className="text-text-muted">Tiers Defined</span>
+                <span className="font-semibold text-text-main">0 Levels</span>
+              </div>
+
+              <div className="flex justify-between text-sm">
+                <span className="text-text-muted">Potential Savings</span>
+                <span className="font-semibold text-green-600">Up to 0%</span>
+              </div>
+            </div>
+
+            <div className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-4">
+              <p className="text-sm font-semibold text-amber-700">
+                Validation Ready
+              </p>
+              <p className="mt-1 text-xs text-amber-600">
+                Tier validation logic will be added in the next task.
+              </p>
+            </div>
+
+            <button className="mt-6 w-full rounded-xl bg-primary px-4 py-3 font-semibold text-white transition hover:opacity-90">
+              Submit for Review
+            </button>
+          </div>
+        </div>
       </div>
     </SupplierLayout>
   );

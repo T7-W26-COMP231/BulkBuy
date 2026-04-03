@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 
 const sidebarItems = [
@@ -12,15 +12,23 @@ const sidebarItems = [
 ];
 
 export default function SupplierSidebar() {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
 
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/", { replace: true });
+  };
   const supplierName =
     user?.companyName ||
     user?.company ||
     `${user?.firstName || ""} ${user?.lastName || ""}`.trim() ||
     "Supplier Account";
 
-  const supplierInitial = supplierName?.charAt(0)?.toUpperCase() || "S";
+  const supplierInitial =
+    user?.emails?.[0]?.address?.charAt(0)?.toUpperCase() ||
+    supplierName?.charAt(0)?.toUpperCase() ||
+    "S";
 
   return (
     <aside className="hidden w-64 shrink-0 bg-[#062f29] px-3 py-4 text-white lg:flex lg:flex-col">
@@ -48,10 +56,9 @@ export default function SupplierSidebar() {
             to={item.to}
             end={item.to === "/supplier"}
             className={({ isActive }) =>
-              `flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition ${
-                isActive
-                  ? "bg-primary text-text-main shadow-sm"
-                  : "text-white/75 hover:bg-white/10 hover:text-white"
+              `flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition ${isActive
+                ? "bg-primary text-text-main shadow-sm"
+                : "text-white/75 hover:bg-white/10 hover:text-white"
               }`
             }
           >
@@ -70,7 +77,7 @@ export default function SupplierSidebar() {
             {supplierInitial}
           </div>
 
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">  {/* 👈 added flex-1 */}
             <p className="truncate text-sm font-semibold text-white">
               {supplierName}
             </p>
@@ -78,6 +85,17 @@ export default function SupplierSidebar() {
               Supplier Account
             </p>
           </div>
+
+          {/* 👇 add this button */}
+          <button
+            type="button"
+            onClick={handleSignOut}
+            title="Sign out"
+            className="shrink-0 flex items-center justify-center rounded-lg p-1.5 text-white/60 hover:bg-white/10 hover:text-red-400 transition-colors"
+          >
+            <span className="material-symbols-outlined text-[20px]">logout</span>
+          </button>
+
         </div>
       </div>
     </aside>

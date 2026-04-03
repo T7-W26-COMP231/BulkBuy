@@ -1,4 +1,20 @@
+import { useAuth } from "../../contexts/AuthContext";
+
 export default function SupplierTopbar() {
+  const { user } = useAuth();
+
+  const supplierName =
+    user?.companyName ||
+    user?.company ||
+    `${user?.firstName || ""} ${user?.lastName || ""}`.trim() ||
+    "Supplier Account";
+
+  const supplierInitial =
+    user?.emails?.[0]?.address?.charAt(0)?.toUpperCase() ||
+    supplierName?.charAt(0)?.toUpperCase() ||
+    "S";
+  //const avatarSrc = user?.avatar ?? null;
+
   return (
     <header className="bg-background-light px-6 py-4 md:px-8">
       <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
@@ -36,13 +52,22 @@ export default function SupplierTopbar() {
             </span>
           </button>
 
+          {/* 👇 updated avatar */}
           <button
             type="button"
             className="overflow-hidden rounded-full border border-neutral-light bg-white"
           >
+            {/* avatarSrc ? (
+    <img
+      src={avatarSrc}
+      alt={supplierName}
+      className="size-10 object-cover"
+    />
+  ) : ( */}
             <div className="flex size-10 items-center justify-center bg-orange-100 text-sm font-bold text-orange-600">
-              S
+              {supplierInitial}
             </div>
+            {/* ) */}
           </button>
         </div>
       </div>

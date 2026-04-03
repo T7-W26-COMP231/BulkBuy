@@ -62,3 +62,10 @@ export const fetchSupplierSuppliesByStatus = async (supplierId, status) => {
   });
   return response.data;
 };
+
+export const fetchSupplierRecentSupplies = async () => {
+  const response = await api.get("/supls", {
+    params: { limit: 5 }
+  });
+  return response.data;
+};

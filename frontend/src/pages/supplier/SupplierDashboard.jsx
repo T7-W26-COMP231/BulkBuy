@@ -2,43 +2,8 @@ import { Navigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { useEffect, useState } from "react";
 import SupplierLayout from "../../components/supplier/SupplierLayout";
-import { fetchSupplierDashboardSummary, fetchSupplierAggregations, fetchSupplierSuppliesByStatus } from "../../api/supplyApi";
+import { fetchSupplierDashboardSummary, fetchSupplierAggregations, fetchSupplierSuppliesByStatus, fetchSupplierRecentSupplies } from "../../api/supplyApi";
 
-const activityRows = [
-  {
-    id: 1,
-    title: "Quote Submitted",
-    subtitle: "#QT-2948",
-    status: "Trending",
-    statusClasses: "bg-emerald-100 text-emerald-700",
-    users: "4,281 users",
-    timestamp: "04h 21m ago",
-    value: "$840,000",
-    icon: "receipt_long",
-  },
-  {
-    id: 2,
-    title: "Order Approved",
-    subtitle: "#ORD-9921",
-    status: "Processing",
-    statusClasses: "bg-orange-100 text-orange-700",
-    users: "2,104 users",
-    timestamp: "01h 15m ago",
-    value: "$1,200,000",
-    icon: "check_box",
-  },
-  {
-    id: 3,
-    title: "Window Extension",
-    subtitle: "Chicago Region",
-    status: "Stable",
-    statusClasses: "bg-slate-200 text-slate-700",
-    users: "942 users",
-    timestamp: "12h 44m ago",
-    value: "$320,000",
-    icon: "history",
-  },
-];
 
 function SupplierStatCard({ icon, label, value, extra, accent, extraColor }) {
   return (
@@ -65,7 +30,7 @@ function SupplierStatCard({ icon, label, value, extra, accent, extraColor }) {
 
 export default function SupplierDashboard() {
   const { user, accessToken } = useAuth();
-
+  const [recentSupplies, setRecentSupplies] = useState([]);
   const [dashboardSummary, setDashboardSummary] = useState({
     activeQuotes: "0",
     activeAggregationWindows: "0",
@@ -84,7 +49,7 @@ export default function SupplierDashboard() {
   useEffect(() => {
     const loadDashboardSummary = async () => {
       try {
-        const [summaryRes, aggrRes, quoteRes, receivedRes, acceptedRes, dispatchedRes, deliveredRes, cancelledRes] = await Promise.all([
+        const [summaryRes, aggrRes, quoteRes, receivedRes, acceptedRes, dispatchedRes, deliveredRes, cancelledRes, recentRes] = await Promise.all([
           fetchSupplierDashboardSummary(),
           fetchSupplierAggregations(user._id),
           fetchSupplierSuppliesByStatus(user._id, "quote"),
@@ -93,6 +58,8 @@ export default function SupplierDashboard() {
           fetchSupplierSuppliesByStatus(user._id, "dispatched"),
           fetchSupplierSuppliesByStatus(user._id, "delivered"),
           fetchSupplierSuppliesByStatus(user._id, "cancelled"),
+          fetchSupplierRecentSupplies(), // 👈 add this
+
         ]);
 
         const summary = summaryRes?.data || {};
@@ -115,6 +82,9 @@ export default function SupplierDashboard() {
           delivered: deliveredRes?.total ?? 0,
           cancelled: cancelledRes?.total ?? 0,
         });
+        setRecentSupplies(recentRes?.items || []);
+        console.log("recentRes:", recentRes); // 👈 add this
+
         console.log("user._id:", user._id);
         console.log("quoteRes:", quoteRes);
       } catch (error) {
@@ -128,7 +98,7 @@ export default function SupplierDashboard() {
   }, [accessToken, user]);
 
   if (!accessToken || !user) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/" replace />;
   }
 
   if (user.role !== "supplier") {
@@ -293,56 +263,58 @@ export default function SupplierDashboard() {
               </thead>
 
               <tbody className="divide-y divide-neutral-light">
-                {activityRows.map((row) => (
-                  <tr
-                    key={row.id}
-                    className="transition hover:bg-neutral-light/40"
-                  >
-                    <td className="px-6 py-5">
-                      <div className="flex items-start gap-3">
-                        <div className="flex size-10 items-center justify-center rounded-xl bg-neutral-light text-text-muted">
-                          <span className="material-symbols-outlined text-[20px]">
-                            {row.icon}
-                          </span>
-                        </div>
 
-                        <div>
-                          <p className="text-sm font-semibold text-text-main">
-                            {row.title}
-                          </p>
-                          <p className="mt-1 text-xs text-text-muted">
-                            {row.subtitle}
-                          </p>
-                        </div>
-                      </div>
-                    </td>
-
-                    <td className="px-6 py-5">
-                      <span
-                        className={`inline-flex rounded-lg px-3 py-1 text-xs font-bold ${row.statusClasses}`}
-                      >
-                        {row.status}
-                      </span>
-                    </td>
-
-                    <td className="px-6 py-5 text-sm font-medium text-text-main">
-                      {row.users}
-                    </td>
-
-                    <td className="px-6 py-5 text-sm text-text-muted">
-                      <div className="flex items-center gap-2">
-                        <span className="material-symbols-outlined text-[16px]">
-                          schedule
-                        </span>
-                        {row.timestamp}
-                      </div>
-                    </td>
-
-                    <td className="px-6 py-5 text-right text-sm font-bold text-text-main">
-                      {row.value}
+                {recentSupplies.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="px-6 py-10 text-center text-sm text-text-muted">
+                      No recent activity found.
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  recentSupplies.map((supply) => {
+                    const statusColors = {
+                      quote: "bg-blue-50 text-blue-700",
+                      received: "bg-emerald-100 text-emerald-700",
+                      accepted: "bg-green-100 text-green-700",
+                      dispatched: "bg-orange-100 text-orange-700",
+                      delivered: "bg-purple-100 text-purple-700",
+                      cancelled: "bg-red-100 text-red-700",
+                    };
+                    return (
+                      <tr key={supply._id} className="transition hover:bg-neutral-light/40">
+                        <td className="px-6 py-5">
+                          <div className="flex items-start gap-3">
+                            <div className="flex size-10 items-center justify-center rounded-xl bg-neutral-light text-text-muted">
+                              <span className="material-symbols-outlined text-[20px]">receipt_long</span>
+                            </div>
+                            <div>
+                              <p className="text-sm font-semibold text-text-main">Supply Request</p>
+                              <p className="mt-1 text-xs text-text-muted">#{supply._id.slice(-6)}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-5">
+                          <span className={`inline-flex rounded-lg px-3 py-1 text-xs font-bold ${statusColors[supply.status] ?? "bg-slate-100 text-slate-700"}`}>
+                            {supply.status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-5 text-sm font-medium text-text-main">
+                          {supply.items?.length ?? 0} item(s)
+                        </td>
+                        <td className="px-6 py-5 text-sm text-text-muted">
+                          <div className="flex items-center gap-2">
+                            <span className="material-symbols-outlined text-[16px]">schedule</span>
+                            {new Date(supply.createdAt).toLocaleDateString()}
+                          </div>
+                        </td>
+                        <td className="px-6 py-5 text-right text-sm font-bold text-text-main">
+                          ${supply.items?.[0]?.quotes?.[0]?.pricePerBulkUnit ?? 0}
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+
               </tbody>
             </table>
           </div>

@@ -76,6 +76,10 @@ async function listSupplies(req, res) {
     if (req.query.supplierId) {
       filter.supplierId = req.query.supplierId;
     }
+    // 👇 add this
+    if (req.user?.role === 'supplier') {
+      filter.supplierId = req.user._id;
+    }
 
     const result = await supplyService.listSupplies(filter, {
       page,
@@ -89,6 +93,7 @@ async function listSupplies(req, res) {
       ...result,
     });
   } catch (err) {
+    console.error("❌ listSupplies error:", err); // 👈 add this
     await auditService.logEvent({
       eventType: 'supply.list.failed',
       actor,

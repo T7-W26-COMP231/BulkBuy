@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import { useAuth } from "./contexts/AuthContext";
 import { io } from "socket.io-client";
@@ -42,7 +42,27 @@ function PlaceholderPage({ title }) {
     </div>
   );
 }
+function RoleRedirect() {
+  const { user, accessToken, initializing } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
 
+  useEffect(() => {
+    // wait until auth is fully restored from localStorage
+    if (initializing) return;
+    if (!accessToken || !user) return;
+
+    if (user.role === "supplier" && !location.pathname.startsWith("/supplier")) {
+      navigate("/supplier/dashboard", { replace: true });
+    }
+
+    if (user.role === "administrator" && !location.pathname.startsWith("/admin")) {
+      navigate("/admin", { replace: true });
+    }
+  }, [user, accessToken, initializing, location.pathname]);
+
+  return null;
+}
 export default function App() {
   const { user, signIn, signUp } = useAuth();
 
@@ -66,79 +86,83 @@ export default function App() {
   }, []);
 
   return (
-    <Routes>
-      {/* Customer routes */}
-      <Route path="/" element={<HomePage />} />
-      <Route path="/marketplace" element={<Shop />} />
-      <Route path="/orders" element={<OrdersPage />} />
-      <Route path="/cart" element={<CartPage />} />
-      <Route path="/items/:id" element={<Item />} />
-      <Route path="/product/:id" element={<ProductDetailsPage />} />
-      <Route path="/products" element={<ProductListPage />} />
-      <Route path="/review-modify-intent" element={<ReviewModifyIntentPage />} />
+    <>
+      <RoleRedirect />
+      <Routes>
+        {/* Customer routes */}
+        <Route path="/" element={<HomePage />} />
+        <Route path="/marketplace" element={<Shop />} />
+        <Route path="/orders" element={<OrdersPage />} />
+        <Route path="/cart" element={<CartPage />} />
+        <Route path="/items/:id" element={<Item />} />
+        <Route path="/product/:id" element={<ProductDetailsPage />} />
+        <Route path="/products" element={<ProductListPage />} />
+        <Route path="/review-modify-intent" element={<ReviewModifyIntentPage />} />
 
-      {/* Supplier routes */}
-      <Route path="/supplier" element={<Navigate to="/supplier/dashboard" replace />} />
-<Route path="/supplier/dashboard" element={<SupplierDashboard />} />
-      <Route path="/supplier/profile" element={<SupplierProfilePage />} />
-      <Route path="/supplier/approved-items" element={<SupplierApprovedItemsPage />} />
-      <Route path="/supplier/quotes" element={<SupplierQuotesPage />} />
-      <Route path="/supplier/orders" element={<SupplierOrdersPage />} />
-      <Route path="/supplier/demand-status" element={<SupplierDemandStatusPage />} />
-      <Route path="/supplier/reports" element={<SupplierReportsPage />} />
+        {/* Supplier routes */}
+        <Route path="/supplier" element={<Navigate to="/supplier/dashboard" replace />} />
+        <Route path="/supplier/dashboard" element={<SupplierDashboard />} />
+        <Route path="/supplier/profile" element={<SupplierProfilePage />} />
+        <Route path="/supplier/approved-items" element={<SupplierApprovedItemsPage />} />
+        <Route path="/supplier/quotes" element={<SupplierQuotesPage />} />
+        <Route path="/supplier/orders" element={<SupplierOrdersPage />} />
+        <Route path="/supplier/demand-status" element={<SupplierDemandStatusPage />} />
+        <Route path="/supplier/reports" element={<SupplierReportsPage />} />
 
-      {/* Admin routes */}
-      <Route path="/admin" element={<AdminDashboard />} />
-      <Route path="/admin/inventory" element={<AdminInventoryPage />} />
-      <Route path="/admin/bulk-orders" element={<AdminBulkOrdersPage />} />
-      <Route path="/admin/pricing-brackets" element={<PricingBracketsPage />} />
+        {/* Admin routes */}
+        <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/admin/inventory" element={<AdminInventoryPage />} />
+        <Route path="/admin/bulk-orders" element={<AdminBulkOrdersPage />} />
+        <Route path="/admin/pricing-brackets" element={<PricingBracketsPage />} />
 
-      <Route path="/admin/supplier-quotes" element={<AdminQuotesReviewPage />} />
+        <Route path="/admin/supplier-quotes" element={<AdminQuotesReviewPage />} />
 
-      <Route path="/admin/sales-window" element={<CreateSalesWindowForm />} />
-      <Route path="/admin/settings" element={<AdminSettingsPage />} />
+        <Route path="/admin/sales-window" element={<CreateSalesWindowForm />} />
+        <Route path="/admin/settings" element={<AdminSettingsPage />} />
 
-      {/* General placeholder routes */}
-      <Route path="/about" element={<PlaceholderPage title="About Us" />} />
-      <Route path="/careers" element={<PlaceholderPage title="Careers" />} />
-      <Route path="/partner-login" element={<PlaceholderPage title="Partner Login" />} />
-      <Route path="/how-it-works" element={<PlaceholderPage title="How It Works" />} />
-      <Route path="/help-center" element={<PlaceholderPage title="Help Center" />} />
-      <Route path="/safety" element={<PlaceholderPage title="Safety" />} />
-      <Route path="/privacy-policy" element={<PlaceholderPage title="Privacy Policy" />} />
-      <Route path="/terms-of-service" element={<PlaceholderPage title="Terms of Service" />} />
-      <Route path="/notifications" element={<PlaceholderPage title="Notifications" />} />
-      <Route path="/profile" element={<PlaceholderPage title="Profile" />} />
-      <Route
-  path="/login"
-  element={
-    <AuthTabs
-      onSignIn={async (payload) => {
-        const res = await signIn(payload);
+        {/* General placeholder routes */}
+        <Route path="/about" element={<PlaceholderPage title="About Us" />} />
+        <Route path="/careers" element={<PlaceholderPage title="Careers" />} />
+        <Route path="/partner-login" element={<PlaceholderPage title="Partner Login" />} />
+        <Route path="/how-it-works" element={<PlaceholderPage title="How It Works" />} />
+        <Route path="/help-center" element={<PlaceholderPage title="Help Center" />} />
+        <Route path="/safety" element={<PlaceholderPage title="Safety" />} />
+        <Route path="/privacy-policy" element={<PlaceholderPage title="Privacy Policy" />} />
+        <Route path="/terms-of-service" element={<PlaceholderPage title="Terms of Service" />} />
+        <Route path="/notifications" element={<PlaceholderPage title="Notifications" />} />
+        <Route path="/profile" element={<PlaceholderPage title="Profile" />} />
 
-        if (res?.ok) {
-          const role = res.user?.role;
+        {/* <Route
+          path="/login"
+          element={
+            <AuthTabs
+              onSignIn={async (payload) => {
+                const res = await signIn(payload);
 
-          if (role === "supplier") {
-            window.location.href = "/supplier/dashboard";
-          } else if (role === "admin") {
-            window.location.href = "/admin";
-          } else {
-            window.location.href = "/";
+                if (res?.ok) {
+                  const role = res.user?.role;
+
+                  if (role === "supplier") {
+                    window.location.href = "/supplier/dashboard";
+                  } else if (role === "admin") {
+                    window.location.href = "/admin";
+                  } else {
+                    window.location.href = "/";
+                  }
+                }
+
+                return res;
+              }}
+              onSignUp={signUp}
+            />
           }
-        }
-
-        return res;
-      }}
-      onSignUp={signUp}
-    />
-  }
-/>
-      <Route path="/community" element={<PlaceholderPage title="Community" />} />
-      <Route path="/settings" element={<PlaceholderPage title="Settings" />} />
-      <Route path="/savings" element={<PlaceholderPage title="Savings Vault" />} />
-      <Route path="/orders" element={<OrdersPage />} />
-      <Route path="/order-details" element={<OrderDetailsPage />} />
-    </Routes>
+        /> */}
+        <Route path="/community" element={<PlaceholderPage title="Community" />} />
+        <Route path="/settings" element={<PlaceholderPage title="Settings" />} />
+        <Route path="/savings" element={<PlaceholderPage title="Savings Vault" />} />
+        <Route path="/orders" element={<OrdersPage />} />
+        <Route path="/order-details" element={<OrderDetailsPage />} />
+      </Routes>
+    </>
   );
 }

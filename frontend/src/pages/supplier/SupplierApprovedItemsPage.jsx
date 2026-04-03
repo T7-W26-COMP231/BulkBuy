@@ -1,13 +1,364 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import SupplierLayout from "../../components/supplier/SupplierLayout";
 
-export default function SupplierProfilePage() {
+const hardcodedItems = [
+  {
+    _id: "1",
+    sku: "AVG-0012",
+    title: "Organic Avocados",
+    unit: "48ct Box",
+    category: "Produce",
+    categoryIcon: "nutrition",
+    categoryColor: "bg-green-100 text-green-700",
+    quoteStatus: "no_quote",
+    image: null,
+    iconBg: "bg-green-100",
+    iconColor: "text-green-600",
+    icon: "nutrition",
+  },
+  {
+    _id: "2",
+    sku: "RIC-9932",
+    title: "Jasmine Rice 20lb",
+    unit: "Bag",
+    category: "Pantry",
+    categoryIcon: "grocery",
+    categoryColor: "bg-orange-100 text-orange-700",
+    quoteStatus: "draft",
+    image: null,
+    iconBg: "bg-orange-100",
+    iconColor: "text-orange-600",
+    icon: "grocery",
+  },
+  {
+    _id: "3",
+    sku: "OIL-2210",
+    title: "Cold Pressed Olive Oil",
+    unit: "1 Gallon",
+    category: "Pantry",
+    categoryIcon: "grocery",
+    categoryColor: "bg-orange-100 text-orange-700",
+    quoteStatus: "approved",
+    image: null,
+    iconBg: "bg-amber-100",
+    iconColor: "text-amber-600",
+    icon: "oil_barrel",
+  },
+  {
+    _id: "4",
+    sku: "DAI-4451",
+    title: "Almond Milk (Unsweetened)",
+    unit: "32oz Carton",
+    category: "Dairy",
+    categoryIcon: "water_drop",
+    categoryColor: "bg-blue-100 text-blue-700",
+    quoteStatus: "no_quote",
+    image: null,
+    iconBg: "bg-blue-100",
+    iconColor: "text-blue-600",
+    icon: "water_drop",
+  },
+  {
+    _id: "5",
+    sku: "PAN-8812",
+    title: "Tipo 00 Flour",
+    unit: "50lb Sack",
+    category: "Pantry",
+    categoryIcon: "grocery",
+    categoryColor: "bg-orange-100 text-orange-700",
+    quoteStatus: "reviewing",
+    image: null,
+    iconBg: "bg-slate-100",
+    iconColor: "text-slate-600",
+    icon: "grocery",
+  },
+  {
+    _id: "6",
+    sku: "BEV-3310",
+    title: "Sparkling Water 24pk",
+    unit: "Case",
+    category: "Dairy",
+    categoryIcon: "water_drop",
+    categoryColor: "bg-blue-100 text-blue-700",
+    quoteStatus: "no_quote",
+    image: null,
+    iconBg: "bg-cyan-100",
+    iconColor: "text-cyan-600",
+    icon: "water_drop",
+  },
+];
+
+const CATEGORIES = ["All", "Produce", "Pantry", "Dairy"];
+
+const quoteStatusConfig = {
+  no_quote: {
+    label: "No Quote",
+    classes: "bg-red-50 text-red-600",
+    dot: "bg-red-500",
+  },
+  draft: {
+    label: "Draft",
+    classes: "bg-yellow-50 text-yellow-600",
+    dot: "bg-yellow-500",
+  },
+  approved: {
+    label: "Approved",
+    classes: "bg-emerald-50 text-emerald-600",
+    dot: "bg-emerald-500",
+  },
+  reviewing: {
+    label: "Reviewing",
+    classes: "bg-blue-50 text-blue-600",
+    dot: "bg-blue-500",
+  },
+};
+
+function QuoteStatusBadge({ status }) {
+  const config = quoteStatusConfig[status] ?? {
+    label: status,
+    classes: "bg-slate-50 text-slate-600",
+    dot: "bg-slate-400",
+  };
+  return (
+    <span className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1 text-xs font-bold ${config.classes}`}>
+      <span className={`size-1.5 rounded-full ${config.dot}`} />
+      {config.label}
+    </span>
+  );
+}
+
+function ActionButton({ status, onCreateQuote, onResumeQuote, onViewDetails }) {
+  if (status === "approved") {
+    return (
+      <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-text-muted">
+        Active
+        <span className="material-symbols-outlined text-[16px]">lock</span>
+      </span>
+    );
+  }
+  if (status === "draft") {
+    return (
+      <button
+        type="button"
+        onClick={onResumeQuote}
+        className="inline-flex items-center gap-1.5 text-sm font-bold text-primary transition hover:opacity-75"
+      >
+        Resume Quote
+        <span className="material-symbols-outlined text-[16px]">edit</span>
+      </button>
+    );
+  }
+  if (status === "reviewing") {
+    return (
+      <button
+        type="button"
+        onClick={onViewDetails}
+        className="inline-flex items-center gap-1.5 text-sm font-bold text-text-main transition hover:opacity-75"
+      >
+        View Details
+        <span className="material-symbols-outlined text-[16px]">visibility</span>
+      </button>
+    );
+  }
+  // no_quote
+  return (
+    <button
+      type="button"
+      onClick={onCreateQuote}
+      className="inline-flex items-center gap-1.5 text-sm font-bold text-primary transition hover:opacity-75"
+    >
+      Create Quote
+      <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
+    </button>
+  );
+}
+
+export default function SupplierApprovedItemsPage() {
+  const navigate = useNavigate();
+  const [activeCategory, setActiveCategory] = useState("All");
+  const [search, setSearch] = useState("");
+
+  const filtered = hardcodedItems.filter((item) => {
+    const matchesCategory =
+      activeCategory === "All" || item.category === activeCategory;
+    const matchesSearch =
+      search === "" ||
+      item.title.toLowerCase().includes(search.toLowerCase()) ||
+      item.sku.toLowerCase().includes(search.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
+
+  const categoryIcons = {
+    All: "apps",
+    Produce: "nutrition",
+    Pantry: "grocery",
+    Dairy: "water_drop",
+  };
+
   return (
     <SupplierLayout>
-      <div className="rounded-2xl border border-neutral-light bg-white p-8 shadow-sm">
-        <h1 className="text-3xl font-bold text-text-main">Supplier Profile</h1>
-        <p className="mt-3 text-text-muted">
-          This page is connected through routing and can be built out later.
-        </p>
+      <div className="mx-auto flex max-w-7xl flex-col gap-6">
+
+        {/* Header */}
+        <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-text-main">Approved Items</h1>
+            <p className="mt-1 text-sm text-text-muted">
+              Manage the inventory you are approved to supply and track quote statuses.
+            </p>
+          </div>
+          <button
+            type="button"
+            className="inline-flex items-center gap-2 rounded-2xl bg-primary px-5 py-3 text-sm font-bold text-text-main transition hover:opacity-90"
+          >
+            <span className="material-symbols-outlined text-[18px]">add</span>
+            Request New Item
+          </button>
+        </div>
+
+        {/* Filters + Search */}
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          {/* Category tabs */}
+          <div className="flex items-center gap-2 flex-wrap">
+            {CATEGORIES.map((cat) => (
+              <button
+                key={cat}
+                type="button"
+                onClick={() => setActiveCategory(cat)}
+                className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition ${activeCategory === cat
+                  ? "bg-primary text-text-main shadow-sm"
+                  : "bg-white border border-neutral-light text-text-muted hover:bg-neutral-light"
+                  }`}
+              >
+                <span className="material-symbols-outlined text-[16px]">
+                  {categoryIcons[cat]}
+                </span>
+                {cat}
+              </button>
+            ))}
+          </div>
+
+          {/* Search */}
+          <div className="relative w-full max-w-xs">
+            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-text-muted">
+              search
+            </span>
+            <input
+              type="text"
+              placeholder="Search by item name or ID..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full rounded-xl border border-neutral-light bg-white py-2.5 pl-10 pr-4 text-sm text-text-main outline-none transition placeholder:text-text-muted focus:border-primary"
+            />
+          </div>
+        </div>
+
+        {/* Table */}
+        <div className="overflow-hidden rounded-2xl border border-neutral-light bg-white shadow-sm">
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[700px] text-left">
+              <thead className="border-b border-neutral-light bg-neutral-light/40">
+                <tr>
+                  <th className="px-6 py-4 text-xs font-bold uppercase tracking-[0.16em] text-text-muted">
+                    Item Name
+                  </th>
+                  <th className="px-6 py-4 text-xs font-bold uppercase tracking-[0.16em] text-text-muted">
+                    Category
+                  </th>
+                  <th className="px-6 py-4 text-xs font-bold uppercase tracking-[0.16em] text-text-muted">
+                    Quote Status
+                  </th>
+                  <th className="px-6 py-4 text-right text-xs font-bold uppercase tracking-[0.16em] text-text-muted">
+                    Action
+                  </th>
+                </tr>
+              </thead>
+
+              <tbody className="divide-y divide-neutral-light">
+                {filtered.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} className="px-6 py-12 text-center text-sm text-text-muted">
+                      No items found.
+                    </td>
+                  </tr>
+                ) : (
+                  filtered.map((item) => (
+                    <tr key={item._id} className="transition hover:bg-neutral-light/40">
+                      {/* Item Name */}
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className={`flex size-10 items-center justify-center rounded-xl ${item.iconBg} ${item.iconColor}`}>
+                            <span className="material-symbols-outlined text-[20px]">
+                              {item.icon}
+                            </span>
+                          </div>
+                          <div>
+                            <p className="text-sm font-semibold text-text-main">
+                              {item.title}
+                            </p>
+                            <p className="mt-0.5 text-xs text-text-muted">
+                              #{item.sku} • {item.unit}
+                            </p>
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* Category */}
+                      <td className="px-6 py-4">
+                        <span className={`inline-flex rounded-lg px-3 py-1 text-xs font-semibold ${item.categoryColor}`}>
+                          {item.category}
+                        </span>
+                      </td>
+
+                      {/* Quote Status */}
+                      <td className="px-6 py-4">
+                        <QuoteStatusBadge status={item.quoteStatus} />
+                      </td>
+
+                      {/* Action */}
+                      <td className="px-6 py-4 text-right">
+                        <ActionButton
+                          status={item.quoteStatus}
+                          onCreateQuote={() => navigate(`/supplier/quotes/create?itemId=${item._id}`)}
+                          onResumeQuote={() => navigate(`/supplier/quotes/create?itemId=${item._id}&resume=true`)}
+                          onViewDetails={() => navigate(`/supplier/quotes?itemId=${item._id}`)}
+                        />
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Pagination */}
+          <div className="flex items-center justify-between border-t border-neutral-light px-6 py-4">
+            <p className="text-sm text-text-muted">
+              Showing <span className="font-semibold text-text-main">1</span> to{" "}
+              <span className="font-semibold text-text-main">{filtered.length}</span> of{" "}
+              <span className="font-semibold text-text-main">{filtered.length}</span> results
+            </p>
+            <div className="flex items-center gap-1">
+              <button type="button" className="flex size-8 items-center justify-center rounded-lg border border-neutral-light text-text-muted hover:bg-neutral-light transition">
+                <span className="material-symbols-outlined text-[16px]">chevron_left</span>
+              </button>
+              <button type="button" className="flex size-8 items-center justify-center rounded-lg bg-primary text-sm font-bold text-text-main">
+                1
+              </button>
+              <button type="button" className="flex size-8 items-center justify-center rounded-lg border border-neutral-light text-sm text-text-muted hover:bg-neutral-light transition">
+                2
+              </button>
+              <button type="button" className="flex size-8 items-center justify-center rounded-lg border border-neutral-light text-sm text-text-muted hover:bg-neutral-light transition">
+                3
+              </button>
+              <button type="button" className="flex size-8 items-center justify-center rounded-lg border border-neutral-light text-text-muted hover:bg-neutral-light transition">
+                <span className="material-symbols-outlined text-[16px]">chevron_right</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
       </div>
     </SupplierLayout>
   );

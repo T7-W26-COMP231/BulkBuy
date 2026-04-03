@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext.jsx"; // adjust path if needed
 import { useToast } from "../../contexts/ToastProvider.jsx"; // adjust path if needed
 import AuthTabs from "../sign-in-up/AuthTabs.jsx"; // adjust path if needed
@@ -14,14 +14,14 @@ const sidebarItems = [
 ];
 
 function ToastAuthWrapper({ toastControls }) {
-  const { signIn, signOut } = useAuth(); // 👈 add signOut here
+  const { signIn, signOut } = useAuth(); // add signOut here
 
   const handleSignIn = async (payload) => {
     try {
       const res = await signIn(payload);
 
       if (res?.user?.role !== "administrator") {
-        await signOut(); // 👈 now it's defined
+        await signOut();
         return { ok: false, error: "Access denied. Administrator credentials required." };
       }
 
@@ -29,16 +29,6 @@ function ToastAuthWrapper({ toastControls }) {
       return { ok: true, user: res.user };
     } catch (err) {
       return { ok: false, error: err?.message ?? "Sign in error" };
-    }
-  };
-
-  const handleSignUp = async (payload) => {
-    try {
-      const res = await signUp(payload);
-      toastControls?.dismiss?.();
-      return res;
-    } catch (err) {
-      return { ok: false, error: err?.message ?? "Registration error" };
     }
   };
 
@@ -57,6 +47,7 @@ function ToastAuthWrapper({ toastControls }) {
 export default function AdminSidebar() {
   const { user, signOut } = useAuth();
   const { showToast, clearAll } = useToast();
+  const navigate = useNavigate();
 
   const displayName = user ? `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() : null;
   const email = user?.emails?.[0]?.address ?? null;
@@ -73,6 +64,7 @@ export default function AdminSidebar() {
     try {
       await signOut();
       clearAll();
+      navigate("/", { replace: true }); // added this to redirect to homepage (bulk buy recommended tab)
     } catch (err) {
       console.error("signOut error:", err);
     }

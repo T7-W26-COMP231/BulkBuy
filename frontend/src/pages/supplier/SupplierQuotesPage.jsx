@@ -1,6 +1,71 @@
+import { useMemo, useState } from "react";
 import SupplierLayout from "../../components/supplier/SupplierLayout";
 
 export default function SupplierQuotesPage() {
+  const [tiers, setTiers] = useState([
+    { id: 1, minQty: "100", unitPrice: "2.50" },
+    { id: 2, minQty: "500", unitPrice: "2.25" },
+    { id: 3, minQty: "1000", unitPrice: "2.00" },
+  ]);
+
+  const handleTierChange = (id, field, value) => {
+    setTiers((current) =>
+      current.map((tier) =>
+        tier.id === id ? { ...tier, [field]: value } : tier
+      )
+    );
+  };
+
+  const handleAddTier = () => {
+    setTiers((current) => [
+      ...current,
+      {
+        id: Date.now(),
+        minQty: "",
+        unitPrice: "",
+      },
+    ]);
+  };
+
+  const validationErrors = useMemo(() => {
+    const errors = [];
+
+    for (let i = 0; i < tiers.length; i += 1) {
+      const currentTier = tiers[i];
+      const previousTier = tiers[i - 1];
+
+      const currentQty = Number(currentTier.minQty);
+      const currentPrice = Number(currentTier.unitPrice);
+
+      if (!currentTier.minQty || currentQty <= 0) {
+        errors.push(`Tier ${i + 1}: minimum quantity must be greater than 0.`);
+      }
+
+      if (!currentTier.unitPrice || currentPrice <= 0) {
+        errors.push(`Tier ${i + 1}: unit price must be greater than 0.`);
+      }
+
+      if (previousTier) {
+        const previousQty = Number(previousTier.minQty);
+        const previousPrice = Number(previousTier.unitPrice);
+
+        if (currentQty <= previousQty) {
+          errors.push(
+            `Tier ${i + 1}: minimum quantity must be higher than Tier ${i}.`
+          );
+        }
+
+        if (currentPrice > previousPrice) {
+          errors.push(
+            `Tier ${i + 1}: unit price cannot be higher than Tier ${i}.`
+          );
+        }
+      }
+    }
+
+    return errors;
+  }, [tiers]);
+
   return (
     <SupplierLayout>
       <div className="space-y-6">
@@ -101,8 +166,7 @@ export default function SupplierQuotesPage() {
                 </div>
               </div>
             </div>
-
-            {/* Dynamic tier table mock-up */}
+            {/* Dynamic tier table with validation */}
             <div className="rounded-2xl border border-neutral-light bg-white p-6 shadow-sm">
               <div className="mb-6 flex items-center justify-between">
                 <div>
@@ -114,7 +178,11 @@ export default function SupplierQuotesPage() {
                   </p>
                 </div>
 
-                <button className="rounded-lg bg-primary/10 px-4 py-2 text-sm font-semibold text-primary">
+                <button
+                  type="button"
+                  onClick={handleAddTier}
+                  className="rounded-lg bg-primary/10 px-4 py-2 text-sm font-semibold text-primary"
+                >
                   + Add Tier
                 </button>
               </div>
@@ -127,59 +195,93 @@ export default function SupplierQuotesPage() {
                 <span>Discount</span>
               </div>
 
-              {/* Tier rows */}
+              {/* Dynamic tier rows */}
               <div className="mt-4 space-y-3">
-                <div className="grid grid-cols-4 gap-4 rounded-xl border border-neutral-light px-4 py-3">
-                  <span className="font-semibold text-text-main">Tier 1</span>
-                  <input
-                    type="number"
-                    value="100"
-                    readOnly
-                    className="rounded-lg border border-neutral-light bg-neutral-light px-3 py-2"
-                  />
-                  <input
-                    type="number"
-                    value="2.50"
-                    readOnly
-                    className="rounded-lg border border-neutral-light bg-neutral-light px-3 py-2"
-                  />
-                  <span className="font-semibold text-green-600">0%</span>
-                </div>
+                {tiers.map((tier, index) => {
+                  const previousPrice =
+                    index === 0
+                      ? Number(tier.unitPrice || 0)
+                      : Number(tiers[index - 1].unitPrice || 0);
 
-                <div className="grid grid-cols-4 gap-4 rounded-xl border border-neutral-light px-4 py-3">
-                  <span className="font-semibold text-text-main">Tier 2</span>
-                  <input
-                    type="number"
-                    value="500"
-                    readOnly
-                    className="rounded-lg border border-neutral-light bg-neutral-light px-3 py-2"
-                  />
-                  <input
-                    type="number"
-                    value="2.25"
-                    readOnly
-                    className="rounded-lg border border-neutral-light bg-neutral-light px-3 py-2"
-                  />
-                  <span className="font-semibold text-green-600">10%</span>
-                </div>
+                  const currentPrice = Number(tier.unitPrice || 0);
 
-                <div className="grid grid-cols-4 gap-4 rounded-xl border border-neutral-light px-4 py-3">
-                  <span className="font-semibold text-text-main">Tier 3</span>
-                  <input
-                    type="number"
-                    value="1000"
-                    readOnly
-                    className="rounded-lg border border-neutral-light bg-neutral-light px-3 py-2"
-                  />
-                  <input
-                    type="number"
-                    value="2.00"
-                    readOnly
-                    className="rounded-lg border border-neutral-light bg-neutral-light px-3 py-2"
-                  />
-                  <span className="font-semibold text-green-600">20%</span>
-                </div>
+                  const discount =
+                    index === 0 || previousPrice <= 0
+                      ? "0%"
+                      : `${Math.max(
+                        0,
+                        Math.round(
+                          ((previousPrice - currentPrice) / previousPrice) *
+                          100
+                        )
+                      )}%`;
+
+                  return (
+                    <div
+                      key={tier.id}
+                      className="grid grid-cols-4 gap-4 rounded-xl border border-neutral-light px-4 py-3"
+                    >
+                      <span className="font-semibold text-text-main">
+                        Tier {index + 1}
+                      </span>
+
+                      <input
+                        type="number"
+                        value={tier.minQty}
+                        onChange={(e) =>
+                          handleTierChange(
+                            tier.id,
+                            "minQty",
+                            e.target.value
+                          )
+                        }
+                        className="rounded-lg border border-neutral-light px-3 py-2"
+                      />
+
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={tier.unitPrice}
+                        onChange={(e) =>
+                          handleTierChange(
+                            tier.id,
+                            "unitPrice",
+                            e.target.value
+                          )
+                        }
+                        className="rounded-lg border border-neutral-light px-3 py-2"
+                      />
+
+                      <span className="font-semibold text-green-600">
+                        {discount}
+                      </span>
+                    </div>
+                  );
+                })}
               </div>
+
+              {validationErrors.length > 0 ? (
+                <div className="mt-5 rounded-xl border border-red-200 bg-red-50 p-4">
+                  <p className="text-sm font-semibold text-red-700">
+                    Validation Errors
+                  </p>
+                  <ul className="mt-2 space-y-1 text-sm text-red-600">
+                    {validationErrors.map((error) => (
+                      <li key={error}>• {error}</li>
+                    ))}
+                  </ul>
+                </div>
+              ) : (
+                <div className="mt-5 rounded-xl border border-green-200 bg-green-50 p-4">
+                  <p className="text-sm font-semibold text-green-700">
+                    Tier validation passed
+                  </p>
+                  <p className="mt-1 text-xs text-green-600">
+                    Each new tier has a higher quantity threshold and an equal
+                    or lower unit price.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
 
@@ -223,14 +325,20 @@ export default function SupplierQuotesPage() {
 
             <div className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-4">
               <p className="text-sm font-semibold text-amber-700">
-                Dynamic Tier Table Ready
+                Tier Validation Active
               </p>
               <p className="mt-1 text-xs text-amber-600">
-                Validation logic will be added in task #137.
+                Invalid pricing tiers are now flagged before submission.
               </p>
             </div>
 
-            <button className="mt-6 w-full rounded-xl bg-primary px-4 py-3 font-semibold text-white transition hover:opacity-90">
+            <button
+              disabled={validationErrors.length > 0}
+              className={`mt-6 w-full rounded-xl px-4 py-3 font-semibold text-white transition ${validationErrors.length > 0
+                  ? "cursor-not-allowed bg-gray-400"
+                  : "bg-primary hover:opacity-90"
+                }`}
+            >
               Submit for Review
             </button>
           </div>

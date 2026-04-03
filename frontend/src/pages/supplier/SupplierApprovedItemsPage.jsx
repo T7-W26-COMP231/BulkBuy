@@ -1,94 +1,9 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import SupplierLayout from "../../components/supplier/SupplierLayout";
 import { fetchApprovedItems } from "../../api/supplyApi";
+import { useState, useEffect } from "react";
+import { useAuth } from "../../contexts/AuthContext";
 
-const hardcodedItems = [
-  {
-    _id: "1",
-    sku: "AVG-0012",
-    title: "Organic Avocados",
-    unit: "48ct Box",
-    category: "Produce",
-    categoryIcon: "nutrition",
-    categoryColor: "bg-green-100 text-green-700",
-    quoteStatus: "no_quote",
-    image: null,
-    iconBg: "bg-green-100",
-    iconColor: "text-green-600",
-    icon: "nutrition",
-  },
-  {
-    _id: "2",
-    sku: "RIC-9932",
-    title: "Jasmine Rice 20lb",
-    unit: "Bag",
-    category: "Pantry",
-    categoryIcon: "grocery",
-    categoryColor: "bg-orange-100 text-orange-700",
-    quoteStatus: "draft",
-    image: null,
-    iconBg: "bg-orange-100",
-    iconColor: "text-orange-600",
-    icon: "grocery",
-  },
-  {
-    _id: "3",
-    sku: "OIL-2210",
-    title: "Cold Pressed Olive Oil",
-    unit: "1 Gallon",
-    category: "Pantry",
-    categoryIcon: "grocery",
-    categoryColor: "bg-orange-100 text-orange-700",
-    quoteStatus: "approved",
-    image: null,
-    iconBg: "bg-amber-100",
-    iconColor: "text-amber-600",
-    icon: "oil_barrel",
-  },
-  {
-    _id: "4",
-    sku: "DAI-4451",
-    title: "Almond Milk (Unsweetened)",
-    unit: "32oz Carton",
-    category: "Dairy",
-    categoryIcon: "water_drop",
-    categoryColor: "bg-blue-100 text-blue-700",
-    quoteStatus: "no_quote",
-    image: null,
-    iconBg: "bg-blue-100",
-    iconColor: "text-blue-600",
-    icon: "water_drop",
-  },
-  {
-    _id: "5",
-    sku: "PAN-8812",
-    title: "Tipo 00 Flour",
-    unit: "50lb Sack",
-    category: "Pantry",
-    categoryIcon: "grocery",
-    categoryColor: "bg-orange-100 text-orange-700",
-    quoteStatus: "reviewing",
-    image: null,
-    iconBg: "bg-slate-100",
-    iconColor: "text-slate-600",
-    icon: "grocery",
-  },
-  {
-    _id: "6",
-    sku: "BEV-3310",
-    title: "Sparkling Water 24pk",
-    unit: "Case",
-    category: "Dairy",
-    categoryIcon: "water_drop",
-    categoryColor: "bg-blue-100 text-blue-700",
-    quoteStatus: "no_quote",
-    image: null,
-    iconBg: "bg-cyan-100",
-    iconColor: "text-cyan-600",
-    icon: "water_drop",
-  },
-];
 
 const CATEGORIES = ["All", "Produce", "Pantry", "Dairy"];
 
@@ -179,14 +94,38 @@ export default function SupplierApprovedItemsPage() {
   const navigate = useNavigate();
   const [activeCategory, setActiveCategory] = useState("All");
   const [search, setSearch] = useState("");
+  const { accessToken, user } = useAuth();
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const filtered = hardcodedItems.filter((item) => {
+  useEffect(() => {
+    const loadItems = async () => {
+      try {
+        const res = await fetchApprovedItems();
+        setItems(res?.data || []);
+
+      } catch (err) {
+        console.error("Failed to load approved items:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (accessToken && user?.role === "supplier") {
+      loadItems();
+    }
+  }, [accessToken, user]);
+  console.log(items)
+
+  const filtered = items.filter((item) => {
     const matchesCategory =
-      activeCategory === "All" || item.category === activeCategory;
+      activeCategory === "All" ||
+      item.tags?.includes(activeCategory.toLowerCase()) ||
+      item.shipping?.class === activeCategory.toLowerCase();
     const matchesSearch =
       search === "" ||
-      item.title.toLowerCase().includes(search.toLowerCase()) ||
-      item.sku.toLowerCase().includes(search.toLowerCase());
+      item.title?.toLowerCase().includes(search.toLowerCase()) ||
+      item.sku?.toLowerCase().includes(search.toLowerCase());
     return matchesCategory && matchesSearch;
   });
 
@@ -289,26 +228,24 @@ export default function SupplierApprovedItemsPage() {
                       {/* Item Name */}
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          <div className={`flex size-10 items-center justify-center rounded-xl ${item.iconBg} ${item.iconColor}`}>
-                            <span className="material-symbols-outlined text-[20px]">
-                              {item.icon}
-                            </span>
+                          <div className="flex size-10 items-center justify-center rounded-xl bg-neutral-light overflow-hidden">
+                            {item.images?.[0] ? (
+                              <img src={item.images[0]} alt={item.title} className="size-10 object-cover" />
+                            ) : (
+                              <span className="material-symbols-outlined text-[20px] text-text-muted">inventory_2</span>
+                            )}
                           </div>
                           <div>
-                            <p className="text-sm font-semibold text-text-main">
-                              {item.title}
-                            </p>
-                            <p className="mt-0.5 text-xs text-text-muted">
-                              #{item.sku} • {item.unit}
-                            </p>
+                            <p className="text-sm font-semibold text-text-main">{item.title}</p>
+                            <p className="mt-0.5 text-xs text-text-muted">#{item.sku}</p>
                           </div>
                         </div>
                       </td>
 
                       {/* Category */}
                       <td className="px-6 py-4">
-                        <span className={`inline-flex rounded-lg px-3 py-1 text-xs font-semibold ${item.categoryColor}`}>
-                          {item.category}
+                        <span className="inline-flex rounded-lg px-3 py-1 text-xs font-semibold bg-neutral-light text-text-muted">
+                          {item.tags?.[0] || "General"}
                         </span>
                       </td>
 

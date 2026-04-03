@@ -106,7 +106,7 @@ export default function HomePage() {
       });
 
     return () => controller.abort();
-  }, [productsMeta?.region, products, detectedCity, fetchAndSetUiProducts]);
+  }, [productsMeta?.region, detectedCity, fetchAndSetUiProducts]);
 
   //-------------------------------------------------------------------------------------------------------
 
@@ -128,7 +128,7 @@ export default function HomePage() {
         const region = productsMeta?.region || detectedCity || "Toronto";
 
         await fetchAndSetEnrichedOrders({
-          userId: user._id,
+          userId: user._id || user.userId,
           region,
           page: 1,
           limit: 25,
@@ -159,7 +159,7 @@ export default function HomePage() {
     detectedCity,
     fetchAndSetEnrichedOrders,
     clearOpsState,
-    orders
+    
   ]);
 
   useEffect(() => {

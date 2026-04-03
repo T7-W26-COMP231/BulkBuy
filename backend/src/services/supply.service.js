@@ -116,45 +116,64 @@ class SupplyService {
 
     if (!supplierId) throw createError(400, 'supplierId is required');
 
+    if (!require("mongoose").Types.ObjectId.isValid(supplierId)) {
+  return {
+    activeQuotes: 0,
+    activeAggregationWindows: 0,
+    orderRequests: 0,
+    criticalAlerts: 0,
+  };
+}
+
     try {
-      const [
-        activeQuotes,
-        activeAggregationWindows,
-        cancelledSupplies,
-        suspendedAggregations
-      ] = await Promise.all([
-        SupplyRepo.count(
-          {
-            supplierId,
-            status: 'accepted',
-          },
-          opts
-        ),
-        AggregationRepo.count({
-          'itemDtos.supplierId': supplierId,
-          status: { $in: ['pending', 'in_process'] }
-        }),
-        SupplyRepo.count(
-          {
-            supplierId,
-            status: 'cancelled',
-          },
-          opts
-        ),
-        AggregationRepo.count({
-          'itemDtos.supplierId': supplierId,
-          status: 'suspended'
-        })
-      ]);
+     const [
+  activeQuotes,
+  activeAggregationWindows,
+  orderRequests,
+  cancelledSupplies,
+  suspendedAggregations
+] = await Promise.all([
+  SupplyRepo.count(
+    {
+      supplierId,
+      status: 'accepted',
+    },
+    opts
+  ),
+  AggregationRepo.count({
+    'itemDtos.supplierId': supplierId,
+    status: { $in: ['pending', 'in_process'] }
+  }),
+  SupplyRepo.count(
+    {
+      supplierId,
+      status: 'quote',
+    },
+    opts
+  ),
+  SupplyRepo.count(
+    {
+      supplierId,
+      status: 'cancelled',
+    },
+    opts
+  ),
+  AggregationRepo.count({
+    'itemDtos.supplierId': supplierId,
+    status: 'suspended'
+  })
+]);
 
       const criticalAlerts = cancelledSupplies + suspendedAggregations;
 
-      return {
-        activeQuotes,
-        activeAggregationWindows,
-        criticalAlerts,
-      };
+     return {
+  activeQuotes,
+  activeAggregationWindows,
+  orderRequests,
+  criticalAlerts,
+};
     } catch (err) {
+      console.error("🚨 Dashboard Summary Error:", err);
       await auditService.logEvent({
         eventType: 'supply.dashboardSummary.failed',
         actor,

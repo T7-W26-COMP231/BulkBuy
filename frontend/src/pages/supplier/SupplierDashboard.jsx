@@ -67,21 +67,24 @@ export default function SupplierDashboard() {
   const { user, accessToken } = useAuth();
 
   const [dashboardSummary, setDashboardSummary] = useState({
-    activeQuotes: "0",
-    activeAggregationWindows: "0",
-    criticalAlerts: "0",
-  });
+  activeQuotes: "0",
+  activeAggregationWindows: "0",
+  orderRequests: "0",
+  criticalAlerts: "0",
+});
 
   useEffect(() => {
     const loadDashboardSummary = async () => {
       try {
         const response = await fetchSupplierDashboardSummary();
         const summary = response?.data || {};
-        setDashboardSummary({
-          activeQuotes: String(summary.activeQuotes ?? 0),
-          activeAggregationWindows: String(summary.activeAggregationWindows ?? 0),
-          criticalAlerts: String(summary.criticalAlerts ?? 0),
-        });
+       setDashboardSummary({
+  activeQuotes: String(summary.activeQuotes ?? 0),
+  activeAggregationWindows: String(summary.activeAggregationWindows ?? 0),
+  orderRequests: String(summary.orderRequests ?? 0),
+  criticalAlerts: String(summary.criticalAlerts ?? 0),
+});
+
       } catch (error) {
         console.error("Failed to load supplier dashboard summary:", error);
       }
@@ -117,6 +120,14 @@ export default function SupplierDashboard() {
       accent: "text-emerald-600",
       extraColor: "text-emerald-600",
     },
+    {
+  label: "Total Order Requests",
+  value: dashboardSummary.orderRequests,
+  extra: "Pending + current",
+  icon: "shopping_cart",
+  accent: "text-sky-600",
+  extraColor: "text-sky-600",
+},
     {
       label: "Critical Alerts",
       value: dashboardSummary.criticalAlerts,
@@ -178,7 +189,7 @@ export default function SupplierDashboard() {
           </div>
         </section>
 
-        <section className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
           {summaryCards.map((card) => (
             <SupplierStatCard key={card.label} {...card} />
           ))}

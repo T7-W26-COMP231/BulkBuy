@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useEffect } from "react";
+import { useAuth } from "./contexts/AuthContext";
 import { io } from "socket.io-client";
 import HomePage from "./pages/customer/HomePage";
 import SupplierDashboard from "./pages/supplier/SupplierDashboard";
@@ -24,6 +25,7 @@ import AdminQuotesReviewPage from "./pages/admin/AdminQuotesReviewPage"
 import OrdersPage from "./pages/customer/OrdersPage";
 import OrderDetailsPage from "./pages/customer/OrderDetails";
 import CreateSalesWindowForm from "./pages/admin/Createsaleswindowform";
+import AuthTabs from "./components/sign-in-up/AuthTabs";
 //import { useAuthBootstrap } from "./hooks/useAuthBootstrap"; // ← added
 
 
@@ -42,6 +44,7 @@ function PlaceholderPage({ title }) {
 }
 
 export default function App() {
+  const { user, signIn, signUp } = useAuth();
 
   useEffect(() => {
     const socket = io(`${import.meta.env.VITE_API_URL}`);
@@ -106,7 +109,31 @@ export default function App() {
       <Route path="/terms-of-service" element={<PlaceholderPage title="Terms of Service" />} />
       <Route path="/notifications" element={<PlaceholderPage title="Notifications" />} />
       <Route path="/profile" element={<PlaceholderPage title="Profile" />} />
-      <Route path="/login" element={<PlaceholderPage title="Login" />} />
+      <Route
+  path="/login"
+  element={
+    <AuthTabs
+      onSignIn={async (payload) => {
+        const res = await signIn(payload);
+
+        if (res?.ok) {
+          const role = res.user?.role;
+
+          if (role === "supplier") {
+            window.location.href = "/supplier/dashboard";
+          } else if (role === "admin") {
+            window.location.href = "/admin";
+          } else {
+            window.location.href = "/";
+          }
+        }
+
+        return res;
+      }}
+      onSignUp={signUp}
+    />
+  }
+/>
       <Route path="/community" element={<PlaceholderPage title="Community" />} />
       <Route path="/settings" element={<PlaceholderPage title="Settings" />} />
       <Route path="/savings" element={<PlaceholderPage title="Savings Vault" />} />

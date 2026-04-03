@@ -68,6 +68,13 @@ router.get(
   asyncHandler(ItemController.publicSearch)
 );
 
+// added this here to we have retrieve supplier approved items
+router.get(
+  '/approved',
+  requireAuth,
+  asyncHandler(ItemController.getApprovedItems)
+);
+
 
 /* Get item by id */
 router.get(

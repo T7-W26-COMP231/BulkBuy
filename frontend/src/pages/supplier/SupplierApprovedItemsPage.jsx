@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import SupplierLayout from "../../components/supplier/SupplierLayout";
+import { fetchApprovedItems } from "../../api/supplyApi";
 
 const hardcodedItems = [
   {

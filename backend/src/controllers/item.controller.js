@@ -11,8 +11,10 @@ const express = require('express');
 const mongoose = require('mongoose');
 const ItemService = require('../services/item.service');
 const auditService = require('../services/audit.service');
-
 const router = express.Router();
+
+const User = require('../models/user.model');   // 👈 added here this is used in getApprovedItems()
+const Supply = require('../models/supply.model'); // 👈 added here this is used in getApprovedItems()
 
 /* Async wrapper to forward errors to express error handler */
 const asyncHandler = (fn) => (req, res, next) => {
@@ -485,6 +487,48 @@ async function publicSearch(req, res) {
   }
 }
 
+//added thsi method so we can get approved items that supplier can create quote for or can supply 
+
+async function getApprovedItems(req, res) {
+  try {
+    const userId = req.user?._id || req.user?.userId;
+
+    const user = await User.findById(userId)
+      .populate('AllowedSupplyItems')
+      .lean()
+      .exec();
+
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+    const approvedItems = user.AllowedSupplyItems || [];
+    if (approvedItems.length === 0) {
+      return res.status(200).json({ success: true, data: [] });
+    }
+
+    const supplies = await Supply.find({ supplierId: userId, deleted: false }).lean();
+
+    const items = approvedItems.map((item) => {
+      const supply = supplies.find((s) =>
+        s.items.some((si) => String(si.itemId) === String(item._id))
+      );
+      let quoteStatus = 'no_quote';
+      if (supply) {
+        if (supply.status === 'accepted') quoteStatus = 'approved';
+        else if (supply.status === 'quote') quoteStatus = 'draft';
+        else if (supply.status === 'received') quoteStatus = 'reviewing';
+        else quoteStatus = supply.status;
+      }
+      return { ...item, quoteStatus, supplyId: supply?._id || null };
+    });
+
+    return res.status(200).json({ success: true, data: items });
+  } catch (err) {
+    console.error('getApprovedItems error:', err);
+    return res.status(500).json({ success: false, message: err.message });
+  }
+}
+
+
 /* Route exports (for wiring in routes file) */
 module.exports = {
   create: asyncHandler(create),
@@ -504,6 +548,7 @@ module.exports = {
   publish: asyncHandler(publish),
   unpublish: asyncHandler(unpublish),
   publicSearch: asyncHandler(publicSearch),
+  getApprovedItems: asyncHandler(getApprovedItems),
 
   /* Utilities for route wiring */
   validateObjectIdParam,

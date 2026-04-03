@@ -69,3 +69,8 @@ export const fetchSupplierRecentSupplies = async () => {
   });
   return response.data;
 };
+
+export const fetchApprovedItems = async () => {
+  const response = await api.get("/items/approved");
+  return response.data;
+};

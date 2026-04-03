@@ -26,68 +26,81 @@ export default function SupplierQuotesPage() {
           {/* Left side */}
           <div className="space-y-6 xl:col-span-2">
             {/* Product information */}
-            <div className="rounded-2xl border border-neutral-light bg-white p-6 shadow-sm">
-              <div className="mb-6 flex items-center gap-3">
-                <div className="h-3 w-3 rounded-full bg-primary"></div>
-                <h2 className="text-xl font-bold text-text-main">
-                  Product Information
-                </h2>
-              </div>
+<div className="rounded-2xl border border-neutral-light bg-white p-6 shadow-sm">
+  <div className="mb-6 flex items-center justify-between">
+    <div className="flex items-center gap-3">
+      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-lg">
+        📦
+      </div>
+      <div>
+        <h2 className="text-xl font-bold text-text-main">
+          Product Information
+        </h2>
+        <p className="text-sm text-text-muted">
+          Configure the selected approved supplier item
+        </p>
+      </div>
+    </div>
 
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-text-main">
-                    Product Name
-                  </label>
-                  <input
-                    type="text"
-                    value="Organic Avocados (Hass)"
-                    readOnly
-                    className="w-full rounded-xl border border-neutral-light bg-neutral-light px-4 py-3"
-                  />
-                </div>
+    <span className="rounded-full bg-neutral-light px-3 py-1 text-xs font-semibold text-text-main">
+      Approved Item
+    </span>
+  </div>
 
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-text-main">
-                    SKU ID
-                  </label>
-                  <input
-                    type="text"
-                    value="AVO-ORG-4402-XL"
-                    readOnly
-                    className="w-full rounded-xl border border-neutral-light bg-neutral-light px-4 py-3"
-                  />
-                </div>
+  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+    <div>
+      <label className="mb-2 block text-sm font-medium text-text-main">
+        Product Name
+      </label>
+      <input
+        type="text"
+        value="Organic Avocados (Hass)"
+        readOnly
+        className="w-full rounded-xl border border-neutral-light bg-neutral-light px-4 py-3"
+      />
+    </div>
 
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-text-main">
-                    Base Unit Price ($)
-                  </label>
-                  <input
-                    type="number"
-                    placeholder="2.50"
-                    className="w-full rounded-xl border border-neutral-light px-4 py-3"
-                  />
-                  <p className="mt-2 text-xs text-text-muted">
-                    Price per unit before discounts.
-                  </p>
-                </div>
+    <div>
+      <label className="mb-2 block text-sm font-medium text-text-main">
+        SKU ID
+      </label>
+      <input
+        type="text"
+        value="AVO-ORG-4402-XL"
+        readOnly
+        className="w-full rounded-xl border border-neutral-light bg-neutral-light px-4 py-3"
+      />
+    </div>
 
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-text-main">
-                    Total Capacity (Units)
-                  </label>
-                  <input
-                    type="number"
-                    placeholder="5000"
-                    className="w-full rounded-xl border border-neutral-light px-4 py-3"
-                  />
-                  <p className="mt-2 text-xs text-text-muted">
-                    Max available stock for this batch.
-                  </p>
-                </div>
-              </div>
-            </div>
+    <div>
+      <label className="mb-2 block text-sm font-medium text-text-main">
+        Base Unit Price ($)
+      </label>
+      <input
+        type="number"
+        placeholder="2.50"
+        className="w-full rounded-xl border border-neutral-light px-4 py-3"
+      />
+      <p className="mt-2 text-xs text-text-muted">
+        Enter supplier starting unit price.
+      </p>
+    </div>
+
+    <div>
+      <label className="mb-2 block text-sm font-medium text-text-main">
+        Total Capacity (Units)
+      </label>
+      <input
+        type="number"
+        placeholder="5000"
+        className="w-full rounded-xl border border-neutral-light px-4 py-3"
+      />
+      <p className="mt-2 text-xs text-text-muted">
+        Available stock for aggregation cycle.
+      </p>
+    </div>
+  </div>
+</div>
 
             {/* Tier placeholder */}
             <div className="rounded-2xl border border-neutral-light bg-white p-6 shadow-sm">

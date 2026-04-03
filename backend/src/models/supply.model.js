@@ -69,7 +69,7 @@ const AddressSchema = new Schema(
   { _id: false }
 );
 
-const STATUS = ['quote', 'accepted', 'dispatched', 'cancelled', 'delivered', 'received'];
+const STATUS = ['draft', 'quote', 'accepted', 'dispatched', 'cancelled', 'delivered', 'received'];
 
 const SupplySchema = new Schema(
   {

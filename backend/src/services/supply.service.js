@@ -474,6 +474,61 @@ class SupplyService {
     }
   }
 
+    /**
+   * Save quote draft
+   * @param {String} supplyId
+   * @param {Object} draftPayload
+   * @param {Object} opts
+   */
+  async saveDraft(supplyId, draftPayload = {}, opts = {}) {
+    const actor = actorFromOpts(opts);
+    const correlationId = opts.correlationId || null;
+
+    if (!supplyId) throw createError(400, 'supplyId is required');
+    if (!draftPayload || typeof draftPayload !== 'object') {
+      throw createError(400, 'draft payload is required');
+    }
+
+    try {
+      const updatePayload = {
+        ...draftPayload,
+        status: 'draft',
+      };
+
+     const updated = await SupplyRepo.updateById(
+  supplyId,
+  updatePayload,
+  { ...opts, returnDocument: "after" }
+);
+
+      if (!updated) throw createError(404, 'Supply not found');
+
+      await auditService.logEvent({
+        eventType: 'supply.saveDraft.success',
+        actor,
+        target: { type: 'Supply', id: supplyId },
+        outcome: 'success',
+        severity: 'info',
+        correlationId,
+        details: { status: 'draft' }
+      });
+
+      return sanitize(updated);
+    } catch (err) {
+      await auditService.logEvent({
+        eventType: 'supply.saveDraft.failed',
+        actor,
+        target: { type: 'Supply', id: supplyId },
+        outcome: 'failure',
+        severity: 'error',
+        correlationId,
+        details: { message: err.message }
+      });
+
+      throw err;
+    }
+  }
+
   /**
    * Update supply status
    * @param {String} supplyId
@@ -498,7 +553,7 @@ class SupplyService {
       const updated = await SupplyRepo.updateById(
         supplyId,
         updatePayload,
-        { ...opts, new: true }
+        { ...opts, returnDocument: "after" }
       );
 
       if (!updated) throw createError(404, 'Supply not found');

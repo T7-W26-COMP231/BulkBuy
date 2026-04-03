@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import SupplierLayout from "../../components/supplier/SupplierLayout";
 
 export default function SupplierQuotesPage() {
@@ -9,23 +9,69 @@ export default function SupplierQuotesPage() {
   ]);
 
   const [draftStatus, setDraftStatus] = useState("");
+const [supplyId, setSupplyId] = useState("");
 
-  const handleSaveDraft = () => {
-    const draftPayload = {
-      productName: "Organic Avocados (Hass)",
-      skuId: "AVO-ORG-4402-XL",
-      tiers,
-      savedAt: new Date().toISOString(),
-      status: "draft",
-    };
+useEffect(() => {
+  const fetchSupplies = async () => {
+    try {
+     const session = localStorage.getItem("app_auth_session_v1");
+const token = session ? JSON.parse(session).accessToken : "";
 
-    localStorage.setItem(
-      "supplier-quote-draft",
-      JSON.stringify(draftPayload)
+      const response = await fetch("http://localhost:5000/api/supls", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const result = await response.json();
+      const supplies = result?.data || result?.items || result;
+
+      if (Array.isArray(supplies) && supplies.length > 0) {
+        setSupplyId(supplies[0]._id);
+      }
+    } catch (error) {
+      console.error("Failed to fetch supplies", error);
+    }
+  };
+
+  fetchSupplies();
+}, []);
+
+const handleSaveDraft = async () => {
+  try {
+    if (!supplyId) {
+      throw new Error("No supply record found for this supplier.");
+    }
+
+    const response = await fetch(
+      `http://localhost:5000/api/supls/${supplyId}/save-draft`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${JSON.parse(
+            localStorage.getItem("app_auth_session_v1")
+          )?.accessToken}`,
+        },
+        body: JSON.stringify({
+          productName: "Organic Avocados (Hass)",
+          skuId: "AVO-ORG-4402-XL",
+          tiers,
+        }),
+      }
     );
 
-    setDraftStatus("Draft saved successfully.");
-  };
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.message || "Failed to save draft");
+    }
+
+    setDraftStatus("Draft saved successfully to server.");
+  } catch (error) {
+    setDraftStatus(error.message);
+  }
+};
 
   const handleTierChange = (id, field, value) => {
     setTiers((current) =>
@@ -113,7 +159,7 @@ export default function SupplierQuotesPage() {
   <div className="rounded-xl border border-green-200 bg-green-50 p-4">
     <p className="text-sm font-semibold text-green-700">{draftStatus}</p>
     <p className="mt-1 text-xs text-green-600">
-      Quote draft stored locally and can be resumed later.
+     Draft synced with backend and available across supplier sessions.
     </p>
   </div>
 )}

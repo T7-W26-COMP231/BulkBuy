@@ -271,6 +271,55 @@ async function acceptQuote(req, res) {
 }
 
 /**
+ * POST /supplies/:id/save-draft
+ */
+async function saveDraft(req, res) {
+  const correlationId = req.correlationId || null;
+  const actor = actorFromReq(req);
+
+  try {
+    const id = req.params.id;
+    const draftPayload = req.body;
+
+    const updated = await supplyService.saveDraft(id, draftPayload, {
+      actor,
+      correlationId,
+    });
+
+    await auditService.logEvent({
+      eventType: 'supply.saveDraft.success',
+      actor,
+      target: { type: 'Supply', id },
+      outcome: 'success',
+      severity: 'info',
+      correlationId,
+      details: { status: 'draft' }
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: 'Draft saved successfully',
+      data: updated
+    });
+  } catch (err) {
+    await auditService.logEvent({
+      eventType: 'supply.saveDraft.failed',
+      actor,
+      target: { type: 'Supply', id: req.params.id || null },
+      outcome: 'failure',
+      severity: err.status && err.status >= 500 ? 'error' : 'warning',
+      correlationId,
+      details: { message: err.message }
+    });
+
+    return res.status(err.status || 500).json({
+      success: false,
+      message: err.message
+    });
+  }
+}
+
+/**
  * POST /supplies/:id/update-status
  */
 /*
@@ -556,5 +605,6 @@ module.exports = {
   addItem,
   getItem,
   updateItem,
-  removeItem
+  removeItem,
+  saveDraft
 };

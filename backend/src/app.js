@@ -72,7 +72,7 @@ const createApp = async () => {
       "https://bulkbuy-production.up.railway.app"
     ],
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Correlation-Id', 'x-correlation-id'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'authorization', 'X-Correlation-Id', 'x-correlation-id'],
     credentials: true
   }));
 

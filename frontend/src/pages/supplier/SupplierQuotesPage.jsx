@@ -9,69 +9,130 @@ export default function SupplierQuotesPage() {
   ]);
 
   const [draftStatus, setDraftStatus] = useState("");
-const [supplyId, setSupplyId] = useState("");
+  const [submitStatus, setSubmitStatus] = useState("");
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+  const [isReviewLocked, setIsReviewLocked] = useState(false);
+  const [supplyId, setSupplyId] = useState("");
 
-useEffect(() => {
-  const fetchSupplies = async () => {
+  useEffect(() => {
+    const fetchSupplies = async () => {
+      try {
+        const session = localStorage.getItem("app_auth_session_v1");
+        const token = session ? JSON.parse(session).accessToken : "";
+
+        const response = await fetch("http://localhost:5000/api/supls", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const result = await response.json();
+        const supplies = result?.data || result?.items || result;
+
+        if (Array.isArray(supplies) && supplies.length > 0) {
+          setSupplyId(supplies[0]._id);
+        }
+      } catch (error) {
+        console.error("Failed to fetch supplies", error);
+      }
+    };
+
+    fetchSupplies();
+  }, []);
+
+  const handleSaveDraft = async () => {
     try {
-     const session = localStorage.getItem("app_auth_session_v1");
-const token = session ? JSON.parse(session).accessToken : "";
+      if (!supplyId) {
+        throw new Error("No supply record found for this supplier.");
+      }
 
-      const response = await fetch("http://localhost:5000/api/supls", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        `http://localhost:5000/api/supls/${supplyId}/save-draft`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${JSON.parse(
+              localStorage.getItem("app_auth_session_v1")
+            )?.accessToken}`,
+          },
+          body: JSON.stringify({
+            productName: "Organic Avocados",
+skuId: "AVO-ORG-4402-XL",
+            tiers: tiers.map((tier) => ({
+              minQty: Number(tier.minQty),
+              unitPrice: Number(tier.unitPrice),
+            })),
+          }),
+        }
+      );
 
       const result = await response.json();
-      const supplies = result?.data || result?.items || result;
 
-      if (Array.isArray(supplies) && supplies.length > 0) {
-        setSupplyId(supplies[0]._id);
+      const updatedSupplyId =
+        result?.data?._id ||
+        result?._id ||
+        supplyId;
+
+      setSupplyId(updatedSupplyId);
+
+      if (!response.ok) {
+        throw new Error(result.message || "Failed to save draft");
       }
+
+      setDraftStatus("Draft saved successfully to server.");
     } catch (error) {
-      console.error("Failed to fetch supplies", error);
+      setDraftStatus(error.message);
     }
   };
 
-  fetchSupplies();
-}, []);
+  const handleSubmitForReview = async () => {
+    try {
+      setSubmitStatus("");
 
-const handleSaveDraft = async () => {
-  try {
-    if (!supplyId) {
-      throw new Error("No supply record found for this supplier.");
-    }
-
-    const response = await fetch(
-      `http://localhost:5000/api/supls/${supplyId}/save-draft`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${JSON.parse(
-            localStorage.getItem("app_auth_session_v1")
-          )?.accessToken}`,
-        },
-        body: JSON.stringify({
-          productName: "Organic Avocados (Hass)",
-          skuId: "AVO-ORG-4402-XL",
-          tiers,
-        }),
+      if (!supplyId) {
+        throw new Error("No supply record found for this supplier.");
       }
-    );
 
-    const result = await response.json();
+      if (validationErrors.length > 0) {
+        throw new Error("Please fix the validation issues before submitting.");
+      }
 
-    if (!response.ok) {
-      throw new Error(result.message || "Failed to save draft");
+      setIsSubmittingReview(true);
+
+      const response = await fetch(
+        `http://localhost:5000/api/supls/${supplyId}/submit-review`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${JSON.parse(
+              localStorage.getItem("app_auth_session_v1")
+            )?.accessToken}`,
+          },
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        if (Array.isArray(result.missingFields) && result.missingFields.length > 0) {
+          throw new Error(
+            `${result.message || "Missing required fields"}: ${result.missingFields.join(", ")}`
+          );
+        }
+
+        throw new Error(result.message || "Failed to submit quote for review");
+      }
+
+      setSubmitStatus("Quote submitted for administrative review successfully.");
+      setIsReviewLocked(true);
+    } catch (error) {
+      setSubmitStatus(error.message);
+    } finally {
+      setIsSubmittingReview(false);
     }
-
-    setDraftStatus("Draft saved successfully to server.");
-  } catch (error) {
-    setDraftStatus(error.message);
-  }
-};
+  };
 
   const handleTierChange = (id, field, value) => {
     setTiers((current) =>
@@ -132,33 +193,33 @@ const handleSaveDraft = async () => {
   }, [tiers]);
 
   const completedTiers = tiers.filter(
-  (tier) => tier.minQty && Number(tier.minQty) > 0 && tier.unitPrice && Number(tier.unitPrice) > 0
-);
-
-const basePrice = Number(tiers[0]?.unitPrice || 0);
-
-const bestDiscount = useMemo(() => {
-  if (!completedTiers.length || basePrice <= 0) return 0;
-
-  const lowestPrice = Math.min(
-    ...completedTiers.map((tier) => Number(tier.unitPrice || 0))
+    (tier) => tier.minQty && Number(tier.minQty) > 0 && tier.unitPrice && Number(tier.unitPrice) > 0
   );
 
-  return Math.max(0, Math.round(((basePrice - lowestPrice) / basePrice) * 100));
-}, [completedTiers, basePrice]);
+  const basePrice = Number(tiers[0]?.unitPrice || 0);
 
-const bestTierQuantity = useMemo(() => {
-  if (!completedTiers.length) return 0;
+  const bestDiscount = useMemo(() => {
+    if (!completedTiers.length || basePrice <= 0) return 0;
 
-  const lowestPriceTier = [...completedTiers].sort(
-    (a, b) => Number(a.unitPrice) - Number(b.unitPrice)
-  )[0];
+    const lowestPrice = Math.min(
+      ...completedTiers.map((tier) => Number(tier.unitPrice || 0))
+    );
 
-  return Number(lowestPriceTier?.minQty || 0);
-}, [completedTiers]);
+    return Math.max(0, Math.round(((basePrice - lowestPrice) / basePrice) * 100));
+  }, [completedTiers, basePrice]);
 
-const summaryStatus =
-  validationErrors.length > 0 ? "Needs Review" : "Ready for Submission";
+  const bestTierQuantity = useMemo(() => {
+    if (!completedTiers.length) return 0;
+
+    const lowestPriceTier = [...completedTiers].sort(
+      (a, b) => Number(a.unitPrice) - Number(b.unitPrice)
+    )[0];
+
+    return Number(lowestPriceTier?.minQty || 0);
+  }, [completedTiers]);
+
+  const summaryStatus =
+    validationErrors.length > 0 ? "Needs Review" : "Ready for Submission";
 
   return (
     <SupplierLayout>
@@ -176,22 +237,52 @@ const summaryStatus =
           </div>
 
           <button
-  type="button"
-  onClick={handleSaveDraft}
-  className="rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:opacity-90 hover:-translate-y-0.5 hover:shadow-md"
->
-  Save Draft
-</button>
+            type="button"
+            onClick={handleSaveDraft}
+            disabled={isReviewLocked}
+            className={`rounded-xl px-5 py-3 text-sm font-semibold text-white shadow-sm transition-all duration-200 ${isReviewLocked
+              ? "cursor-not-allowed bg-gray-400"
+              : "bg-primary hover:opacity-90 hover:-translate-y-0.5 hover:shadow-md"
+              }`}
+          >
+            {isReviewLocked ? "Draft Locked" : "Save Draft"}
+          </button>
         </div>
 
         {draftStatus && (
-  <div className="rounded-xl border border-green-200 bg-green-50 p-4">
-    <p className="text-sm font-semibold text-green-700">{draftStatus}</p>
-    <p className="mt-1 text-xs text-green-600">
-     Draft synced with backend and available across supplier sessions.
-    </p>
-  </div>
-)}
+          <div className="rounded-xl border border-green-200 bg-green-50 p-4">
+            <p className="text-sm font-semibold text-green-700">
+              {draftStatus}
+            </p>
+            <p className="mt-1 text-xs text-green-600">
+              Draft synced with backend and available across supplier sessions.
+            </p>
+          </div>
+        )}
+
+        {submitStatus && (
+          <div
+            className={`rounded-xl p-4 ${isReviewLocked
+              ? "border border-green-200 bg-green-50"
+              : "border border-amber-200 bg-amber-50"
+              }`}
+          >
+            <p
+              className={`text-sm font-semibold ${isReviewLocked ? "text-green-700" : "text-amber-700"
+                }`}
+            >
+              {submitStatus}
+            </p>
+            <p
+              className={`mt-1 text-xs ${isReviewLocked ? "text-green-600" : "text-amber-600"
+                }`}
+            >
+              {isReviewLocked
+                ? "This quote is now locked and waiting for administrative review."
+                : "Submission could not be completed yet."}
+            </p>
+          </div>
+        )}
 
         {/* Main layout */}
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
@@ -288,9 +379,13 @@ const summaryStatus =
                 <button
                   type="button"
                   onClick={handleAddTier}
-                  className="rounded-lg bg-primary/10 px-4 py-2 text-sm font-semibold text-primary transition-all duration-200 hover:bg-primary hover:text-white hover:-translate-y-0.5 hover:shadow-md"
+                  disabled={isReviewLocked}
+                  className={`rounded-lg px-4 py-2 text-sm font-semibold transition-all duration-200 ${isReviewLocked
+                    ? "cursor-not-allowed bg-gray-200 text-gray-500"
+                    : "bg-primary/10 text-primary hover:bg-primary hover:text-white hover:-translate-y-0.5 hover:shadow-md"
+                    }`}
                 >
-                  + Add Tier
+                  {isReviewLocked ? "Tier Locked" : "+ Add Tier"}
                 </button>
               </div>
 
@@ -335,6 +430,7 @@ const summaryStatus =
                       <input
                         type="number"
                         value={tier.minQty}
+                        readOnly={isReviewLocked}
                         onChange={(e) =>
                           handleTierChange(
                             tier.id,
@@ -349,6 +445,7 @@ const summaryStatus =
                         type="number"
                         step="0.01"
                         value={tier.unitPrice}
+                        readOnly={isReviewLocked}
                         onChange={(e) =>
                           handleTierChange(
                             tier.id,
@@ -392,18 +489,17 @@ const summaryStatus =
             </div>
           </div>
 
-                    {/* Right side summary */}
+          {/* Right side summary */}
           <div className="rounded-2xl border border-neutral-light bg-white p-6 shadow-sm">
             <div className="flex items-start justify-between">
               <h2 className="text-xl font-bold text-text-main">
                 Quote Summary
               </h2>
               <span
-                className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                  validationErrors.length > 0
-                    ? "bg-amber-100 text-amber-700"
-                    : "bg-green-100 text-green-700"
-                }`}
+                className={`rounded-full px-3 py-1 text-xs font-semibold ${validationErrors.length > 0
+                  ? "bg-amber-100 text-amber-700"
+                  : "bg-green-100 text-green-700"
+                  }`}
               >
                 {summaryStatus}
               </span>
@@ -460,29 +556,26 @@ const summaryStatus =
             </div>
 
             <div
-              className={`mt-6 rounded-xl p-4 ${
-                validationErrors.length > 0
-                  ? "border border-amber-200 bg-amber-50"
-                  : "border border-green-200 bg-green-50"
-              }`}
+              className={`mt-6 rounded-xl p-4 ${validationErrors.length > 0
+                ? "border border-amber-200 bg-amber-50"
+                : "border border-green-200 bg-green-50"
+                }`}
             >
               <p
-                className={`text-sm font-semibold ${
-                  validationErrors.length > 0
-                    ? "text-amber-700"
-                    : "text-green-700"
-                }`}
+                className={`text-sm font-semibold ${validationErrors.length > 0
+                  ? "text-amber-700"
+                  : "text-green-700"
+                  }`}
               >
                 {validationErrors.length > 0
                   ? "Quote requires validation fixes"
                   : "Quote summary ready"}
               </p>
               <p
-                className={`mt-1 text-xs ${
-                  validationErrors.length > 0
-                    ? "text-amber-600"
-                    : "text-green-600"
-                }`}
+                className={`mt-1 text-xs ${validationErrors.length > 0
+                  ? "text-amber-600"
+                  : "text-green-600"
+                  }`}
               >
                 {validationErrors.length > 0
                   ? "Resolve tier pricing issues before submitting for review."
@@ -491,14 +584,23 @@ const summaryStatus =
             </div>
 
             <button
-              disabled={validationErrors.length > 0}
-              className={`mt-6 w-full rounded-xl px-4 py-3 font-semibold text-white transition-all duration-200 ${
-  validationErrors.length > 0
-    ? "cursor-not-allowed bg-gray-400"
-    : "bg-primary hover:opacity-90 hover:-translate-y-0.5 hover:shadow-md"
-}`}
+              type="button"
+              onClick={handleSubmitForReview}
+              disabled={
+                validationErrors.length > 0 ||
+                isSubmittingReview ||
+                isReviewLocked
+              }
+              className={`mt-6 w-full rounded-xl px-4 py-3 font-semibold text-white transition-all duration-200 ${validationErrors.length > 0 || isSubmittingReview || isReviewLocked
+                ? "cursor-not-allowed bg-gray-400"
+                : "bg-primary hover:opacity-90 hover:-translate-y-0.5 hover:shadow-md"
+                }`}
             >
-              Submit for Review
+              {isReviewLocked
+                ? "Under Review"
+                : isSubmittingReview
+                  ? "Submitting..."
+                  : "Submit for Review"}
             </button>
           </div>
         </div>

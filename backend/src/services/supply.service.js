@@ -18,7 +18,16 @@ const SupplyRepo = require('../repositories/supply.repo');
 const AggregationRepo = require('../repositories/aggregation.repo');
 const auditService = require('./audit.service');
 
-const STATUS = ['quote', 'accepted', 'dispatched', 'cancelled', 'delivered', 'received'];
+const STATUS = [
+  'quote',
+  'draft',
+  'pending_review',
+  'accepted',
+  'dispatched',
+  'cancelled',
+  'delivered',
+  'received'
+];
 
 function actorFromOpts(opts = {}) {
   if (!opts) return { userId: null, role: null };
@@ -490,10 +499,20 @@ class SupplyService {
     }
 
     try {
-      const updatePayload = {
-        ...draftPayload,
-        status: 'draft',
-      };
+ const existing = await SupplyRepo.findById(supplyId, opts);
+
+const currentMetadata =
+  existing?.metadata?.toObject?.() ||
+  existing?.metadata ||
+  {};
+
+const updatePayload = {
+  metadata: {
+    ...currentMetadata,
+    quoteDraft: draftPayload,
+  },
+  status: 'draft',
+};
 
      const updated = await SupplyRepo.updateById(
   supplyId,
@@ -529,12 +548,92 @@ class SupplyService {
     }
   }
 
+   /**
+   * Submit finalized quote for admin review
+   * @param {String} supplyId
+   * @param {Object} opts
+   */
+  async submitForReview(supplyId, opts = {}) {
+    const actor = actorFromOpts(opts);
+    const correlationId = opts.correlationId || null;
+
+    if (!supplyId) {
+      throw createError(400, 'supplyId is required');
+    }
+
+    try {
+      const existing = await SupplyRepo.findById(supplyId, opts);
+
+      if (!existing) {
+        throw createError(404, 'Supply not found');
+      }
+
+      // Prevent resubmission
+      if (existing.status === 'pending_review') {
+        throw createError(409, 'Quote is already under review');
+      }
+
+           const missingFields = [];
+
+     const quoteDraft =
+  existing.metadata?.get?.("quoteDraft") ||
+  existing.metadata?.quoteDraft ||
+  {};
+
+if (!quoteDraft.productName) missingFields.push('productName');
+if (!quoteDraft.skuId) missingFields.push('skuId');
+
+      if (missingFields.length > 0) {
+        const error = createError(422, 'Missing required fields');
+        error.missingFields = missingFields;
+        throw error;
+      }
+
+      const updated = await SupplyRepo.updateById(
+        supplyId,
+        {
+          status: 'pending_review',
+          isLocked: true,
+          submittedAt: new Date(),
+        },
+        { ...opts, returnDocument: 'after' }
+      );
+
+      await auditService.logEvent({
+        eventType: 'supply.submitReview.success',
+        actor,
+        target: { type: 'Supply', id: supplyId },
+        outcome: 'success',
+        severity: 'info',
+        correlationId,
+        details: { status: 'pending_review' }
+      });
+
+      return sanitize(updated);
+    } catch (err) {
+      await auditService.logEvent({
+        eventType: 'supply.submitReview.failed',
+        actor,
+        target: { type: 'Supply', id: supplyId },
+        outcome: 'failure',
+        severity: 'error',
+        correlationId,
+        details: { message: err.message }
+      });
+
+      throw err;
+    }
+    }
+
   /**
    * Update supply status
    * @param {String} supplyId
    * @param {String} status
    * @param {Object} opts
    */
+
+  
+
   async updateStatus(supplyId, status, opts = {}) {
     const actor = actorFromOpts(opts);
     const correlationId = opts.correlationId || null;

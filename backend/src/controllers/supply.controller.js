@@ -320,6 +320,55 @@ async function saveDraft(req, res) {
 }
 
 /**
+ * POST /supplies/:id/submit-review
+ */
+async function submitForReview(req, res) {
+  const correlationId = req.correlationId || null;
+  const actor = actorFromReq(req);
+
+  try {
+    const id = req.params.id;
+
+    const submitted = await supplyService.submitForReview(id, {
+      actor,
+      correlationId,
+    });
+
+    await auditService.logEvent({
+      eventType: 'supply.submitReview.success',
+      actor,
+      target: { type: 'Supply', id },
+      outcome: 'success',
+      severity: 'info',
+      correlationId,
+      details: { status: 'pending_review' }
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: 'Quote submitted for administrative review',
+      data: submitted
+    });
+  } catch (err) {
+    await auditService.logEvent({
+      eventType: 'supply.submitReview.failed',
+      actor,
+      target: { type: 'Supply', id: req.params.id || null },
+      outcome: 'failure',
+      severity: err.status && err.status >= 500 ? 'error' : 'warning',
+      correlationId,
+      details: { message: err.message }
+    });
+
+    return res.status(err.status || 500).json({
+      success: false,
+      message: err.message,
+      missingFields: err.missingFields || []
+    });
+  }
+}
+
+/**
  * POST /supplies/:id/update-status
  */
 /*
@@ -606,5 +655,6 @@ module.exports = {
   getItem,
   updateItem,
   removeItem,
-  saveDraft
+  saveDraft,
+  submitForReview
 };

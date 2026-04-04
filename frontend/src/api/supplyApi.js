@@ -7,10 +7,9 @@ export const fetchQuotesByStatus = async (status) => {
   });
   return response.data;
 };
-
 export const fetchQuoteCounts = async () => {
   const [pendingRes, approvedRes, rejectedRes] = await Promise.all([
-    fetchQuotesByStatus("quote"),
+    fetchQuotesByStatus("pending_review"),
     fetchQuotesByStatus("accepted"),
     fetchQuotesByStatus("cancelled"),
   ]);
@@ -22,12 +21,7 @@ export const fetchQuoteCounts = async () => {
   };
 };
 
-export const approveQuote = async ({ supplyId, itemId, quoteId }) => {
-  await api.post(`/supls/${supplyId}/accept-quote`, {
-    itemId,
-    quoteId,
-  });
-
+export const approveQuote = async ({ supplyId }) => {
   const response = await api.post(`/supls/${supplyId}/update-status`, {
     status: "accepted",
   });

@@ -29,6 +29,8 @@ function mapBackendStatus(status) {
       return "Approved";
     case "cancelled":
       return "Rejected";
+    case "pending_review":
+      return "Pending";
     default:
       return "Pending";
   }
@@ -48,6 +50,43 @@ function formatDate(dateValue) {
 }
 
 function mapSupplyToQuoteRows(supply) {
+  const quoteDraft =
+    supply?.metadata?.quoteDraft ||
+    supply?.metadata?.get?.("quoteDraft") ||
+    null;
+
+  if (quoteDraft) {
+    return [
+      {
+        id: `${supply._id || supply.id || "supply"}-draft`,
+        supplyId: supply._id || supply.id || "",
+        itemId: supply?.items?.[0]?.itemId?._id || supply?.items?.[0]?.itemId || "",
+        quoteId: "",
+        supplier:
+          supply?.supplierId?.name ||
+          supply?.supplierId?.companyName ||
+          supply?.supplierId?.businessName ||
+          "Unknown Supplier",
+        contactEmail: supply?.supplierId?.email || "No email provided",
+        contactPhone: supply?.supplierId?.phone || "No phone provided",
+        product: quoteDraft.productName || "Unnamed Product",
+        submittedOn: formatDate(supply?.submittedAt || supply?.updatedAt || supply?.createdAt),
+        tiers: Array.isArray(quoteDraft.tiers)
+          ? quoteDraft.tiers.map((tier) => ({
+              minQty: tier.minQty,
+              unitPrice: tier.unitPrice,
+              discountPercent: null,
+              description: "",
+            }))
+          : [],
+        status: mapBackendStatus(supply?.status),
+        rawSupply: supply,
+        rawItem: supply?.items?.[0] || null,
+        rawQuote: null,
+      },
+    ];
+  }
+
   if (!Array.isArray(supply?.items)) return [];
 
   return supply.items.map((item, index) => {
@@ -103,8 +142,8 @@ export default function AdminQuotesReviewPage() {
     Rejected: 0,
   });
 
-  const statusMap = {
-    Pending: "quote",
+   const statusMap = {
+    Pending: "pending_review",
     Approved: "accepted",
     Rejected: "cancelled",
   };
@@ -180,10 +219,8 @@ export default function AdminQuotesReviewPage() {
 
     try {
       await approveQuote({
-        supplyId: selectedQuote.supplyId,
-        itemId: selectedQuote.itemId,
-        quoteId: selectedQuote.quoteId,
-      });
+  supplyId: selectedQuote.supplyId,
+});
 
       handleCloseModals();
       await loadCounts();

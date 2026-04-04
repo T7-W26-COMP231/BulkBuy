@@ -37,6 +37,8 @@ function validateItemId(req, res, next) {
  * POST   /supplies/:id/add-quote        -> add quote to an item
  * POST   /supplies/:id/accept-quote     -> accept a quote
  * POST   /supplies/:id/update-status    -> update supply status (enum)
+ * POST   /supplies/:id/save-draft       -> save supplier quote draft
+ * POST   /supplies/:id/submit-review    -> submit finalized quote for admin review
  * DELETE /supplies/:id/hard             -> hard delete (admin)
  *
  * Item-level:
@@ -58,6 +60,7 @@ router.post('/:id/add-quote', requireAuth, supplyValidators.idParam, supplyValid
 router.post('/:id/accept-quote', requireAuth, supplyValidators.idParam, supplyValidators.acceptQuote, asyncHandler(SupplyController.acceptQuote));
 router.post('/:id/update-status', requireAuth, supplyValidators.idParam, supplyValidators.updateStatus, asyncHandler(SupplyController.updateStatus));
 router.post('/:id/save-draft', requireAuth, supplyValidators.idParam, asyncHandler(SupplyController.saveDraft));
+router.post('/:id/submit-review', requireAuth, supplyValidators.idParam, asyncHandler(SupplyController.submitForReview));
 
 /* Hard delete (admin only) */
 router.delete('/:id/hard', requireAuth, supplyValidators.idParam, supplyValidators.adminOnly, asyncHandler(SupplyController.hardDelete));

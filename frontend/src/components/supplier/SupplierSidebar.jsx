@@ -6,7 +6,7 @@ const sidebarItems = [
   { label: "Profile", icon: "person", to: "/supplier/profile" },
   { label: "Approved Items", icon: "verified", to: "/supplier/approved-items" },
   { label: "Quotes", icon: "description", to: "/supplier/quotes" },
-  { label: "Orders", icon: "shopping_cart", to: "/supplier/orders" },
+  { label: "Order Requests", icon: "shopping_cart", to: "/supplier/orders" },
   { label: "Demand Status", icon: "bar_chart", to: "/supplier/demand-status" },
   { label: "Reports", icon: "download", to: "/supplier/reports" },
 ];

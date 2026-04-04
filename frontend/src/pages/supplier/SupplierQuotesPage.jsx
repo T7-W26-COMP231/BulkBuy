@@ -131,6 +131,35 @@ const handleSaveDraft = async () => {
     return errors;
   }, [tiers]);
 
+  const completedTiers = tiers.filter(
+  (tier) => tier.minQty && Number(tier.minQty) > 0 && tier.unitPrice && Number(tier.unitPrice) > 0
+);
+
+const basePrice = Number(tiers[0]?.unitPrice || 0);
+
+const bestDiscount = useMemo(() => {
+  if (!completedTiers.length || basePrice <= 0) return 0;
+
+  const lowestPrice = Math.min(
+    ...completedTiers.map((tier) => Number(tier.unitPrice || 0))
+  );
+
+  return Math.max(0, Math.round(((basePrice - lowestPrice) / basePrice) * 100));
+}, [completedTiers, basePrice]);
+
+const bestTierQuantity = useMemo(() => {
+  if (!completedTiers.length) return 0;
+
+  const lowestPriceTier = [...completedTiers].sort(
+    (a, b) => Number(a.unitPrice) - Number(b.unitPrice)
+  )[0];
+
+  return Number(lowestPriceTier?.minQty || 0);
+}, [completedTiers]);
+
+const summaryStatus =
+  validationErrors.length > 0 ? "Needs Review" : "Ready for Submission";
+
   return (
     <SupplierLayout>
       <div className="space-y-6">
@@ -149,7 +178,7 @@ const handleSaveDraft = async () => {
           <button
   type="button"
   onClick={handleSaveDraft}
-  className="rounded-xl border border-neutral-light bg-white px-5 py-3 text-sm font-semibold text-text-main shadow-sm transition hover:shadow-md"
+  className="rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:opacity-90 hover:-translate-y-0.5 hover:shadow-md"
 >
   Save Draft
 </button>
@@ -259,7 +288,7 @@ const handleSaveDraft = async () => {
                 <button
                   type="button"
                   onClick={handleAddTier}
-                  className="rounded-lg bg-primary/10 px-4 py-2 text-sm font-semibold text-primary"
+                  className="rounded-lg bg-primary/10 px-4 py-2 text-sm font-semibold text-primary transition-all duration-200 hover:bg-primary hover:text-white hover:-translate-y-0.5 hover:shadow-md"
                 >
                   + Add Tier
                 </button>
@@ -363,11 +392,22 @@ const handleSaveDraft = async () => {
             </div>
           </div>
 
-          {/* Right side summary */}
+                    {/* Right side summary */}
           <div className="rounded-2xl border border-neutral-light bg-white p-6 shadow-sm">
-            <h2 className="text-xl font-bold text-text-main">
-              Quote Summary
-            </h2>
+            <div className="flex items-start justify-between">
+              <h2 className="text-xl font-bold text-text-main">
+                Quote Summary
+              </h2>
+              <span
+                className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                  validationErrors.length > 0
+                    ? "bg-amber-100 text-amber-700"
+                    : "bg-green-100 text-green-700"
+                }`}
+              >
+                {summaryStatus}
+              </span>
+            </div>
 
             <div className="mt-6 overflow-hidden rounded-2xl bg-neutral-light">
               <div className="flex h-48 items-center justify-center text-text-muted">
@@ -384,38 +424,79 @@ const handleSaveDraft = async () => {
               </div>
 
               <div className="flex justify-between text-sm">
+                <span className="text-text-muted">SKU</span>
+                <span className="font-semibold text-text-main">
+                  AVO-ORG-4402-XL
+                </span>
+              </div>
+
+              <div className="flex justify-between text-sm">
                 <span className="text-text-muted">Base Price</span>
                 <span className="font-semibold text-text-main">
-                  $2.50 / unit
+                  ${basePrice.toFixed(2)} / unit
                 </span>
               </div>
 
               <div className="flex justify-between text-sm">
                 <span className="text-text-muted">Tiers Defined</span>
-                <span className="font-semibold text-text-main">3 Levels</span>
+                <span className="font-semibold text-text-main">
+                  {completedTiers.length} Level{completedTiers.length === 1 ? "" : "s"}
+                </span>
+              </div>
+
+              <div className="flex justify-between text-sm">
+                <span className="text-text-muted">Best Tier Qty</span>
+                <span className="font-semibold text-text-main">
+                  {bestTierQuantity || 0} units
+                </span>
               </div>
 
               <div className="flex justify-between text-sm">
                 <span className="text-text-muted">Potential Savings</span>
-                <span className="font-semibold text-green-600">Up to 20%</span>
+                <span className="font-semibold text-green-600">
+                  Up to {bestDiscount}%
+                </span>
               </div>
             </div>
 
-            <div className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-4">
-              <p className="text-sm font-semibold text-amber-700">
-                Tier Validation Active
+            <div
+              className={`mt-6 rounded-xl p-4 ${
+                validationErrors.length > 0
+                  ? "border border-amber-200 bg-amber-50"
+                  : "border border-green-200 bg-green-50"
+              }`}
+            >
+              <p
+                className={`text-sm font-semibold ${
+                  validationErrors.length > 0
+                    ? "text-amber-700"
+                    : "text-green-700"
+                }`}
+              >
+                {validationErrors.length > 0
+                  ? "Quote requires validation fixes"
+                  : "Quote summary ready"}
               </p>
-              <p className="mt-1 text-xs text-amber-600">
-                Invalid pricing tiers are now flagged before submission.
+              <p
+                className={`mt-1 text-xs ${
+                  validationErrors.length > 0
+                    ? "text-amber-600"
+                    : "text-green-600"
+                }`}
+              >
+                {validationErrors.length > 0
+                  ? "Resolve tier pricing issues before submitting for review."
+                  : "Summary reflects the current pricing tiers and best available savings."}
               </p>
             </div>
 
             <button
               disabled={validationErrors.length > 0}
-              className={`mt-6 w-full rounded-xl px-4 py-3 font-semibold text-white transition ${validationErrors.length > 0
-                  ? "cursor-not-allowed bg-gray-400"
-                  : "bg-primary hover:opacity-90"
-                }`}
+              className={`mt-6 w-full rounded-xl px-4 py-3 font-semibold text-white transition-all duration-200 ${
+  validationErrors.length > 0
+    ? "cursor-not-allowed bg-gray-400"
+    : "bg-primary hover:opacity-90 hover:-translate-y-0.5 hover:shadow-md"
+}`}
             >
               Submit for Review
             </button>

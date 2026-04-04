@@ -5,7 +5,7 @@
  * - Consistent audit logging and correlationId propagation
  */
 const { sendQuoteApproved, sendQuoteRejected } = require('../services/email.service');
-const { emitToUser } = require('../socket');
+const { emitToUser, getSocketIO } = require('../socket');
 
 const userService = require('../services/user.service');
 
@@ -344,6 +344,17 @@ async function submitForReview(req, res) {
       correlationId,
       details: { status: 'pending_review' }
     });
+    // added this block
+    try {
+      getSocketIO().emit('quote_submitted', {
+        supplyId: id,
+        productName: submitted?.items?.[0]?.meta?.productName || 'a product',
+        supplierId: actor.userId,
+        submittedAt: new Date().toISOString(),
+      });
+    } catch (socketErr) {
+      console.warn('⚠ Socket emit failed:', socketErr.message);
+    }
 
     return res.status(200).json({
       success: true,

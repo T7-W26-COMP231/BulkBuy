@@ -7,6 +7,7 @@ import "./styles/global.css";
 import { AuthProvider } from "./contexts/AuthContext.jsx";
 import { OpsContextProvider } from "./contexts/OpsContex.jsx";
 import ToastProvider from "./contexts/ToastProvider.jsx";
+import { NotificationProvider } from "./contexts/NotificationContext.jsx";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
@@ -14,7 +15,9 @@ ReactDOM.createRoot(document.getElementById("root")).render(
       <OpsContextProvider apiBase="http://localhost:5000/api/opcs">
         <ToastProvider>
           <BrowserRouter>
-            <App />
+            <NotificationProvider>
+              <App />
+            </NotificationProvider>
           </BrowserRouter>
         </ToastProvider>
       </OpsContextProvider>

@@ -1,3 +1,5 @@
+import NotificationBell from "../../pages/shared/NotificationBell";
+
 export default function AdminTopbar({ title = "Admin" }) {
   return (
     <header className="border-b border-neutral-light bg-white px-6 py-4 md:px-8">
@@ -12,12 +14,9 @@ export default function AdminTopbar({ title = "Admin" }) {
         </div>
 
         <div className="flex items-center gap-3">
-          <button
-            type="button"
-            className="flex h-10 w-10 items-center justify-center rounded-xl bg-neutral-light text-text-muted transition hover:bg-primary/15"
-          >
-            <span className="material-symbols-outlined">notifications</span>
-          </button>
+
+          <NotificationBell />
+
 
           <button
             type="button"

@@ -1,5 +1,5 @@
 import { useAuth } from "../../contexts/AuthContext";
-
+import NotificationBell from "../../pages/shared/NotificationBell";
 export default function SupplierTopbar() {
   const { user } = useAuth();
 
@@ -42,15 +42,7 @@ export default function SupplierTopbar() {
               expand_more
             </span>
           </button>
-
-          <button
-            type="button"
-            className="flex size-10 items-center justify-center rounded-full bg-white text-text-muted transition hover:bg-neutral-light"
-          >
-            <span className="material-symbols-outlined text-[20px]">
-              notifications
-            </span>
-          </button>
+          <NotificationBell />
 
           {/* 👇 updated avatar */}
           <button

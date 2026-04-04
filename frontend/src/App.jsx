@@ -1,6 +1,8 @@
 import { Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import { useAuth } from "./contexts/AuthContext";
+import { useNotifications } from "./contexts/NotificationContext";
+
 import { io } from "socket.io-client";
 import HomePage from "./pages/customer/HomePage";
 import SupplierDashboard from "./pages/supplier/SupplierDashboard";
@@ -24,9 +26,8 @@ import AdminSettingsPage from "./pages/admin/AdminSettingsPage";
 import AdminQuotesReviewPage from "./pages/admin/AdminQuotesReviewPage"
 import OrdersPage from "./pages/customer/OrdersPage";
 import OrderDetailsPage from "./pages/customer/OrderDetails";
-import CreateSalesWindowForm from "./pages/admin/Createsaleswindowform";
+import CreateSalesWindowForm from "./pages/admin/CreateSalesWindowForm";
 import AuthTabs from "./components/sign-in-up/AuthTabs";
-//import { useAuthBootstrap } from "./hooks/useAuthBootstrap"; // ← added
 
 
 
@@ -64,6 +65,8 @@ function RoleRedirect() {
   return null;
 }
 export default function App() {
+  const { addNotification } = useNotifications();
+
   const { user, signIn, signUp } = useAuth();
 
   useEffect(() => {
@@ -73,17 +76,32 @@ export default function App() {
 
     socket.on("connect", () => {
       console.log("🟢 Connected to server:", socket.id);
+
+      if (user?._id) {
+        socket.emit("register", user._id);
+        console.log("📝 Registered socket for user:", user._id);
+      }
     });
 
     socket.on("order_created", (data) => {
-      console.log("🔥 Order Created:", data);
+      addNotification(`New order created`, "info");
       alert("🛒 New order created!");
+    });
+    // new — fires when supplier submits a quote
+
+    socket.on("quote_submitted", (data) => {
+      if (user?.role === "administrator") {
+        addNotification(
+          `New quote submitted for ${data?.productName || "a product"} — review pending.`,
+          "info"
+        );
+      }
     });
 
     return () => {
       socket.disconnect();
     };
-  }, []);
+  }, [user]);
 
   return (
     <>

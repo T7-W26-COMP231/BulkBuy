@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import SupplierLayout from "../../components/supplier/SupplierLayout";
+import { useNotifications } from "../../contexts/NotificationContext";
 
 export default function SupplierQuotesPage() {
   const [tiers, setTiers] = useState([
@@ -21,7 +22,7 @@ export default function SupplierQuotesPage() {
         const session = localStorage.getItem("app_auth_session_v1");
         const token = session ? JSON.parse(session).accessToken : "";
 
-        const response = await fetch("http://localhost:5000/api/supls", {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/supls`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -31,7 +32,13 @@ export default function SupplierQuotesPage() {
         const supplies = result?.data || result?.items || result;
 
         if (Array.isArray(supplies) && supplies.length > 0) {
-          setSupplyId(supplies[0]._id);
+          const supply = supplies[0];
+          setSupplyId(supply._id);
+
+          // Rehydrate lock state from server
+          if (supply.status === "pending_review" || supply.status === "approved") {
+            setIsReviewLocked(true);
+          }
         }
       } catch (error) {
         console.error("Failed to fetch supplies", error);
@@ -48,7 +55,7 @@ export default function SupplierQuotesPage() {
       }
 
       const response = await fetch(
-        `http://localhost:5000/api/supls/${supplyId}/save-draft`,
+        `${import.meta.env.VITE_API_URL}/api/supls/${supplyId}/save-draft`,
         {
           method: "POST",
           headers: {
@@ -88,12 +95,12 @@ export default function SupplierQuotesPage() {
   };
 
   const handleSubmitForReview = () => {
-  if (validationErrors.length > 0 || isSubmittingReview || isReviewLocked) {
-    return;
-  }
+    if (validationErrors.length > 0 || isSubmittingReview || isReviewLocked) {
+      return;
+    }
 
-  setIsConfirmOpen(true);
-};
+    setIsConfirmOpen(true);
+  };
 
   const confirmSubmitForReview = async () => {
     try {
@@ -110,7 +117,7 @@ export default function SupplierQuotesPage() {
       setIsSubmittingReview(true);
 
       const response = await fetch(
-        `http://localhost:5000/api/supls/${supplyId}/submit-review`,
+        `${import.meta.env.VITE_API_URL}/api/supls/${supplyId}/submit-review`,
         {
           method: "POST",
           headers: {
@@ -137,6 +144,10 @@ export default function SupplierQuotesPage() {
       setSubmitStatus("Quote submitted for administrative review successfully.");
       setIsReviewLocked(true);
       setIsConfirmOpen(false);
+      addNotification(
+        "Your quote for Organic Avocados has been submitted for review.",
+        "success"
+      );
     } catch (error) {
       setSubmitStatus(error.message);
       setIsConfirmOpen(false);
@@ -616,7 +627,7 @@ export default function SupplierQuotesPage() {
           </div>
         </div>
       </div>
-            {isConfirmOpen && (
+      {isConfirmOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
           <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl border border-neutral-light">
             <h3 className="text-xl font-bold text-text-main">

@@ -12,6 +12,7 @@ export default function SupplierQuotesPage() {
   const [submitStatus, setSubmitStatus] = useState("");
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   const [isReviewLocked, setIsReviewLocked] = useState(false);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [supplyId, setSupplyId] = useState("");
 
   useEffect(() => {
@@ -58,7 +59,7 @@ export default function SupplierQuotesPage() {
           },
           body: JSON.stringify({
             productName: "Organic Avocados",
-skuId: "AVO-ORG-4402-XL",
+            skuId: "AVO-ORG-4402-XL",
             tiers: tiers.map((tier) => ({
               minQty: Number(tier.minQty),
               unitPrice: Number(tier.unitPrice),
@@ -86,7 +87,15 @@ skuId: "AVO-ORG-4402-XL",
     }
   };
 
-  const handleSubmitForReview = async () => {
+  const handleSubmitForReview = () => {
+  if (validationErrors.length > 0 || isSubmittingReview || isReviewLocked) {
+    return;
+  }
+
+  setIsConfirmOpen(true);
+};
+
+  const confirmSubmitForReview = async () => {
     try {
       setSubmitStatus("");
 
@@ -127,8 +136,10 @@ skuId: "AVO-ORG-4402-XL",
 
       setSubmitStatus("Quote submitted for administrative review successfully.");
       setIsReviewLocked(true);
+      setIsConfirmOpen(false);
     } catch (error) {
       setSubmitStatus(error.message);
+      setIsConfirmOpen(false);
     } finally {
       setIsSubmittingReview(false);
     }
@@ -605,6 +616,43 @@ skuId: "AVO-ORG-4402-XL",
           </div>
         </div>
       </div>
+            {isConfirmOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl border border-neutral-light">
+            <h3 className="text-xl font-bold text-text-main">
+              Confirm Quote Submission
+            </h3>
+
+            <p className="mt-3 text-sm text-text-muted">
+              Are you sure you want to submit this finalized quote for
+              administrative review?
+            </p>
+
+            <p className="mt-2 text-sm text-text-muted">
+              After submission, this quote will be locked and editing will not
+              be permitted while it is under review.
+            </p>
+
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setIsConfirmOpen(false)}
+                className="rounded-xl border border-neutral-light bg-white px-4 py-2 text-sm font-semibold text-text-main transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                onClick={confirmSubmitForReview}
+                className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-white transition-all duration-200 hover:opacity-90 hover:-translate-y-0.5 hover:shadow-md"
+              >
+                Confirm Submission
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </SupplierLayout>
   );
 }

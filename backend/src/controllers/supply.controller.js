@@ -5,6 +5,7 @@
  * - Consistent audit logging and correlationId propagation
  */
 const { sendQuoteApproved, sendQuoteRejected } = require('../services/email.service');
+const { emitToUser } = require('../socket');
 
 const userService = require('../services/user.service');
 
@@ -437,12 +438,21 @@ async function updateStatus(req, res) {
           numberOfBulkUnits: supply?.items?.[0]?.quotes?.[0]?.numberOfBulkUnits || null,
         };
 
+
+
         if (status === 'accepted') {
           await sendQuoteApproved(supplierEmail, supplierName, quoteDetails);
         } else if (status === 'cancelled') {
           await sendQuoteRejected(supplierEmail, supplierName, quoteDetails, rejectionReason);
         }
       }
+      emitToUser(String(supply.supplierId), "quote-status-updated", {
+        supplyId: id,
+        status,
+        rejectionReason: rejectionReason || null,
+        updatedAt: new Date().toISOString(),
+      });
+
     } catch (emailErr) {
       console.warn('⚠ Email notification failed:', emailErr.message);
     }

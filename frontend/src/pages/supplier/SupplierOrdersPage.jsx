@@ -60,6 +60,7 @@ export default function SupplierOrdersPage() {
   const [totalResults, setTotalResults] = useState(0);
   const [appliedCityFilter, setAppliedCityFilter] = useState("All Cities");
   const [appliedStatusFilter, setAppliedStatusFilter] = useState("");
+  const [selectedOrder, setSelectedOrder] = useState(null);
   const itemsPerPage = 5;
 
   const cityOptions = [
@@ -79,14 +80,14 @@ export default function SupplierOrdersPage() {
   ];
 
   const statusOptions = [
-  { label: "All", value: "All" },
-  { label: "Draft", value: "Draft" },
-  { label: "Submitted", value: "Submitted" },
-  { label: "Approved", value: "Approved" },
-  { label: "Declined", value: "Declined" },
-  { label: "Dispatched", value: "Dispatched" },
-  { label: "Fulfilled", value: "Fulfilled" },
-];
+    { label: "All", value: "All" },
+    { label: "Draft", value: "Draft" },
+    { label: "Submitted", value: "Submitted" },
+    { label: "Approved", value: "Approved" },
+    { label: "Declined", value: "Declined" },
+    { label: "Dispatched", value: "Dispatched" },
+    { label: "Fulfilled", value: "Fulfilled" },
+  ];
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -231,20 +232,20 @@ export default function SupplierOrdersPage() {
             </div>
 
             {/* Status */}
-<div className="flex flex-col gap-1.5">
-  <label className="text-xs font-semibold text-text-muted">Status</label>
-  <select
-    value={statusFilter}
-    onChange={(e) => setStatusFilter(e.target.value)}
-    className="rounded-xl border border-neutral-light bg-white px-4 py-2.5 text-sm text-text-main outline-none focus:border-primary"
-  >
-    {statusOptions.map((status) => (
-      <option key={status.value} value={status.value}>
-        {status.label}
-      </option>
-    ))}
-  </select>
-</div>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-semibold text-text-muted">Status</label>
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="rounded-xl border border-neutral-light bg-white px-4 py-2.5 text-sm text-text-main outline-none focus:border-primary"
+              >
+                {statusOptions.map((status) => (
+                  <option key={status.value} value={status.value}>
+                    {status.label}
+                  </option>
+                ))}
+              </select>
+            </div>
 
             <button
               type="button"
@@ -322,6 +323,7 @@ export default function SupplierOrdersPage() {
                         <div className="flex items-center gap-2">
                           <button
                             type="button"
+                            onClick={() => setSelectedOrder(order)}
                             className="text-sm font-semibold text-primary transition hover:opacity-70"
                           >
                             View
@@ -395,6 +397,92 @@ export default function SupplierOrdersPage() {
             </div>
           </div>
         </section>
+        {selectedOrder && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+            <div className="w-full max-w-2xl rounded-3xl bg-white shadow-2xl">
+              <div className="flex items-center justify-between border-b border-neutral-light px-6 py-4">
+                <h2 className="text-lg font-bold text-text-main">
+                  Order Details
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => setSelectedOrder(null)}
+                  className="text-sm font-semibold text-text-muted transition hover:text-text-main"
+                >
+                  Close
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 px-6 py-6 md:grid-cols-2">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-text-muted">
+                    Order ID
+                  </p>
+                  <p className="mt-1 text-sm font-bold text-text-main">
+                    #{selectedOrder.id}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-text-muted">
+                    Product
+                  </p>
+                  <p className="mt-1 text-sm text-text-main">
+                    {selectedOrder.product}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-text-muted">
+                    City
+                  </p>
+                  <p className="mt-1 text-sm text-text-main">
+                    {selectedOrder.city}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-text-muted">
+                    Quantity
+                  </p>
+                  <p className="mt-1 text-sm text-text-main">
+                    {selectedOrder.quantity}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-text-muted">
+                    Delivery Start
+                  </p>
+                  <p className="mt-1 text-sm text-text-main">
+                    {selectedOrder.windowStart}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-text-muted">
+                    Delivery End
+                  </p>
+                  <p className="mt-1 text-sm text-text-main">
+                    {selectedOrder.windowEnd}
+                  </p>
+                </div>
+
+                <div className="md:col-span-2">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-text-muted">
+                    Status
+                  </p>
+                  <span
+                    className={`mt-2 inline-flex rounded-lg px-3 py-1 text-xs font-bold capitalize ${STATUS_STYLES[selectedOrder.status] ?? "bg-slate-100 text-slate-700"
+                      }`}
+                  >
+                    {selectedOrder.status}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </SupplierLayout>
   );

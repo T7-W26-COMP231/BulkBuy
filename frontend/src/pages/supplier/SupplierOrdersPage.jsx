@@ -476,10 +476,9 @@ export default function SupplierOrdersPage() {
                 >
                   Cancel
                 </button>
-
                 <button
                   type="button"
-
+                  disabled={!declineReason.trim()}
                   onClick={async () => {
                     if (!declineReason.trim()) {
                       setDeclineError("Decline reason is required");
@@ -530,7 +529,10 @@ export default function SupplierOrdersPage() {
                       setDeclineError(err.message || "Failed to decline order");
                     }
                   }}
-                  className="rounded-xl bg-red-600 px-4 py-2 text-sm font-bold text-white transition hover:opacity-90"
+                  className={`rounded-xl px-4 py-2 text-sm font-bold text-white transition ${declineReason.trim()
+                      ? "bg-red-600 hover:opacity-90"
+                      : "bg-red-300 cursor-not-allowed"
+                    }`}
                 >
                   Submit Decline
                 </button>
@@ -538,6 +540,7 @@ export default function SupplierOrdersPage() {
             </div>
           </div>
         )}
+
         {selectedOrder && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
             <div className="w-full max-w-2xl rounded-3xl bg-white shadow-2xl">

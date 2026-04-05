@@ -99,6 +99,21 @@ router.get(
 );
 
 /* -------------------------------------------------------------------------- */
+/* Supplier order requests
+ * purpose: Retrieve supplier order requests for review
+ * method: GET
+ * path: /orders/supplier-requests
+ * params:
+ *   - query: supplierId, status, page, limit
+ * validators: none for now
+ * controller: OrderController.getSupplierOrderRequests
+ */
+router.get(
+  '/supplier-requests',
+  asyncHandler(OrderController.getSupplierOrderRequests)
+);
+
+/* -------------------------------------------------------------------------- */
 /* Get order by id
  * purpose: Retrieve a single order by Mongo _id
  * method: GET

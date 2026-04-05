@@ -2,49 +2,154 @@ import SupplierLayout from "../../components/supplier/SupplierLayout";
 import { useState, useEffect } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 
-const MOCK_ORDERS = [
-  { id: "ORD-2023-8841", product: "Organic Whole Milk 1L", city: "New York, NY", quantity: "1,200 Units", windowStart: "Oct 12", windowEnd: "Oct 14", status: "pending" },
-  { id: "ORD-2023-8842", product: "Premium Coffee Beans (Dark)", city: "Austin, TX", quantity: "450 kg", windowStart: "Oct 14", windowEnd: "Oct 15", status: "pending" },
-  { id: "ORD-2023-8843", product: "Eco-Friendly Paper Bags (M)", city: "Chicago, IL", quantity: "5,000 Pcs", windowStart: "Oct 13", windowEnd: "Oct 18", status: "pending" },
-  { id: "ORD-2023-8844", product: "Aluminum Foil Wraps", city: "Seattle, WA", quantity: "800 Boxes", windowStart: "Oct 15", windowEnd: "Oct 16", status: "pending" },
-  { id: "ORD-2023-8845", product: "Bulk Rice (Basmati) 25kg", city: "Miami, FL", quantity: "200 Bags", windowStart: "Oct 16", windowEnd: "Oct 20", status: "pending" },
-];
-
 const STATUS_STYLES = {
   pending: "bg-amber-100 text-amber-700",
+  requested: "bg-amber-100 text-amber-700",
   approved: "bg-green-100 text-green-700",
   declined: "bg-red-100 text-red-700",
+  dispatched: "bg-blue-100 text-blue-700",
+  fulfilled: "bg-emerald-100 text-emerald-700",
+};
+
+const formatEpochDate = (value) => {
+  if (!value) return "N/A";
+  const date = new Date(Number(value));
+  if (Number.isNaN(date.getTime())) return "N/A";
+  return date.toLocaleDateString();
+};
+
+const mapApiOrder = (order) => {
+  const items = Array.isArray(order.items) ? order.items : [];
+  const firstItem = items[0] || {};
+  const totalQty = items.reduce(
+    (sum, item) => sum + Number(item?.quantity || item?.meta?.quantity || 0),
+    0
+  );
+
+  return {
+    id: order._id,
+    product:
+      items.length > 1
+        ? `${items.length} items`
+        : firstItem.productId
+          ? `Product ${String(firstItem.productId).slice(-6)}`
+          : "N/A",
+    city: order.ops_region || "N/A",
+    quantity: `${totalQty || 0} Units`,
+    windowStart: order.salesWindow?.fromEpoch
+      ? formatEpochDate(order.salesWindow.fromEpoch)
+      : "N/A",
+    windowEnd: order.salesWindow?.toEpoch
+      ? formatEpochDate(order.salesWindow.toEpoch)
+      : "N/A",
+    status: (order.status || "pending").toLowerCase(),
+    createdAt: order.createdAt || null,
+  };
 };
 
 export default function SupplierOrdersPage() {
   const { accessToken } = useAuth();
-  const [orders, setOrders] = useState(MOCK_ORDERS);
+  const [orders, setOrders] = useState([]);
   const [cityFilter, setCityFilter] = useState("All Cities");
-  const [statusFilter, setStatusFilter] = useState("Pending");
+  const [statusFilter, setStatusFilter] = useState("All");
   const [dateFilter, setDateFilter] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalResults, setTotalResults] = useState(0);
+  const [appliedCityFilter, setAppliedCityFilter] = useState("All Cities");
+  const [appliedStatusFilter, setAppliedStatusFilter] = useState("");
   const itemsPerPage = 5;
 
-  const cities = ["All Cities", ...Array.from(new Set(MOCK_ORDERS.map((o) => o.city)))];
+  const cities = [
+    "All Cities",
+    ...Array.from(
+      new Set(["ON-GTA", "ON-TOR", "NA", ...orders.map((o) => o.city).filter(Boolean)])
+    ),
+  ];
 
-  const filtered = orders.filter((o) => {
-    const cityMatch = cityFilter === "All Cities" || o.city === cityFilter;
-    const statusMatch = statusFilter === "" || o.status.toLowerCase() === statusFilter.toLowerCase();
-    return cityMatch && statusMatch;
-  });
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        setLoading(true);
+        setError("");
 
-  const totalPages = Math.ceil(filtered.length / itemsPerPage);
-  const paginated = filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+        const params = new URLSearchParams();
+        params.set("page", currentPage);
+        params.set("limit", itemsPerPage);
 
-  const handleApply = () => setCurrentPage(1);
+        if (appliedCityFilter !== "All Cities") {
+          params.set("ops_region", appliedCityFilter);
+        }
+
+        if (appliedStatusFilter) {
+          params.set("status", appliedStatusFilter);
+        }
+
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/api/ordrs/supplier-requests?${params.toString()}`,
+          {
+            headers: accessToken
+              ? {
+                Authorization: `Bearer ${accessToken}`,
+              }
+              : {},
+          }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data?.message || "Failed to load supplier order requests");
+        }
+
+        const mappedOrders = Array.isArray(data.items)
+          ? data.items.map(mapApiOrder)
+          : [];
+
+        setOrders(mappedOrders);
+        setTotalPages(Number(data.pages) || 1);
+        setTotalResults(Number(data.total) || 0);
+      } catch (err) {
+        setOrders([]);
+        setTotalPages(1);
+        setTotalResults(0);
+        setError(err.message || "Failed to load order requests");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrders();
+  }, [accessToken, currentPage, appliedCityFilter, appliedStatusFilter]);
+
+  const filtered = dateFilter
+    ? orders.filter((o) => {
+      if (!o.createdAt) return false;
+      const iso = new Date(Number(o.createdAt)).toISOString().slice(0, 10);
+      return iso === dateFilter;
+    })
+    : orders;
+
+  const paginated = filtered;
+
+  const handleApply = () => {
+    setCurrentPage(1);
+    setAppliedCityFilter(cityFilter);
+    setAppliedStatusFilter(statusFilter ? statusFilter.toLowerCase() : "");
+  };
 
   const handleApprove = (id) => {
-    setOrders((prev) => prev.map((o) => o.id === id ? { ...o, status: "approved" } : o));
+    setOrders((prev) =>
+      prev.map((o) => (o.id === id ? { ...o, status: "approved" } : o))
+    );
   };
 
   const handleDecline = (id) => {
-    setOrders((prev) => prev.map((o) => o.id === id ? { ...o, status: "declined" } : o));
+    setOrders((prev) =>
+      prev.map((o) => (o.id === id ? { ...o, status: "declined" } : o))
+    );
   };
 
   return (
@@ -112,10 +217,13 @@ export default function SupplierOrdersPage() {
                 onChange={(e) => setStatusFilter(e.target.value)}
                 className="rounded-xl border border-neutral-light bg-white px-4 py-2.5 text-sm text-text-main outline-none focus:border-primary"
               >
-                <option>Pending</option>
+                <option>All</option>
+                <option>Draft</option>
+                <option>Submitted</option>
                 <option>Approved</option>
                 <option>Declined</option>
-                <option value="">All</option>
+                <option>Dispatched</option>
+                <option>Fulfilled</option>
               </select>
             </div>
 

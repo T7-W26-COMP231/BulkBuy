@@ -136,6 +136,25 @@ const OrderController = {
     return send(res, 200, { success: true, ...result });
   }),
 
+    /**
+   * GET /orders/supplier-requests
+   */
+  getSupplierOrderRequests: asyncHandler(async (req, res) => {
+    const opts = {
+  ops_region: req.query.ops_region,
+  status: req.query.status,
+  page: req.query.page,
+  limit: req.query.limit
+};
+
+    const result = await OrderService.getSupplierOrderRequests(opts);
+
+    return send(res, 200, {
+      success: true,
+      ...result
+    });
+  }),
+
   /**
    * PATCH /orders/:id
    */

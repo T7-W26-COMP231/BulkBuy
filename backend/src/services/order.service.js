@@ -118,6 +118,30 @@ class OrderService {
     return result;
   }
 
+  async getSupplierOrderRequests(opts = {}) {
+  const page = Math.max(1, parseInt(opts.page, 10) || 1);
+  const limit = Math.max(1, parseInt(opts.limit, 10) || 10);
+
+  const filter = {};
+
+ if (opts.ops_region) {
+  filter.ops_region = opts.ops_region;
+}
+
+if (opts.status && opts.status.toLowerCase() !== "all") {
+  filter.status = opts.status.toLowerCase();
+}
+
+  const result = await OrderRepo.paginate(filter, {
+    page,
+    limit,
+    sort: 'createdAt:-1'
+  });
+
+  result.items = (result.items || []).map(sanitizeForClient);
+  return result;
+}
+
   async updateById(id, update = {}, opts = { new: true }) {
     if (!id) throw createError(400, 'id is required');
     if (!update || typeof update !== 'object') throw createError(400, 'update payload is required');

@@ -63,19 +63,29 @@ export default function SupplierOrdersPage() {
   const itemsPerPage = 5;
 
   const cityOptions = [
-  { label: "All Cities", value: "All Cities" },
-  { label: "Toronto", value: "ON-TOR" },
-  { label: "Mississauga", value: "ON-MIS" },
-  { label: "Brampton", value: "ON-BRA" },
-  { label: "Vaughan", value: "ON-VAU" },
-  { label: "Markham", value: "ON-MAR" },
-  { label: "Richmond Hill", value: "ON-RHL" },
-  { label: "Oakville", value: "ON-OAK" },
-  { label: "Burlington", value: "ON-BUR" },
-  { label: "Ajax", value: "ON-AJX" },
-  { label: "Pickering", value: "ON-PCK" },
-  { label: "Oshawa", value: "ON-OSH" },
-  { label: "Milton", value: "ON-MLT" },
+    { label: "All Cities", value: "All Cities" },
+    { label: "Toronto", value: "ON-TOR" },
+    { label: "Mississauga", value: "ON-MIS" },
+    { label: "Brampton", value: "ON-BRA" },
+    { label: "Vaughan", value: "ON-VAU" },
+    { label: "Markham", value: "ON-MAR" },
+    { label: "Richmond Hill", value: "ON-RHL" },
+    { label: "Oakville", value: "ON-OAK" },
+    { label: "Burlington", value: "ON-BUR" },
+    { label: "Ajax", value: "ON-AJX" },
+    { label: "Pickering", value: "ON-PCK" },
+    { label: "Oshawa", value: "ON-OSH" },
+    { label: "Milton", value: "ON-MLT" },
+  ];
+
+  const statusOptions = [
+  { label: "All", value: "All" },
+  { label: "Draft", value: "Draft" },
+  { label: "Submitted", value: "Submitted" },
+  { label: "Approved", value: "Approved" },
+  { label: "Declined", value: "Declined" },
+  { label: "Dispatched", value: "Dispatched" },
+  { label: "Fulfilled", value: "Fulfilled" },
 ];
 
   useEffect(() => {
@@ -202,10 +212,10 @@ export default function SupplierOrdersPage() {
                 className="rounded-xl border border-neutral-light bg-white px-4 py-2.5 text-sm text-text-main outline-none focus:border-primary"
               >
                 {cityOptions.map((city) => (
-  <option key={city.value} value={city.value}>
-    {city.label}
-  </option>
-))}
+                  <option key={city.value} value={city.value}>
+                    {city.label}
+                  </option>
+                ))}
               </select>
             </div>
 
@@ -221,22 +231,20 @@ export default function SupplierOrdersPage() {
             </div>
 
             {/* Status */}
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold text-text-muted">Status</label>
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="rounded-xl border border-neutral-light bg-white px-4 py-2.5 text-sm text-text-main outline-none focus:border-primary"
-              >
-                <option>All</option>
-                <option>Draft</option>
-                <option>Submitted</option>
-                <option>Approved</option>
-                <option>Declined</option>
-                <option>Dispatched</option>
-                <option>Fulfilled</option>
-              </select>
-            </div>
+<div className="flex flex-col gap-1.5">
+  <label className="text-xs font-semibold text-text-muted">Status</label>
+  <select
+    value={statusFilter}
+    onChange={(e) => setStatusFilter(e.target.value)}
+    className="rounded-xl border border-neutral-light bg-white px-4 py-2.5 text-sm text-text-main outline-none focus:border-primary"
+  >
+    {statusOptions.map((status) => (
+      <option key={status.value} value={status.value}>
+        {status.label}
+      </option>
+    ))}
+  </select>
+</div>
 
             <button
               type="button"

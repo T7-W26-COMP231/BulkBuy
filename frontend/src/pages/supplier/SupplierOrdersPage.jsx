@@ -255,7 +255,19 @@ export default function SupplierOrdersPage() {
               </thead>
 
               <tbody className="divide-y divide-neutral-light">
-                {paginated.length === 0 ? (
+                {loading ? (
+                  <tr>
+                    <td colSpan={7} className="px-6 py-12 text-center text-sm text-text-muted">
+                      Loading order requests...
+                    </td>
+                  </tr>
+                ) : error ? (
+                  <tr>
+                    <td colSpan={7} className="px-6 py-12 text-center text-sm text-red-600">
+                      {error}
+                    </td>
+                  </tr>
+                ) : paginated.length === 0 ? (
                   <tr>
                     <td colSpan={7} className="px-6 py-12 text-center text-sm text-text-muted">
                       No order requests found.
@@ -280,7 +292,10 @@ export default function SupplierOrdersPage() {
                         {order.windowStart} - {order.windowEnd}
                       </td>
                       <td className="px-6 py-5">
-                        <span className={`inline-flex rounded-lg px-3 py-1 text-xs font-bold capitalize ${STATUS_STYLES[order.status] ?? "bg-slate-100 text-slate-700"}`}>
+                        <span
+                          className={`inline-flex rounded-lg px-3 py-1 text-xs font-bold capitalize ${STATUS_STYLES[order.status] ?? "bg-slate-100 text-slate-700"
+                            }`}
+                        >
                           {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                         </span>
                       </td>
@@ -292,7 +307,7 @@ export default function SupplierOrdersPage() {
                           >
                             View
                           </button>
-                          {order.status === "pending" && (
+                          {(order.status === "pending" || order.status === "submitted") && (
                             <>
                               <button
                                 type="button"
@@ -322,8 +337,8 @@ export default function SupplierOrdersPage() {
           {/* Pagination */}
           <div className="flex items-center justify-between border-t border-neutral-light px-6 py-4">
             <p className="text-sm text-text-muted">
-              Showing {Math.min((currentPage - 1) * itemsPerPage + 1, filtered.length)} to{" "}
-              {Math.min(currentPage * itemsPerPage, filtered.length)} of {filtered.length} results
+              Showing {totalResults === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1} to{" "}
+              {Math.min(currentPage * itemsPerPage, totalResults)} of {totalResults} results
             </p>
 
             <div className="flex items-center gap-1">

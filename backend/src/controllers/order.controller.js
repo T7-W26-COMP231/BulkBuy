@@ -220,50 +220,84 @@ const OrderController = {
     return send(res, 200, { success: true, data: updated });
   }),
 
- /**
- * POST /orders/:id/update-status
- * Body: { status }
+  /**
+  * POST /orders/:id/update-status
+  * Body: { status }
+  */
+  updateStatus: asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const { status } = req.body || {};
+
+    if (!id || !status) {
+      throw createError(400, 'order id and status are required');
+    }
+
+    const opts = buildOpts(req);
+    const updated = await OrderService.updateStatus(id, status, opts);
+
+    // Emit status update
+    try {
+      const io = getSocketIO();
+      io.emit('order_status_updated', updated);
+    } catch (err) {
+      console.warn('Socket.IO not ready:', err && err.message);
+    }
+
+    return send(res, 200, { success: true, data: updated });
+  }),
+
+  /**
+   * PATCH /orders/:id/approve
+   * Supplier approves order request
+   */
+  approveSupplierOrder: asyncHandler(async (req, res) => {
+    const { id } = req.params;
+
+    if (!id) {
+      throw createError(400, 'order id is required');
+    }
+
+    const opts = buildOpts(req);
+    const updated = await OrderService.approveSupplierOrder(id, opts);
+
+    // Emit supplier approval event
+    try {
+      const io = getSocketIO();
+      io.emit('supplier_order_approved', updated);
+    } catch (err) {
+      console.warn('Socket.IO not ready:', err && err.message);
+    }
+
+    return send(res, 200, { success: true, data: updated });
+  }),
+
+  /**
+ * PATCH /orders/:id/decline
+ * Supplier declines order request with required reason
  */
-updateStatus: asyncHandler(async (req, res) => {
+declineSupplierOrder: asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const { status } = req.body || {};
-
-  if (!id || !status) {
-    throw createError(400, 'order id and status are required');
-  }
-
-  const opts = buildOpts(req);
-  const updated = await OrderService.updateStatus(id, status, opts);
-
-  // Emit status update
-  try {
-    const io = getSocketIO();
-    io.emit('order_status_updated', updated);
-  } catch (err) {
-    console.warn('Socket.IO not ready:', err && err.message);
-  }
-
-  return send(res, 200, { success: true, data: updated });
-}),
-
-/**
- * PATCH /orders/:id/approve
- * Supplier approves order request
- */
-approveSupplierOrder: asyncHandler(async (req, res) => {
-  const { id } = req.params;
+  const { reason } = req.body || {};
 
   if (!id) {
     throw createError(400, 'order id is required');
   }
 
-  const opts = buildOpts(req);
-  const updated = await OrderService.approveSupplierOrder(id, opts);
+  if (!reason || !reason.trim()) {
+    throw createError(400, 'decline reason is required');
+  }
 
-  // Emit supplier approval event
+  const opts = buildOpts(req);
+  const updated = await OrderService.declineSupplierOrder(
+    id,
+    reason.trim(),
+    opts
+  );
+
+  // Emit supplier decline event
   try {
     const io = getSocketIO();
-    io.emit('supplier_order_approved', updated);
+    io.emit('supplier_order_declined', updated);
   } catch (err) {
     console.warn('Socket.IO not ready:', err && err.message);
   }

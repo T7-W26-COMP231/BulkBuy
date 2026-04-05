@@ -191,6 +191,23 @@ router.patch(
   orderValidators && orderValidators.idParam,
   asyncHandler(OrderController.approveSupplierOrder)
 );
+
+/* -------------------------------------------------------------------------- */
+/* Decline supplier order request
+ * purpose: Supplier declines an order request with required reason
+ * method: PATCH
+ * path: /orders/:id/decline
+ * params:
+ *   - path: id
+ *   - body: { reason }
+ * validators: orderValidators.idParam
+ * controller: OrderController.declineSupplierOrder
+ */
+router.patch(
+  '/:id/decline',
+  orderValidators && orderValidators.idParam,
+  asyncHandler(OrderController.declineSupplierOrder)
+);
 router.patch(
   '/:id',
   orderValidators && orderValidators.idParam,

@@ -119,28 +119,28 @@ class OrderService {
   }
 
   async getSupplierOrderRequests(opts = {}) {
-  const page = Math.max(1, parseInt(opts.page, 10) || 1);
-  const limit = Math.max(1, parseInt(opts.limit, 10) || 10);
+    const page = Math.max(1, parseInt(opts.page, 10) || 1);
+    const limit = Math.max(1, parseInt(opts.limit, 10) || 10);
 
-  const filter = {};
+    const filter = {};
 
- if (opts.ops_region) {
-  filter.ops_region = opts.ops_region;
-}
+    if (opts.ops_region) {
+      filter.ops_region = opts.ops_region;
+    }
 
-if (opts.status && opts.status.toLowerCase() !== "all") {
-  filter.status = opts.status.toLowerCase();
-}
+    if (opts.status && opts.status.toLowerCase() !== "all") {
+      filter.status = opts.status.toLowerCase();
+    }
 
-  const result = await OrderRepo.paginate(filter, {
-    page,
-    limit,
-    sort: 'createdAt:-1'
-  });
+    const result = await OrderRepo.paginate(filter, {
+      page,
+      limit,
+      sort: 'createdAt:-1'
+    });
 
-  result.items = (result.items || []).map(sanitizeForClient);
-  return result;
-}
+    result.items = (result.items || []).map(sanitizeForClient);
+    return result;
+  }
 
   async updateById(id, update = {}, opts = { new: true }) {
     if (!id) throw createError(400, 'id is required');
@@ -237,19 +237,80 @@ if (opts.status && opts.status.toLowerCase() !== "all") {
   }
 
   async approveSupplierOrder(orderId, opts = {}) {
+    if (!orderId) {
+      throw createError(400, 'orderId is required');
+    }
+
+    const actor = actorFromOpts(opts);
+    const correlationId = opts.correlationId || null;
+
+    try {
+      const updated = await OrderRepo.updateStatus(orderId, 'approved');
+
+      if (!updated) {
+        await this._audit(
+          'supplier.order.approve',
+          actor,
+          orderId,
+          'failure',
+          'warn',
+          correlationId,
+          { reason: 'not_found' }
+        );
+        throw createError(404, 'Order not found');
+      }
+
+      await this._audit(
+        'supplier.order.approve',
+        actor,
+        orderId,
+        'success',
+        'info',
+        correlationId,
+        { status: 'approved' }
+      );
+
+      return sanitizeForClient(updated);
+    } catch (err) {
+      await this._audit(
+        'supplier.order.approve',
+        actor,
+        orderId,
+        'failure',
+        'error',
+        correlationId,
+        { error: err && err.message }
+      );
+      throw err;
+    }
+  }
+
+  async declineSupplierOrder(orderId, reason, opts = {}) {
   if (!orderId) {
     throw createError(400, 'orderId is required');
+  }
+
+  if (!reason || !reason.trim()) {
+    throw createError(400, 'decline reason is required');
   }
 
   const actor = actorFromOpts(opts);
   const correlationId = opts.correlationId || null;
 
   try {
-    const updated = await OrderRepo.updateStatus(orderId, 'approved');
+    const updated = await OrderRepo.updateById(
+      orderId,
+      {
+        status: 'declined',
+        declineReason: reason.trim(),
+        updatedAt: Date.now()
+      },
+      { new: true }
+    );
 
     if (!updated) {
       await this._audit(
-        'supplier.order.approve',
+        'supplier.order.decline',
         actor,
         orderId,
         'failure',
@@ -261,19 +322,22 @@ if (opts.status && opts.status.toLowerCase() !== "all") {
     }
 
     await this._audit(
-      'supplier.order.approve',
+      'supplier.order.decline',
       actor,
       orderId,
       'success',
       'info',
       correlationId,
-      { status: 'approved' }
+      {
+        status: 'declined',
+        declineReason: reason.trim()
+      }
     );
 
     return sanitizeForClient(updated);
   } catch (err) {
     await this._audit(
-      'supplier.order.approve',
+      'supplier.order.decline',
       actor,
       orderId,
       'failure',
@@ -591,7 +655,7 @@ if (opts.status && opts.status.toLowerCase() !== "all") {
   //   - Return paginated orders for user enriched with latest sales-window pricing, availability, flags
   //   - Use batch SalesWindowService calls to avoid N+1
   //   - If opts.persist === true, persist updated pricing snapshots for submitted orders
-  
+
   /**
    * Private read-intensive helper
    *

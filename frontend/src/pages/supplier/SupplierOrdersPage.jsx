@@ -61,6 +61,9 @@ export default function SupplierOrdersPage() {
   const [appliedCityFilter, setAppliedCityFilter] = useState("All Cities");
   const [appliedStatusFilter, setAppliedStatusFilter] = useState("");
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [declineTargetId, setDeclineTargetId] = useState(null);
+  const [declineReason, setDeclineReason] = useState("");
+  const [declineError, setDeclineError] = useState("");
   const itemsPerPage = 5;
 
   const cityOptions = [
@@ -160,45 +163,45 @@ export default function SupplierOrdersPage() {
     setAppliedStatusFilter(statusFilter ? statusFilter.toLowerCase() : "");
   };
 
- const handleApprove = async (id) => {
-  try {
-    const response = await fetch(
-      `${import.meta.env.VITE_API_URL}/api/ordrs/${id}/approve`,
-      {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          ...(accessToken
-            ? { Authorization: `Bearer ${accessToken}` }
-            : {}),
-        },
-      }
-    );
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data?.message || "Failed to approve order");
-    }
-
-    setOrders((prev) =>
-      prev.map((o) => (o.id === id ? { ...o, status: "approved" } : o))
-    );
-
-    if (selectedOrder?.id === id) {
-      setSelectedOrder((prev) =>
-        prev ? { ...prev, status: "approved" } : prev
+  const handleApprove = async (id) => {
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/ordrs/${id}/approve`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            ...(accessToken
+              ? { Authorization: `Bearer ${accessToken}` }
+              : {}),
+          },
+        }
       );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data?.message || "Failed to approve order");
+      }
+
+      setOrders((prev) =>
+        prev.map((o) => (o.id === id ? { ...o, status: "approved" } : o))
+      );
+
+      if (selectedOrder?.id === id) {
+        setSelectedOrder((prev) =>
+          prev ? { ...prev, status: "approved" } : prev
+        );
+      }
+    } catch (err) {
+      setError(err.message || "Failed to approve order");
     }
-  } catch (err) {
-    setError(err.message || "Failed to approve order");
-  }
-};
+  };
 
   const handleDecline = (id) => {
-    setOrders((prev) =>
-      prev.map((o) => (o.id === id ? { ...o, status: "declined" } : o))
-    );
+    setDeclineTargetId(id);
+    setDeclineReason("");
+    setDeclineError("");
   };
 
   return (
@@ -426,6 +429,115 @@ export default function SupplierOrdersPage() {
             </div>
           </div>
         </section>
+
+        {declineTargetId && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+            <div className="w-full max-w-lg rounded-3xl bg-white shadow-2xl">
+              <div className="border-b border-neutral-light px-6 py-4">
+                <h2 className="text-lg font-bold text-text-main">
+                  Decline Order Request
+                </h2>
+                <p className="mt-1 text-sm text-text-muted">
+                  Please provide a reason before declining this request.
+                </p>
+              </div>
+
+              <div className="px-6 py-5">
+                <label className="mb-2 block text-sm font-semibold text-text-main">
+                  Decline Reason
+                </label>
+                <textarea
+                  value={declineReason}
+                  onChange={(e) => {
+                    setDeclineReason(e.target.value);
+                    setDeclineError("");
+                  }}
+                  rows={4}
+                  placeholder="Example: Insufficient stock for requested delivery window"
+                  className="w-full rounded-2xl border border-neutral-light px-4 py-3 text-sm outline-none focus:border-primary"
+                />
+
+                {declineError && (
+                  <p className="mt-2 text-sm font-medium text-red-600">
+                    {declineError}
+                  </p>
+                )}
+              </div>
+
+              <div className="flex justify-end gap-3 border-t border-neutral-light px-6 py-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDeclineTargetId(null);
+                    setDeclineReason("");
+                    setDeclineError("");
+                  }}
+                  className="rounded-xl border border-neutral-light px-4 py-2 text-sm font-semibold text-text-main"
+                >
+                  Cancel
+                </button>
+
+                <button
+                  type="button"
+
+                  onClick={async () => {
+                    if (!declineReason.trim()) {
+                      setDeclineError("Decline reason is required");
+                      return;
+                    }
+
+                    try {
+                      const response = await fetch(
+                        `${import.meta.env.VITE_API_URL}/api/ordrs/${declineTargetId}/decline`,
+                        {
+                          method: "PATCH",
+                          headers: {
+                            "Content-Type": "application/json",
+                            ...(accessToken
+                              ? { Authorization: `Bearer ${accessToken}` }
+                              : {}),
+                          },
+                          body: JSON.stringify({
+                            reason: declineReason.trim(),
+                          }),
+                        }
+                      );
+
+                      const data = await response.json();
+
+                      if (!response.ok) {
+                        throw new Error(data?.message || "Failed to decline order");
+                      }
+
+                      setOrders((prev) =>
+                        prev.map((o) =>
+                          o.id === declineTargetId
+                            ? { ...o, status: "declined" }
+                            : o
+                        )
+                      );
+
+                      if (selectedOrder?.id === declineTargetId) {
+                        setSelectedOrder((prev) =>
+                          prev ? { ...prev, status: "declined" } : prev
+                        );
+                      }
+
+                      setDeclineTargetId(null);
+                      setDeclineReason("");
+                      setDeclineError("");
+                    } catch (err) {
+                      setDeclineError(err.message || "Failed to decline order");
+                    }
+                  }}
+                  className="rounded-xl bg-red-600 px-4 py-2 text-sm font-bold text-white transition hover:opacity-90"
+                >
+                  Submit Decline
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
         {selectedOrder && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
             <div className="w-full max-w-2xl rounded-3xl bg-white shadow-2xl">

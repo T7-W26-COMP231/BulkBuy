@@ -216,6 +216,24 @@ router.patch(
 );
 
 /* -------------------------------------------------------------------------- */
+/* Confirm fulfillment
+ * purpose: Supplier confirms fulfillment and records expected delivery date
+ * method: PATCH
+ * path: /orders/:id/confirm-fulfillment
+ * params:
+ *   - path: id
+ *   - body: { expectedDeliveryDate }
+ * validators: orderValidators.idParam
+ * controller: OrderController.confirmFulfillment
+ */
+router.patch(
+  '/:id/confirm-fulfillment',
+  orderValidators && orderValidators.idParam,
+  asyncHandler(OrderController.confirmFulfillment)
+);
+
+
+/* -------------------------------------------------------------------------- */
 /* Update one by filter
  * purpose: Find one order by filter and apply update (body: { filter, update, opts })
  * method: PATCH

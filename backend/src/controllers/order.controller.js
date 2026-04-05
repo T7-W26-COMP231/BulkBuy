@@ -305,6 +305,42 @@ declineSupplierOrder: asyncHandler(async (req, res) => {
   return send(res, 200, { success: true, data: updated });
 }),
 
+/**
+ * PATCH /orders/:id/confirm-fulfillment
+ * Supplier confirms fulfillment and records expected delivery date
+ */
+
+confirmFulfillment: asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { expectedDeliveryDate } = req.body || {};
+
+  if (!id) {
+    throw createError(400, 'order id is required');
+  }
+
+  if (!expectedDeliveryDate) {
+    throw createError(400, 'expectedDeliveryDate is required');
+  }
+
+  const opts = buildOpts(req);
+  const updated = await OrderService.confirmFulfillment(
+    id,
+    expectedDeliveryDate,
+    opts
+  );
+
+  try {
+    const io = getSocketIO();
+    io.emit('order_fulfillment_confirmed', updated);
+  } catch (err) {
+    console.warn('Socket.IO not ready:', err && err.message);
+  }
+
+  return send(res, 200, { success: true, data: updated });
+}),
+
+
+
   /**
    * POST /orders/:id/submit
    * Submits a draft order (transactional)

@@ -349,6 +349,72 @@ class OrderService {
   }
 }
 
+
+  async confirmFulfillment(orderId, expectedDeliveryDate, opts = {}) {
+    if (!orderId) {
+      throw createError(400, 'orderId is required');
+    }
+
+    if (!expectedDeliveryDate) {
+      throw createError(400, 'expectedDeliveryDate is required');
+    }
+
+    const actor = actorFromOpts(opts);
+    const correlationId = opts.correlationId || null;
+
+    try {
+      const updated = await OrderRepo.updateById(
+        orderId,
+        {
+          status: 'confirmed',
+          expectedDeliveryDate: Number(expectedDeliveryDate),
+          updatedAt: Date.now()
+        },
+        { new: true }
+      );
+
+      if (!updated) {
+        await this._audit(
+          'supplier.fulfillment.confirm',
+          actor,
+          orderId,
+          'failure',
+          'warn',
+          correlationId,
+          { reason: 'not_found' }
+        );
+        throw createError(404, 'Order not found');
+      }
+
+      await this._audit(
+        'supplier.fulfillment.confirm',
+        actor,
+        orderId,
+        'success',
+        'info',
+        correlationId,
+        {
+          status: 'confirmed',
+          expectedDeliveryDate: Number(expectedDeliveryDate)
+        }
+      );
+
+      return sanitizeForClient(updated);
+    } catch (err) {
+      await this._audit(
+        'supplier.fulfillment.confirm',
+        actor,
+        orderId,
+        'failure',
+        'error',
+        correlationId,
+        { error: err && err.message }
+      );
+      throw err;
+    }
+  }
+
+
   /* -------------------------
    * Cart / item-level operations with immutability guards
    * ------------------------- */

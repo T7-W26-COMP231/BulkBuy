@@ -1,6 +1,7 @@
 import SupplierLayout from "../../components/supplier/SupplierLayout";
 import { useState, useEffect } from "react";
 import { useAuth } from "../../contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const STATUS_STYLES = {
   pending: "bg-amber-100 text-amber-700",
@@ -49,6 +50,7 @@ const mapApiOrder = (order) => {
 
 export default function SupplierOrdersPage() {
   const { accessToken } = useAuth();
+  const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
   const [cityFilter, setCityFilter] = useState("All Cities");
   const [statusFilter, setStatusFilter] = useState("All");
@@ -64,6 +66,7 @@ export default function SupplierOrdersPage() {
   const [declineTargetId, setDeclineTargetId] = useState(null);
   const [declineReason, setDeclineReason] = useState("");
   const [declineError, setDeclineError] = useState("");
+
   const itemsPerPage = 5;
 
   const cityOptions = [
@@ -377,6 +380,17 @@ export default function SupplierOrdersPage() {
                                 Decline
                               </button>
                             </>
+
+                          )}
+                          {/* ADD THIS RIGHT AFTER ↓ */}
+                          {order.status === "approved" && (
+                            <button
+                              type="button"
+                              onClick={() => navigate(`/supplier/order-requests/${order.id}/fulfillment`)}
+                              className="rounded-lg bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700 transition hover:bg-blue-100"
+                            >
+                              Confirm Fulfillment
+                            </button>
                           )}
                         </div>
                       </td>
@@ -530,8 +544,8 @@ export default function SupplierOrdersPage() {
                     }
                   }}
                   className={`rounded-xl px-4 py-2 text-sm font-bold text-white transition ${declineReason.trim()
-                      ? "bg-red-600 hover:opacity-90"
-                      : "bg-red-300 cursor-not-allowed"
+                    ? "bg-red-600 hover:opacity-90"
+                    : "bg-red-300 cursor-not-allowed"
                     }`}
                 >
                   Submit Decline

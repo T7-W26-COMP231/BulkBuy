@@ -420,9 +420,9 @@ class ConfigService {
     }
   }
 
-    /**
-   * Find by filter
-   */
+  /**
+ * Find by filter
+ */
   async findByFilter(filter = {}, opts = {}) {
     try {
       const items = await ConfigRepo.findByFilter(filter, opts);
@@ -444,6 +444,7 @@ class ConfigService {
   /**
    * Save admin pricing tiers
    */
+
   async savePricingTiers(tiers = [], opts = {}) {
     const actor = actorFromOpts(opts);
     const correlationId = opts.correlationId || null;
@@ -489,5 +490,6 @@ class ConfigService {
     }
   }
 }
+
 
 module.exports = new ConfigService();

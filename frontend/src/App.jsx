@@ -2,6 +2,7 @@ import { Routes, Route, Navigate, useNavigate, useLocation } from "react-router-
 import { useEffect } from "react";
 import { useAuth } from "./contexts/AuthContext";
 import { useNotifications } from "./contexts/NotificationContext";
+import SupplierFulfillmentPage from "./pages/supplier/SupplierFulfillmentPage";
 
 import { io } from "socket.io-client";
 import HomePage from "./pages/customer/HomePage";
@@ -126,6 +127,7 @@ export default function App() {
         <Route path="/supplier/orders" element={<SupplierOrdersPage />} />
         <Route path="/supplier/demand-status" element={<SupplierDemandStatusPage />} />
         <Route path="/supplier/reports" element={<SupplierReportsPage />} />
+        <Route path="/supplier/order-requests/:id/fulfillment" element={<SupplierFulfillmentPage />} />
 
         {/* Admin routes */}
         <Route path="/admin" element={<AdminDashboard />} />

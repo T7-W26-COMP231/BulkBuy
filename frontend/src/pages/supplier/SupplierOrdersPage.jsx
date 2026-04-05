@@ -62,12 +62,21 @@ export default function SupplierOrdersPage() {
   const [appliedStatusFilter, setAppliedStatusFilter] = useState("");
   const itemsPerPage = 5;
 
-  const cities = [
-    "All Cities",
-    ...Array.from(
-      new Set(["ON-GTA", "ON-TOR", "NA", ...orders.map((o) => o.city).filter(Boolean)])
-    ),
-  ];
+  const cityOptions = [
+  { label: "All Cities", value: "All Cities" },
+  { label: "Toronto", value: "ON-TOR" },
+  { label: "Mississauga", value: "ON-MIS" },
+  { label: "Brampton", value: "ON-BRA" },
+  { label: "Vaughan", value: "ON-VAU" },
+  { label: "Markham", value: "ON-MAR" },
+  { label: "Richmond Hill", value: "ON-RHL" },
+  { label: "Oakville", value: "ON-OAK" },
+  { label: "Burlington", value: "ON-BUR" },
+  { label: "Ajax", value: "ON-AJX" },
+  { label: "Pickering", value: "ON-PCK" },
+  { label: "Oshawa", value: "ON-OSH" },
+  { label: "Milton", value: "ON-MLT" },
+];
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -192,9 +201,11 @@ export default function SupplierOrdersPage() {
                 onChange={(e) => setCityFilter(e.target.value)}
                 className="rounded-xl border border-neutral-light bg-white px-4 py-2.5 text-sm text-text-main outline-none focus:border-primary"
               >
-                {cities.map((c) => (
-                  <option key={c}>{c}</option>
-                ))}
+                {cityOptions.map((city) => (
+  <option key={city.value} value={city.value}>
+    {city.label}
+  </option>
+))}
               </select>
             </div>
 

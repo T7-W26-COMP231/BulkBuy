@@ -161,7 +161,7 @@ function initSocketAuth(io, opts = {}) {
       }
 
       // Normalize userId: payload may contain userId, sub, id, or userId-like fields
-      const userId = payload._id || payload.userId || payload.sub || payload.id || payload._id;
+      const userId = payload._id || payload.userId || payload.sub || payload.id;
       if (!userId) {
         const e = new Error('Token missing user identifier');
         e.data = { code: 'INVALID_TOKEN_PAYLOAD' };

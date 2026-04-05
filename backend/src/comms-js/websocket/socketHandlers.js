@@ -47,12 +47,12 @@ async function resolveSocketIdsForUserId(userId) {
  * Attach handlers
  * ------------------------- */
 
-function attachHandlers(io) {
+function attachHandlers(io, opts={}) {
   if (!io) throw new Error('Socket.IO instance required');
   ioInstance = io;
 
   io.on('connection', (socket) => {
-    onConnect(socket).catch((err) => {
+    onConnect(socket, opts).catch((err) => {
       logger.warn({ err: err && err.message }, 'socket onConnect error; disconnecting socket');
       try { socket.disconnect(true); } catch (e) { /* ignore */ }
     });
@@ -71,7 +71,7 @@ function attachHandlers(io) {
  * Per-socket lifecycle
  * ------------------------- */
 
-async function onConnect(socket) {
+async function onConnect(socket, opts={}) {
   const user = socket.user || null;
   debug('socket connected', socket.id);
 
@@ -81,6 +81,15 @@ async function onConnect(socket) {
     logSocketConnect(socket, { user, correlationId });
   } catch (e) {
     logger.debug({ err: e && e.message }, 'logSocketConnect failed (non-fatal)');
+  }
+
+  // === New: console log every connection (anonymous or authenticated) ===
+  try {
+    const userId = user && (user._id || user.userId) ? (user._id || user.userId) : 'anonymous';
+    // server console output for quick visibility
+    console.log(`[socket] connected -> socketId=[ ${socket.id} ], user=[ ${userId} ]`);
+  } catch (e) {
+    logger.debug({ err: e && e.message }, 'console.log on connect failed (non-fatal)');
   }
 
   // If authenticated, map and join rooms
@@ -113,8 +122,22 @@ async function onConnect(socket) {
     logger.warn({ err: err && err.message }, 'failed to emit connected ack');
   }
 
+  // Emit a minimal welcome message on connect (safe for anonymous and authenticated sockets)
+  try {
+    const welcome = {
+      id: `welcome-${Date.now()}`,
+      type: 'system',
+      scope: user ? 'user' : 'public',
+      payload: { message: user ? 'Welcome back' : 'Welcome', socketId: socket.id },
+      createdAt: new Date().toISOString()
+    };
+    socket.emit('welcome', welcome);
+  } catch (err) {
+    logger.debug({ err: err && err.message }, 'failed to emit welcome on connect (non-fatal)');
+  }
+
   // Attach common listeners and upgrade handlers
-  setupCommonListeners(socket);
+  setupCommonListeners(socket, opts);
 
   // Disconnect cleanup
   socket.on('disconnect', (reason) => {
@@ -128,7 +151,7 @@ async function onConnect(socket) {
  * Common listeners (lightweight)
  * ------------------------- */
 
-function setupCommonListeners(socket) {
+function setupCommonListeners(socket, opts={}) {
   socket.on('ping', (payload, cb) => {
     if (cb && typeof cb === 'function') cb({ pong: true, ts: Date.now() });
   });
@@ -206,6 +229,13 @@ function setupCommonListeners(socket) {
   socket.on('identifyUser', async (payload = {}, cb) => {
     try {
       const { token, userId } = payload;
+      try {
+        if (opts && opts.initSocketAuth && typeof opts.initSocketAuth === 'function') {
+          opts.authApi = opts.initSocketAuth(opts.io, {...opts.initsocketAuthOpts, accessToken : token});
+        };
+      } catch (error) {
+        console.log('\nsocket identifyUser error | ', error, "\n");
+      }
 
       // Resolve user: prefer token validation
       let resolvedUser = null;
@@ -237,6 +267,12 @@ function setupCommonListeners(socket) {
 
       // Attach user to socket for subsequent handlers
       socket.user = resolvedUser;
+      // === New: console log when a socket is upgraded/identified ===
+      try {
+        console.log(`\n[ socket 🟢 ] identified -> socketId=[ ${socket.id} ] user=[ ${String(resolvedUser._id)} ]\n`);
+      } catch (e) {
+        logger.debug({ err: e && e.message }, 'console.log on identifyUser failed (non-fatal)');
+      }
 
       // Join rooms for the user (region/roles)
       try {

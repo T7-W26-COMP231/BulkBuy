@@ -18,6 +18,7 @@ const createError = require('http-errors');
 const jwtHelper = require('../utils/jwt.helper');
 const userService = require('./user.service');
 const auditService = require('./audit.service');
+const { disconnectUserSockets } = require('../comms-js/websocket/socketService');
 
 /**
  * Build audit actor from opts (best-effort).
@@ -192,8 +193,9 @@ async function logout(userId, refreshToken, correlationId = null) {
   try {
     if (userId && refreshToken && typeof userService.logout === 'function') {
       await userService.logout(userId, refreshToken, correlationId);
+      await disconnectUserSockets(userId);
     }
-
+    
     await auditService.logEvent({
       eventType: 'auth.logout.success',
       actor,

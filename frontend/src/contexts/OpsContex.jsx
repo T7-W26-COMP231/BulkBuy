@@ -105,15 +105,22 @@ export function OpsContextProvider({
   /* Canonical state */
   const [products, setProducts] = useState(null); // expected server shape (e.g., { products: [], meta: {} } )
   const [productsMeta, setProductsMeta] = useState({ region: null, page: 1, limit: 25, fetchedAt: null });
+  const [wsuproducts, setWsuproducts] = useState(0);
 
   const [orders, setOrders] = useState(null); // expected server shape (paginated)
   const [ordersMeta, setOrdersMeta] = useState({ userId: null, region: null, page: 1, limit: 25, fetchedAt: null });
+  const [wsuorders, setWsuorders] = useState(0);
+
+  const [ops_region, setOps_region] = useState("");
+  const [backendUrl, setBackendUrl] = useState("http://localhost:5000");
+  const [socket, setSocket] = useState(null);
 
   /* In-memory caches */
   const productsCacheRef = useRef(new Map());
   const ordersCacheRef = useRef(new Map());
 
   /* Abort controllers */
+  // initialize once
   const abortControllersRef = useRef(new Set());
   useEffect(() => {
     return () => {
@@ -144,14 +151,14 @@ export function OpsContextProvider({
       const controller = new AbortController();
       abortControllersRef.current.add(controller);
 
-      const token = resolveToken();
+      const token = opts.jwtAccessToken || resolveToken();
       const headers = Object.assign({ 'Content-Type': 'application/json' }, opts.headers || {});
       if (token) headers.Authorization = `Bearer ${token}`;
 
       const fetchOpts = {
         method: opts.method || 'GET',
         headers,
-        signal: controller.signal,
+        signal: opts.signal || controller.signal,
         credentials: opts.credentials || undefined
       };
       if (opts.body !== undefined) {
@@ -198,14 +205,14 @@ export function OpsContextProvider({
       const page = Number.isFinite(Number(opts.page)) ? Number(opts.page) : 1;
       const limit = Number.isFinite(Number(opts.limit)) ? Number(opts.limit) : 25;
       const key = productsKey({ region: opts.region, page, limit });
-
+      
       // cached
       const cached = productsCacheRef.current.get(key);
       if (cached && !opts.force) return cached;
-
+      
       if (method === 'GET') {
         const qs = buildQuery({ region: opts.region, page, limit });
-        const res = await apiFetch(`${endpoints.getUiProducts}${qs}`, { method: 'GET', signal: opts.signal });
+        const res = await apiFetch(`${endpoints.getUiProducts}${qs}`, {...opts, method: 'GET', signal: opts.signal });
         if (!res.ok) {
           const msg = (res.raw && (res.raw.error || res.raw.message)) || `HTTP ${res.status}`;
           throw Object.assign(new Error(msg), { status: res.status, payload: res.raw });
@@ -239,7 +246,7 @@ export function OpsContextProvider({
       const page = Number.isFinite(Number(opts.page)) ? Number(opts.page) : 1;
       const limit = Number.isFinite(Number(opts.limit)) ? Number(opts.limit) : 25;
       const status = opts.status;
-      const includeSaveForLater = !!opts.includeSaveForLater;
+      const includeSaveForLater = !!opts.includeSaveForLater || true;
       const persist = !!opts.persist;
       const key = ordersKey({
         userId: opts.userId,
@@ -250,10 +257,9 @@ export function OpsContextProvider({
         includeSaveForLater,
         persist
       });
-
       const cached = ordersCacheRef.current.get(key);
       if (cached && !opts.force) return cached;
-
+      
       if (method === 'GET') {
         const qs = buildQuery({
           userId: opts.userId,
@@ -264,14 +270,19 @@ export function OpsContextProvider({
           includeSaveForLater,
           persist
         });
-        const res = await apiFetch(`${endpoints.getEnrichedOrders}${qs}`, { method: 'GET', signal: opts.signal });
-        if (!res.ok) {
-          const msg = (res.raw && (res.raw.error || res.raw.message)) || `HTTP ${res.status}`;
-          throw Object.assign(new Error(msg), { status: res.status, payload: res.raw });
+        try {
+          const res = await apiFetch(`${endpoints.getEnrichedOrders}${qs}`, {...opts, method: 'GET', signal: opts.signal });
+          if (!res.ok) {
+            const msg = (res.raw && (res.raw.error || res.raw.message)) || `HTTP ${res.status}`;
+            throw Object.assign(new Error(msg), { status: res.status, payload: res.raw });
+          }
+          const payload = res.raw ?? res.text ?? {};
+          ordersCacheRef.current.set(key, payload);
+          return payload;
+        } catch (error) {
+          console.log('Authenticated user orders fetch error ----------> | ', error);
         }
-        const payload = res.raw ?? res.text ?? {};
-        ordersCacheRef.current.set(key, payload);
-        return payload;
+      
       }
 
       // POST
@@ -374,8 +385,9 @@ export function OpsContextProvider({
   const fetchAndSetEnrichedOrders = useCallback(
     async (opts = {}) => {
       // requireAuth: default false (allow callers to decide). If caller sets requireAuth true and no token, throw.
+      const jwtAccessToken = opts.jwtAccessToken || await resolveToken();
       const requireAuth = opts.requireAuth === undefined ? false : Boolean(opts.requireAuth);
-      if (requireAuth && ! await resolveToken()) throw new Error('Authentication required to fetch orders');
+      if (requireAuth && !jwtAccessToken) throw new Error('Authentication required to fetch orders');
 
       setLoadingOrders(true);
       setError(null);
@@ -568,8 +580,13 @@ export function OpsContextProvider({
       error,
       products,
       productsMeta,
+      wsuproducts, setWsuproducts,
       orders,
       ordersMeta,
+      wsuorders, setWsuorders,
+      ops_region, setOps_region,
+      backendUrl, setBackendUrl,
+      socket, setSocket,
       /* fetch + state setters */
       fetchAndSetUiProducts,
       refreshUiProducts,
@@ -596,8 +613,13 @@ export function OpsContextProvider({
       error,
       products,
       productsMeta,
+      wsuproducts, setWsuproducts,
       orders,
       ordersMeta,
+      wsuorders, setWsuorders,
+      ops_region, setOps_region,
+      backendUrl, setBackendUrl,
+      socket, setSocket,
       fetchAndSetUiProducts,
       refreshUiProducts,
       appendUiProducts,

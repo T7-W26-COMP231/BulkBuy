@@ -1,0 +1,186 @@
+[
+  {
+    "_id": "bb1000000000000000000001",
+    "itemDtos": [
+      {
+        "itemId": "6800000000000000000000i01",
+        "pricingSnapshot": {
+          "atInstantPrice": 10.99,
+          "discountedPercentage": 12,
+          "discountBracket": { "initial": 0, "final": 12 },
+          "meta": { "currency": "CAD", "note": "last snapshot inside window; winter promo applied" }
+        },
+        "supplierId": "660000000000000000000002",
+        "salesWindow": [
+          { "from": 1672531200000, "to": 1675209599000 }
+        ]
+      },
+      {
+        "itemId": "6800000000000000000000i21",
+        "pricingSnapshot": {
+          "atInstantPrice": 3.5,
+          "discountedPercentage": 0,
+          "discountBracket": { "initial": 0, "final": 0 },
+          "meta": { "note": "accessory baseline price" }
+        },
+        "supplierId": "660000000000000000000002",
+        "salesWindow": [
+          { "from": 1672531200000, "to": 1675209599000 }
+        ]
+      },
+      {
+        "itemId": "6800000000000000000000i05",
+        "pricingSnapshot": {
+          "atInstantPrice": 74.5,
+          "discountedPercentage": 0,
+          "discountBracket": { "initial": 0, "final": 0 },
+          "meta": { "note": "base case price for 50-pack boxes in head window" }
+        },
+        "supplierId": "660000000000000000000003",
+        "salesWindow": [
+          { "from": 1672531200000, "to": 1675209599000 }
+        ]
+      }
+    ],
+    "orders": [
+      "a10000000000000000000002",
+      "a200000000000000000008",
+      "a200000000000000000012"
+    ],
+    "ops_region": "north-america:ca-on",
+    "status": "processed",
+    "metadata": {
+      "sourceWindowId": "880000000000000000000001",
+      "createdFrom": "salesWindow-head",
+      "notes": "Aggregation created at end of sales window; includes last snapshots and matching orders."
+    },
+    "createdAt": 1675209599000,
+    "updatedAt": 1675209599000
+  },
+  {
+    "_id": "bb1000000000000000000002",
+    "itemDtos": [
+      {
+        "itemId": "6800000000000000000000i01",
+        "pricingSnapshot": {
+          "atInstantPrice": 11.99,
+          "discountedPercentage": 4,
+          "discountBracket": { "initial": 0, "final": 4 },
+          "meta": { "currency": "CAD", "note": "overflow extension adjustment" }
+        },
+        "supplierId": "660000000000000000000002",
+        "salesWindow": [
+          { "from": 1672531200000, "to": 1676419199000 }
+        ]
+      },
+      {
+        "itemId": "6800000000000000000000i21",
+        "pricingSnapshot": {
+          "atInstantPrice": 3.25,
+          "discountedPercentage": 7,
+          "discountBracket": { "initial": 0, "final": 7 },
+          "meta": { "note": "overflow accessory promo" }
+        },
+        "supplierId": "660000000000000000000002",
+        "salesWindow": [
+          { "from": 1672531200000, "to": 1676419199000 }
+        ]
+      },
+      {
+        "itemId": "6800000000000000000000i05",
+        "pricingSnapshot": {
+          "atInstantPrice": 69.0,
+          "discountedPercentage": 7.38,
+          "discountBracket": { "initial": 0, "final": 7.38 },
+          "meta": { "note": "overflow continuation of early-bird bulk discount" }
+        },
+        "supplierId": "660000000000000000000003",
+        "salesWindow": [
+          { "from": 1672531200000, "to": 1676419199000 }
+        ]
+      }
+    ],
+    "orders": [],
+    "ops_region": "north-america:ca-on",
+    "status": "processed",
+    "metadata": {
+      "sourceWindowId": "880000000000000000000002",
+      "createdFrom": "salesWindow-overflow",
+      "notes": "Overflow window extended head pricing; no matching orders recorded inside overflow-only interval."
+    },
+    "createdAt": 1676419199000,
+    "updatedAt": 1676419199000
+  },
+  {
+    "_id": "bb1000000000000000000003",
+    "itemDtos": [
+      {
+        "itemId": "6800000000000000000000i02",
+        "pricingSnapshot": {
+          "atInstantPrice": 84.99,
+          "discountedPercentage": 0,
+          "discountBracket": { "initial": 0, "final": 0 },
+          "meta": { "currency": "CAD", "note": "spring overlap window pricing" }
+        },
+        "supplierId": "660000000000000000000003",
+        "salesWindow": [
+          { "from": 1677628800000, "to": 1688169599000 }
+        ]
+      },
+      {
+        "itemId": "6800000000000000000000i03",
+        "pricingSnapshot": {
+          "atInstantPrice": 32.0,
+          "discountedPercentage": 0,
+          "discountBracket": { "initial": 0, "final": 0 },
+          "meta": { "note": "standard overlap price" }
+        },
+        "supplierId": "660000000000000000000003",
+        "salesWindow": [
+          { "from": 1677628800000, "to": 1688169599000 }
+        ]
+      },
+      {
+        "itemId": "6800000000000000000000i04",
+        "pricingSnapshot": {
+          "atInstantPrice": 210.0,
+          "discountedPercentage": 0,
+          "discountBracket": { "initial": 0, "final": 0 },
+          "meta": { "note": "membership product overlap pricing" }
+        },
+        "supplierId": "660000000000000000000002",
+        "salesWindow": [
+          { "from": 1677628800000, "to": 1688169599000 }
+        ]
+      },
+      {
+        "itemId": "6800000000000000000000i05",
+        "pricingSnapshot": {
+          "atInstantPrice": 72.0,
+          "discountedPercentage": 3.36,
+          "discountBracket": { "initial": 0, "final": 3.36 },
+          "meta": { "note": "overlap promotional price" }
+        },
+        "supplierId": "660000000000000000000003",
+        "salesWindow": [
+          { "from": 1677628800000, "to": 1688169599000 }
+        ]
+      }
+    ],
+    "orders": [
+      "a200000000000000000004",
+      "a300000000000000000006",
+      "a200000000000000000016",
+      "a300000000000000000008"
+    ],
+    "ops_region": "north-america:ca-on",
+    "status": "processed",
+    "metadata": {
+      "sourceWindowId": "880000000000000000000003",
+      "createdFrom": "salesWindow-overlap",
+      "notes": "Overlap head aggregation; includes orders that closed during the overlap period."
+    },
+    "createdAt": 1688169599000,
+    "updatedAt": 1688169599000
+  }
+]

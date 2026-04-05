@@ -33,7 +33,7 @@ const start = async () => {
 
     // start HTTP server
     const server = app.listen(config.port, () => {
-      console.log(`\nServer running in ${config.nodeEnv} mode on port ${config.port} | <--- 🤗 |\n`);
+      console.log(`\n---///--Server running in ${config.nodeEnv} mode on port ${config.port} --------------------> 🕊\n`);
     });
 
     // ---------------------------------------------------------
@@ -44,8 +44,7 @@ const start = async () => {
     //  - If comms-js is missing or initComms throws, logs the error and continues running the HTTP server.
     //  - Does not call attachSocketHandlers at all.
     // ---------------------------------------------------------
-
-
+    
     try {
       const comms = require('./src/comms-js'); // must export initComms
       if (!comms || typeof comms.initComms !== 'function') {
@@ -57,14 +56,14 @@ const start = async () => {
             jwtSecret: process.env.JWT_SECRET || config.accessSecret,
             path: process.env.SOCKET_PATH || '/socket.io',
             cors: {
-              origin: config.clientUrl || "http://localhost:5173/" || '*',
-              methods: ['GET', 'POST'],
+              origin: ("http://localhost:5173" || config.clientUrl || '*').replace(/\/$/, ''),
+              methods: ['GET','POST','PUT','PATCH','DELETE','OPTIONS'],
               credentials: true
             },
             logger: console
             // pass redisClient here if you have one: redisClient: myRedisClient
           });
-          console.log('\nComms initialized via comms-js.initComms | <--- 🤗 |\n');
+          console.log('\nComms initialized via comms-js.initComms ');
         } catch (err) {
           console.error('comms-js.initComms failed:', err);
           // continue running HTTP server even if comms init fails

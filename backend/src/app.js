@@ -57,11 +57,11 @@ const createApp = async () => {
     app.use(morgan('combined'));
   }
 
-  // CORS
+  // CORS 
   app.use(cors({
-    origin: config.clientUrl || "http://localhost:5173/" || '*',
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Correlation-Id', 'x-correlation-id'],
+    origin: ("http://localhost:5173" || config.clientUrl || '*').replace(/\/$/, ''),
+    methods: ['GET','POST','PUT','PATCH','DELETE','OPTIONS'],
+    allowedHeaders: ['Content-Type','Authorization','X-Correlation-Id','x-correlation-id'],
     credentials: true
   }));
 

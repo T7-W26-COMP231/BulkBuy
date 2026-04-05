@@ -2,7 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const authCtrl = require('../controllers/auth.controller');
-const { requireAuth } = require('../middleware/auth.middleware');
+const { requireAuth, optionalAuth } = require('../middleware/auth.middleware');
 
 /**
  * Async wrapper to forward errors to express error handler
@@ -26,7 +26,7 @@ router.post('/refresh', asyncHandler(authCtrl.refresh));
 /**
  * Protected
  */
-router.post('/logout', requireAuth, asyncHandler(authCtrl.logout));
+router.post('/logout', optionalAuth, asyncHandler(authCtrl.logout));
 router.get('/me', requireAuth, asyncHandler(authCtrl.me));
 
 module.exports = router;

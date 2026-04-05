@@ -1,0 +1,32 @@
+[
+  {
+    "_id": "6500000000000000000000c1",
+    "name": "Packaging",
+    "slug": "packaging",
+    "description": "Boxes, bags, and protective packaging materials.",
+    "parent": null,
+    "metadata": { "department": "supplies" },
+    "createdAt": 1680300300000,
+    "updatedAt": 1680300300000
+  },
+  {
+    "_id": "6500000000000000000000c2",
+    "name": "Reusable Bags",
+    "slug": "reusable-bags",
+    "description": "Cloth and heavy-duty reusable shopping bags.",
+    "parent": "6500000000000000000000c1",
+    "metadata": { "ecoFriendly": true },
+    "createdAt": 1680300400000,
+    "updatedAt": 1680300400000
+  },
+  {
+    "_id": "6500000000000000000000c3",
+    "name": "Office Supplies",
+    "slug": "office-supplies",
+    "description": "General office consumables and storage.",
+    "parent": null,
+    "metadata": {},
+    "createdAt": 1680300500000,
+    "updatedAt": 1680300500000
+  }
+]

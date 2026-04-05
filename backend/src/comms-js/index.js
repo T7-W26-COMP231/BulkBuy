@@ -14,6 +14,23 @@ let runtime = {
   api: null
 };
 
+// --- NEW: lazy require of emailService factory (optional) ---
+let emailServiceModule = null;
+
+async function maybeInitEmailService(emailConfig = {}) {
+  if (!emailConfig) return null;
+  try {
+    // require lazily so comms can run without email module present
+    if (!emailServiceModule) emailServiceModule = require('../emailing/emailService');
+    // emailServiceModule exports init(...) which returns the module.exports (per your design)
+    const svc = await emailServiceModule.init(emailConfig);
+    return svc;
+  } catch (err) {
+    logger && logger.warn && logger.warn({ err: err && err.message }, 'initComms: emailService init failed; continuing without it');
+    return null;
+  }
+}
+
 /**
  * initComms
  * - Bootstraps the comms subsystem and attaches Socket.IO to the provided HTTP server.
@@ -25,6 +42,7 @@ let runtime = {
  *   - path: optional socket path (default '/')
  *   - cors: optional CORS options for Socket.IO
  *   - logger: optional logger (pino-compatible)
+ *   - emailServiceConfig: optional config object passed to emailService.init(config)
  *
  * @returns {Promise<{ io, api }>}
  */
@@ -39,7 +57,8 @@ async function initComms(opts = {}) {
     jwtSecret = process.env.ACCESS_SECRET,
     path, // = '/',
     cors, // = { origin: true, credentials: true },
-    logger: customLogger = null
+    logger: customLogger = null,
+    emailServiceConfig = null // <-- NEW: optional email service config
   } = opts;
 
   if (!server) {
@@ -48,29 +67,7 @@ async function initComms(opts = {}) {
 
   if (customLogger) logger = customLogger;
 
-  // try {
-  //   const { io, api } = await socketService.initSocket(server, {
-  //     path,
-  //     cors,
-  //     redisClient,
-  //     jwtSecret,
-  //     logger
-  //   });
-
-  //   logger.info('initComms: result', { hasIo: !!(result && result.io), ioPath: result && result.io && typeof result.io.path === 'function' ? result.io.path() : null, ioHttpServerEqualsProvided: !!(result && result.io && result.io.httpServer === server) });
-
-  //   runtime.initialized = true;
-  //   runtime.io = io;
-  //   runtime.api = api;
-
-  //   logger.info('comms subsystem initialized');
-  //   return { io, api };
-  // } catch (err) {
-  //   logger.error({ err: err && err.message }, 'Failed to initialize comms subsystem');
-  //   throw err;
-  // }
-
-    try {
+  try {
     // call socketService and keep the raw result for inspection
     const result = await socketService.initSocket(server, {
       path,
@@ -100,7 +97,7 @@ async function initComms(opts = {}) {
       io = new Server(server, {
         path: path || '/socket.io',
         cors: {
-          origin: (cors && cors.origin) || 'http://localhost:3000',
+          origin: (cors && cors.origin) || 'http://localhost:5000',
           methods: (cors && cors.methods) || ['GET','POST'],
           credentials: !!(cors && cors.credentials)
         }
@@ -121,6 +118,18 @@ async function initComms(opts = {}) {
       api = api || null;
     }
 
+    // --- NEW: initialize email service if config provided ---
+    let emailServiceInstance = null;
+    if (emailServiceConfig) {
+      emailServiceInstance = await maybeInitEmailService(emailServiceConfig);
+      if (emailServiceInstance) {
+        // ensure api object exists and attach emailService
+        api = api || {};
+        api.emailService = emailServiceInstance;
+        logger.info('initComms: emailService initialized and attached to runtime.api.emailService');
+      }
+    }
+
     runtime.initialized = true;
     runtime.io = io;
     runtime.api = api;
@@ -131,8 +140,6 @@ async function initComms(opts = {}) {
     logger.error({ err: err && err.message }, 'Failed to initialize comms subsystem');
     throw err;
   }
-
-
 }
 
 /**
@@ -147,6 +154,16 @@ async function closeComms(opts = {}) {
   if (!runtime.initialized) return;
 
   try {
+    // If emailService was attached, attempt graceful shutdown
+    try {
+      if (runtime.api && runtime.api.emailService && typeof runtime.api.emailService.shutdown === 'function') {
+        await runtime.api.emailService.shutdown(opts);
+        logger.info('initComms: emailService shutdown complete');
+      }
+    } catch (e) {
+      logger.warn({ err: e && e.message }, 'closeComms: emailService shutdown failed (continuing)');
+    }
+
     await socketService.shutdown(timeoutMs);
     runtime.initialized = false;
     runtime.io = null;

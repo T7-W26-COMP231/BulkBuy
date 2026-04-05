@@ -1,0 +1,32 @@
+[
+  {
+    "_id": "64a1f0000000000000000001",
+    "key": "images/item-box-1.jpg",
+    "url": "https://images.unsplash.com/photo-1513708928675-3b1b9f6f7b2a",
+    "contentType": "image/jpeg",
+    "size": 342120,
+    "metadata": { "source": "unsplash", "alt": "Cardboard boxes stacked" },
+    "createdAt": 1680300000000,
+    "updatedAt": 1680300000000
+  },
+  {
+    "_id": "64a1f00000000000000000002",
+    "key": "images/item-bag-1.jpg",
+    "url": "https://images.unsplash.com/photo-1526178611994-6c3b6b3f1f2b",
+    "contentType": "image/jpeg",
+    "size": 215430,
+    "metadata": { "source": "unsplash", "alt": "Reusable shopping bag" },
+    "createdAt": 1680300001000,
+    "updatedAt": 1680300001000
+  },
+  {
+    "_id": "64a1f00000000000000000003",
+    "key": "avatars/admin.png",
+    "url": "https://images.unsplash.com/photo-1544005313-94ddf0286df2",
+    "contentType": "image/png",
+    "size": 45210,
+    "metadata": { "source": "unsplash", "alt": "Admin avatar" },
+    "createdAt": 1680300002000,
+    "updatedAt": 1680300002000
+  }
+]

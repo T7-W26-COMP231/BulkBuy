@@ -1,0 +1,162 @@
+[
+  {
+    "code": "north-america:ca-on",
+    "displayName": "Canada — Ontario",
+    "countryCode": "CA",
+    "subdivisionCode": "ON",
+    "locale": "en-CA",
+    "currency": "CAD",
+    "timezone": "America/Toronto",
+    "defaultWarehouseId": "6500000000000000000000w1",
+    "warehouseIds": ["6500000000000000000000w1"],
+    "coordinates": { "lat": 43.7615, "lng": -79.4111 },
+    "carriers": [
+      { "id": "canadapost", "name": "Canada Post", "serviceLevels": ["standard", "priority", "expedited"] },
+      { "id": "fedex", "name": "FedEx", "serviceLevels": ["ground", "priority"] },
+      { "id": "purolator", "name": "Purolator", "serviceLevels": ["standard", "express"] }
+    ],
+    "tax": {
+      "gst": 0.05,
+      "hst": 0.13,
+      "pst": 0.08,
+      "notes": "HST applies in many Ontario transactions; use combined rate where applicable"
+    },
+    "shippingZones": [
+      { "zoneId": "ON_LOCAL", "name": "Local Ontario", "maxTransitDays": 3 },
+      { "zoneId": "ON_REGIONAL", "name": "Regional Ontario", "maxTransitDays": 5 }
+    ],
+    "businessHours": { "mondayToFriday": "08:30-17:30", "saturday": "09:00-13:00", "sunday": "closed" },
+    "publicHolidays": ["2026-01-01", "2026-07-01", "2026-09-07", "2026-12-25"],
+    "metadata": { "ops_contact": "+1-416-555-0001", "preferredPickup": "TOR-FC-01" }
+  },
+  {
+    "code": "north-america:ca-qc",
+    "displayName": "Canada — Quebec",
+    "countryCode": "CA",
+    "subdivisionCode": "QC",
+    "locale": "fr-CA",
+    "currency": "CAD",
+    "timezone": "America/Toronto",
+    "defaultWarehouseId": "6500000000000000000000w2",
+    "warehouseIds": ["6500000000000000000000w2"],
+    "coordinates": { "lat": 45.5017, "lng": -73.5673 },
+    "carriers": [
+      { "id": "purolator", "name": "Purolator", "serviceLevels": ["economy", "express"] },
+      { "id": "canadapost", "name": "Canada Post", "serviceLevels": ["standard", "priority"] },
+      { "id": "fedex", "name": "FedEx", "serviceLevels": ["ground", "priority"] }
+    ],
+    "tax": {
+      "gst": 0.05,
+      "qst": 0.09975,
+      "notes": "Quebec uses GST + QST; ensure QST registration for suppliers operating in QC"
+    },
+    "shippingZones": [
+      { "zoneId": "QC_LOCAL", "name": "Local Quebec", "maxTransitDays": 3 },
+      { "zoneId": "QC_REGIONAL", "name": "Regional Quebec", "maxTransitDays": 6 }
+    ],
+    "businessHours": { "mondayToFriday": "08:30-17:00", "saturday": "closed", "sunday": "closed" },
+    "publicHolidays": ["2026-01-01", "2026-06-24", "2026-07-01", "2026-12-25"],
+    "metadata": { "ops_contact": "+1-514-555-0002", "preferredPickup": "MTL-CD-01" }
+  },
+  {
+    "code": "north-america:us-ny",
+    "displayName": "United States — New York",
+    "countryCode": "US",
+    "subdivisionCode": "NY",
+    "locale": "en-US",
+    "currency": "USD",
+    "timezone": "America/New_York",
+    "defaultWarehouseId": null,
+    "warehouseIds": [],
+    "coordinates": { "lat": 40.7128, "lng": -74.0060 },
+    "carriers": [
+      { "id": "usps", "name": "USPS", "serviceLevels": ["priority", "first-class"] },
+      { "id": "fedex", "name": "FedEx", "serviceLevels": ["ground", "overnight"] },
+      { "id": "ups", "name": "UPS", "serviceLevels": ["ground", "express"] }
+    ],
+    "tax": {
+      "stateSalesTax": 0.04,
+      "localSalesTax": 0.045,
+      "notes": "Sales tax varies by county/city; calculate per destination"
+    },
+    "shippingZones": [
+      { "zoneId": "US_NORTHEAST", "name": "US Northeast", "maxTransitDays": 4 }
+    ],
+    "businessHours": { "mondayToFriday": "09:00-18:00", "saturday": "closed", "sunday": "closed" },
+    "publicHolidays": ["2026-01-01", "2026-11-26", "2026-12-25"],
+    "metadata": { "ops_contact": "+1-212-555-0003" }
+  },
+  {
+    "code": "europe:gb-eng",
+    "displayName": "United Kingdom — England",
+    "countryCode": "GB",
+    "subdivisionCode": "ENG",
+    "locale": "en-GB",
+    "currency": "GBP",
+    "timezone": "Europe/London",
+    "defaultWarehouseId": null,
+    "warehouseIds": [],
+    "coordinates": { "lat": 51.5074, "lng": -0.1278 },
+    "carriers": [
+      { "id": "royalmail", "name": "Royal Mail", "serviceLevels": ["standard", "tracked"] },
+      { "id": "dhl", "name": "DHL", "serviceLevels": ["express", "economy"] }
+    ],
+    "tax": {
+      "vat": 0.20,
+      "notes": "Apply VAT rules for B2B and B2C; use VAT registration where required"
+    },
+    "shippingZones": [
+      { "zoneId": "EU_WEST", "name": "Western Europe", "maxTransitDays": 5 }
+    ],
+    "businessHours": { "mondayToFriday": "09:00-17:30", "saturday": "closed", "sunday": "closed" },
+    "publicHolidays": ["2026-01-01", "2026-12-25", "2026-12-26"],
+    "metadata": { "ops_contact": "+44-20-5555-0004" }
+  },
+  {
+    "code": "asia:sg-sg",
+    "displayName": "Singapore",
+    "countryCode": "SG",
+    "subdivisionCode": "SG",
+    "locale": "en-SG",
+    "currency": "SGD",
+    "timezone": "Asia/Singapore",
+    "defaultWarehouseId": null,
+    "warehouseIds": [],
+    "coordinates": { "lat": 1.3521, "lng": 103.8198 },
+    "carriers": [
+      { "id": "singpost", "name": "SingPost", "serviceLevels": ["standard", "express"] },
+      { "id": "dhl", "name": "DHL", "serviceLevels": ["express"] }
+    ],
+    "tax": {
+      "gst": 0.08,
+      "notes": "GST applies to most goods and services; check registration thresholds"
+    },
+    "shippingZones": [
+      { "zoneId": "APAC", "name": "Asia Pacific", "maxTransitDays": 7 }
+    ],
+    "businessHours": { "mondayToFriday": "09:00-18:00", "saturday": "closed", "sunday": "closed" },
+    "publicHolidays": ["2026-01-01", "2026-02-01", "2026-12-25"],
+    "metadata": { "ops_contact": "+65-5555-0005" }
+  },
+  {
+    "code": "global:default",
+    "displayName": "Global Defaults",
+    "countryCode": null,
+    "subdivisionCode": null,
+    "locale": "en",
+    "currency": "USD",
+    "timezone": "UTC",
+    "defaultWarehouseId": null,
+    "warehouseIds": [],
+    "coordinates": { "lat": 0, "lng": 0 },
+    "carriers": [
+      { "id": "dhl", "name": "DHL", "serviceLevels": ["express", "economy"] },
+      { "id": "fedex", "name": "FedEx", "serviceLevels": ["internationalPriority", "internationalEconomy"] }
+    ],
+    "tax": { "notes": "Use destination-based tax rules; override per region" },
+    "shippingZones": [],
+    "businessHours": { "mondayToFriday": "09:00-17:00", "saturday": "closed", "sunday": "closed" },
+    "publicHolidays": [],
+    "metadata": { "supportEmail": "ops@bulkbuy.example" }
+  }
+]

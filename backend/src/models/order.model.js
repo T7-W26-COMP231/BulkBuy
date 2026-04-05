@@ -13,6 +13,8 @@ const mongoose = require('mongoose');
 
 const { Schema } = mongoose;
 
+const { generateDefaultIdStr } = require('./generateDefaultIdStr');
+
 /* -------------------------
  * Sub-schemas
  * ------------------------- */
@@ -83,7 +85,9 @@ const SalesWindowSchema = new Schema({
  * ------------------------- */
 
 const OrderSchema = new Schema({
-  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
+  _id: { type: String, required: true, trim: true }, // only for testing
+  // userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
+  userId: { type: String, required: true, trim: true, index: true }, // only for testing
 
   items: { type: [OrderItemSchema], default: [], index: true },
 
@@ -155,6 +159,19 @@ OrderSchema.pre('save', function () {
   const now = Date.now();
   if (!this.createdAt) this.createdAt = now;
   this.updatedAt = now;
+});
+
+
+OrderSchema.pre('validate', async function () {
+  // 1. Only run if the schema expects a String for _id
+  if (this.schema.path('_id').instance !== 'String') return;
+
+  // 2. Only generate if no _id exists (is undefined or null)
+  if (!this._id) {
+    // If generateDefaultId throws the "max attempts" error, 
+    // Mongoose will catch it and stop the save automatically.
+    this._id = await generateDefaultIdStr(this, { length: 20 });
+  }
 });
 
 /* -------------------------
@@ -331,5 +348,7 @@ OrderSchema.methods.extractSaveForLater = function () {
 /* -------------------------
  * Export model
  * ------------------------- */
+
+// OrderSchema.plugin(require('./castLegacyIds'));
 
 module.exports = mongoose.models.Order || mongoose.model('Order', OrderSchema);

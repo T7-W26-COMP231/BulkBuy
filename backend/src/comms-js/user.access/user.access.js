@@ -1,4 +1,4 @@
-// src/comms-js/src/access/user.access.js
+// src/comms-js/user.access/user.access.js
 // Centralized user lookup and recipient resolution utilities for the comms subsystem.
 // - Wraps UserRepository and Config model
 // - Integrates with socketService runtime registry

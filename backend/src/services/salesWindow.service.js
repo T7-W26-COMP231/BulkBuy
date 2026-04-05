@@ -21,6 +21,7 @@
 const createError = require("http-errors");
 const SalesWindowRepo = require("../repositories/salesWindow.repo");
 const auditService = require("./audit.service");
+const ItemRepo = require('../repositories/item.repo');
 
 // ops-context cache eviction (in-process cache)
 
@@ -958,36 +959,29 @@ class SalesWindowService {
       sort: { "window.fromEpoch": -1 },
     });
     const windows = await SalesWindowRepo.findByFilter(filter, findOpts);
-
     if (!Array.isArray(windows) || windows.length === 0) {
       return { products: [], total: 0, page, limit, pages: 0 };
     }
-
+    
     // 2) fetch merged views for each window (repo/model is authoritative for merging)
-    const mergedPromises = windows.map((w) =>
-      SalesWindowRepo.getMergedView(
-        w._id,
-        Object.assign({}, opts, { lean: true }),
-      ),
-    );
-    const mergedResults = await Promise.all(mergedPromises);
-
+    // const mergedPromises = windows.map((w) =>
+    //   SalesWindowRepo.getWindowChain(
+    //     w._id,
+    //     Object.assign({}, opts, { lean: true }),
+    //   ),
+    // );
+    // const mergedResults = await Promise.all(mergedPromises);
+    
+    
     // 3) aggregate products deduped by productId; items deduped by itemId (first-seen wins)
     const productMap = new Map();
 
-    for (let wi = 0; wi < mergedResults.length; wi++) {
-      const merged = mergedResults[wi];
+    for (let wi = 0; wi < windows.length; wi++) {
+      const merged = windows[wi];
       const sourceWindow = windows[wi];
-      const sourceWindowId =
-        sourceWindow && sourceWindow._id ? String(sourceWindow._id) : null;
-      const sourceWindowFrom =
-        sourceWindow && sourceWindow.window
-          ? Number(sourceWindow.window.fromEpoch)
-          : null;
-      const sourceWindowTo =
-        sourceWindow && sourceWindow.window
-          ? Number(sourceWindow.window.toEpoch)
-          : null;
+      const sourceWindowId = sourceWindow && sourceWindow._id ? String(sourceWindow._id) : null;
+      const sourceWindowFrom = sourceWindow && sourceWindow.window ? Number(sourceWindow.window.fromEpoch) : null;
+      const sourceWindowTo =  sourceWindow && sourceWindow.window ? Number(sourceWindow.window.toEpoch) : null;
 
       if (!merged || !Array.isArray(merged.products)) continue;
 
@@ -1021,10 +1015,7 @@ class SalesWindowService {
             window: { fromEpoch: sourceWindowFrom, toEpoch: sourceWindowTo },
             items: itemsOut,
             _itemMap: itemMap,
-            metadata:
-              p.metadata && typeof p.metadata === "object"
-                ? Object.assign({}, p.metadata)
-                : {},
+            metadata: p.metadata && typeof p.metadata === "object" ? Object.assign({}, p.metadata) : {},
           });
         } else {
           // merge items into existing product; keep first-seen item (from newer window)
@@ -1071,13 +1062,14 @@ class SalesWindowService {
       metadata: p.metadata,
     }));
 
+    
     // 5) paginate products (we will enrich each paged product one at a time)
     const total = allProducts.length;
     const pages = total === 0 ? 0 : Math.max(1, Math.ceil(total / limit));
     const start = (page - 1) * limit;
     const end = start + limit;
     const pagedProducts = allProducts.slice(start, end);
-
+    
     // 6) per-product enrichment: fetch item details for each product's items and merge
     // Select all item fields except `price` and `pricingTiers`.
     // Based on the Item model, include: _id, sku, title, slug, description, shortDescription,
@@ -1122,7 +1114,6 @@ class SalesWindowService {
         .filter(Boolean)
         .map(String);
       let itemDetailsMap = new Map();
-
       if (itemIds.length > 0) {
         // fetch item details for this product in one query
         const dbItems = await ItemRepo.findByFilter(
@@ -1134,7 +1125,7 @@ class SalesWindowService {
           itemDetailsMap.set(idStr, dbItem);
         }
       }
-
+      
       // merge details into items, preserving stub fields (itemId, productId, windowId)
       const enrichedItems = prod.items.map((it) => {
         const idStr = String(it.itemId);
@@ -1167,7 +1158,6 @@ class SalesWindowService {
         metadata: prod.metadata,
       });
     }
-
     return { products: productsWithDetails, total, page, limit, pages };
   }
 

@@ -11,7 +11,7 @@ import ToastProvider from "./contexts/ToastProvider.jsx";
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <AuthProvider>
-      <OpsContextProvider apiBase="http://localhost:5000/api/opcs">
+      <OpsContextProvider apiBase="http://localhost:5000/api/opscs">
         <ToastProvider>
           <BrowserRouter>
             <App />

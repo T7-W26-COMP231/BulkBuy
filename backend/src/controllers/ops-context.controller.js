@@ -42,8 +42,13 @@ async function getUiProducts(req, res) {
   if (!Number.isFinite(limit) || limit <= 0) throw createError(400, 'limit must be a positive integer');
 
   const opts = { region, page, limit, actor, correlationId, session: req.mongoSession || null };
-  const result = await OpsContextService.getUiProducts(opts);
-  return res.status(200).json({ success: true, data: result });
+  try {
+    const result = await OpsContextService.getUiProducts(opts);    
+    return res.status(200).json({ success: true, data: result });
+  } catch (error) {
+    throw createError(500, `error getting ui products @ : ${error}`);
+  }
+  
 }
 
 /**
@@ -56,7 +61,6 @@ async function getEnrichedOrders(req, res) {
 
   const userId = source.userId;
   if (!userId || typeof userId !== 'string') throw createError(400, 'userId is required and must be a string');
-
   const region = source.region || null;
   const page = source.page ? parseInt(source.page, 10) : 1;
   const limit = source.limit ? parseInt(source.limit, 10) : 25;

@@ -6,6 +6,7 @@
 // - Includes common indexes, pre-save timestamp maintenance, and a few helpful statics.
 
 const mongoose = require('mongoose');
+const { generateDefaultIdStr } = require('./generateDefaultIdStr');
 
 const { Schema } = mongoose;
 
@@ -36,7 +37,7 @@ const PricingSnapshotSchema = new Schema({
 
 const ItemDtoSchema = new Schema({
   itemId: { type: Schema.Types.ObjectId, ref: 'Item', required: true },
-  pricingSnapshot: { type: PricingSnapshotSchema, default: () => ({}) },
+  pricingSnapshot: { type: PricingSnapshotSchema, default: () => ({}) },// the last from the saleswindow
   supplierId: { type: Schema.Types.ObjectId, ref: 'User', default: null },
   salesWindow: { type: [SalesWindowSchema], default: [] }
 }, { _id: false });
@@ -46,6 +47,7 @@ const ItemDtoSchema = new Schema({
  * ------------------------- */
 
 const AggregationSchema = new Schema({
+  _id: { type: String, required: true, trim: true }, // only for testing
   itemDtos: { type: [ItemDtoSchema], default: [] },
 
   orders: { type: [Schema.Types.ObjectId], ref: 'Order', default: [] },
@@ -95,6 +97,21 @@ AggregationSchema.pre('save', function () {
   if (!this.createdAt) this.createdAt = now;
   this.updatedAt = now;
 });
+
+
+AggregationSchema.pre('validate', async function () {
+  // 1. Only run if the schema expects a String for _id
+  if (this.schema.path('_id').instance !== 'String') return;
+
+  // 2. Only generate if no _id exists (is undefined or null)
+  if (!this._id) {
+    // If generateDefaultId throws the "max attempts" error, 
+    // Mongoose will catch it and stop the save automatically.
+    this._id = await generateDefaultIdStr(this, { length: 20 });
+  }
+});
+
+
 
 /* -------------------------
  * Statics / Helpers
@@ -171,5 +188,8 @@ AggregationSchema.methods.pushItemDto = async function (itemDto = {}) {
 /* -------------------------
  * Export model
  * ------------------------- */
+
+
+// AggregationSchema.plugin(require('./castLegacyIds'));
 
 module.exports = mongoose.models.Aggregation || mongoose.model('Aggregation', AggregationSchema);

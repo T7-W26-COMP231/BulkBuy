@@ -37,6 +37,9 @@
 
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 
+// after successful login API returns { accessToken, refreshToken, user }
+import { disconnectSocket  } from '../comms-js/socket';
+
 /* -------------------------
    Defaults and utilities
    ------------------------- */
@@ -130,7 +133,7 @@ export function AuthProvider({
   const [loading, setLoading] = useState(false);
   const [initializing, setInitializing] = useState(true);
   const [error, setError] = useState(null);
-
+  
   const refreshTimerRef = useRef(null);
   const abortControllersRef = useRef(new Set());
   const accessTokenRef = useRef(null); // keep latest token for apiFetch
@@ -309,6 +312,7 @@ export function AuthProvider({
      ------------------------- */
   const signIn = useCallback(
     async ({ email, password } = {}) => {
+      
       setLoading(true);
       setError(null);
       try {
@@ -332,7 +336,7 @@ export function AuthProvider({
         setRefreshToken(normalized.refreshToken || null);
         setUser(() => normalized.user ?? null);
         setLoading(false);
-
+        
         // dispatch event after ref/state are set
         try {
           window.dispatchEvent(new CustomEvent("auth:signedin", {
@@ -356,7 +360,7 @@ export function AuthProvider({
       } catch (err) {
         const msg = err?.message || "Sign in error";
         setError(msg);
-        setLoading(false);
+        setLoading(false);        
         return { ok: false, error: msg };
       }
     },
@@ -511,6 +515,9 @@ export function AuthProvider({
         try {
           localStorage.removeItem(storageKey);
         } catch {}
+
+        // disconnect socket
+        disconnectSocket();
 
         // after clearing tokens/user in signOut
         try {

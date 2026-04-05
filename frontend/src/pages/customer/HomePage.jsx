@@ -8,6 +8,8 @@ import { getCityData, getFeaturedAggregation } from "../../data/mockData";
 import { useAuth } from "../../contexts/AuthContext.jsx";
 import { useOpsContext } from "../../contexts/OpsContex.jsx";
 
+import { initSocket } from "../../comms-js/socket";
+
 const GTA_CITIES = [
   { name: "Toronto", lat: 43.6532, lng: -79.3832 },
   { name: "Scarborough", lat: 43.7764, lng: -79.2318 },
@@ -60,16 +62,18 @@ export default function HomePage() {
   const { user, accessToken } = useAuth();
   const {
     orders,
+    wsuorders, wsuproducts,
     products,
     productsMeta,
+    setOps_region,
+    setSocket,
     fetchAndSetUiProducts,
     fetchAndSetEnrichedOrders,
     clearState: clearOpsState,
-    applyRealtimeUpdate,
+    // applyRealtimeUpdate,
+    backendUrl
   } = useOpsContext();
 
-  const [socketConnected, setSocketConnected] = useState(false);
-  const socketRef = useRef(null);
   const [locationState, setLocationState] = useState("idle");
   const [detectedCity, setDetectedCity] = useState(null);
 
@@ -79,33 +83,41 @@ export default function HomePage() {
   const selectedAggregation = getFeaturedAggregation(activeCity);
   const aggregationStatus = selectedAggregation?.status ?? "OPEN";
   const closesIn = selectedAggregation?.closesIn ?? "TBD";
-  const progressPct = selectedAggregation
-    ? Math.min(
-        (selectedAggregation.soldUnits / selectedAggregation.targetUnits) * 100,
-        100,
-      )
-    : 0;
+  const progressPct = selectedAggregation  ? Math.min((selectedAggregation.soldUnits / selectedAggregation.targetUnits) * 100, 100,  ) : 0;
+
+  useEffect(() => {
+    setOps_region((() => "north-america:ca-on" || activeCity)());
+  }, []);
+  
+  //-------------------------------------------------------------------------------------------------------
 
   // PRODUCTS: run on mount and when region changes
   useEffect(() => {
     const controller = new AbortController();
-    const region = productsMeta?.region || detectedCity || "Toronto";
-    fetchAndSetUiProducts({
-      region,
-      page: 1,
-      limit: 24,
-      signal: controller.signal,
-    })
-      .then((e) => {
+    const region = "north-america:ca-on" || productsMeta?.region || detectedCity || "Toronto";
+    try {
+      const socket = initSocket(null , { region, url: backendUrl});
+      setSocket(socket)
+      fetchAndSetUiProducts({
+        region,
+        page: 1,
+        limit: 24,
+        signal: controller.signal,
+      }).then((e) => {
         // eslint-disable-next-line no-console
-        console.log("01 | products ->", products); //----------------------
-      })
-      .catch((err) => {
+        console.log("01 | products ->", products /* JSON.stringify(products)*/); //----------------------
+      }).catch((err) => {
         if (err && err.name === "AbortError") return;
       });
 
-    return () => controller.abort();
-  }, [productsMeta?.region, products, detectedCity, fetchAndSetUiProducts]);
+      setTimeout(() => {
+        return () => controller.abort();
+      }, 2000);
+    } catch (error) {
+      console.log("home page - products+socket : this is the error ", error);
+    }
+    
+  }, [wsuproducts, productsMeta?.region, products, detectedCity, fetchAndSetUiProducts]);
 
 //-------------------------------------------------------------------------------------------------------
 
@@ -124,18 +136,18 @@ export default function HomePage() {
         }
         if (!mounted || controller.signal.aborted) return;
 
-        const region = productsMeta?.region || detectedCity || "Toronto";
-
+        const region = "north-america:ca-on" || productsMeta?.region || detectedCity || "Toronto";
         await fetchAndSetEnrichedOrders({
-          userId: user._id,
+          userId: user.userId, //user._id, --- careful this : endpoint expects the users public ID
           region,
           page: 1,
           limit: 25,
           requireAuth: true,
           signal: controller.signal,
+          jwtAccessToken : accessToken
         }).then(() => {
           // eslint-disable-next-line no-console
-          console.log("02 | orders ->", orders); //------------------------
+          console.log("02 | orders ->", orders /* JSON.stringify(orders) */); //------------------------
         });
 
       } catch (err) {
@@ -147,13 +159,14 @@ export default function HomePage() {
 
     run();
 
-    return () => {
-      mounted = false;
-      controller.abort();
-    };
+    setTimeout(() => {
+        return () => { mounted = false; controller.abort();   };
+    }, 2000);
+    
   }, [
     user?.userId,
     accessToken,
+    wsuorders,
     productsMeta?.region,
     detectedCity,
     fetchAndSetEnrichedOrders,
@@ -161,48 +174,49 @@ export default function HomePage() {
     orders
   ]);
   
-  useEffect(() => {
-    const socketUrl =
-      import.meta.env.VITE_SOCKET_URL || "http://localhost:5000";
-    const socket = io(socketUrl, { autoConnect: true });
-    socketRef.current = socket;
+  // useEffect(() => {
+  //   const socketUrl =
+  //     import.meta.env.VITE_SOCKET_URL || "http://localhost:5000";
+  //   const socket = io(socketUrl, { autoConnect: true });
+  //   socketRef.current = socket;
 
-    socket.on("connect", () => setSocketConnected(true));
-    socket.on("disconnect", () => setSocketConnected(false));
+  //   socket.on("connect", () => setSocketConnected(true));
+  //   socket.on("disconnect", () => setSocketConnected(false));
 
-    socket.on("product:update", (payload) => {
-      try {
-        applyRealtimeUpdate({
-          products: Array.isArray(payload) ? payload : [payload],
-        });
-      } catch (e) {}
-    });
+  //   socket.on("product:update", (payload) => {
+  //     try {
+  //       applyRealtimeUpdate({
+  //         products: Array.isArray(payload) ? payload : [payload],
+  //       });
+  //     } catch (e) {}
+  //   });
 
-    socket.on("order:update", (payload) => {
-      try {
-        applyRealtimeUpdate({
-          orders: Array.isArray(payload) ? payload : [payload],
-        });
-      } catch (e) {}
-    });
+  //   socket.on("order:update", (payload) => {
+  //     try {
+  //       applyRealtimeUpdate({
+  //         orders: Array.isArray(payload) ? payload : [payload],
+  //       });
+  //     } catch (e) {}
+  //   });
 
-    socket.on("order_created", (data) => {
-      try {
-        applyRealtimeUpdate({ order: data });
-      } catch (e) {}
-      // eslint-disable-next-line no-alert
-      alert("New order created");
-    });
+  //   socket.on("order_created", (data) => {
+  //     try {
+  //       applyRealtimeUpdate({ order: data });
+  //     } catch (e) {}
+  //     // eslint-disable-next-line no-alert
+  //     alert("New order created");
+  //   });
 
-    return () => {
-      try {
-        socket.disconnect();
-      } catch {}
-      socketRef.current = null;
-    };
-  }, [applyRealtimeUpdate]);
+  //   return () => {
+  //     try {
+  //       socket.disconnect();
+  //     } catch {}
+  //     socketRef.current = null;
+  //   };
+  // }, [applyRealtimeUpdate]);
 
   // Location modal logic
+  
   useEffect(() => {
     const savedCity = sessionStorage.getItem("detectedCity");
     const dismissed = sessionStorage.getItem("locationModalDismissed");

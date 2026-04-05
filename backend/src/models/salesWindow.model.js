@@ -29,6 +29,7 @@
 
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
+const { generateDefaultIdStr } = require('./generateDefaultIdStr');
 const createError = require('http-errors');
 
 /* -------------------------
@@ -62,6 +63,7 @@ const PricingTierSchema = new Schema({
  * ProductItemSchema
  */
 const ProductItemSchema = new Schema({
+  _id: { type: String, required: true, trim: true }, // only for testing
   itemId: { type: Schema.Types.ObjectId, required: true, index: true },
   productId: { type: Schema.Types.ObjectId, required: true, index: true },
   pricing_snapshots: { type: [PricingSnapshotSchema], default: [] }, // the first one is the initial price setter
@@ -118,6 +120,19 @@ SalesWindowSchema.pre('save', function () {
         });
       }
     });
+  }
+});
+
+
+SalesWindowSchema.pre('validate', async function () {
+  // 1. Only run if the schema expects a String for _id
+  if (this.schema.path('_id').instance !== 'String') return;
+
+  // 2. Only generate if no _id exists (is undefined or null)
+  if (!this._id) {
+    // If generateDefaultId throws the "max attempts" error, 
+    // Mongoose will catch it and stop the save automatically.
+    this._id = await generateDefaultIdStr(this, { length: 20 });
   }
 });
 
@@ -219,4 +234,7 @@ try {
 /* -------------------------
  * Export model
  * ------------------------- */
+
+// SalesWindowSchema.plugin(require('./castLegacyIds'));
+
 module.exports = mongoose.models.SalesWindow || mongoose.model('SalesWindow', SalesWindowSchema);

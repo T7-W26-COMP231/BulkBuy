@@ -17,6 +17,8 @@ let io = null;
 let handlersApi = null;
 let authApi = null;
 let initialized = false;
+let socketOpts = null;
+let initAapi = null;
 
 /**
  * initSocket
@@ -37,7 +39,7 @@ async function initSocket(server, opts = {}) {
   if (!server) throw new Error('HTTP server instance is required to initialize sockets');
 
   // const {
-  //   path = '/',
+  //   path = '/socket.io',
   //   cors = { origin: config.clientUrl || "http://localhost:5173/" || '*' || true, credentials: true } || { origin: true, credentials: true },
   //   redisClient = null,
   //   jwtSecret = process.env.ACCESS_SECRET,
@@ -52,12 +54,6 @@ async function initSocket(server, opts = {}) {
     logger: customLogger = null
   } = opts;
 
-
-  // if (customLogger) {
-  //   // allow injection of a different logger
-  //   // eslint-disable-next-line no-unused-vars
-  //   logger = customLogger;
-  // }
 
   // create Socket.IO server
   io = new Server(server, {
@@ -87,16 +83,36 @@ async function initSocket(server, opts = {}) {
   }
 
   // init auth middleware (uses existing verifyAccess helper)
-  authApi = initSocketAuth(io, {jwtSecret: process.env.JWT_SECRET, accessToken : opts?.accessToken, tokenField: 'token', logger, cacheTtl: 30 * 1000 });
+  // init auth middleware only when an accessToken is explicitly provided.
+  // When not provided, anonymous connections are allowed and identification
+  // can happen later via the identifyUser event.
 
-  // attach handlers (connection lifecycle, emit helpers)
-  handlersApi = socketHandlers.attachHandlers(io);
+  const initsocketAuthOpts = {
+      jwtSecret: process.env.JWT_SECRET,
+      accessToken: opts.accessToken || null,
+      tokenField: 'token',
+      logger,
+      cacheTtl: 30 * 1000
+  };
+
+  if (opts?.accessToken) {
+    authApi = initSocketAuth(io, initsocketAuthOpts);
+    logger.info('socketService: auth middleware initialized (connect-time auth enabled)');
+  } else {
+    logger.info('socketService: auth middleware not initialized — anonymous connections allowed');
+  }
+
+  // attach handlers (connection lifecycle, emit helpers) and hold for updates on signin
+  socketOpts = { io, authApi, initSocketAuth, buildApi, initsocketAuthOpts, initAapi } 
+  handlersApi = socketHandlers.attachHandlers(io, opts = socketOpts);
 
   initialized = true;
 
   logger.info('Socket service initialized');
 
-  return { io, api: buildApi(io, handlersApi) };
+  initAapi = buildApi(io, handlersApi);
+  
+  return { io, api: initAapi };
 }
 
 /* -------------------------

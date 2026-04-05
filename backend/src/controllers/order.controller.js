@@ -136,16 +136,16 @@ const OrderController = {
     return send(res, 200, { success: true, ...result });
   }),
 
-    /**
-   * GET /orders/supplier-requests
-   */
+  /**
+ * GET /orders/supplier-requests
+ */
   getSupplierOrderRequests: asyncHandler(async (req, res) => {
     const opts = {
-  ops_region: req.query.ops_region,
-  status: req.query.status,
-  page: req.query.page,
-  limit: req.query.limit
-};
+      ops_region: req.query.ops_region,
+      status: req.query.status,
+      page: req.query.page,
+      limit: req.query.limit
+    };
 
     const result = await OrderService.getSupplierOrderRequests(opts);
 
@@ -220,29 +220,56 @@ const OrderController = {
     return send(res, 200, { success: true, data: updated });
   }),
 
-  /**
-   * POST /orders/:id/update-status
-   * Body: { status }
-   */
-  updateStatus: asyncHandler(async (req, res) => {
-    const { id } = req.params;
-    const { status } = req.body || {};
+ /**
+ * POST /orders/:id/update-status
+ * Body: { status }
+ */
+updateStatus: asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body || {};
 
-    if (!id || !status) throw createError(400, 'order id and status are required');
+  if (!id || !status) {
+    throw createError(400, 'order id and status are required');
+  }
 
-    const opts = buildOpts(req);
-    const updated = await OrderService.updateStatus(id, status, opts);
+  const opts = buildOpts(req);
+  const updated = await OrderService.updateStatus(id, status, opts);
 
-    // Emit status update
-    try {
-      const io = getSocketIO();
-      io.emit('order_status_updated', updated);
-    } catch (err) {
-      console.warn('Socket.IO not ready:', err && err.message);
-    }
+  // Emit status update
+  try {
+    const io = getSocketIO();
+    io.emit('order_status_updated', updated);
+  } catch (err) {
+    console.warn('Socket.IO not ready:', err && err.message);
+  }
 
-    return send(res, 200, { success: true, data: updated });
-  }),
+  return send(res, 200, { success: true, data: updated });
+}),
+
+/**
+ * PATCH /orders/:id/approve
+ * Supplier approves order request
+ */
+approveSupplierOrder: asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  if (!id) {
+    throw createError(400, 'order id is required');
+  }
+
+  const opts = buildOpts(req);
+  const updated = await OrderService.approveSupplierOrder(id, opts);
+
+  // Emit supplier approval event
+  try {
+    const io = getSocketIO();
+    io.emit('supplier_order_approved', updated);
+  } catch (err) {
+    console.warn('Socket.IO not ready:', err && err.message);
+  }
+
+  return send(res, 200, { success: true, data: updated });
+}),
 
   /**
    * POST /orders/:id/submit

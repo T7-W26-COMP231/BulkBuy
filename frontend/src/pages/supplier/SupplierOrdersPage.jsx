@@ -160,11 +160,40 @@ export default function SupplierOrdersPage() {
     setAppliedStatusFilter(statusFilter ? statusFilter.toLowerCase() : "");
   };
 
-  const handleApprove = (id) => {
+ const handleApprove = async (id) => {
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_API_URL}/api/ordrs/${id}/approve`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          ...(accessToken
+            ? { Authorization: `Bearer ${accessToken}` }
+            : {}),
+        },
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data?.message || "Failed to approve order");
+    }
+
     setOrders((prev) =>
       prev.map((o) => (o.id === id ? { ...o, status: "approved" } : o))
     );
-  };
+
+    if (selectedOrder?.id === id) {
+      setSelectedOrder((prev) =>
+        prev ? { ...prev, status: "approved" } : prev
+      );
+    }
+  } catch (err) {
+    setError(err.message || "Failed to approve order");
+  }
+};
 
   const handleDecline = (id) => {
     setOrders((prev) =>

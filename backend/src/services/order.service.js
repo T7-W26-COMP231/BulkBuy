@@ -236,6 +236,55 @@ if (opts.status && opts.status.toLowerCase() !== "all") {
     }
   }
 
+  async approveSupplierOrder(orderId, opts = {}) {
+  if (!orderId) {
+    throw createError(400, 'orderId is required');
+  }
+
+  const actor = actorFromOpts(opts);
+  const correlationId = opts.correlationId || null;
+
+  try {
+    const updated = await OrderRepo.updateStatus(orderId, 'approved');
+
+    if (!updated) {
+      await this._audit(
+        'supplier.order.approve',
+        actor,
+        orderId,
+        'failure',
+        'warn',
+        correlationId,
+        { reason: 'not_found' }
+      );
+      throw createError(404, 'Order not found');
+    }
+
+    await this._audit(
+      'supplier.order.approve',
+      actor,
+      orderId,
+      'success',
+      'info',
+      correlationId,
+      { status: 'approved' }
+    );
+
+    return sanitizeForClient(updated);
+  } catch (err) {
+    await this._audit(
+      'supplier.order.approve',
+      actor,
+      orderId,
+      'failure',
+      'error',
+      correlationId,
+      { error: err && err.message }
+    );
+    throw err;
+  }
+}
+
   /* -------------------------
    * Cart / item-level operations with immutability guards
    * ------------------------- */

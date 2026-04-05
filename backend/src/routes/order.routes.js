@@ -175,6 +175,22 @@ router.get(
  * validators: orderValidators.idParam, orderValidators.update
  * controller: OrderController.updateById
  */
+
+/* -------------------------------------------------------------------------- */
+/* Approve supplier order request
+ * purpose: Supplier approves an order request for supply workflow
+ * method: PATCH
+ * path: /orders/:id/approve
+ * params:
+ *   - path: id
+ * validators: orderValidators.idParam
+ * controller: OrderController.approveSupplierOrder
+ */
+router.patch(
+  '/:id/approve',
+  orderValidators && orderValidators.idParam,
+  asyncHandler(OrderController.approveSupplierOrder)
+);
 router.patch(
   '/:id',
   orderValidators && orderValidators.idParam,

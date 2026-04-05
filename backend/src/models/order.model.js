@@ -101,14 +101,23 @@ const OrderSchema = new Schema({
   metadata: { type: Map, of: Schema.Types.Mixed, default: {} },
 
   // draft here means in cart. once submitted, a new blank order is created.
-  // the cart is always the latest draft order; on new blank cart creation,
-  // saveForLater items should be copied over by business logic.
-  status: {
-    type: String,
-    enum: ['draft', 'submitted', 'cancelled', 'confirmed', 'dispatched', 'fulfilled'],
-    default: 'draft',
-    index: true
-  },
+// the cart is always the latest draft order; on new blank cart creation,
+// saveForLater items should be copied over by business logic.
+status: {
+  type: String,
+  enum: [
+    'draft',
+    'submitted',
+    'approved',
+    'declined',
+    'cancelled',
+    'confirmed',
+    'dispatched',
+    'fulfilled'
+  ],
+  default: 'draft',
+  index: true
+},
 
   // Audit timestamps (epoch ms)
   createdAt: { type: Number, default: () => Date.now(), index: true },

@@ -2,6 +2,7 @@
 const express = require('express');
 const OrderController = require('../controllers/order.controller');
 const orderValidators = require('../validators/order.validators');
+const { requireAuth, requireAdmin } = require('../middleware/auth.middleware');
 
 const router = express.Router();
 
@@ -416,6 +417,8 @@ router.post(
  */
 router.delete(
   '/:id/hard',
+  requireAuth,
+  requireAdmin,
   orderValidators && orderValidators.idParam,
   orderValidators && orderValidators.adminOnly,
   asyncHandler(OrderController.hardDeleteById)

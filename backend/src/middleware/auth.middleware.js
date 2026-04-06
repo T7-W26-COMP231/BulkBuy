@@ -18,6 +18,20 @@ function requireAuth(req, res, next) {
   }
 }
 
+function requireAdmin(req, res, next) {
+  if (!req.user) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
+
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({
+      message: 'Forbidden: Admin access only',
+    });
+  }
+
+  return next();
+}
+
 /**
  * optionalAuth
  * - If a Bearer token is present, verifies it and attaches req.user.
@@ -37,4 +51,4 @@ function optionalAuth(req, res, next) {
   return next();
 }
 
-module.exports = { requireAuth, optionalAuth };
+module.exports = { requireAuth, requireAdmin, optionalAuth };

@@ -44,6 +44,16 @@ function PlaceholderPage({ title }) {
     </div>
   );
 }
+function AdminRoute({ children }) {
+  const { user } = useAuth();
+
+  if (!user || user.role !== "administrator") {
+    return <Navigate to="/" replace />;
+  }
+
+  return children;
+}
+
 function RoleRedirect() {
   const { user, accessToken, initializing } = useAuth();
   const navigate = useNavigate();
@@ -61,7 +71,7 @@ function RoleRedirect() {
     if (user.role === "administrator" && !location.pathname.startsWith("/admin")) {
       navigate("/admin", { replace: true });
     }
-  }, [user, accessToken, initializing, location.pathname]);
+  }, [user, accessToken, initializing, location.pathname, navigate]);
 
   return null;
 }
@@ -129,16 +139,69 @@ export default function App() {
         <Route path="/supplier/reports" element={<SupplierReportsPage />} />
         <Route path="/supplier/order-requests/:id/fulfillment" element={<SupplierFulfillmentPage />} />
 
-        {/* Admin routes */}
-        <Route path="/admin" element={<AdminDashboard />} />
-        <Route path="/admin/inventory" element={<AdminInventoryPage />} />
-        <Route path="/admin/bulk-orders" element={<AdminBulkOrdersPage />} />
-        <Route path="/admin/pricing-brackets" element={<PricingBracketsPage />} />
+      {/* Admin routes */}
+<Route
+  path="/admin"
+  element={
+    <AdminRoute>
+      <AdminDashboard />
+    </AdminRoute>
+  }
+/>
 
-        <Route path="/admin/supplier-quotes" element={<AdminQuotesReviewPage />} />
+<Route
+  path="/admin/inventory"
+  element={
+    <AdminRoute>
+      <AdminInventoryPage />
+    </AdminRoute>
+  }
+/>
 
-        <Route path="/admin/sales-window" element={<CreateSalesWindowForm />} />
-        <Route path="/admin/settings" element={<AdminSettingsPage />} />
+<Route
+  path="/admin/bulk-orders"
+  element={
+    <AdminRoute>
+      <AdminBulkOrdersPage />
+    </AdminRoute>
+  }
+/>
+
+<Route
+  path="/admin/pricing-brackets"
+  element={
+    <AdminRoute>
+      <PricingBracketsPage />
+    </AdminRoute>
+  }
+/>
+
+<Route
+  path="/admin/supplier-quotes"
+  element={
+    <AdminRoute>
+      <AdminQuotesReviewPage />
+    </AdminRoute>
+  }
+/>
+
+<Route
+  path="/admin/sales-window"
+  element={
+    <AdminRoute>
+      <CreateSalesWindowForm />
+    </AdminRoute>
+  }
+/>
+
+<Route
+  path="/admin/settings"
+  element={
+    <AdminRoute>
+      <AdminSettingsPage />
+    </AdminRoute>
+  }
+/>
 
         {/* General placeholder routes */}
         <Route path="/about" element={<PlaceholderPage title="About Us" />} />

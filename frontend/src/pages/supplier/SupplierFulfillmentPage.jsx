@@ -14,10 +14,11 @@ const STATUS_STYLES = {
     pending: "bg-amber-100 text-amber-700",
     requested: "bg-amber-100 text-amber-700",
     approved: "bg-green-100 text-green-700",
+    confirmed: "bg-purple-100 text-purple-700", // added here
     declined: "bg-red-100 text-red-700",
     dispatched: "bg-blue-100 text-blue-700",
     fulfilled: "bg-emerald-100 text-emerald-700",
-    confirmed: "bg-slate-100 text-slate-700",
+
 };
 
 export default function SupplierFulfillmentPage() {
@@ -94,7 +95,7 @@ export default function SupplierFulfillmentPage() {
                         ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
                     },
                     body: JSON.stringify({
-                        expectedDeliveryDate: deliveryDate,
+                        expectedDeliveryDate: new Date(deliveryDate).getTime(), // 👈 convert to epoch ms
                         notes: fulfillmentNotes,
                     }),
                 }
@@ -159,8 +160,8 @@ export default function SupplierFulfillmentPage() {
         items.length > 1
             ? `${items.length} items`
             : firstItem.productId
-            ? `Product ${String(firstItem.productId).slice(-6)}`
-            : "N/A";
+                ? `Product ${String(firstItem.productId).slice(-6)}`
+                : "N/A";
 
     const productSubtitle = firstItem?.pricingSnapshot?.meta?.currency
         ? `Currency: ${firstItem.pricingSnapshot.meta.currency}`
@@ -224,9 +225,8 @@ export default function SupplierFulfillmentPage() {
                                 <div className="mb-5 flex items-center justify-between">
                                     <h2 className="text-base font-bold text-text-main">Order Summary</h2>
                                     <span
-                                        className={`rounded-lg px-3 py-1 text-xs font-bold uppercase ${
-                                            STATUS_STYLES[orderStatus] ?? "bg-slate-100 text-slate-700"
-                                        }`}
+                                        className={`rounded-lg px-3 py-1 text-xs font-bold uppercase ${STATUS_STYLES[orderStatus] ?? "bg-slate-100 text-slate-700"
+                                            }`}
                                     >
                                         {orderStatus}
                                     </span>
@@ -323,11 +323,10 @@ export default function SupplierFulfillmentPage() {
                                                         )
                                                     )
                                                 }
-                                                className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 transition ${
-                                                    item.checked
-                                                        ? "border-primary bg-primary"
-                                                        : "border-neutral-light bg-white"
-                                                }`}
+                                                className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 transition ${item.checked
+                                                    ? "border-primary bg-primary"
+                                                    : "border-neutral-light bg-white"
+                                                    }`}
                                             >
                                                 {item.checked && (
                                                     <svg
@@ -370,11 +369,10 @@ export default function SupplierFulfillmentPage() {
                                                 setDeliveryDate(e.target.value);
                                                 setConfirmError("");
                                             }}
-                                            className={`w-full rounded-xl border px-4 py-2.5 text-sm outline-none ${
-                                                confirmError
-                                                    ? "border-red-300 focus:border-red-500"
-                                                    : "border-neutral-light focus:border-primary"
-                                            }`}
+                                            className={`w-full rounded-xl border px-4 py-2.5 text-sm outline-none ${confirmError
+                                                ? "border-red-300 focus:border-red-500"
+                                                : "border-neutral-light focus:border-primary"
+                                                }`}
                                         />
                                         {confirmError && (
                                             <p className="mt-2 text-sm font-medium text-red-600">
@@ -510,11 +508,10 @@ export default function SupplierFulfillmentPage() {
                                 type="button"
                                 disabled={!declineReason.trim() || declining}
                                 onClick={handleDecline}
-                                className={`rounded-xl px-4 py-2 text-sm font-bold text-white transition ${
-                                    declineReason.trim() && !declining
-                                        ? "bg-red-600 hover:opacity-90"
-                                        : "cursor-not-allowed bg-red-300"
-                                }`}
+                                className={`rounded-xl px-4 py-2 text-sm font-bold text-white transition ${declineReason.trim() && !declining
+                                    ? "bg-red-600 hover:opacity-90"
+                                    : "cursor-not-allowed bg-red-300"
+                                    }`}
                             >
                                 {declining ? "Declining..." : "Submit Decline"}
                             </button>

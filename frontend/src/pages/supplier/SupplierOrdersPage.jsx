@@ -90,6 +90,7 @@ export default function SupplierOrdersPage() {
     { label: "Draft", value: "Draft" },
     { label: "Submitted", value: "Submitted" },
     { label: "Approved", value: "Approved" },
+    { label: "Confirmed", value: "Confirmed" },
     { label: "Declined", value: "Declined" },
     { label: "Dispatched", value: "Dispatched" },
     { label: "Fulfilled", value: "Fulfilled" },

@@ -112,6 +112,10 @@ const OrderSchema = new Schema({
     trim: true,
     default: null
   },
+  expectedDeliveryDate: {
+    type: Number,
+    default: null
+  },
 
   // draft here means in cart. once submitted, a new blank order is created.
   // the cart is always the latest draft order; on new blank cart creation,

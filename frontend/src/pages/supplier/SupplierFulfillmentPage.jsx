@@ -59,7 +59,7 @@ export default function SupplierFulfillmentPage() {
                 );
                 const data = await response.json();
                 if (!response.ok) throw new Error(data?.message || "Failed to load order");
-                setOrder(data);
+                setOrder(data.data);
             } catch (err) {
                 setOrderError(err.message || "Failed to load order");
             } finally {
@@ -126,23 +126,42 @@ export default function SupplierFulfillmentPage() {
 
     // Derived order values
     const items = Array.isArray(order?.items) ? order.items : [];
+
     const totalQty = items.reduce(
-        (sum, item) => sum + Number(item?.quantity || item?.meta?.quantity || 0),
-        0
+    (sum, item) => sum + Number(item?.quantity || item?.meta?.quantity || 0),
+    0
     );
+
     const firstItem = items[0] || {};
+
     const productName =
-        items.length > 1
-            ? `${items.length} items`
-            : firstItem.productId
-                ? `Product ${String(firstItem.productId).slice(-6)}`
-                : "N/A";
+    items.length > 1
+        ? `${items.length} items`
+        : firstItem.productId
+        ? `Product ${String(firstItem.productId).slice(-6)}`
+        : "N/A";
+
+    const productSubtitle =
+    firstItem?.pricingSnapshot?.meta?.currency
+        ? `Currency: ${firstItem.pricingSnapshot.meta.currency}`
+        : "Order item details";
+
+    const deliveryCity =
+    order?.deliveryLocation?.city ||
+    order?.orderLocation?.city ||
+    order?.ops_region ||
+    "N/A";
+
+    const orderIdDisplay = order?._id ? `#${order._id}` : "N/A";
+
     const windowStart = order?.salesWindow?.fromEpoch
-        ? formatEpochDate(order.salesWindow.fromEpoch)
-        : "N/A";
+    ? formatEpochDate(order.salesWindow.fromEpoch)
+    : "N/A";
+
     const windowEnd = order?.salesWindow?.toEpoch
-        ? formatEpochDate(order.salesWindow.toEpoch)
-        : "N/A";
+    ? formatEpochDate(order.salesWindow.toEpoch)
+    : "N/A";
+
     const orderStatus = (order?.status || "approved").toLowerCase();
 
     return (
@@ -206,7 +225,7 @@ export default function SupplierFulfillmentPage() {
                                             Order ID
                                         </p>
                                         <p className="mt-1 text-sm font-bold text-text-main">
-                                            #ORD-2023-8912
+                                            {orderIdDisplay}
                                         </p>
                                     </div>
                                     <div>
@@ -214,7 +233,7 @@ export default function SupplierFulfillmentPage() {
                                             Quantity
                                         </p>
                                         <p className="mt-1 text-sm font-bold text-text-main">
-                                            500 Units
+                                            {totalQty || 0} Units
                                         </p>
                                     </div>
                                     <div>
@@ -222,7 +241,7 @@ export default function SupplierFulfillmentPage() {
                                             Delivery City
                                         </p>
                                         <p className="mt-1 text-sm font-bold text-text-main">
-                                            San Francisco, CA
+                                            {deliveryCity}
                                         </p>
                                     </div>
                                 </div>
@@ -236,15 +255,15 @@ export default function SupplierFulfillmentPage() {
                                             </svg>
                                         </div>
                                         <div className="flex-1">
-                                            <p className="text-sm font-bold text-text-main">Organic Arabica Beans</p>
-                                            <p className="text-xs text-text-muted">Premium Grade-A Whole Beans</p>
+                                            <p className="text-sm font-bold text-text-main">{productName}</p>
+                                            <p className="text-xs text-text-muted">{productSubtitle}</p>
                                         </div>
                                         <div className="flex items-center gap-4 text-xs text-text-muted">
                                             <span className="flex items-center gap-1">
                                                 <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                                 </svg>
-                                                Oct 12 - Oct 15 · 25kg Sacks
+                                                {windowStart} - {windowEnd}
                                             </span>
                                         </div>
                                     </div>

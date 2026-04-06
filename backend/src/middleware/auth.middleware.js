@@ -23,7 +23,9 @@ function requireAdmin(req, res, next) {
     return res.status(401).json({ message: 'Unauthorized' });
   }
 
-  if (req.user.role !== 'admin') {
+  const allowedAdminRoles = ['admin', 'administrator'];
+
+  if (!allowedAdminRoles.includes(req.user.role)) {
     return res.status(403).json({
       message: 'Forbidden: Admin access only',
     });

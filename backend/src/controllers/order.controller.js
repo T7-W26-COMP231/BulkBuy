@@ -145,6 +145,20 @@ const OrderController = {
     });
   }),
 
+
+    /**
+   * GET /orders/dashboard-metrics
+   * Admin dashboard summary cards
+   */
+  getDashboardMetrics: asyncHandler(async (req, res) => {
+    const metrics = await OrderService.getDashboardMetrics();
+
+    return send(res, 200, {
+      success: true,
+      data: metrics
+    });
+  }),
+
   /**
    * PATCH /orders/:id
    */

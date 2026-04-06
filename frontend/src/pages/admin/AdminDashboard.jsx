@@ -1,5 +1,7 @@
 import AdminSidebar from "../../components/admin/AdminSidebar";
 import AdminTopbar from "../../components/admin/AdminTopbar";
+import { useEffect, useState } from "react";
+import { useAuth } from "../../contexts/AuthContext";
 
 // ── Stat Card ──────────────────────────────────────────────────────────────
 function AdminStatCard({ icon, label, value, extra, extraColor, accent }) {
@@ -90,6 +92,47 @@ const WINDOW_CLOSURES = [
 
 // ── Dashboard ──────────────────────────────────────────────────────────────
 export default function AdminDashboard() {
+  const { accessToken } = useAuth();
+
+  const [stats, setStats] = useState({
+    pendingQuotes: 0,
+    activeWindows: 0,
+    criticalAlerts: 0,
+  });
+
+  useEffect(() => {
+    const fetchDashboardMetrics = async () => {
+      try {
+        console.log("ADMIN TOKEN:", accessToken);
+       const response = await fetch(
+  `${import.meta.env.VITE_API_URL}/api/orders/dashboard-metrics`,
+  {
+    method: "GET",
+    cache: "no-store",
+    headers: {
+      "Content-Type": "application/json",
+      ...(accessToken
+        ? { Authorization: `Bearer ${accessToken}` }
+        : {}),
+    },
+  }
+);
+
+        const result = await response.json();
+
+        if (result?.success) {
+          setStats(result.data);
+        }
+      } catch (error) {
+        console.error("Failed to load dashboard metrics:", error);
+      }
+    };
+
+    if (accessToken) {
+      fetchDashboardMetrics();
+    }
+  }, [accessToken]);
+
   return (
     <div className="min-h-screen bg-background-light text-text-main">
       <div className="flex min-h-screen">
@@ -151,9 +194,32 @@ export default function AdminDashboard() {
 
               {/* ── Stat cards ────────────────────────────────────────── */}
               <section className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                {STAT_CARDS.map((card) => (
-                  <AdminStatCard key={card.label} {...card} />
-                ))}
+                <AdminStatCard
+                  label="Pending Quote Reviews"
+                  value={stats.pendingQuotes}
+                  extra="Live"
+                  icon="description"
+                  accent="text-primary"
+                  extraColor="text-text-muted"
+                />
+
+                <AdminStatCard
+                  label="Active Aggregation Windows"
+                  value={stats.activeWindows}
+                  extra="Active"
+                  icon="schedule"
+                  accent="text-emerald-600"
+                  extraColor="text-emerald-600"
+                />
+
+                <AdminStatCard
+                  label="Critical Alerts"
+                  value={stats.criticalAlerts}
+                  extra="Critical"
+                  icon="error"
+                  accent="text-red-500"
+                  extraColor="text-red-500"
+                />
               </section>
 
               {/* ── Upcoming Window Closures ──────────────────────────── */}

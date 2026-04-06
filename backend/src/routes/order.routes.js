@@ -115,6 +115,23 @@ router.get(
 );
 
 /* -------------------------------------------------------------------------- */
+/* Dashboard metrics (admin)
+ * purpose: Retrieve summary metrics for the admin dashboard
+ * method: GET
+ * path: /orders/dashboard-metrics
+ * params:
+ *   - none
+ * validators: requireAuth, requireAdmin
+ * controller: OrderController.getDashboardMetrics
+ */
+router.get(
+  '/dashboard-metrics',
+  requireAuth,
+  requireAdmin,
+  asyncHandler(OrderController.getDashboardMetrics)
+);
+
+/* -------------------------------------------------------------------------- */
 /* Get order by id
  * purpose: Retrieve a single order by Mongo _id
  * method: GET

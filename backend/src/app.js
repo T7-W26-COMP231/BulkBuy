@@ -91,7 +91,8 @@ const createApp = async () => {
   app.use('/api/confg', configRoutes);
   app.use('/api/comms', messageRoutes); // message REST endpoints
   app.use('/api/comms', socketRoutes);  // comms websocket-related REST endpoints (missed/ack/create/broadcast)
-  app.use('/api/ordrs', orderRoutes);
+   app.use('/api/ordrs', orderRoutes);   // legacy teammate route
+  app.use('/api/orders', orderRoutes);  // admin dashboard + clean route
   app.use('/api/prdts', productRoutes);
   app.use('/api/rmaps', regionMapRoutes);
   app.use('/api/revws', reviewRoutes);

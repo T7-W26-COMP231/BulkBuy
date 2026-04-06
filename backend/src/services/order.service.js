@@ -972,8 +972,38 @@ class OrderService {
     }
   }
 
+       async getDashboardMetrics() {
+    const pendingQuotes = await this.count({
+      status: "submitted",
+    });
+
+    const activeWindows = await this.count({
+      status: { $in: ["approved", "confirmed"] },
+    });
+
+    const criticalAlerts = await this.count({
+      status: { $in: ["declined", "cancelled"] },
+    });
+
+    console.log("📊 DASHBOARD METRICS:", {
+      pendingQuotes,
+      activeWindows,
+      criticalAlerts,
+    });
+
+    return {
+      pendingQuotes,
+      activeWindows,
+      criticalAlerts,
+    };
+  }
+
   async count(filter = {}) {
-    const f = typeof filter === 'object' && filter !== null ? { ...filter } : {};
+    const f =
+      typeof filter === "object" && filter !== null
+        ? { ...filter }
+        : {};
+
     return OrderRepo.count(f);
   }
 

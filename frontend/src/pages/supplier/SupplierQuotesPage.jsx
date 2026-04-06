@@ -54,15 +54,35 @@ export default function SupplierQuotesPage() {
         throw new Error("No supply record found for this supplier.");
       }
 
+      // const response = await fetch(
+      //   `${import.meta.env.VITE_API_URL}/api/supls/${supplyId}/save-draft`,
+      //   {
+      //     method: "POST",
+      //     headers: {
+      //       "Content-Type": "application/json",
+      //       Authorization: `Bearer ${JSON.parse(
+      //         localStorage.getItem("app_auth_session_v1")
+      //       )?.accessToken}`,
+      //     },
+      //     body: JSON.stringify({
+      //       productName: "Organic Avocados",
+      //       skuId: "AVO-ORG-4402-XL",
+      //       tiers: tiers.map((tier) => ({
+      //         minQty: Number(tier.minQty),
+      //         unitPrice: Number(tier.unitPrice),
+      //       })),
+      //     }),
+      //   }
+      // );
+
+
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/api/supls/${supplyId}/save-draft`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${JSON.parse(
-              localStorage.getItem("app_auth_session_v1")
-            )?.accessToken}`,
+            Authorization: `Bearer ${JSON.parse(localStorage.getItem("app_auth_session_v1"))?.accessToken}`,
           },
           body: JSON.stringify({
             productName: "Organic Avocados",
@@ -116,7 +136,7 @@ export default function SupplierQuotesPage() {
 
       setIsSubmittingReview(true);
 
-      const response = await fetch(
+      /*const response = await fetch(
         `${import.meta.env.VITE_API_URL}/api/supls/${supplyId}/submit-review`,
         {
           method: "POST",
@@ -126,6 +146,21 @@ export default function SupplierQuotesPage() {
               localStorage.getItem("app_auth_session_v1")
             )?.accessToken}`,
           },
+        }
+      );*/
+
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/supls/${supplyId}/submit-review`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${JSON.parse(localStorage.getItem("app_auth_session_v1"))?.accessToken}`,
+          },
+          body: JSON.stringify({          // ← ADD THIS
+            productName: "Organic Avocados",
+            skuId: "AVO-ORG-4402-XL",
+          }),
         }
       );
 

@@ -1,0 +1,1756 @@
+[
+  {
+    "_id": "880000000000000000000001",
+    "window": {
+      "fromEpoch": 1672531200000,
+      "toEpoch": 1675209599000
+    },
+    "products": [
+      {
+        "productId": "770000000000000000000001",
+        "items": [
+          {
+            "itemId": "6800000000000000000000i01",
+            "productId": "770000000000000000000001",
+            "pricing_snapshots": [
+              {
+                "atInstantPrice": 12.5,
+                "discountedPercentage": 0,
+                "discountBracket": { "initial": 0, "final": 0 },
+                "createdAt": 1672531200000,
+                "updatedAt": 1672531200000,
+                "metadata": {
+                  "note": "Initial launch price for reusable tote set",
+                  "currency": "CAD",
+                  "source": "catalog-import-2023-01"
+                }
+              },
+              {
+                "atInstantPrice": 10.99,
+                "discountedPercentage": 12,
+                "discountBracket": { "initial": 0, "final": 12 },
+                "createdAt": 1673126000000,
+                "updatedAt": 1673126000000,
+                "metadata": {
+                  "note": "Promotional winter discount applied",
+                  "promoCode": "WINTER12",
+                  "appliedBy": "pricing-service-v2"
+                }
+              }
+            ],
+            "qtySold": 420,
+            "qtyAvailable": 1580,
+            "pricing_tiers": [
+              { "quantity": 10, "discountPercentagePerUnitBulk": 5 },
+              { "quantity": 50, "discountPercentagePerUnitBulk": 12 }
+            ],
+            "metadata": {
+              "warehouseAllocation": {
+                "6500000000000000000000w1": 1200,
+                "6500000000000000000000w2": 380
+              },
+              "leadTimeDays": 3,
+              "packaging": "polybag-5"
+            },
+            "createdAt": 1672531200000,
+            "updatedAt": 1673126000000
+          },
+          {
+            "itemId": "6800000000000000000000i21",
+            "productId": "770000000000000000000001",
+            "pricing_snapshots": [
+              {
+                "atInstantPrice": 3.5,
+                "discountedPercentage": 0,
+                "discountBracket": { "initial": 0, "final": 0 },
+                "createdAt": 1672531200000,
+                "updatedAt": 1672531200000,
+                "metadata": { "note": "Accessory: single tote replacement" }
+              }
+            ],
+            "qtySold": 120,
+            "qtyAvailable": 880,
+            "pricing_tiers": [
+              { "quantity": 100, "discountPercentagePerUnitBulk": 8 }
+            ],
+            "metadata": {
+              "warehouseAllocation": {
+                "6500000000000000000000w1": 600,
+                "6500000000000000000000w2": 280
+              }
+            },
+            "createdAt": 1672531200000,
+            "updatedAt": 1672531200000
+          }
+        ],
+        "metadata": { "category": "reusable-bags", "brand": "EcoCarry" }
+      },
+      {
+        "productId": "770000000000000000000005",
+        "items": [
+          {
+            "itemId": "6800000000000000000000i05",
+            "productId": "770000000000000000000005",
+            "pricing_snapshots": [
+              {
+                "atInstantPrice": 74.5,
+                "discountedPercentage": 0,
+                "discountBracket": { "initial": 0, "final": 0 },
+                "createdAt": 1672531200000,
+                "updatedAt": 1672531200000,
+                "metadata": { "note": "Base case price for 50-pack boxes" }
+              },
+              {
+                "atInstantPrice": 69.0,
+                "discountedPercentage": 7.38,
+                "discountBracket": { "initial": 0, "final": 7.38 },
+                "createdAt": 1672896000000,
+                "updatedAt": 1672896000000,
+                "metadata": {
+                  "note": "Early-bird bulk discount",
+                  "promoCode": "BULK7"
+                }
+              }
+            ],
+            "qtySold": 210,
+            "qtyAvailable": 1790,
+            "pricing_tiers": [
+              { "quantity": 5, "discountPercentagePerUnitBulk": 6 },
+              { "quantity": 25, "discountPercentagePerUnitBulk": 14 }
+            ],
+            "metadata": {
+              "warehouseAllocation": {
+                "6500000000000000000000w1": 1500,
+                "6500000000000000000000w2": 290
+              },
+              "sustainabilityCert": "FSC",
+              "boxDimensionsCm": { "length": 40, "width": 30, "height": 25 }
+            },
+            "createdAt": 1672531200000,
+            "updatedAt": 1672896000000
+          }
+        ],
+        "metadata": { "category": "shipping-boxes", "ecoScore": 88 }
+      }
+    ],
+    "ops_region": "north-america:ca-on",
+    "overflow_id": null,
+    "isHead": true,
+    "metadata": {
+      "createdBy": "catalog-admin",
+      "notes": "Q1 2023 promotional window — winter clearance and early-bird bulk pricing"
+    },
+    "createdAt": 1672531200000,
+    "updatedAt": 1673126000000
+  },
+  {
+    "_id": "880000000000000000000002",
+    "window": {
+      "fromEpoch": 1672531200000,
+      "toEpoch": 1676419199000
+    },
+    "products": [
+      {
+        "productId": "770000000000000000000001",
+        "items": [
+          {
+            "itemId": "6800000000000000000000i01",
+            "productId": "770000000000000000000001",
+            "pricing_snapshots": [
+              {
+                "atInstantPrice": 11.99,
+                "discountedPercentage": 4,
+                "discountBracket": { "initial": 0, "final": 4 },
+                "createdAt": 1675209600000,
+                "updatedAt": 1675209600000,
+                "metadata": { "note": "Overflow extension price adjustment", "currency": "CAD", "source": "overflow-adjuster" }
+              }
+            ],
+            "qtySold": 85,
+            "qtyAvailable": 1495,
+            "pricing_tiers": [{ "quantity": 10, "discountPercentagePerUnitBulk": 5 }],
+            "metadata": { "warehouseAllocation": { "6500000000000000000000w1": 1200, "6500000000000000000000w2": 295 }, "overflowNote": "extended stock from head" },
+            "createdAt": 1672531200000,
+            "updatedAt": 1675209600000
+          },
+          {
+            "itemId": "6800000000000000000000i21",
+            "productId": "770000000000000000000001",
+            "pricing_snapshots": [
+              {
+                "atInstantPrice": 3.25,
+                "discountedPercentage": 7,
+                "discountBracket": { "initial": 0, "final": 7 },
+                "createdAt": 1675209600000,
+                "updatedAt": 1675209600000,
+                "metadata": { "note": "overflow accessory promo" }
+              }
+            ],
+            "qtySold": 20,
+            "qtyAvailable": 860,
+            "pricing_tiers": [{ "quantity": 100, "discountPercentagePerUnitBulk": 8 }],
+            "metadata": { "warehouseAllocation": { "6500000000000000000000w1": 600, "6500000000000000000000w2": 260 } },
+            "createdAt": 1672531200000,
+            "updatedAt": 1675209600000
+          }
+        ],
+        "metadata": { "category": "reusable-bags", "brand": "EcoCarry", "windowRole": "overflow" }
+      },
+      {
+        "productId": "770000000000000000000005",
+        "items": [
+          {
+            "itemId": "6800000000000000000000i05",
+            "productId": "770000000000000000000005",
+            "pricing_snapshots": [
+              {
+                "atInstantPrice": 69.0,
+                "discountedPercentage": 7.38,
+                "discountBracket": { "initial": 0, "final": 7.38 },
+                "createdAt": 1675209600000,
+                "updatedAt": 1675209600000,
+                "metadata": { "note": "overflow continuation of early-bird bulk discount" }
+              }
+            ],
+            "qtySold": 40,
+            "qtyAvailable": 1750,
+            "pricing_tiers": [
+              { "quantity": 5, "discountPercentagePerUnitBulk": 6 },
+              { "quantity": 25, "discountPercentagePerUnitBulk": 14 }
+            ],
+            "metadata": { "warehouseAllocation": { "6500000000000000000000w1": 1500, "6500000000000000000000w2": 250 } },
+            "createdAt": 1672531200000,
+            "updatedAt": 1675209600000
+          }
+        ],
+        "metadata": { "category": "shipping-boxes", "ecoScore": 88, "windowRole": "overflow" }
+      },
+      {
+        "productId": "770000000000000000000006",
+        "items": [
+          {
+            "itemId": "6800000000000000000000i06",
+            "productId": "770000000000000000000006",
+            "pricing_snapshots": [
+              {
+                "atInstantPrice": 57.5,
+                "discountedPercentage": 4.17,
+                "discountBracket": { "initial": 0, "final": 4.17 },
+                "createdAt": 1675209600000,
+                "updatedAt": 1675209600000,
+                "metadata": { "note": "overflow price parity with head" }
+              }
+            ],
+            "qtySold": 60,
+            "qtyAvailable": 3540,
+            "pricing_tiers": [{ "quantity": 3, "discountPercentagePerUnitBulk": 8 }],
+            "metadata": { "tapeWidthMm": 48, "coreDiameterMm": 76 },
+            "createdAt": 1672531200000,
+            "updatedAt": 1675209600000
+          }
+        ],
+        "metadata": { "tapeCase": true, "windowRole": "overflow" }
+      },
+      {
+        "productId": "770000000000000000000009",
+        "items": [
+          {
+            "itemId": "6800000000000000000000i09",
+            "productId": "770000000000000000000009",
+            "pricing_snapshots": [
+              {
+                "atInstantPrice": 45.0,
+                "discountedPercentage": 6.25,
+                "discountBracket": { "initial": 0, "final": 6.25 },
+                "createdAt": 1675209600000,
+                "updatedAt": 1675209600000,
+                "metadata": { "note": "overflow markdown to clear seasonal stock" }
+              }
+            ],
+            "qtySold": 95,
+            "qtyAvailable": 1705,
+            "pricing_tiers": [{ "quantity": 10, "discountPercentagePerUnitBulk": 10 }],
+            "metadata": { "recyclable": true, "gsm": 80 },
+            "createdAt": 1672531200000,
+            "updatedAt": 1675209600000
+          }
+        ],
+        "metadata": { "recyclable": true, "windowRole": "overflow" }
+      }
+    ],
+    "ops_region": "north-america:ca-on",
+    "overflow_id": "880000000000000000000001",
+    "isHead": false,
+    "metadata": {
+      "createdBy": "catalog-admin",
+      "notes": "Overflow document extending the Q1 head window to cover additional inventory and extended promos"
+    },
+    "createdAt": 1675209600000,
+    "updatedAt": 1675209600000
+  },
+  {
+    "_id": "880000000000000000000003",
+    "window": {
+      "fromEpoch": 1677628800000,
+      "toEpoch": 1688169599000
+    },
+    "products": [
+      {
+        "productId": "770000000000000000000002",
+        "items": [
+          {
+            "itemId": "6800000000000000000000i02",
+            "productId": "770000000000000000000002",
+            "pricing_snapshots": [
+              {
+                "atInstantPrice": 84.99,
+                "discountedPercentage": 0,
+                "discountBracket": { "initial": 0, "final": 0 },
+                "createdAt": 1677628800000,
+                "updatedAt": 1677628800000,
+                "metadata": { "note": "spring overlap window pricing", "currency": "CAD" }
+              }
+            ],
+            "qtySold": 150,
+            "qtyAvailable": 2050,
+            "pricing_tiers": [{ "quantity": 5, "discountPercentagePerUnitBulk": 7 }, { "quantity": 20, "discountPercentagePerUnitBulk": 15 }],
+            "metadata": { "leadTimeDays": 3, "supplyType": "packaging" },
+            "createdAt": 1677628800000,
+            "updatedAt": 1677628800000
+          }
+        ],
+        "metadata": { "supplyType": "packaging", "windowRole": "overlap-early" }
+      },
+      {
+        "productId": "770000000000000000000003",
+        "items": [
+          {
+            "itemId": "6800000000000000000000i03",
+            "productId": "770000000000000000000003",
+            "pricing_snapshots": [
+              {
+                "atInstantPrice": 32.0,
+                "discountedPercentage": 0,
+                "discountBracket": { "initial": 0, "final": 0 },
+                "createdAt": 1677628800000,
+                "updatedAt": 1677628800000,
+                "metadata": { "note": "overlap window standard price" }
+              }
+            ],
+            "qtySold": 320,
+            "qtyAvailable": 1680,
+            "pricing_tiers": [{ "quantity": 10, "discountPercentagePerUnitBulk": 10 }],
+            "metadata": { "warehouseFriendly": true, "barcodeType": "Code128" },
+            "createdAt": 1677628800000,
+            "updatedAt": 1677628800000
+          }
+        ],
+        "metadata": { "warehouseFriendly": true, "windowRole": "overlap-early" }
+      },
+      {
+        "productId": "770000000000000000000004",
+        "items": [
+          {
+            "itemId": "6800000000000000000000i04",
+            "productId": "770000000000000000000004",
+            "pricing_snapshots": [
+              {
+                "atInstantPrice": 210.0,
+                "discountedPercentage": 0,
+                "discountBracket": { "initial": 0, "final": 0 },
+                "createdAt": 1677628800000,
+                "updatedAt": 1677628800000,
+                "metadata": { "note": "overlap pricing for membership product" }
+              }
+            ],
+            "qtySold": 30,
+            "qtyAvailable": 1970,
+            "pricing_tiers": [],
+            "metadata": { "bulkOrder": true, "roastDateWindowDays": 7 },
+            "createdAt": 1677628800000,
+            "updatedAt": 1677628800000
+          }
+        ],
+        "metadata": { "bulkOrder": true, "windowRole": "overlap-early" }
+      },
+      {
+        "productId": "770000000000000000000005",
+        "items": [
+          {
+            "itemId": "6800000000000000000000i05",
+            "productId": "770000000000000000000005",
+            "pricing_snapshots": [
+              {
+                "atInstantPrice": 72.0,
+                "discountedPercentage": 3.36,
+                "discountBracket": { "initial": 0, "final": 3.36 },
+                "createdAt": 1677628800000,
+                "updatedAt": 1677628800000,
+                "metadata": { "note": "overlap promotional price" }
+              }
+            ],
+            "qtySold": 110,
+            "qtyAvailable": 1730,
+            "pricing_tiers": [{ "quantity": 5, "discountPercentagePerUnitBulk": 6 }],
+            "metadata": { "ecoPackaging": true, "material": "100% recycled" },
+            "createdAt": 1677628800000,
+            "updatedAt": 1677628800000
+          }
+        ],
+        "metadata": { "ecoPackaging": true, "windowRole": "overlap-early" }
+      }
+    ],
+    "ops_region": "north-america:ca-on",
+    "overflow_id": null,
+    "isHead": true,
+    "metadata": {
+      "createdBy": "catalog-scheduler",
+      "notes": "Early spring overlap window — carries forward select head promos and introduces spring pricing"
+    },
+    "createdAt": 1677628800000,
+    "updatedAt": 1677628800000
+  },
+  {
+    "_id": "880000000000000000000004",
+    "window": {
+      "fromEpoch": 1711920000000,
+      "toEpoch": 1743455999000
+    },
+    "products": [
+      {
+        "productId": "770000000000000000000001",
+        "items": [
+          {
+            "itemId": "6800000000000000000000i01",
+            "productId": "770000000000000000000001",
+            "pricing_snapshots": [
+              {
+                "atInstantPrice": 13.5,
+                "discountedPercentage": 0,
+                "discountBracket": { "initial": 0, "final": 0 },
+                "createdAt": 1711920000000,
+                "updatedAt": 1711920000000,
+                "metadata": { "note": "current window base price", "currency": "CAD" }
+              },
+              {
+                "atInstantPrice": 11.99,
+                "discountedPercentage": 11.11,
+                "discountBracket": { "initial": 0, "final": 11.11 },
+                "createdAt": 1714521600000,
+                "updatedAt": 1714521600000,
+                "metadata": { "note": "mid-window promotional discount", "promoCode": "SPRING11" }
+              }
+            ],
+            "qtySold": 980,
+            "qtyAvailable": 1020,
+            "pricing_tiers": [{ "quantity": 10, "discountPercentagePerUnitBulk": 5 }, { "quantity": 50, "discountPercentagePerUnitBulk": 12 }],
+            "metadata": { "warehouseAllocation": { "6500000000000000000000w1": 800, "6500000000000000000000w2": 220 }, "leadTimeDays": 2 },
+            "createdAt": 1711920000000,
+            "updatedAt": 1714521600000
+          },
+          {
+            "itemId": "6800000000000000000000i21",
+            "productId": "770000000000000000000001",
+            "pricing_snapshots": [
+              {
+                "atInstantPrice": 3.75,
+                "discountedPercentage": 0,
+                "discountBracket": { "initial": 0, "final": 0 },
+                "createdAt": 1711920000000,
+                "updatedAt": 1711920000000,
+                "metadata": { "note": "current accessory price" }
+              }
+            ],
+            "qtySold": 240,
+            "qtyAvailable": 760,
+            "pricing_tiers": [{ "quantity": 100, "discountPercentagePerUnitBulk": 8 }],
+            "metadata": { "warehouseAllocation": { "6500000000000000000000w1": 500, "6500000000000000000000w2": 260 } },
+            "createdAt": 1711920000000,
+            "updatedAt": 1711920000000
+          }
+        ],
+        "metadata": { "category": "reusable-bags", "brand": "EcoCarry" }
+      },
+      {
+        "productId": "770000000000000000000002",
+        "items": [
+          {
+            "itemId": "6800000000000000000000i02",
+            "productId": "770000000000000000000002",
+            "pricing_snapshots": [
+              {
+                "atInstantPrice": 89.99,
+                "discountedPercentage": 0,
+                "discountBracket": { "initial": 0, "final": 0 },
+                "createdAt": 1711920000000,
+                "updatedAt": 1711920000000,
+                "metadata": { "note": "current standard price" }
+              }
+            ],
+            "qtySold": 420,
+            "qtyAvailable": 1580,
+            "pricing_tiers": [{ "quantity": 5, "discountPercentagePerUnitBulk": 7 }],
+            "metadata": { "leadTimeDays": 3, "supplyType": "packaging" },
+            "createdAt": 1711920000000,
+            "updatedAt": 1711920000000
+          }
+        ],
+        "metadata": { "supplyType": "packaging" }
+      },
+      {
+        "productId": "770000000000000000000003",
+        "items": [
+          {
+            "itemId": "6800000000000000000000i03",
+            "productId": "770000000000000000000003",
+            "pricing_snapshots": [
+              {
+                "atInstantPrice": 34.0,
+                "discountedPercentage": 0,
+                "discountBracket": { "initial": 0, "final": 0 },
+                "createdAt": 1711920000000,
+                "updatedAt": 1711920000000,
+                "metadata": { "note": "current price for barcode labels" }
+              }
+            ],
+            "qtySold": 1120,
+            "qtyAvailable": 880,
+            "pricing_tiers": [{ "quantity": 10, "discountPercentagePerUnitBulk": 10 }],
+            "metadata": { "warehouseFriendly": true, "barcodeType": "Code128" },
+            "createdAt": 1711920000000,
+            "updatedAt": 1711920000000
+          }
+        ],
+        "metadata": { "warehouseFriendly": true }
+      },
+      {
+        "productId": "770000000000000000000004",
+        "items": [
+          {
+            "itemId": "6800000000000000000000i04",
+            "productId": "770000000000000000000004",
+            "pricing_snapshots": [
+              {
+                "atInstantPrice": 225.0,
+                "discountedPercentage": 0,
+                "discountBracket": { "initial": 0, "final": 0 },
+                "createdAt": 1711920000000,
+                "updatedAt": 1711920000000,
+                "metadata": { "note": "current membership bulk price" }
+              }
+            ],
+            "qtySold": 210,
+            "qtyAvailable": 1790,
+            "pricing_tiers": [],
+            "metadata": { "bulkOrder": true, "roastDateWindowDays": 7 },
+            "createdAt": 1711920000000,
+            "updatedAt": 1711920000000
+          }
+        ],
+        "metadata": { "bulkOrder": true }
+      },
+      {
+        "productId": "770000000000000000000005",
+        "items": [
+          {
+            "itemId": "6800000000000000000000i05",
+            "productId": "770000000000000000000005",
+            "pricing_snapshots": [
+              {
+                "atInstantPrice": 79.0,
+                "discountedPercentage": 0,
+                "discountBracket": { "initial": 0, "final": 0 },
+                "createdAt": 1711920000000,
+                "updatedAt": 1711920000000,
+                "metadata": { "note": "current box case price" }
+              }
+            ],
+            "qtySold": 640,
+            "qtyAvailable": 1360,
+            "pricing_tiers": [{ "quantity": 5, "discountPercentagePerUnitBulk": 6 }],
+            "metadata": { "ecoPackaging": true, "material": "100% recycled" },
+            "createdAt": 1711920000000,
+            "updatedAt": 1711920000000
+          }
+        ],
+        "metadata": { "ecoPackaging": true }
+      },
+      {
+        "productId": "770000000000000000000006",
+        "items": [
+          {
+            "itemId": "6800000000000000000000i06",
+            "productId": "770000000000000000000006",
+            "pricing_snapshots": [
+              {
+                "atInstantPrice": 59.99,
+                "discountedPercentage": 0,
+                "discountBracket": { "initial": 0, "final": 0 },
+                "createdAt": 1711920000000,
+                "updatedAt": 1711920000000,
+                "metadata": { "note": "current tape case price" }
+              }
+            ],
+            "qtySold": 980,
+            "qtyAvailable": 2620,
+            "pricing_tiers": [{ "quantity": 3, "discountPercentagePerUnitBulk": 8 }],
+            "metadata": { "tapeWidthMm": 48, "coreDiameterMm": 76 },
+            "createdAt": 1711920000000,
+            "updatedAt": 1711920000000
+          }
+        ],
+        "metadata": { "tapeCase": true }
+      },
+      {
+        "productId": "770000000000000000000007",
+        "items": [
+          {
+            "itemId": "6800000000000000000000i07",
+            "productId": "770000000000000000000007",
+            "pricing_snapshots": [
+              {
+                "atInstantPrice": 149.0,
+                "discountedPercentage": 0,
+                "discountBracket": { "initial": 0, "final": 0 },
+                "createdAt": 1711920000000,
+                "updatedAt": 1711920000000,
+                "metadata": { "note": "current sanitizer case price" }
+              }
+            ],
+            "qtySold": 420,
+            "qtyAvailable": 1580,
+            "pricing_tiers": [{ "quantity": 10, "discountPercentagePerUnitBulk": 10 }],
+            "metadata": { "hazmat": false, "shelfLifeMonths": 24 },
+            "createdAt": 1711920000000,
+            "updatedAt": 1711920000000
+          }
+        ],
+        "metadata": { "safetyStock": true }
+      },
+      {
+        "productId": "770000000000000000000008",
+        "items": [
+          {
+            "itemId": "6800000000000000000000i08",
+            "productId": "770000000000000000000008",
+            "pricing_snapshots": [
+              {
+                "atInstantPrice": 39.5,
+                "discountedPercentage": 0,
+                "discountBracket": { "initial": 0, "final": 0 },
+                "createdAt": 1711920000000,
+                "updatedAt": 1711920000000,
+                "metadata": { "note": "current retail hooks price" }
+              }
+            ],
+            "qtySold": 760,
+            "qtyAvailable": 1840,
+            "pricing_tiers": [{ "quantity": 5, "discountPercentagePerUnitBulk": 0 }],
+            "metadata": { "retailUse": true, "material": "zinc-plated steel" },
+            "createdAt": 1711920000000,
+            "updatedAt": 1711920000000
+          }
+        ],
+        "metadata": { "retailUse": true }
+      },
+      {
+        "productId": "770000000000000000000009",
+        "items": [
+          {
+            "itemId": "6800000000000000000000i09",
+            "productId": "770000000000000000000009",
+            "pricing_snapshots": [
+              {
+                "atInstantPrice": 48.0,
+                "discountedPercentage": 0,
+                "discountBracket": { "initial": 0, "final": 0 },
+                "createdAt": 1711920000000,
+                "updatedAt": 1711920000000,
+                "metadata": { "note": "current kraft paper price" }
+              }
+            ],
+            "qtySold": 540,
+            "qtyAvailable": 1260,
+            "pricing_tiers": [{ "quantity": 10, "discountPercentagePerUnitBulk": 10 }],
+            "metadata": { "recyclable": true, "gsm": 80 },
+            "createdAt": 1711920000000,
+            "updatedAt": 1711920000000
+          }
+        ],
+        "metadata": { "recyclable": true }
+      },
+      {
+        "productId": "77000000000000000000000a",
+        "items": [
+          {
+            "itemId": "6800000000000000000000i10",
+            "productId": "77000000000000000000000a",
+            "pricing_snapshots": [
+              {
+                "atInstantPrice": 129.0,
+                "discountedPercentage": 0,
+                "discountBracket": { "initial": 0, "final": 0 },
+                "createdAt": 1711920000000,
+                "updatedAt": 1711920000000,
+                "metadata": { "note": "current waterproof label price" }
+              }
+            ],
+            "qtySold": 300,
+            "qtyAvailable": 1700,
+            "pricing_tiers": [],
+            "metadata": { "waterproof": true, "printable": true, "material": "polypropylene" },
+            "createdAt": 1711920000000,
+            "updatedAt": 1711920000000
+          }
+        ],
+        "metadata": { "waterproof": true }
+      }
+    ],
+    "ops_region": "north-america:ca-on",
+    "overflow_id": null,
+    "isHead": true,
+    "metadata": {
+      "createdBy": "catalog-currentizer",
+      "notes": "Current active sales window for region north-america:ca-on. Contains full product set for active catalog; mid-window promos may apply."
+    },
+    "createdAt": 1711920000000,
+    "updatedAt": 1714521600000
+  },
+  {
+    "_id": "880000000000000000000005",
+    "window": {
+      "fromEpoch": 1790000000000,
+      "toEpoch": 1821535999000
+    },
+    "products": [
+      {
+        "productId": "770000000000000000000001",
+        "items": [
+          {
+            "itemId": "6800000000000000000000i01",
+            "productId": "770000000000000000000001",
+            "pricing_snapshots": [
+              {
+                "atInstantPrice": 14.99,
+                "discountedPercentage": 0,
+                "discountBracket": { "initial": 0, "final": 0 },
+                "createdAt": 1790000000000,
+                "updatedAt": 1790000000000,
+                "metadata": { "note": "future baseline price; anticipated cost increase", "currency": "CAD", "source": "future-catalog-2027" }
+              },
+              {
+                "atInstantPrice": 12.99,
+                "discountedPercentage": 13.34,
+                "discountBracket": { "initial": 0, "final": 13.34 },
+                "createdAt": 1792592000000,
+                "updatedAt": 1792592000000,
+                "metadata": { "note": "planned mid-window promotional discount", "promoCode": "FUTURE13" }
+              }
+            ],
+            "qtySold": 0,
+            "qtyAvailable": 5000,
+            "pricing_tiers": [
+              { "quantity": 10, "discountPercentagePerUnitBulk": 5 },
+              { "quantity": 50, "discountPercentagePerUnitBulk": 12 },
+              { "quantity": 200, "discountPercentagePerUnitBulk": 20 }
+            ],
+            "metadata": { "warehouseAllocation": { "6500000000000000000000w1": 3200, "6500000000000000000000w2": 1800 }, "leadTimeDays": 2, "packaging": "future-polybag-5" },
+            "createdAt": 1790000000000,
+            "updatedAt": 1792592000000
+          },
+          {
+            "itemId": "6800000000000000000000i21",
+            "productId": "770000000000000000000001",
+            "pricing_snapshots": [
+              {
+                "atInstantPrice": 3.95,
+                "discountedPercentage": 0,
+                "discountBracket": { "initial": 0, "final": 0 },
+                "createdAt": 1790000000000,
+                "updatedAt": 1790000000000,
+                "metadata": { "note": "future accessory price" }
+              }
+            ],
+            "qtySold": 0,
+            "qtyAvailable": 2400,
+            "pricing_tiers": [{ "quantity": 100, "discountPercentagePerUnitBulk": 8 }],
+            "metadata": { "warehouseAllocation": { "6500000000000000000000w1": 1600, "6500000000000000000000w2": 800 } },
+            "createdAt": 1790000000000,
+            "updatedAt": 1790000000000
+          }
+        ],
+        "metadata": { "category": "reusable-bags", "brand": "EcoCarry", "futureWindowRole": "future-head" }
+      },
+      {
+        "productId": "770000000000000000000002",
+        "items": [
+          {
+            "itemId": "6800000000000000000000i02",
+            "productId": "770000000000000000000002",
+            "pricing_snapshots": [
+              {
+                "atInstantPrice": 94.99,
+                "discountedPercentage": 0,
+                "discountBracket": { "initial": 0, "final": 0 },
+                "createdAt": 1790000000000,
+                "updatedAt": 1790000000000,
+                "metadata": { "note": "future standard price for pallet wrap kit", "currency": "CAD" }
+              },
+              {
+                "atInstantPrice": 84.99,
+                "discountedPercentage": 10.53,
+                "discountBracket": { "initial": 0, "final": 10.53 },
+                "createdAt": 1795184000000,
+                "updatedAt": 1795184000000,
+                "metadata": { "note": "planned promotional price", "promoCode": "FUTURE10" }
+              }
+            ],
+            "qtySold": 0,
+            "qtyAvailable": 2200,
+            "pricing_tiers": [{ "quantity": 5, "discountPercentagePerUnitBulk": 7 }, { "quantity": 20, "discountPercentagePerUnitBulk": 15 }],
+            "metadata": { "leadTimeDays": 3, "supplyType": "packaging" },
+            "createdAt": 1790000000000,
+            "updatedAt": 1795184000000
+          }
+        ],
+        "metadata": { "supplyType": "packaging", "futureWindowRole": "future-head" }
+      },
+      {
+        "productId": "770000000000000000000003",
+        "items": [
+          {
+            "itemId": "6800000000000000000000i03",
+            "productId": "770000000000000000000003",
+            "pricing_snapshots": [
+              {
+                "atInstantPrice": 36.0,
+                "discountedPercentage": 0,
+                "discountBracket": { "initial": 0, "final": 0 },
+                "createdAt": 1790000000000,
+                "updatedAt": 1790000000000,
+                "metadata": { "note": "future price for barcode labels" }
+              }
+            ],
+            "qtySold": 0,
+            "qtyAvailable": 5000,
+            "pricing_tiers": [{ "quantity": 10, "discountPercentagePerUnitBulk": 10 }],
+            "metadata": { "warehouseFriendly": true, "barcodeType": "Code128" },
+            "createdAt": 1790000000000,
+            "updatedAt": 1790000000000
+          }
+        ],
+        "metadata": { "warehouseFriendly": true, "futureWindowRole": "future-head" }
+      },
+      {
+        "productId": "770000000000000000000004",
+        "items": [
+          {
+            "itemId": "6800000000000000000000i04",
+            "productId": "770000000000000000000004",
+            "pricing_snapshots": [
+              {
+                "atInstantPrice": 239.0,
+                "discountedPercentage": 0,
+                "discountBracket": { "initial": 0, "final": 0 },
+                "createdAt": 1790000000000,
+                "updatedAt": 1790000000000,
+                "metadata": { "note": "future membership bulk price; includes subscription options" }
+              },
+              {
+                "atInstantPrice": 215.0,
+                "discountedPercentage": 10.04,
+                "discountBracket": { "initial": 0, "final": 10.04 },
+                "createdAt": 1797776000000,
+                "updatedAt": 1797776000000,
+                "metadata": { "note": "planned member promo", "promoCode": "MEMBER10" }
+              }
+            ],
+            "qtySold": 0,
+            "qtyAvailable": 1200,
+            "pricing_tiers": [],
+            "metadata": { "bulkOrder": true, "roastDateWindowDays": 7 },
+            "createdAt": 1790000000000,
+            "updatedAt": 1797776000000
+          }
+        ],
+        "metadata": { "bulkOrder": true, "futureWindowRole": "future-head" }
+      },
+      {
+        "productId": "770000000000000000000005",
+        "items": [
+          {
+            "itemId": "6800000000000000000000i05",
+            "productId": "770000000000000000000005",
+            "pricing_snapshots": [
+              {
+                "atInstantPrice": 84.0,
+                "discountedPercentage": 0,
+                "discountBracket": { "initial": 0, "final": 0 },
+                "createdAt": 1790000000000,
+                "updatedAt": 1790000000000,
+                "metadata": { "note": "future case price for 50-pack boxes" }
+              },
+              {
+                "atInstantPrice": 74.5,
+                "discountedPercentage": 11.31,
+                "discountBracket": { "initial": 0, "final": 11.31 },
+                "createdAt": 1792592000000,
+                "updatedAt": 1792592000000,
+                "metadata": { "note": "planned early-window discount", "promoCode": "FUTURE11" }
+              }
+            ],
+            "qtySold": 0,
+            "qtyAvailable": 4000,
+            "pricing_tiers": [{ "quantity": 5, "discountPercentagePerUnitBulk": 6 }, { "quantity": 25, "discountPercentagePerUnitBulk": 14 }],
+            "metadata": { "ecoPackaging": true, "material": "100% recycled" },
+            "createdAt": 1790000000000,
+            "updatedAt": 1792592000000
+          }
+        ],
+        "metadata": { "ecoPackaging": true, "futureWindowRole": "future-head" }
+      },
+      {
+        "productId": "770000000000000000000006",
+        "items": [
+          {
+            "itemId": "6800000000000000000000i06",
+            "productId": "770000000000000000000006",
+            "pricing_snapshots": [
+              {
+                "atInstantPrice": 64.99,
+                "discountedPercentage": 0,
+                "discountBracket": { "initial": 0, "final": 0 },
+                "createdAt": 1790000000000,
+                "updatedAt": 1790000000000,
+                "metadata": { "note": "future premium shipping tape price" }
+              }
+            ],
+            "qtySold": 0,
+            "qtyAvailable": 6000,
+            "pricing_tiers": [{ "quantity": 3, "discountPercentagePerUnitBulk": 8 }],
+            "metadata": { "tapeWidthMm": 48, "coreDiameterMm": 76 },
+            "createdAt": 1790000000000,
+            "updatedAt": 1790000000000
+          }
+        ],
+        "metadata": { "tapeCase": true, "futureWindowRole": "future-head" }
+      },
+      {
+        "productId": "770000000000000000000007",
+        "items": [
+          {
+            "itemId": "6800000000000000000000i07",
+            "productId": "770000000000000000000007",
+            "pricing_snapshots": [
+              {
+                "atInstantPrice": 159.0,
+                "discountedPercentage": 0,
+                "discountBracket": { "initial": 0, "final": 0 },
+                "createdAt": 1790000000000,
+                "updatedAt": 1790000000000,
+                "metadata": { "note": "future sanitizer case price; updated packaging" }
+              }
+            ],
+            "qtySold": 0,
+            "qtyAvailable": 2400,
+            "pricing_tiers": [{ "quantity": 10, "discountPercentagePerUnitBulk": 10 }],
+            "metadata": { "hazmat": false, "shelfLifeMonths": 36 },
+            "createdAt": 1790000000000,
+            "updatedAt": 1790000000000
+          }
+        ],
+        "metadata": { "safetyStock": true, "futureWindowRole": "future-head" }
+      },
+      {
+        "productId": "770000000000000000000008",
+        "items": [
+          {
+            "itemId": "6800000000000000000000i08",
+            "productId": "770000000000000000000008",
+            "pricing_snapshots": [
+              {
+                "atInstantPrice": 42.0,
+                "discountedPercentage": 0,
+                "discountBracket": { "initial": 0, "final": 0 },
+                "createdAt": 1790000000000,
+                "updatedAt": 1790000000000,
+                "metadata": { "note": "future retail hooks price" }
+              }
+            ],
+            "qtySold": 0,
+            "qtyAvailable": 3600,
+            "pricing_tiers": [{ "quantity": 5, "discountPercentagePerUnitBulk": 5 }],
+            "metadata": { "retailUse": true, "material": "zinc-plated steel" },
+            "createdAt": 1790000000000,
+            "updatedAt": 1790000000000
+          }
+        ],
+        "metadata": { "retailUse": true, "futureWindowRole": "future-head" }
+      },
+      {
+        "productId": "770000000000000000000009",
+        "items": [
+          {
+            "itemId": "6800000000000000000000i09",
+            "productId": "770000000000000000000009",
+            "pricing_snapshots": [
+              {
+                "atInstantPrice": 52.0,
+                "discountedPercentage": 0,
+                "discountBracket": { "initial": 0, "final": 0 },
+                "createdAt": 1790000000000,
+                "updatedAt": 1790000000000,
+                "metadata": { "note": "future kraft paper price; premium recycled grade" }
+              }
+            ],
+            "qtySold": 0,
+            "qtyAvailable": 3000,
+            "pricing_tiers": [{ "quantity": 10, "discountPercentagePerUnitBulk": 10 }],
+            "metadata": { "recyclable": true, "gsm": 90 },
+            "createdAt": 1790000000000,
+            "updatedAt": 1790000000000
+          }
+        ],
+        "metadata": { "recyclable": true, "futureWindowRole": "future-head" }
+      },
+      {
+        "productId": "77000000000000000000000a",
+        "items": [
+          {
+            "itemId": "6800000000000000000000i10",
+            "productId": "77000000000000000000000a",
+            "pricing_snapshots": [
+              {
+                "atInstantPrice": 139.0,
+                "discountedPercentage": 0,
+                "discountBracket": { "initial": 0, "final": 0 },
+                "createdAt": 1790000000000,
+                "updatedAt": 1790000000000,
+                "metadata": { "note": "future waterproof label price; updated adhesive formula" }
+              }
+            ],
+            "qtySold": 0,
+            "qtyAvailable": 4200,
+            "pricing_tiers": [],
+            "metadata": { "waterproof": true, "printable": true, "material": "polypropylene" },
+            "createdAt": 1790000000000,
+            "updatedAt": 1790000000000
+          }
+        ],
+        "metadata": { "waterproof": true, "futureWindowRole": "future-head" }
+      }
+    ],
+    "ops_region": "north-america:ca-on",
+    "overflow_id": null,
+    "isHead": true,
+    "metadata": {
+      "createdBy": "catalog-future-planner",
+      "notes": "Planned future sales window for region north-america:ca-on. Contains full product set with projected pricing and inventory allocations for the upcoming multi-year campaign."
+    },
+    "createdAt": 1790000000000,
+    "updatedAt": 1792592000000
+  },
+  {
+    "_id": "880000000000000000000010",
+    "window": { "fromEpoch": 1711920000000, "toEpoch": 1821535999000 },
+    "products": [
+      {
+        "productId": "770000000000000000000001",
+        "items": [
+          {
+            "itemId": "6800000000000000000000i01",
+            "productId": "770000000000000000000001",
+            "pricing_snapshots": [{ "atInstantPrice": 13.5, "discountedPercentage": 0, "discountBracket": { "initial": 0, "final": 0 }, "createdAt": 1711920000000, "updatedAt": 1711920000000, "metadata": { "currency": "CAD" } }],
+            "qtySold": 120,
+            "qtyAvailable": 1880,
+            "pricing_tiers": [{ "quantity": 10, "discountPercentagePerUnitBulk": 5 }, { "quantity": 50, "discountPercentagePerUnitBulk": 12 }],
+            "metadata": { "packaging": "polybag-5", "leadTimeDays": 2 },
+            "createdAt": 1711920000000,
+            "updatedAt": 1711920000000
+          },
+          {
+            "itemId": "6800000000000000000000i21",
+            "productId": "770000000000000000000001",
+            "pricing_snapshots": [{ "atInstantPrice": 3.75, "discountedPercentage": 0, "discountBracket": { "initial": 0, "final": 0 }, "createdAt": 1711920000000, "updatedAt": 1711920000000 }],
+            "qtySold": 40,
+            "qtyAvailable": 960,
+            "pricing_tiers": [{ "quantity": 50, "discountPercentagePerUnitBulk": 4 }, { "quantity": 200, "discountPercentagePerUnitBulk": 8 }],
+            "metadata": { "warehouseAllocation": { "6500000000000000000000w1": 600, "6500000000000000000000w2": 360 } },
+            "createdAt": 1711920000000,
+            "updatedAt": 1711920000000
+          },
+          {
+            "itemId": "6800000000000000000000i31",
+            "productId": "770000000000000000000001",
+            "pricing_snapshots": [{ "atInstantPrice": 2.95, "discountedPercentage": 0, "discountBracket": { "initial": 0, "final": 0 }, "createdAt": 1712000000000, "updatedAt": 1712000000000, "metadata": { "note": "single replacement SKU" } }],
+            "qtySold": 10,
+            "qtyAvailable": 400,
+            "pricing_tiers": [{ "quantity": 20, "discountPercentagePerUnitBulk": 3 }, { "quantity": 100, "discountPercentagePerUnitBulk": 7 }],
+            "metadata": {},
+            "createdAt": 1712000000000,
+            "updatedAt": 1712000000000
+          },
+          {
+            "itemId": "6800000000000000000000i41",
+            "productId": "770000000000000000000001",
+            "pricing_snapshots": [{ "atInstantPrice": 11.0, "discountedPercentage": 0, "discountBracket": { "initial": 0, "final": 0 }, "createdAt": 1712100000000, "updatedAt": 1712100000000, "metadata": { "pack": "bundle-3" } }],
+            "qtySold": 5,
+            "qtyAvailable": 200,
+            "pricing_tiers": [{ "quantity": 3, "discountPercentagePerUnitBulk": 2 }, { "quantity": 12, "discountPercentagePerUnitBulk": 6 }],
+            "metadata": { "bundle": true },
+            "createdAt": 1712100000000,
+            "updatedAt": 1712100000000
+          },
+          {
+            "itemId": "6800000000000000000000i51",
+            "productId": "770000000000000000000001",
+            "pricing_snapshots": [{ "atInstantPrice": 9.99, "discountedPercentage": 0, "discountBracket": { "initial": 0, "final": 0 }, "createdAt": 1712200000000, "updatedAt": 1712200000000, "metadata": { "note": "sample pack" } }],
+            "qtySold": 2,
+            "qtyAvailable": 100,
+            "pricing_tiers": [{ "quantity": 5, "discountPercentagePerUnitBulk": 1 }, { "quantity": 25, "discountPercentagePerUnitBulk": 5 }],
+            "metadata": {},
+            "createdAt": 1712200000000,
+            "updatedAt": 1712200000000
+          }
+        ],
+        "metadata": { "category": "reusable-bags", "brand": "EcoCarry" }
+      },
+      {
+        "productId": "770000000000000000000002",
+        "items": [
+          {
+            "itemId": "6800000000000000000000i02",
+            "productId": "770000000000000000000002",
+            "pricing_snapshots": [{ "atInstantPrice": 89.99, "discountedPercentage": 0, "discountBracket": { "initial": 0, "final": 0 }, "createdAt": 1711920000000, "updatedAt": 1711920000000, "metadata": { "currency": "CAD" } }],
+            "qtySold": 60,
+            "qtyAvailable": 1940,
+            "pricing_tiers": [{ "quantity": 5, "discountPercentagePerUnitBulk": 7 }, { "quantity": 20, "discountPercentagePerUnitBulk": 15 }],
+            "metadata": { "supplyType": "packaging", "leadTimeDays": 3 },
+            "createdAt": 1711920000000,
+            "updatedAt": 1711920000000
+          },
+          {
+            "itemId": "6800000000000000000000i22",
+            "productId": "770000000000000000000002",
+            "pricing_snapshots": [{ "atInstantPrice": 79.5, "discountedPercentage": 0, "discountBracket": { "initial": 0, "final": 0 }, "createdAt": 1711950000000, "updatedAt": 1711950000000, "metadata": { "note": "narrow-width roll" } }],
+            "qtySold": 8,
+            "qtyAvailable": 300,
+            "pricing_tiers": [{ "quantity": 10, "discountPercentagePerUnitBulk": 4 }, { "quantity": 50, "discountPercentagePerUnitBulk": 10 }],
+            "metadata": {},
+            "createdAt": 1711950000000,
+            "updatedAt": 1711950000000
+          },
+          {
+            "itemId": "6800000000000000000000i32",
+            "productId": "770000000000000000000002",
+            "pricing_snapshots": [{ "atInstantPrice": 99.99, "discountedPercentage": 0, "discountBracket": { "initial": 0, "final": 0 }, "createdAt": 1712050000000, "updatedAt": 1712050000000, "metadata": { "note": "industrial grade" } }],
+            "qtySold": 3,
+            "qtyAvailable": 120,
+            "pricing_tiers": [{ "quantity": 5, "discountPercentagePerUnitBulk": 6 }, { "quantity": 25, "discountPercentagePerUnitBulk": 12 }],
+            "metadata": {},
+            "createdAt": 1712050000000,
+            "updatedAt": 1712050000000
+          },
+          {
+            "itemId": "6800000000000000000000i42",
+            "productId": "770000000000000000000002",
+            "pricing_snapshots": [{ "atInstantPrice": 85.0, "discountedPercentage": 0, "discountBracket": { "initial": 0, "final": 0 }, "createdAt": 1712105000000, "updatedAt": 1712105000000, "metadata": {} }],
+            "qtySold": 12,
+            "qtyAvailable": 600,
+            "pricing_tiers": [{ "quantity": 10, "discountPercentagePerUnitBulk": 5 }, { "quantity": 40, "discountPercentagePerUnitBulk": 11 }],
+            "metadata": {},
+            "createdAt": 1712105000000,
+            "updatedAt": 1712105000000
+          },
+          {
+            "itemId": "6800000000000000000000i52",
+            "productId": "770000000000000000000002",
+            "pricing_snapshots": [{ "atInstantPrice": 88.5, "discountedPercentage": 0, "discountBracket": { "initial": 0, "final": 0 }, "createdAt": 1712150000000, "updatedAt": 1712150000000, "metadata": { "note": "promo bundle" } }],
+            "qtySold": 6,
+            "qtyAvailable": 420,
+            "pricing_tiers": [{ "quantity": 20, "discountPercentagePerUnitBulk": 5 }, { "quantity": 100, "discountPercentagePerUnitBulk": 12 }],
+            "metadata": {},
+            "createdAt": 1712150000000,
+            "updatedAt": 1712150000000
+          }
+        ],
+        "metadata": { "supplyType": "packaging" }
+      },
+      {
+        "productId": "770000000000000000000003",
+        "items": [
+          {
+            "itemId": "6800000000000000000000i03",
+            "productId": "770000000000000000000003",
+            "pricing_snapshots": [{ "atInstantPrice": 34.0, "discountedPercentage": 0, "discountBracket": { "initial": 0, "final": 0 }, "createdAt": 1711920000000, "updatedAt": 1711920000000 }],
+            "qtySold": 300,
+            "qtyAvailable": 700,
+            "pricing_tiers": [{ "quantity": 10, "discountPercentagePerUnitBulk": 8 }, { "quantity": 50, "discountPercentagePerUnitBulk": 15 }],
+            "metadata": { "warehouseFriendly": true, "barcodeType": "Code128" },
+            "createdAt": 1711920000000,
+            "updatedAt": 1711920000000
+          },
+          {
+            "itemId": "6800000000000000000000i23",
+            "productId": "770000000000000000000003",
+            "pricing_snapshots": [{ "atInstantPrice": 31.5, "discountedPercentage": 0, "discountBracket": { "initial": 0, "final": 0 }, "createdAt": 1711960000000, "updatedAt": 1711960000000 }],
+            "qtySold": 40,
+            "qtyAvailable": 360,
+            "pricing_tiers": [{ "quantity": 5, "discountPercentagePerUnitBulk": 3 }, { "quantity": 25, "discountPercentagePerUnitBulk": 9 }],
+            "metadata": {},
+            "createdAt": 1711960000000,
+            "updatedAt": 1711960000000
+          },
+          {
+            "itemId": "6800000000000000000000i33",
+            "productId": "770000000000000000000003",
+            "pricing_snapshots": [{ "atInstantPrice": 29.99, "discountedPercentage": 0, "discountBracket": { "initial": 0, "final": 0 }, "createdAt": 1712060000000, "updatedAt": 1712060000000, "metadata": { "note": "economy roll" } }],
+            "qtySold": 20,
+            "qtyAvailable": 240,
+            "pricing_tiers": [{ "quantity": 20, "discountPercentagePerUnitBulk": 4 }, { "quantity": 100, "discountPercentagePerUnitBulk": 10 }],
+            "metadata": {},
+            "createdAt": 1712060000000,
+            "updatedAt": 1712060000000
+          },
+          {
+            "itemId": "6800000000000000000000i43",
+            "productId": "770000000000000000000003",
+            "pricing_snapshots": [{ "atInstantPrice": 35.0, "discountedPercentage": 0, "discountBracket": { "initial": 0, "final": 0 }, "createdAt": 1712120000000, "updatedAt": 1712120000000 }],
+            "qtySold": 10,
+            "qtyAvailable": 180,
+            "pricing_tiers": [{ "quantity": 5, "discountPercentagePerUnitBulk": 2 }, { "quantity": 30, "discountPercentagePerUnitBulk": 8 }],
+            "metadata": {},
+            "createdAt": 1712120000000,
+            "updatedAt": 1712120000000
+          },
+          {
+            "itemId": "6800000000000000000000i53",
+            "productId": "770000000000000000000003",
+            "pricing_snapshots": [{ "atInstantPrice": 33.5, "discountedPercentage": 0, "discountBracket": { "initial": 0, "final": 0 }, "createdAt": 1712180000000, "updatedAt": 1712180000000 }],
+            "qtySold": 5,
+            "qtyAvailable": 120,
+            "pricing_tiers": [{ "quantity": 10, "discountPercentagePerUnitBulk": 3 }, { "quantity": 50, "discountPercentagePerUnitBulk": 9 }],
+            "metadata": {},
+            "createdAt": 1712180000000,
+            "updatedAt": 1712180000000
+          }
+        ],
+        "metadata": { "warehouseFriendly": true }
+      },
+      {
+        "productId": "770000000000000000000004",
+        "items": [
+          {
+            "itemId": "6800000000000000000000i04",
+            "productId": "770000000000000000000004",
+            "pricing_snapshots": [{ "atInstantPrice": 225.0, "discountedPercentage": 0, "discountBracket": { "initial": 0, "final": 0 }, "createdAt": 1711920000000, "updatedAt": 1711920000000, "metadata": { "note": "membership bulk price" } }],
+            "qtySold": 80,
+            "qtyAvailable": 1720,
+            "pricing_tiers": [{ "quantity": 2, "discountPercentagePerUnitBulk": 5 }, { "quantity": 10, "discountPercentagePerUnitBulk": 12 }],
+            "metadata": { "bulkOrder": true, "roastDateWindowDays": 7 },
+            "createdAt": 1711920000000,
+            "updatedAt": 1711920000000
+          },
+          {
+            "itemId": "6800000000000000000000i24",
+            "productId": "770000000000000000000004",
+            "pricing_snapshots": [{ "atInstantPrice": 219.0, "discountedPercentage": 0, "discountBracket": { "initial": 0, "final": 0 }, "createdAt": 1712005000000, "updatedAt": 1712005000000 }],
+            "qtySold": 12,
+            "qtyAvailable": 300,
+            "pricing_tiers": [{ "quantity": 5, "discountPercentagePerUnitBulk": 4 }, { "quantity": 20, "discountPercentagePerUnitBulk": 10 }],
+            "metadata": {},
+            "createdAt": 1712005000000,
+            "updatedAt": 1712005000000
+          },
+          {
+            "itemId": "6800000000000000000000i34",
+            "productId": "770000000000000000000004",
+            "pricing_snapshots": [{ "atInstantPrice": 235.0, "discountedPercentage": 0, "discountBracket": { "initial": 0, "final": 0 }, "createdAt": 1712100000000, "updatedAt": 1712100000000, "metadata": { "note": "premium roast option" } }],
+            "qtySold": 6,
+            "qtyAvailable": 120,
+            "pricing_tiers": [{ "quantity": 1, "discountPercentagePerUnitBulk": 2 }, { "quantity": 5, "discountPercentagePerUnitBulk": 8 }],
+            "metadata": {},
+            "createdAt": 1712100000000,
+            "updatedAt": 1712100000000
+          },
+          {
+            "itemId": "6800000000000000000000i44",
+            "productId": "770000000000000000000004",
+            "pricing_snapshots": [{ "atInstantPrice": 205.0, "discountedPercentage": 0, "discountBracket": { "initial": 0, "final": 0 }, "createdAt": 1712155000000, "updatedAt": 1712155000000 }],
+            "qtySold": 2,
+            "qtyAvailable": 60,
+            "pricing_tiers": [{ "quantity": 2, "discountPercentagePerUnitBulk": 3 }, { "quantity": 8, "discountPercentagePerUnitBulk": 9 }],
+            "metadata": {},
+            "createdAt": 1712155000000,
+            "updatedAt": 1712155000000
+          },
+          {
+            "itemId": "6800000000000000000000i54",
+            "productId": "770000000000000000000004",
+            "pricing_snapshots": [{ "atInstantPrice": 229.0, "discountedPercentage": 0, "discountBracket": { "initial": 0, "final": 0 }, "createdAt": 1712205000000, "updatedAt": 1712205000000 }],
+            "qtySold": 0,
+            "qtyAvailable": 80,
+            "pricing_tiers": [{ "quantity": 10, "discountPercentagePerUnitBulk": 5 }, { "quantity": 50, "discountPercentagePerUnitBulk": 12 }],
+            "metadata": {},
+            "createdAt": 1712205000000,
+            "updatedAt": 1712205000000
+          }
+        ],
+        "metadata": { "bulkOrder": true }
+      },
+      {
+        "productId": "770000000000000000000005",
+        "items": [
+          {
+            "itemId": "6800000000000000000000i05",
+            "productId": "770000000000000000000005",
+            "pricing_snapshots": [{ "atInstantPrice": 79.0, "discountedPercentage": 0, "discountBracket": { "initial": 0, "final": 0 }, "createdAt": 1711920000000, "updatedAt": 1711920000000 }],
+            "qtySold": 420,
+            "qtyAvailable": 1580,
+            "pricing_tiers": [{ "quantity": 5, "discountPercentagePerUnitBulk": 6 }, { "quantity": 25, "discountPercentagePerUnitBulk": 14 }],
+            "metadata": { "ecoPackaging": true, "material": "100% recycled" },
+            "createdAt": 1711920000000,
+            "updatedAt": 1711920000000
+          },
+          {
+            "itemId": "6800000000000000000000i25",
+            "productId": "770000000000000000000005",
+            "pricing_snapshots": [{ "atInstantPrice": 74.5, "discountedPercentage": 0, "discountBracket": { "initial": 0, "final": 0 }, "createdAt": 1711970000000, "updatedAt": 1711970000000 }],
+            "qtySold": 30,
+            "qtyAvailable": 600,
+            "pricing_tiers": [{ "quantity": 10, "discountPercentagePerUnitBulk": 4 }, { "quantity": 50, "discountPercentagePerUnitBulk": 11 }],
+            "metadata": {},
+            "createdAt": 1711970000000,
+            "updatedAt": 1711970000000
+          },
+          {
+            "itemId": "6800000000000000000000i35",
+            "productId": "770000000000000000000005",
+            "pricing_snapshots": [{ "atInstantPrice": 69.0, "discountedPercentage": 7.38, "discountBracket": { "initial": 0, "final": 7.38 }, "createdAt": 1672896000000, "updatedAt": 1672896000000, "metadata": { "note": "early-bird bulk" } }],
+            "qtySold": 200,
+            "qtyAvailable": 1200,
+            "pricing_tiers": [{ "quantity": 5, "discountPercentagePerUnitBulk": 6 }, { "quantity": 25, "discountPercentagePerUnitBulk": 14 }],
+            "metadata": {},
+            "createdAt": 1672896000000,
+            "updatedAt": 1672896000000
+          },
+          {
+            "itemId": "6800000000000000000000i45",
+            "productId": "770000000000000000000005",
+            "pricing_snapshots": [{ "atInstantPrice": 72.0, "discountedPercentage": 3.36, "discountBracket": { "initial": 0, "final": 3.36 }, "createdAt": 1677628800000, "updatedAt": 1677628800000, "metadata": { "note": "overlap promo" } }],
+            "qtySold": 110,
+            "qtyAvailable": 1730,
+            "pricing_tiers": [{ "quantity": 10, "discountPercentagePerUnitBulk": 3 }, { "quantity": 50, "discountPercentagePerUnitBulk": 10 }],
+            "metadata": {},
+            "createdAt": 1677628800000,
+            "updatedAt": 1677628800000
+          },
+          {
+            "itemId": "6800000000000000000000i55",
+            "productId": "770000000000000000000005",
+            "pricing_snapshots": [{ "atInstantPrice": 84.0, "discountedPercentage": 0, "discountBracket": { "initial": 0, "final": 0 }, "createdAt": 1790000000000, "updatedAt": 1790000000000, "metadata": { "note": "future planned price" } }],
+            "qtySold": 0,
+            "qtyAvailable": 4000,
+            "pricing_tiers": [{ "quantity": 25, "discountPercentagePerUnitBulk": 5 }, { "quantity": 100, "discountPercentagePerUnitBulk": 12 }],
+            "metadata": {},
+            "createdAt": 1790000000000,
+            "updatedAt": 1790000000000
+          }
+        ],
+        "metadata": { "ecoPackaging": true }
+      }
+    ],
+    "ops_region": "north-america:ca-on",
+    "overflow_id": null,
+    "isHead": true,
+    "metadata": { "createdBy": "catalog-currentizer", "notes": "Primary current head window for north-america:ca-on; full product set active." },
+    "createdAt": 1711920000000,
+    "updatedAt": 1712205000000
+  },
+  {
+    "_id": "880000000000000000000011",
+    "window": { "fromEpoch": 1715209600000, "toEpoch": 1821535999000 },
+    "products": [
+      {
+        "productId": "770000000000000000000001",
+        "items": [
+          {
+            "itemId": "6800000000000000000000i01",
+            "productId": "770000000000000000000001",
+            "pricing_snapshots": [{ "atInstantPrice": 11.99, "discountedPercentage": 4, "discountBracket": { "initial": 0, "final": 4 }, "createdAt": 1715209600000, "updatedAt": 1715209600000, "metadata": { "note": "overflow adjustment" } }],
+            "qtySold": 85,
+            "qtyAvailable": 1495,
+            "pricing_tiers": [{ "quantity": 10, "discountPercentagePerUnitBulk": 5 }, { "quantity": 50, "discountPercentagePerUnitBulk": 12 }],
+            "metadata": { "overflowNote": "extended stock" },
+            "createdAt": 1672531200000,
+            "updatedAt": 1715209600000
+          },
+          {
+            "itemId": "6800000000000000000000i21",
+            "productId": "770000000000000000000001",
+            "pricing_snapshots": [{ "atInstantPrice": 3.25, "discountedPercentage": 7, "discountBracket": { "initial": 0, "final": 7 }, "createdAt": 1715209600000, "updatedAt": 1715209600000 }],
+            "qtySold": 20,
+            "qtyAvailable": 860,
+            "pricing_tiers": [{ "quantity": 50, "discountPercentagePerUnitBulk": 4 }, { "quantity": 200, "discountPercentagePerUnitBulk": 8 }],
+            "metadata": {},
+            "createdAt": 1672531200000,
+            "updatedAt": 1715209600000
+          },
+          {
+            "itemId": "6800000000000000000000i31",
+            "productId": "770000000000000000000001",
+            "pricing_snapshots": [{ "atInstantPrice": 2.95, "discountedPercentage": 0, "discountBracket": { "initial": 0, "final": 0 }, "createdAt": 1715209600000, "updatedAt": 1715209600000 }],
+            "qtySold": 5,
+            "qtyAvailable": 300,
+            "pricing_tiers": [{ "quantity": 20, "discountPercentagePerUnitBulk": 3 }, { "quantity": 100, "discountPercentagePerUnitBulk": 7 }],
+            "metadata": {},
+            "createdAt": 1715209600000,
+            "updatedAt": 1715209600000
+          },
+          {
+            "itemId": "6800000000000000000000i41",
+            "productId": "770000000000000000000001",
+            "pricing_snapshots": [{ "atInstantPrice": 10.5, "discountedPercentage": 0, "discountBracket": { "initial": 0, "final": 0 }, "createdAt": 1715209600000, "updatedAt": 1715209600000 }],
+            "qtySold": 2,
+            "qtyAvailable": 150,
+            "pricing_tiers": [{ "quantity": 3, "discountPercentagePerUnitBulk": 2 }, { "quantity": 12, "discountPercentagePerUnitBulk": 6 }],
+            "metadata": {},
+            "createdAt": 1715209600000,
+            "updatedAt": 1715209600000
+          },
+          {
+            "itemId": "6800000000000000000000i51",
+            "productId": "770000000000000000000001",
+            "pricing_snapshots": [{ "atInstantPrice": 9.5, "discountedPercentage": 0, "discountBracket": { "initial": 0, "final": 0 }, "createdAt": 1715209600000, "updatedAt": 1715209600000 }],
+            "qtySold": 0,
+            "qtyAvailable": 80,
+            "pricing_tiers": [{ "quantity": 5, "discountPercentagePerUnitBulk": 1 }, { "quantity": 25, "discountPercentagePerUnitBulk": 5 }],
+            "metadata": {},
+            "createdAt": 1715209600000,
+            "updatedAt": 1715209600000
+          }
+        ],
+        "metadata": { "windowRole": "overflow" }
+      },
+      {
+        "productId": "770000000000000000000006",
+        "items": [
+          {
+            "itemId": "6800000000000000000000i06",
+            "productId": "770000000000000000000006",
+            "pricing_snapshots": [{ "atInstantPrice": 59.99, "discountedPercentage": 0, "discountBracket": { "initial": 0, "final": 0 }, "createdAt": 1715209600000, "updatedAt": 1715209600000 }],
+            "qtySold": 60,
+            "qtyAvailable": 3540,
+            "pricing_tiers": [{ "quantity": 3, "discountPercentagePerUnitBulk": 8 }, { "quantity": 12, "discountPercentagePerUnitBulk": 15 }],
+            "metadata": { "tapeWidthMm": 48 },
+            "createdAt": 1672531200000,
+            "updatedAt": 1715209600000
+          },
+          {
+            "itemId": "6800000000000000000000i26",
+            "productId": "770000000000000000000006",
+            "pricing_snapshots": [{ "atInstantPrice": 57.5, "discountedPercentage": 4.17, "discountBracket": { "initial": 0, "final": 4.17 }, "createdAt": 1715209600000, "updatedAt": 1715209600000 }],
+            "qtySold": 10,
+            "qtyAvailable": 500,
+            "pricing_tiers": [{ "quantity": 3, "discountPercentagePerUnitBulk": 5 }, { "quantity": 10, "discountPercentagePerUnitBulk": 10 }],
+            "metadata": {},
+            "createdAt": 1715209600000,
+            "updatedAt": 1715209600000
+          },
+          {
+            "itemId": "6800000000000000000000i36",
+            "productId": "770000000000000000000006",
+            "pricing_snapshots": [{ "atInstantPrice": 62.0, "discountedPercentage": 0, "discountBracket": { "initial": 0, "final": 0 }, "createdAt": 1715250000000, "updatedAt": 1715250000000 }],
+            "qtySold": 4,
+            "qtyAvailable": 220,
+            "pricing_tiers": [{ "quantity": 5, "discountPercentagePerUnitBulk": 3 }, { "quantity": 20, "discountPercentagePerUnitBulk": 9 }],
+            "metadata": {},
+            "createdAt": 1715250000000,
+            "updatedAt": 1715250000000
+          },
+          {
+            "itemId": "6800000000000000000000i46",
+            "productId": "770000000000000000000006",
+            "pricing_snapshots": [{ "atInstantPrice": 59.0, "discountedPercentage": 0, "discountBracket": { "initial": 0, "final": 0 }, "createdAt": 1715300000000, "updatedAt": 1715300000000 }],
+            "qtySold": 0,
+            "qtyAvailable": 100,
+            "pricing_tiers": [{ "quantity": 10, "discountPercentagePerUnitBulk": 2 }, { "quantity": 50, "discountPercentagePerUnitBulk": 8 }],
+            "metadata": {},
+            "createdAt": 1715300000000,
+            "updatedAt": 1715300000000
+          },
+          {
+            "itemId": "6800000000000000000000i56",
+            "productId": "770000000000000000000006",
+            "pricing_snapshots": [{ "atInstantPrice": 58.5, "discountedPercentage": 0, "discountBracket": { "initial": 0, "final": 0 }, "createdAt": 1715350000000, "updatedAt": 1715350000000 }],
+            "qtySold": 0,
+            "qtyAvailable": 60,
+            "pricing_tiers": [{ "quantity": 3, "discountPercentagePerUnitBulk": 4 }, { "quantity": 15, "discountPercentagePerUnitBulk": 10 }],
+            "metadata": {},
+            "createdAt": 1715350000000,
+            "updatedAt": 1715350000000
+          }
+        ],
+        "metadata": { "windowRole": "overflow" }
+      },
+      {
+        "productId": "770000000000000000000009",
+        "items": [
+          {
+            "itemId": "6800000000000000000000i09",
+            "productId": "770000000000000000000009",
+            "pricing_snapshots": [{ "atInstantPrice": 48.0, "discountedPercentage": 0, "discountBracket": { "initial": 0, "final": 0 }, "createdAt": 1715209600000, "updatedAt": 1715209600000 }],
+            "qtySold": 95,
+            "qtyAvailable": 1705,
+            "pricing_tiers": [{ "quantity": 10, "discountPercentagePerUnitBulk": 10 }, { "quantity": 50, "discountPercentagePerUnitBulk": 18 }],
+            "metadata": { "recyclable": true },
+            "createdAt": 1672531200000,
+            "updatedAt": 1715209600000
+          },
+          {
+            "itemId": "6800000000000000000000i29",
+            "productId": "770000000000000000000009",
+            "pricing_snapshots": [{ "atInstantPrice": 45.0, "discountedPercentage": 6.25, "discountBracket": { "initial": 0, "final": 6.25 }, "createdAt": 1675209600000, "updatedAt": 1675209600000 }],
+            "qtySold": 120,
+            "qtyAvailable": 1260,
+            "pricing_tiers": [{ "quantity": 20, "discountPercentagePerUnitBulk": 5 }, { "quantity": 100, "discountPercentagePerUnitBulk": 12 }],
+            "metadata": {},
+            "createdAt": 1675209600000,
+            "updatedAt": 1675209600000
+          },
+          {
+            "itemId": "6800000000000000000000i39",
+            "productId": "770000000000000000000009",
+            "pricing_snapshots": [{ "atInstantPrice": 50.0, "discountedPercentage": 0, "discountBracket": { "initial": 0, "final": 0 }, "createdAt": 1715255000000, "updatedAt": 1715255000000 }],
+            "qtySold": 0,
+            "qtyAvailable": 300,
+            "pricing_tiers": [{ "quantity": 10, "discountPercentagePerUnitBulk": 3 }, { "quantity": 40, "discountPercentagePerUnitBulk": 9 }],
+            "metadata": {},
+            "createdAt": 1715255000000,
+            "updatedAt": 1715255000000
+          },
+          {
+            "itemId": "6800000000000000000000i49",
+            "productId": "770000000000000000000009",
+            "pricing_snapshots": [{ "atInstantPrice": 47.0, "discountedPercentage": 0, "discountBracket": { "initial": 0, "final": 0 }, "createdAt": 1715305000000, "updatedAt": 1715305000000 }],
+            "qtySold": 0,
+            "qtyAvailable": 200,
+            "pricing_tiers": [{ "quantity": 5, "discountPercentagePerUnitBulk": 2 }, { "quantity": 25, "discountPercentagePerUnitBulk": 8 }],
+            "metadata": {},
+            "createdAt": 1715305000000,
+            "updatedAt": 1715305000000
+          },
+          {
+            "itemId": "6800000000000000000000i59",
+            "productId": "770000000000000000000009",
+            "pricing_snapshots": [{ "atInstantPrice": 46.5, "discountedPercentage": 0, "discountBracket": { "initial": 0, "final": 0 }, "createdAt": 1715355000000, "updatedAt": 1715355000000 }],
+            "qtySold": 0,
+            "qtyAvailable": 150,
+            "pricing_tiers": [{ "quantity": 10, "discountPercentagePerUnitBulk": 3 }, { "quantity": 50, "discountPercentagePerUnitBulk": 10 }],
+            "metadata": {},
+            "createdAt": 1715355000000,
+            "updatedAt": 1715355000000
+          }
+        ],
+        "metadata": { "windowRole": "overflow" }
+      },
+      {
+        "productId": "77000000000000000000000a",
+        "items": [
+          {
+            "itemId": "6800000000000000000000i10",
+            "productId": "77000000000000000000000a",
+            "pricing_snapshots": [{ "atInstantPrice": 129.0, "discountedPercentage": 0, "discountBracket": { "initial": 0, "final": 0 }, "createdAt": 1715209600000, "updatedAt": 1715209600000 }],
+            "qtySold": 300,
+            "qtyAvailable": 1700,
+            "pricing_tiers": [{ "quantity": 5, "discountPercentagePerUnitBulk": 3 }, { "quantity": 25, "discountPercentagePerUnitBulk": 10 }],
+            "metadata": { "waterproof": true },
+            "createdAt": 1672531200000,
+            "updatedAt": 1715209600000
+          },
+          {
+            "itemId": "6800000000000000000000i20",
+            "productId": "77000000000000000000000a",
+            "pricing_snapshots": [{ "atInstantPrice": 139.0, "discountedPercentage": 0, "discountBracket": { "initial": 0, "final": 0 }, "createdAt": 1790000000000, "updatedAt": 1790000000000, "metadata": { "note": "future planned price" } }],
+            "qtySold": 0,
+            "qtyAvailable": 4200,
+            "pricing_tiers": [{ "quantity": 50, "discountPercentagePerUnitBulk": 5 }, { "quantity": 200, "discountPercentagePerUnitBulk": 12 }],
+            "metadata": {},
+            "createdAt": 1790000000000,
+            "updatedAt": 1790000000000
+          },
+          {
+            "itemId": "6800000000000000000000i30",
+            "productId": "77000000000000000000000a",
+            "pricing_snapshots": [{ "atInstantPrice": 125.0, "discountedPercentage": 0, "discountBracket": { "initial": 0, "final": 0 }, "createdAt": 1715250000000, "updatedAt": 1715250000000 }],
+            "qtySold": 20,
+            "qtyAvailable": 600,
+            "pricing_tiers": [{ "quantity": 10, "discountPercentagePerUnitBulk": 4 }, { "quantity": 50, "discountPercentagePerUnitBulk": 11 }],
+            "metadata": {},
+            "createdAt": 1715250000000,
+            "updatedAt": 1715250000000
+          },
+          {
+            "itemId": "6800000000000000000000i40",
+            "productId": "77000000000000000000000a",
+            "pricing_snapshots": [{ "atInstantPrice": 128.0, "discountedPercentage": 0, "discountBracket": { "initial": 0, "final": 0 }, "createdAt": 1715300000000, "updatedAt": 1715300000000 }],
+            "qtySold": 10,
+            "qtyAvailable": 400,
+            "pricing_tiers": [{ "quantity": 5, "discountPercentagePerUnitBulk": 2 }, { "quantity": 25, "discountPercentagePerUnitBulk": 9 }],
+            "metadata": {},
+            "createdAt": 1715300000000,
+            "updatedAt": 1715300000000
+          },
+          {
+            "itemId": "6800000000000000000000i50",
+            "productId": "77000000000000000000000a",
+            "pricing_snapshots": [{ "atInstantPrice": 130.0, "discountedPercentage": 0, "discountBracket": { "initial": 0, "final": 0 }, "createdAt": 1715350000000, "updatedAt": 1715350000000 }],
+            "qtySold": 0,
+            "qtyAvailable": 220,
+            "pricing_tiers": [{ "quantity": 10, "discountPercentagePerUnitBulk": 3 }, { "quantity": 40, "discountPercentagePerUnitBulk": 10 }],
+            "metadata": {},
+            "createdAt": 1715350000000,
+            "updatedAt": 1715350000000
+          }
+        ],
+        "metadata": { "windowRole": "overflow" }
+      },
+      {
+        "productId": "770000000000000000000011",
+        "items": [
+          {
+            "itemId": "6800000000000000000000i17",
+            "productId": "770000000000000000000011",
+            "pricing_snapshots": [{ "atInstantPrice": 49.0, "discountedPercentage": 0, "discountBracket": { "initial": 0, "final": 0 }, "createdAt": 1715209600000, "updatedAt": 1715209600000 }],
+            "qtySold": 60,
+            "qtyAvailable": 940,
+            "pricing_tiers": [{ "quantity": 5, "discountPercentagePerUnitBulk": 2 }, { "quantity": 20, "discountPercentagePerUnitBulk": 7 }],
+            "metadata": {},
+            "createdAt": 1680306600000,
+            "updatedAt": 1715209600000
+          },
+          {
+            "itemId": "6800000000000000000000i27",
+            "productId": "770000000000000000000011",
+            "pricing_snapshots": [{ "atInstantPrice": 47.0, "discountedPercentage": 0, "discountBracket": { "initial": 0, "final": 0 }, "createdAt": 1715255000000, "updatedAt": 1715255000000 }],
+            "qtySold": 0,
+            "qtyAvailable": 200,
+            "pricing_tiers": [{ "quantity": 10, "discountPercentagePerUnitBulk": 3 }, { "quantity": 50, "discountPercentagePerUnitBulk": 9 }],
+            "metadata": {},
+            "createdAt": 1715255000000,
+            "updatedAt": 1715255000000
+          },
+          {
+            "itemId": "6800000000000000000000i37",
+            "productId": "770000000000000000000011",
+            "pricing_snapshots": [{ "atInstantPrice": 50.0, "discountedPercentage": 0, "discountBracket": { "initial": 0, "final": 0 }, "createdAt": 1715305000000, "updatedAt": 1715305000000 }],
+            "qtySold": 0,
+            "qtyAvailable": 120,
+            "pricing_tiers": [{ "quantity": 5, "discountPercentagePerUnitBulk": 2 }, { "quantity": 25, "discountPercentagePerUnitBulk": 8 }],
+            "metadata": {},
+            "createdAt": 1715305000000,
+            "updatedAt": 1715305000000
+          },
+          {
+            "itemId": "6800000000000000000000i47",
+            "productId": "770000000000000000000011",
+            "pricing_snapshots": [{ "atInstantPrice": 46.0, "discountedPercentage": 0, "discountBracket": { "initial": 0, "final": 0 }, "createdAt": 1715355000000, "updatedAt": 1715355000000 }],
+            "qtySold": 0,
+            "qtyAvailable": 80,
+            "pricing_tiers": [{ "quantity": 10, "discountPercentagePerUnitBulk": 1 }, { "quantity": 40, "discountPercentagePerUnitBulk": 6 }],
+            "metadata": {},
+            "createdAt": 1715355000000,
+            "updatedAt": 1715355000000
+          },
+          {
+            "itemId": "6800000000000000000000i57",
+            "productId": "770000000000000000000011",
+            "pricing_snapshots": [{ "atInstantPrice": 48.5, "discountedPercentage": 0, "discountBracket": { "initial": 0, "final": 0 }, "createdAt": 1715400000000, "updatedAt": 1715400000000 }],
+            "qtySold": 0,
+            "qtyAvailable": 60,
+            "pricing_tiers": [{ "quantity": 5, "discountPercentagePerUnitBulk": 2 }, { "quantity": 20, "discountPercentagePerUnitBulk": 7 }],
+            "metadata": {},
+            "createdAt": 1715400000000,
+            "updatedAt": 1715400000000
+          }
+        ],
+        "metadata": { "windowRole": "overflow" }
+      }
+    ],
+    "ops_region": "north-america:ca-on",
+    "overflow_id": "880000000000000000000010",
+    "isHead": false,
+    "metadata": { "createdBy": "catalog-admin", "notes": "Overflow extending primary head window; pricing tiers populated." },
+    "createdAt": 1715209600000,
+    "updatedAt": 1715400000000
+  },
+  {
+    "_id": "880000000000000000000012",
+    "window": { "fromEpoch": 1713000000000, "toEpoch": 1821535999000 },
+    "products": [
+      {
+        "productId": "770000000000000000000007",
+        "items": [
+          { "itemId": "6800000000000000000000i07", "productId": "770000000000000000000007", "pricing_snapshots": [{ "atInstantPrice": 149.0, "discountedPercentage": 0, "discountBracket": { "initial": 0, "final": 0 }, "createdAt": 1713000000000, "updatedAt": 1713000000000 }], "qtySold": 420, "qtyAvailable": 1580, "pricing_tiers": [{ "quantity": 10, "discountPercentagePerUnitBulk": 5 }, { "quantity": 50, "discountPercentagePerUnitBulk": 12 }], "metadata": { "shelfLifeMonths": 24 }, "createdAt": 1713000000000, "updatedAt": 1713000000000 },
+          { "itemId": "6800000000000000000000i27", "productId": "770000000000000000000007", "pricing_snapshots": [{ "atInstantPrice": 139.0, "discountedPercentage": 0, "discountBracket": { "initial": 0, "final": 0 }, "createdAt": 1713050000000, "updatedAt": 1713050000000 }], "qtySold": 10, "qtyAvailable": 400, "pricing_tiers": [{ "quantity": 5, "discountPercentagePerUnitBulk": 3 }, { "quantity": 25, "discountPercentagePerUnitBulk": 9 }], "metadata": {}, "createdAt": 1713050000000, "updatedAt": 1713050000000 },
+          { "itemId": "6800000000000000000000i37", "productId": "770000000000000000000007", "pricing_snapshots": [{ "atInstantPrice": 155.0, "discountedPercentage": 0, "discountBracket": { "initial": 0, "final": 0 }, "createdAt": 1713100000000, "updatedAt": 1713100000000 }], "qtySold": 0, "qtyAvailable": 200, "pricing_tiers": [{ "quantity": 3, "discountPercentagePerUnitBulk": 4 }, { "quantity": 12, "discountPercentagePerUnitBulk": 10 }], "metadata": {}, "createdAt": 1713100000000, "updatedAt": 1713100000000 },
+          { "itemId": "6800000000000000000000i47", "productId": "770000000000000000000007", "pricing_snapshots": [{ "atInstantPrice": 149.0, "discountedPercentage": 0, "discountBracket": { "initial": 0, "final": 0 }, "createdAt": 1713150000000, "updatedAt": 1713150000000 }], "qtySold": 0, "qtyAvailable": 120, "pricing_tiers": [{ "quantity": 5, "discountPercentagePerUnitBulk": 2 }, { "quantity": 20, "discountPercentagePerUnitBulk": 7 }], "metadata": {}, "createdAt": 1713150000000, "updatedAt": 1713150000000 },
+          { "itemId": "6800000000000000000000i57", "productId": "770000000000000000000007", "pricing_snapshots": [{ "atInstantPrice": 152.0, "discountedPercentage": 0, "discountBracket": { "initial": 0, "final": 0 }, "createdAt": 1713200000000, "updatedAt": 1713200000000 }], "qtySold": 0, "qtyAvailable": 80, "pricing_tiers": [{ "quantity": 10, "discountPercentagePerUnitBulk": 3 }, { "quantity": 40, "discountPercentagePerUnitBulk": 9 }], "metadata": {}, "createdAt": 1713200000000, "updatedAt": 1713200000000 }
+        ],
+        "metadata": {}
+      },
+      {
+        "productId": "770000000000000000000008",
+        "items": [
+          { "itemId": "6800000000000000000000i08", "productId": "770000000000000000000008", "pricing_snapshots": [{ "atInstantPrice": 39.5, "discountedPercentage": 0, "discountBracket": { "initial": 0, "final": 0 }, "createdAt": 1713000000000, "updatedAt": 1713000000000 }], "qtySold": 760, "qtyAvailable": 1840, "pricing_tiers": [{ "quantity": 5, "discountPercentagePerUnitBulk": 2 }, { "quantity": 25, "discountPercentagePerUnitBulk": 7 }], "metadata": { "retailUse": true }, "createdAt": 1713000000000, "updatedAt": 1713000000000 },
+          { "itemId": "6800000000000000000000i28", "productId": "770000000000000000000008", "pricing_snapshots": [{ "atInstantPrice": 38.0, "discountedPercentage": 0, "discountBracket": { "initial": 0, "final": 0 }, "createdAt": 1713050000000, "updatedAt": 1713050000000 }], "qtySold": 20, "qtyAvailable": 300, "pricing_tiers": [{ "quantity": 10, "discountPercentagePerUnitBulk": 3 }, { "quantity": 50, "discountPercentagePerUnitBulk": 9 }], "metadata": {}, "createdAt": 1713050000000, "updatedAt": 1713050000000 },
+          { "itemId": "6800000000000000000000i38", "productId": "770000000000000000000008", "pricing_snapshots": [{ "atInstantPrice": 40.0, "discountedPercentage": 0, "discountBracket": { "initial": 0, "final": 0 }, "createdAt": 1713100000000, "updatedAt": 1713100000000 }], "qtySold": 0, "qtyAvailable": 200, "pricing_tiers": [{ "quantity": 5, "discountPercentagePerUnitBulk": 2 }, { "quantity": 30, "discountPercentagePerUnitBulk": 8 }], "metadata": {}, "createdAt": 1713100000000, "updatedAt": 1713100000000 },
+          { "itemId": "6800000000000000000000i48", "productId": "770000000000000000000008", "pricing_snapshots": [{ "atInstantPrice": 39.0, "discountedPercentage": 0, "discountBracket": { "initial": 0, "final": 0 }, "createdAt": 1713150000000, "updatedAt": 1713150000000 }], "qtySold": 0, "qtyAvailable": 120, "pricing_tiers": [{ "quantity": 10, "discountPercentagePerUnitBulk": 3 }, { "quantity": 40, "discountPercentagePerUnitBulk": 10 }], "metadata": {}, "createdAt": 1713150000000, "updatedAt": 1713150000000 },
+          { "itemId": "6800000000000000000000i58", "productId": "770000000000000000000008", "pricing_snapshots": [{ "atInstantPrice": 41.0, "discountedPercentage": 0, "discountBracket": { "initial": 0, "final": 0 }, "createdAt": 1713200000000, "updatedAt": 1713200000000 }], "qtySold": 0, "qtyAvailable": 80, "pricing_tiers": [{ "quantity": 5, "discountPercentagePerUnitBulk": 1 }, { "quantity": 20, "discountPercentagePerUnitBulk": 6 }], "metadata": {}, "createdAt": 1713200000000, "updatedAt": 1713200000000 }
+        ],
+        "metadata": {}
+      },
+      {
+        "productId": "770000000000000000000012",
+        "items": [
+          { "itemId": "6800000000000000000000i18", "productId": "770000000000000000000012", "pricing_snapshots": [{ "atInstantPrice": 89.0, "discountedPercentage": 0, "discountBracket": { "initial": 0, "final": 0 }, "createdAt": 1713000000000, "updatedAt": 1713000000000 }], "qtySold": 320, "qtyAvailable": 1680, "pricing_tiers": [{ "quantity": 10, "discountPercentagePerUnitBulk": 5 }, { "quantity": 50, "discountPercentagePerUnitBulk": 12 }], "metadata": {}, "createdAt": 1713000000000, "updatedAt": 1713000000000 },
+          { "itemId": "6800000000000000000000i28", "productId": "770000000000000000000012", "pricing_snapshots": [{ "atInstantPrice": 85.0, "discountedPercentage": 0, "discountBracket": { "initial": 0, "final": 0 }, "createdAt": 1713050000000, "updatedAt": 1713050000000 }], "qtySold": 40, "qtyAvailable": 400, "pricing_tiers": [{ "quantity": 5, "discountPercentagePerUnitBulk": 3 }, { "quantity": 25, "discountPercentagePerUnitBulk": 9 }], "metadata": {}, "createdAt": 1713050000000, "updatedAt": 1713050000000 },
+          { "itemId": "6800000000000000000000i38", "productId": "770000000000000000000012", "pricing_snapshots": [{ "atInstantPrice": 92.0, "discountedPercentage": 0, "discountBracket": { "initial": 0, "final": 0 }, "createdAt": 1713100000000, "updatedAt": 1713100000000 }], "qtySold": 0, "qtyAvailable": 200, "pricing_tiers": [{ "quantity": 10, "discountPercentagePerUnitBulk": 4 }, { "quantity": 40, "discountPercentagePerUnitBulk": 11 }], "metadata": {}, "createdAt": 1713100000000, "updatedAt": 1713100000000 },
+          { "itemId": "6800000000000000000000i48", "productId": "770000000000000000000012", "pricing_snapshots": [{ "atInstantPrice": 88.0, "discountedPercentage": 0, "discountBracket": { "initial": 0, "final": 0 }, "createdAt": 1713150000000, "updatedAt": 1713150000000 }], "qtySold": 0, "qtyAvailable": 120, "pricing_tiers": [{ "quantity": 5, "discountPercentagePerUnitBulk": 2 }, { "quantity": 20, "discountPercentagePerUnitBulk": 7 }], "metadata": {}, "createdAt": 1713150000000, "updatedAt": 1713150000000 },
+          { "itemId": "6800000000000000000000i58", "productId": "770000000000000000000012", "pricing_snapshots": [{ "atInstantPrice": 90.0, "discountedPercentage": 0, "discountBracket": { "initial": 0, "final": 0 }, "createdAt": 1713200000000, "updatedAt": 1713200000000 }], "qtySold": 0, "qtyAvailable": 80, "pricing_tiers": [{ "quantity": 10, "discountPercentagePerUnitBulk": 3 }, { "quantity": 50, "discountPercentagePerUnitBulk": 10 }], "metadata": {}, "createdAt": 1713200000000, "updatedAt": 1713200000000 }
+        ],
+        "metadata": {}
+      },
+      {
+        "productId": "770000000000000000000013",
+        "items": [
+          { "itemId": "6800000000000000000000i19", "productId": "770000000000000000000013", "pricing_snapshots": [{ "atInstantPrice": 199.0, "discountedPercentage": 0, "discountBracket": { "initial": 0, "final": 0 }, "createdAt": 1713000000000, "updatedAt": 1713000000000 }], "qtySold": 1120, "qtyAvailable": 880, "pricing_tiers": [{ "quantity": 10, "discountPercentagePerUnitBulk": 6 }, { "quantity": 50, "discountPercentagePerUnitBulk": 14 }], "metadata": {}, "createdAt": 1713000000000, "updatedAt": 1713000000000 },
+          { "itemId": "6800000000000000000000i29", "productId": "770000000000000000000013", "pricing_snapshots": [{ "atInstantPrice": 189.0, "discountedPercentage": 0, "discountBracket": { "initial": 0, "final": 0 }, "createdAt": 1713050000000, "updatedAt": 1713050000000 }], "qtySold": 20, "qtyAvailable": 300, "pricing_tiers": [{ "quantity": 5, "discountPercentagePerUnitBulk": 4 }, { "quantity": 25, "discountPercentagePerUnitBulk": 10 }], "metadata": {}, "createdAt": 1713050000000, "updatedAt": 1713050000000 },
+          { "itemId": "6800000000000000000000i39", "productId": "770000000000000000000013", "pricing_snapshots": [{ "atInstantPrice": 205.0, "discountedPercentage": 0, "discountBracket": { "initial": 0, "final": 0 }, "createdAt": 1713100000000, "updatedAt": 1713100000000 }], "qtySold": 0, "qtyAvailable": 200, "pricing_tiers": [{ "quantity": 10, "discountPercentagePerUnitBulk": 5 }, { "quantity": 40, "discountPercentagePerUnitBulk": 12 }], "metadata": {}, "createdAt": 1713100000000, "updatedAt": 1713100000000 },
+          { "itemId": "6800000000000000000000i49", "productId": "770000000000000000000013", "pricing_snapshots": [{ "atInstantPrice": 199.0, "discountedPercentage": 0, "discountBracket": { "initial": 0, "final": 0 }, "createdAt": 1713150000000, "updatedAt": 1713150000000 }], "qtySold": 0, "qtyAvailable": 120, "pricing_tiers": [{ "quantity": 5, "discountPercentagePerUnitBulk": 3 }, { "quantity": 20, "discountPercentagePerUnitBulk": 9 }], "metadata": {}, "createdAt": 1713150000000, "updatedAt": 1713150000000 },
+          { "itemId": "6800000000000000000000i59", "productId": "770000000000000000000013", "pricing_snapshots": [{ "atInstantPrice": 210.0, "discountedPercentage": 0, "discountBracket": { "initial": 0, "final": 0 }, "createdAt": 1713200000000, "updatedAt": 1713200000000 }], "qtySold": 0, "qtyAvailable": 80, "pricing_tiers": [{ "quantity": 10, "discountPercentagePerUnitBulk": 4 }, { "quantity": 50, "discountPercentagePerUnitBulk": 11 }], "metadata": {}, "createdAt": 1713200000000, "updatedAt": 1713200000000 }
+        ],
+        "metadata": {}
+      },
+      {
+        "productId": "770000000000000000000014",
+        "items": [
+          { "itemId": "6800000000000000000000i20", "productId": "770000000000000000000014", "pricing_snapshots": [{ "atInstantPrice": 399.0, "discountedPercentage": 0, "discountBracket": { "initial": 0, "final": 0 }, "createdAt": 1713000000000, "updatedAt": 1713000000000 }], "qtySold": 10, "qtyAvailable": 1990, "pricing_tiers": [{ "quantity": 1, "discountPercentagePerUnitBulk": 2 }, { "quantity": 5, "discountPercentagePerUnitBulk": 8 }], "metadata": { "lidIncluded": true }, "createdAt": 1713000000000, "updatedAt": 1713000000000 },
+          { "itemId": "6800000000000000000000i30", "productId": "770000000000000000000014", "pricing_snapshots": [{ "atInstantPrice": 389.0, "discountedPercentage": 0, "discountBracket": { "initial": 0, "final": 0 }, "createdAt": 1713050000000, "updatedAt": 1713050000000 }], "qtySold": 0, "qtyAvailable": 200, "pricing_tiers": [{ "quantity": 5, "discountPercentagePerUnitBulk": 3 }, { "quantity": 20, "discountPercentagePerUnitBulk": 9 }], "metadata": {}, "createdAt": 1713050000000, "updatedAt": 1713050000000 },
+          { "itemId": "6800000000000000000000i40", "productId": "770000000000000000000014", "pricing_snapshots": [{ "atInstantPrice": 379.0, "discountedPercentage": 0, "discountBracket": { "initial": 0, "final": 0 }, "createdAt": 1713100000000, "updatedAt": 1713100000000 }], "qtySold": 0, "qtyAvailable": 120, "pricing_tiers": [{ "quantity": 10, "discountPercentagePerUnitBulk": 4 }, { "quantity": 50, "discountPercentagePerUnitBulk": 11 }], "metadata": {}, "createdAt": 1713100000000, "updatedAt": 1713100000000 },
+          { "itemId": "6800000000000000000000i50", "productId": "770000000000000000000014", "pricing_snapshots": [{ "atInstantPrice": 399.0, "discountedPercentage": 0, "discountBracket": { "initial": 0, "final": 0 }, "createdAt": 1713150000000, "updatedAt": 1713150000000 }], "qtySold": 0, "qtyAvailable": 80, "pricing_tiers": [{ "quantity": 5, "discountPercentagePerUnitBulk": 3 }, { "quantity": 25, "discountPercentagePerUnitBulk": 10 }], "metadata": {}, "createdAt": 1713150000000, "updatedAt": 1713150000000 },
+          { "itemId": "6800000000000000000000i60", "productId": "770000000000000000000014", "pricing_snapshots": [{ "atInstantPrice": 389.0, "discountedPercentage": 0, "discountBracket": { "initial": 0, "final": 0 }, "createdAt": 1713200000000, "updatedAt": 1713200000000 }], "qtySold": 0, "qtyAvailable": 60, "pricing_tiers": [{ "quantity": 10, "discountPercentagePerUnitBulk": 3 }, { "quantity": 40, "discountPercentagePerUnitBulk": 9 }], "metadata": {}, "createdAt": 1713200000000, "updatedAt": 1713200000000 }
+        ],
+        "metadata": {}
+      }
+    ],
+    "ops_region": "north-america:ca-on",
+    "overflow_id": null,
+    "isHead": true,
+    "metadata": { "createdBy": "catalog-scheduler", "notes": "Secondary current head window for north-america:ca-on; complementary product set." },
+    "createdAt": 1713000000000,
+    "updatedAt": 1713200000000
+  }
+]
+
+

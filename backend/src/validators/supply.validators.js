@@ -53,20 +53,22 @@ function adminOnly(req, res, next) {
 
 /* Common param validators */
 const idParam = [
+  //param('id').exists().withMessage('id is required').bail().custom((v) => mongoose.Types.ObjectId.isValid(String(v))).withMessage('id must be a valid ObjectId'),
   param('id').exists().withMessage('id is required').bail()
-    .custom((v) => mongoose.Types.ObjectId.isValid(String(v))).withMessage('id must be a valid ObjectId'),
+    .isString().trim().notEmpty().withMessage('id must be a non-empty string'),
   runValidation
 ];
 
 const itemIdParam = [
+  //param('itemId').exists().withMessage('itemId is required').bail().custom((v) => mongoose.Types.ObjectId.isValid(String(v))).withMessage('itemId must be a valid ObjectId'),
   param('itemId').exists().withMessage('itemId is required').bail()
-    .custom((v) => mongoose.Types.ObjectId.isValid(String(v))).withMessage('itemId must be a valid ObjectId'),
+    .isString().trim().notEmpty().withMessage('itemId must be a non-empty string'),
   runValidation
 ];
 
 /* Create supply */
 const create = [
-  body('supplierId').exists().withMessage('supplierId is required').bail()
+  /*body('supplierId').exists().withMessage('supplierId is required').bail()
     .custom((v) => mongoose.Types.ObjectId.isValid(String(v))).withMessage('supplierId must be a valid ObjectId'),
   body('requesterId').optional().custom((v) => mongoose.Types.ObjectId.isValid(String(v))).withMessage('requesterId must be a valid ObjectId'),
   body('items').isArray({ min: 1 }).withMessage('items must be a non-empty array'),
@@ -76,7 +78,20 @@ const create = [
   body('items.*.quotes').optional().isArray().withMessage('items.*.quotes must be an array'),
   body('deliveryLocation').optional().isObject().withMessage('deliveryLocation must be an object'),
   body('ops_region').optional().isString().trim(),
+  body('metadata').optional().isObject(),*/
+
+  body('supplierId').exists().withMessage('supplierId is required').bail()
+    .isString().trim().notEmpty().withMessage('supplierId must be a non-empty string'),
+  body('requesterId').optional().isString().trim().notEmpty().withMessage('requesterId must be a non-empty string'),
+  body('items').isArray({ min: 1 }).withMessage('items must be a non-empty array'),
+  body('items.*.itemId').exists().withMessage('items.*.itemId is required').bail()
+    .isString().trim().notEmpty().withMessage('items.*.itemId must be a non-empty string'),
+  body('items.*.requestedQuantity').optional().isInt({ min: 0 }).withMessage('items.*.requestedQuantity must be a non-negative integer'),
+  body('items.*.quotes').optional().isArray().withMessage('items.*.quotes must be an array'),
+  body('deliveryLocation').optional().isObject().withMessage('deliveryLocation must be an object'),
+  body('ops_region').optional().isString().trim(),
   body('metadata').optional().isObject(),
+
   runValidation
 ];
 
@@ -91,7 +106,8 @@ const queryValidator = [
 
 /* Update supply (partial) */
 const update = [
-  param('id').exists().withMessage('id is required').bail()
+
+  /*param('id').exists().withMessage('id is required').bail()
     .custom((v) => mongoose.Types.ObjectId.isValid(String(v))).withMessage('id must be a valid ObjectId'),
   body().custom((value) => {
     if (!value || typeof value !== 'object' || Array.isArray(value)) {
@@ -102,24 +118,42 @@ const update = [
     }
     return true;
   }),
+  body('_id').not().exists().withMessage('_id cannot be modified'),*/
+  param('id').exists().withMessage('id is required').bail()
+    .isString().trim().notEmpty().withMessage('id must be a non-empty string'),
+  body().custom((value) => {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error('update payload must be an object');
+    if (Object.keys(value).length === 0) throw new Error('update payload cannot be empty');
+    return true;
+  }),
   body('_id').not().exists().withMessage('_id cannot be modified'),
+
   runValidation
 ];
 
 /* Add item to supply */
 const addItem = [
-  param('id').exists().withMessage('id is required').bail()
+  /*param('id').exists().withMessage('id is required').bail()
     .custom((v) => mongoose.Types.ObjectId.isValid(String(v))).withMessage('id must be a valid ObjectId'),
   body('itemId').exists().withMessage('itemId is required').bail()
     .custom((v) => mongoose.Types.ObjectId.isValid(String(v))).withMessage('itemId must be a valid ObjectId'),
   body('requestedQuantity').optional().isInt({ min: 0 }).withMessage('requestedQuantity must be a non-negative integer'),
+  body('quotes').optional().isArray().withMessage('quotes must be an array'),*/
+
+  param('id').exists().withMessage('id is required').bail()
+    .isString().trim().notEmpty().withMessage('id must be a non-empty string'),
+  body('itemId').exists().withMessage('itemId is required').bail()
+    .isString().trim().notEmpty().withMessage('itemId must be a non-empty string'),
+  body('requestedQuantity').optional().isInt({ min: 0 }).withMessage('requestedQuantity must be a non-negative integer'),
   body('quotes').optional().isArray().withMessage('quotes must be an array'),
+
   runValidation
 ];
 
 /* Add quote to an item */
 const addQuote = [
-  param('id').exists().withMessage('id is required').bail()
+
+  /*param('id').exists().withMessage('id is required').bail()
     .custom((v) => mongoose.Types.ObjectId.isValid(String(v))).withMessage('id must be a valid ObjectId'),
   body('itemId').exists().withMessage('itemId is required').bail()
     .custom((v) => mongoose.Types.ObjectId.isValid(String(v))).withMessage('itemId must be a valid ObjectId'),
@@ -128,18 +162,40 @@ const addQuote = [
     .isFloat({ min: 0 }).withMessage('quote.pricePerBulkUnit must be a non-negative number').toFloat(),
   body('quote.numberOfBulkUnits').optional().isInt({ min: 1 }).withMessage('quote.numberOfBulkUnits must be an integer >= 1').toInt(),
   body('quote.discountingScheme').optional().isArray().withMessage('quote.discountingScheme must be an array'),
+  body('quote.isAccepted').optional().isBoolean().toBoolean(),*/
+
+  param('id').exists().withMessage('id is required').bail()
+    .isString().trim().notEmpty().withMessage('id must be a non-empty string'),
+  body('itemId').exists().withMessage('itemId is required').bail()
+    .isString().trim().notEmpty().withMessage('itemId must be a non-empty string'),
+  body('quote').exists().withMessage('quote is required').bail().isObject().withMessage('quote must be an object'),
+  body('quote.pricePerBulkUnit').exists().withMessage('quote.pricePerBulkUnit is required').bail()
+    .isFloat({ min: 0 }).withMessage('quote.pricePerBulkUnit must be a non-negative number').toFloat(),
+  body('quote.numberOfBulkUnits').optional().isInt({ min: 1 }).withMessage('quote.numberOfBulkUnits must be an integer >= 1').toInt(),
+  body('quote.discountingScheme').optional().isArray().withMessage('quote.discountingScheme must be an array'),
   body('quote.isAccepted').optional().isBoolean().toBoolean(),
+
   runValidation
 ];
 
 /* Accept quote */
 const acceptQuote = [
-  param('id').exists().withMessage('id is required').bail()
+
+  /*param('id').exists().withMessage('id is required').bail()
     .custom((v) => mongoose.Types.ObjectId.isValid(String(v))).withMessage('id must be a valid ObjectId'),
   body('itemId').exists().withMessage('itemId is required').bail()
     .custom((v) => mongoose.Types.ObjectId.isValid(String(v))).withMessage('itemId must be a valid ObjectId'),
   body('quoteId').optional().custom((v) => mongoose.Types.ObjectId.isValid(String(v))).withMessage('quoteId must be a valid ObjectId'),
+  body('quoteIndex').optional().isInt({ min: 0 }).withMessage('quoteIndex must be a non-negative integer').toInt(),*/
+
+  param('id').exists().withMessage('id is required').bail()
+    .isString().trim().notEmpty().withMessage('id must be a non-empty string'),
+  body('itemId').exists().withMessage('itemId is required').bail()
+    .isString().trim().notEmpty().withMessage('itemId must be a non-empty string'),
+  body('quoteId').optional().isString().trim().notEmpty().withMessage('quoteId must be a non-empty string'),
   body('quoteIndex').optional().isInt({ min: 0 }).withMessage('quoteIndex must be a non-negative integer').toInt(),
+
+
   body().custom((value) => {
     // require at least one of quoteId or quoteIndex (or allow default behavior)
     if (!value.quoteId && value.quoteIndex === undefined) {
@@ -153,8 +209,13 @@ const acceptQuote = [
 
 /* Update status */
 const updateStatus = [
-  param('id').exists().withMessage('id is required').bail()
+  /*param('id').exists().withMessage('id is required').bail()
     .custom((v) => mongoose.Types.ObjectId.isValid(String(v))).withMessage('id must be a valid ObjectId'),
+  body('status').exists().withMessage('status is required').bail()
+    .isIn(STATUS).withMessage(`status must be one of: ${STATUS.join(', ')}`),*/
+
+  param('id').exists().withMessage('id is required').bail()
+    .isString().trim().notEmpty().withMessage('id must be a non-empty string'),
   body('status').exists().withMessage('status is required').bail()
     .isIn(STATUS).withMessage(`status must be one of: ${STATUS.join(', ')}`),
   runValidation

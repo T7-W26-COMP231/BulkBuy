@@ -45,10 +45,18 @@ const pricingSnapshotRules = [
  * - Optional: items array with productId/itemId/quantity/saveForLater/pricingSnapshot
  */
 const create = [
-  body('userId').exists().withMessage('userId is required').isMongoId().withMessage('userId must be a valid ObjectId'),
+  //  body('userId').exists().withMessage('userId is required').isMongoId().withMessage('userId must be a valid ObjectId'),
+
+  body('userId').exists().withMessage('userId is required').isString().trim().notEmpty().withMessage('userId must be a non-empty string'),
+
   body('items').optional().isArray().withMessage('items must be an array'),
-  body('items.*.productId').optional().isMongoId().withMessage('items.*.productId must be a valid ObjectId'),
-  body('items.*.itemId').optional().isMongoId().withMessage('items.*.itemId must be a valid ObjectId'),
+
+  //  body('items.*.productId').optional().isMongoId().withMessage('items.*.productId must be a valid ObjectId'),
+  body('items.*.productId').optional().isString().trim().notEmpty().withMessage('items.*.productId must be a non-empty string'),
+  body('items.*.itemId').optional().isString().trim().notEmpty().withMessage('items.*.itemId must be a non-empty string'),
+
+  //  body('items.*.itemId').optional().isMongoId().withMessage('items.*.itemId must be a valid ObjectId'),
+
   body('items.*.quantity').optional().isInt({ min: 1 }).withMessage('items.*.quantity must be an integer >= 1').toInt(),
   body('items.*.saveForLater').optional().isBoolean().withMessage('items.*.saveForLater must be boolean').toBoolean(),
   body('items.*.pricingSnapshot').optional().isObject().withMessage('items.*.pricingSnapshot must be an object'),
@@ -77,18 +85,22 @@ const queryValidator = [
 
 /* Param validators */
 const idParam = [
-  param('id').exists().withMessage('id is required').isMongoId().withMessage('id must be a valid ObjectId'),
+  //param('id').exists().withMessage('id is required').isMongoId().withMessage('id must be a valid ObjectId'),
+  param('id').exists().withMessage('id is required').isString().trim().notEmpty().withMessage('id must be a non-empty string'),
+
   runValidation
 ];
 
 const userIdParam = [
-  param('userId').exists().withMessage('userId is required').isMongoId().withMessage('userId must be a valid ObjectId'),
-  runValidation
+  //  param('userId').exists().withMessage('userId is required').isMongoId().withMessage('userId must be a valid ObjectId'), runValidation
+  param('userId').exists().withMessage('userId is required').isString().trim().notEmpty().withMessage('userId must be a non-empty string'),
+
 ];
 
 const itemIdParam = [
-  param('itemId').exists().withMessage('itemId is required').isMongoId().withMessage('itemId must be a valid ObjectId'),
-  runValidation
+  //  param('itemId').exists().withMessage('itemId is required').isMongoId().withMessage('itemId must be a valid ObjectId'), runValidation
+  param('itemId').exists().withMessage('itemId is required').isString().trim().notEmpty().withMessage('itemId must be a non-empty string'),
+
 ];
 
 /**
@@ -96,7 +108,9 @@ const itemIdParam = [
  * Partial update - require non-empty object and disallow immutable fields
  */
 const update = [
-  param('id').exists().isMongoId().withMessage('id must be a valid ObjectId'),
+  //param('id').exists().isMongoId().withMessage('id must be a valid ObjectId'),
+  body('itemId').exists().withMessage('itemId is required').isString().trim().notEmpty().withMessage('itemId must be a non-empty string'),
+
   body().custom((value) => {
     if (!value || typeof value !== 'object' || Array.isArray(value)) {
       throw new Error('update payload must be an object');
@@ -127,8 +141,10 @@ const updateOne = [
  * Body: { messageId }
  */
 const addMessage = [
-  param('id').exists().isMongoId().withMessage('id must be a valid ObjectId'),
-  body('messageId').exists().withMessage('messageId is required').isMongoId().withMessage('messageId must be a valid ObjectId'),
+  //param('id').exists().isMongoId().withMessage('id must be a valid ObjectId'),
+  //body('messageId').exists().withMessage('messageId is required').isMongoId().withMessage('messageId must be a valid ObjectId'),
+  param('id').exists().isString().trim().notEmpty().withMessage('id must be a non-empty string'),
+  body('messageId').exists().withMessage('messageId is required').isString().trim().notEmpty().withMessage('messageId must be a non-empty string'),
   runValidation
 ];
 
@@ -137,7 +153,9 @@ const addMessage = [
  * Body: { status }
  */
 const updateStatus = [
-  param('id').exists().isMongoId().withMessage('id must be a valid ObjectId'),
+  //param('id').exists().isMongoId().withMessage('id must be a valid ObjectId'),
+  param('id').exists().isString().trim().notEmpty().withMessage('id must be a non-empty string'),
+
   body('status').exists().withMessage('status is required').isIn(['draft', 'submitted', 'confirmed', 'cancelled', 'dispatched', 'fulfilled']).withMessage('invalid status'),
   runValidation
 ];
@@ -147,9 +165,14 @@ const updateStatus = [
  * Body: { productId, itemId, pricingSnapshot?, saveForLater?, quantity? }
  */
 const addItem = [
-  param('id').exists().isMongoId().withMessage('id must be a valid ObjectId'),
-  body('productId').exists().withMessage('productId is required').isMongoId().withMessage('productId must be a valid ObjectId'),
-  body('itemId').exists().withMessage('itemId is required').isMongoId().withMessage('itemId must be a valid ObjectId'),
+  //param('id').exists().isMongoId().withMessage('id must be a valid ObjectId'),
+  //body('productId').exists().withMessage('productId is required').isMongoId().withMessage('productId must be a valid ObjectId'),
+  //body('itemId').exists().withMessage('itemId is required').isMongoId().withMessage('itemId must be a valid ObjectId'),
+
+  param('id').exists().isString().trim().notEmpty().withMessage('id must be a non-empty string'),
+  body('productId').exists().withMessage('productId is required').isString().trim().notEmpty().withMessage('productId must be a non-empty string'),
+  body('itemId').exists().withMessage('itemId is required').isString().trim().notEmpty().withMessage('itemId must be a non-empty string'),
+
   body('quantity').optional().isInt({ min: 1 }).withMessage('quantity must be integer >= 1').toInt(),
   body('saveForLater').optional().isBoolean().withMessage('saveForLater must be boolean').toBoolean(),
   body('pricingSnapshot').optional().isObject().withMessage('pricingSnapshot must be an object'),
@@ -164,9 +187,16 @@ const addItem = [
  * PATCH /orders/:id/set-item-quantity
  * Body: { itemId, quantity }
  */
+
+// const setItemQuantity = [
+//   param('id').exists().isMongoId().withMessage('id must be a valid ObjectId'),
+//   body('itemId').exists().withMessage('itemId is required').isMongoId().withMessage('itemId must be a valid ObjectId'),
+//   body('quantity').exists().withMessage('quantity is required').isInt({ min: 0 }).withMessage('quantity must be integer >= 0').toInt(),  
+//   runValidation
+// ];
 const setItemQuantity = [
-  param('id').exists().isMongoId().withMessage('id must be a valid ObjectId'),
-  body('itemId').exists().withMessage('itemId is required').isMongoId().withMessage('itemId must be a valid ObjectId'),
+  param('id').exists().isString().trim().notEmpty().withMessage('id must be a non-empty string'),
+  body('itemId').exists().withMessage('itemId is required').isString().trim().notEmpty().withMessage('itemId must be a non-empty string'),
   body('quantity').exists().withMessage('quantity is required').isInt({ min: 0 }).withMessage('quantity must be integer >= 0').toInt(),
   runValidation
 ];
@@ -176,16 +206,23 @@ const setItemQuantity = [
  * Body: { itemId, changes: { quantity?, saveForLater?, pricingSnapshot? } }
  */
 const updateItem = [
-  param('id').exists().isMongoId().withMessage('id must be a valid ObjectId'),
-  body('itemId').exists().withMessage('itemId is required').isMongoId().withMessage('itemId must be a valid ObjectId'),
+  //param('id').exists().isMongoId().withMessage('id must be a valid ObjectId'),
+  //body('itemId').exists().withMessage('itemId is required').isMongoId().withMessage('itemId must be a valid ObjectId'),
+
+  param('id').exists().isString().trim().notEmpty().withMessage('id must be a non-empty string'),
+  body('itemId').exists().withMessage('itemId is required').isString().trim().notEmpty().withMessage('itemId must be a non-empty string'),
+
   body('changes').exists().withMessage('changes is required').isObject().withMessage('changes must be an object'),
+
   body('changes.quantity').optional().isInt({ min: 0 }).withMessage('changes.quantity must be integer >= 0').toInt(),
+
   body('changes.saveForLater').optional().isBoolean().withMessage('changes.saveForLater must be boolean').toBoolean(),
   body('changes.pricingSnapshot').optional().isObject().withMessage('changes.pricingSnapshot must be an object'),
   body('changes.pricingSnapshot.atInstantPrice').optional().isFloat({ min: 0 }).withMessage('pricingSnapshot.atInstantPrice must be a non-negative number').toFloat(),
   body('changes.pricingSnapshot.discountedPercentage').optional().isFloat({ min: 0, max: 100 }).withMessage('pricingSnapshot.discountedPercentage must be between 0 and 100').toFloat(),
   body('changes.pricingSnapshot.discountBracket.initial').optional().isFloat().withMessage('pricingSnapshot.discountBracket.initial must be a number').toFloat(),
   body('changes.pricingSnapshot.discountBracket.final').optional().isFloat().withMessage('pricingSnapshot.discountBracket.final must be a number').toFloat(),
+
   runValidation
 ];
 
@@ -195,10 +232,16 @@ const updateItem = [
  */
 const bulkCreate = [
   body().isArray({ min: 1 }).withMessage('request body must be a non-empty array'),
-  body('*.userId').exists().withMessage('userId is required for each order').isMongoId().withMessage('userId must be a valid ObjectId'),
+
+  //body('*.userId').exists().withMessage('userId is required for each order').isMongoId().withMessage('userId must be a valid ObjectId'),
+  body('*.userId').exists().withMessage('userId is required for each order').isString().trim().notEmpty().withMessage('userId must be a non-empty string'),
+
   body('*.items').optional().isArray(),
-  body('*.items.*.productId').optional().isMongoId().withMessage('items.*.productId must be a valid ObjectId'),
-  body('*.items.*.itemId').optional().isMongoId().withMessage('items.*.itemId must be a valid ObjectId'),
+
+  // body('*.items.*.productId').optional().isMongoId().withMessage('items.*.productId must be a valid ObjectId'),
+  // body('*.items.*.itemId').optional().isMongoId().withMessage('items.*.itemId must be a valid ObjectId'),
+  body('*.items.*.productId').optional().isString().trim().notEmpty().withMessage('items.*.productId must be a non-empty string'),
+  body('*.items.*.itemId').optional().isString().trim().notEmpty().withMessage('items.*.itemId must be a non-empty string'),
   runValidation
 ];
 

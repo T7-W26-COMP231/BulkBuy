@@ -10,8 +10,14 @@ import { getCityData } from "../../data/mockData";
 export default function CartPage() {
   const { showToast } = useToast();
   const location = useLocation();
-  const user = JSON.parse(localStorage.getItem("user") || "null");
-  const userId = user?._id || null;
+  //const user = JSON.parse(localStorage.getItem("user") || "null");
+  //const userId = user?._id || null;
+
+  const sessionRaw = localStorage.getItem("app_auth_session_v1");
+  const session = sessionRaw ? JSON.parse(sessionRaw) : null;
+  const user = session?.user || null;
+  const userId = user?.userId || user?._id || null;
+
   const cartStorageKey = userId ? `cartItems_${userId}` : "cartItems_guest";
   const [detectedCity, setDetectedCity] = useState("Scarborough");
   const [intentConfirmed, setIntentConfirmed] = useState(false);

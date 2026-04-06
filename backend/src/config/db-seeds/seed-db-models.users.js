@@ -102,10 +102,10 @@ async function run(opts = {}) {
 
   // Build payloads: 5 users (2 suppliers, 2 customers, 1 admin)
   const payloads = [
-    makeUserPayload({ idx: 1, role: 'supplier', firstName: 'Supply', lastName: 'One', email: 'supplier1@bulkbuy.example.com' }),
-    makeUserPayload({ idx: 2, role: 'supplier', firstName: 'Supply', lastName: 'Two', email: 'supplier2@bulkbuy.example.com' }),
-    makeUserPayload({ idx: 3, role: 'customer', firstName: 'Customer', lastName: 'One', email: 'customer1@bulkbuy.example.com' }),
-    makeUserPayload({ idx: 4, role: 'customer', firstName: 'Customer', lastName: 'Two', email: 'customer2@bulkbuy.example.com' }),
+    makeUserPayload({ idx: 1, role: 'supplier', firstName: 'Supply', lastName: 'One', email: 'supplier1@bulkbuy.example.com', password: 'SupplierPass!234' }),
+    makeUserPayload({ idx: 2, role: 'supplier', firstName: 'Supply', lastName: 'Two', email: 'supplier2@bulkbuy.example.com', password: 'SupplierPass!234' }),
+    makeUserPayload({ idx: 3, role: 'customer', firstName: 'Customer', lastName: 'One', email: 'customer1@bulkbuy.example.com', password: 'CustomerPass!234' }),
+    makeUserPayload({ idx: 4, role: 'customer', firstName: 'Customer', lastName: 'Two', email: 'customer2@bulkbuy.example.com', password: 'CustomerPass!234' }),
     makeUserPayload({ idx: 0, role: 'administrator', firstName: 'System', lastName: 'Admin', email: 'admin@bulkbuy.example.com', password: 'AdminPass!234' })
   ];
 

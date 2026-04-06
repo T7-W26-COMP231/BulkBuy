@@ -30,7 +30,7 @@ export default function SupplierFulfillmentPage() {
 
     const [deliveryDate, setDeliveryDate] = useState("");
     const [fulfillmentNotes, setFulfillmentNotes] = useState("");
-    const [fulfillmentError, setFulfillmentError] = useState("");
+
     const [confirming, setConfirming] = useState(false);
 
     const [showDeclineModal, setShowDeclineModal] = useState(false);
@@ -70,13 +70,10 @@ export default function SupplierFulfillmentPage() {
     }, [id, accessToken]);
 
     const handleConfirmFulfillment = async () => {
-        if (!deliveryDate) {
-            setFulfillmentError("Expected delivery date is required.");
-            return;
-        }
+
         try {
             setConfirming(true);
-            setFulfillmentError("");
+
             const response = await fetch(
                 `${import.meta.env.VITE_API_URL}/api/ordrs/${id}/fulfill`,
                 {
@@ -92,7 +89,7 @@ export default function SupplierFulfillmentPage() {
             if (!response.ok) throw new Error(data?.message || "Failed to confirm fulfillment");
             navigate("/supplier/order-requests");
         } catch (err) {
-            setFulfillmentError(err.message || "Failed to confirm fulfillment");
+
         } finally {
             setConfirming(false);
         }
@@ -311,17 +308,10 @@ export default function SupplierFulfillmentPage() {
                                         <input
                                             type="date"
                                             value={deliveryDate}
-                                            onChange={(e) => {
-                                                setDeliveryDate(e.target.value);
-                                                setFulfillmentError("");
-                                            }}
+                                            onChange={(e) => setDeliveryDate(e.target.value)}
                                             className="w-full rounded-xl border border-neutral-light px-4 py-2.5 text-sm outline-none focus:border-primary"
                                         />
-                                        {fulfillmentError && (
-                                            <p className="mt-2 text-sm font-medium text-red-600">
-                                                {fulfillmentError}
-                                            </p>
-                                        )}
+
                                     </div>
 
                                     <div>

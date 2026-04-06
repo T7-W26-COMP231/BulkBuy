@@ -7,7 +7,9 @@ import api from './api';
  */
 export const createIntent = async (intentData) => {
   try {
-    const response = await api.post('/api/ordrs', intentData);
+    //const response = await api.post('/api/ordrs', intentData);
+    const response = await api.post('/ordrs', intentData);
+
     return response.data;
   } catch (error) {
     console.error('Error creating intent:', error);
@@ -60,7 +62,9 @@ export const buildIntentPayload = ({
  */
 export const getMyIntents = async (userId) => {
   try {
-    const response = await api.get(`/api/ordrs/user/${userId}`);
+    //const response = await api.get(`/api/ordrs/user/${userId}`);
+    const response = await api.get(`/ordrs/user/${userId}`);
+
     console.log(response.data);
     return response.data;
   } catch (error) {
@@ -80,7 +84,9 @@ export const getMyIntents = async (userId) => {
  */
 export const updateIntentItem = async (orderId, itemId, quantity) => {
   try {
-    const response = await api.patch(`/api/ordrs/${orderId}/update-item`, {
+    //    const response = await api.patch(`/api/ordrs/${orderId}/update-item`, {
+    const response = await api.patch(`/ordrs/${orderId}/update-item`, {
+
       itemId,
       changes: { quantity }
     });
@@ -108,7 +114,9 @@ export const updateIntentItem = async (orderId, itemId, quantity) => {
  */
 export const removeIntentItem = async (orderId, itemId) => {
   try {
-    const response = await api.delete(`/api/ordrs/${orderId}/items/${itemId}`);
+    //const response = await api.delete(`/api/ordrs/${orderId}/items/${itemId}`);
+    const response = await api.delete(`/ordrs/${orderId}/items/${itemId}`);
+
     return response.data;
   } catch (error) {
     if (error.response?.status === 423) {

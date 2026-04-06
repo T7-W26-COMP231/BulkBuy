@@ -1,10 +1,10 @@
-// server.js
-const { createApp } = require('./src/app');
-const { setSocketIO } = require('./src/socket');
+// server-comms-only.js
+// Same bootstrap flow as your original server.js but uses comms-js.initComms only.
+// Non-disruptive: does not modify any other files. Keeps the same start/stop behavior.
+
+const createApp = require('./src/app');
 const connectDB = require('./src/config/db');
 const config = require('./src/config/env');
-const http = require('http');
-const { Server } = require('socket.io');
 
 const start = async () => {
   try {
@@ -25,38 +25,54 @@ const start = async () => {
     }
 
     disableLogging();
+
     // ---------------------------------------------------------
 
-    const app = await createApp();
+    // create express app (same as original)
+    const { app } = await createApp();
 
-    // ✅ HTTP server
-    const server = http.createServer(app);
+    // start HTTP server
+    const server = app.listen(config.port, () => {
+      console.log(`\n---///--Server running in ${config.nodeEnv} mode on port ${config.port} --------------------> 🕊\n`);
+    });
 
-    // ✅ Socket.IO (ONLY ONCE)
-    const io = new Server(server, {
-      cors: {
-        origin: config.clientUrl,
-        methods: ['GET', 'POST'],
-        credentials: true
+    // ---------------------------------------------------------
+    // Comms-only initialization (no legacy attachSocketHandlers)
+    //
+    // Behavior:
+    //  - Attempts to require ./src/comms-js and call initComms with the running server.
+    //  - If comms-js is missing or initComms throws, logs the error and continues running the HTTP server.
+    //  - Does not call attachSocketHandlers at all.
+    // ---------------------------------------------------------
+    
+    try {
+      const comms = require('./src/comms-js'); // must export initComms
+      if (!comms || typeof comms.initComms !== 'function') {
+        console.error('comms-js.initComms is not available. Ensure ./src/comms-js/index.js exports initComms.');
+      } else {
+        try {
+          await comms.initComms({
+            server,
+            jwtSecret: process.env.JWT_SECRET || config.accessSecret,
+            path: process.env.SOCKET_PATH || '/socket.io',
+            cors: {
+              origin: ("http://localhost:5173" || config.clientUrl || '*').replace(/\/$/, ''),
+              methods: ['GET','POST','PUT','PATCH','DELETE','OPTIONS'],
+              credentials: true
+            },
+            logger: console
+            // pass redisClient here if you have one: redisClient: myRedisClient
+          });
+          console.log('\nComms initialized via comms-js.initComms ');
+        } catch (err) {
+          console.error('comms-js.initComms failed:', err);
+          // continue running HTTP server even if comms init fails
+        }
       }
-    });
-
-    // ✅ attach globally
-    setSocketIO(io);
-
-    // ✅ connection listener
-    io.on('connection', (socket) => {
-      console.log('🔌 New client connected:', socket.id);
-
-      socket.on('disconnect', () => {
-        console.log('❌ Client disconnected:', socket.id);
-      });
-    });
-
-    // ✅ start server
-    server.listen(config.port, () => {
-      console.log(`\n\nServer running in ${config.nodeEnv} mode on port ${config.port}`);
-    });
+    } catch (err) {
+      console.error('Failed to require comms-js module (./src/comms-js). Socket subsystem not initialized.', err);
+      // continue running HTTP server
+    }
 
     // ---------------------------------------------------------
     const shutdown = async () => {

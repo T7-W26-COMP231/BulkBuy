@@ -13,9 +13,18 @@ export default function ReviewModifyIntentPage() {
   const cartItems = (() => {
     if (location.state?.cartItems?.length) return location.state.cartItems;
     try {
-      const storedUser = JSON.parse(localStorage.getItem("user") || "null");
-      const key = storedUser?._id ? `cartItems_${storedUser._id}` : "cartItems_guest";
+      //const storedUser = JSON.parse(localStorage.getItem("user") || "null");
+      //const key = storedUser?._id ? `cartItems_${storedUser._id}` : "cartItems_guest";
+
+      const sessionRaw = localStorage.getItem("app_auth_session_v1");
+      const session = sessionRaw ? JSON.parse(sessionRaw) : null;
+      const storedUser = session?.user || null;
+      const key = (storedUser?.userId || storedUser?._id)
+        ? `cartItems_${storedUser.userId || storedUser._id}`
+        : "cartItems_guest";
+
       return JSON.parse(sessionStorage.getItem(key) || "[]");
+
     } catch { return []; }
   })();
 
@@ -31,10 +40,14 @@ export default function ReviewModifyIntentPage() {
 
   useEffect(() => {
     const fetchIntents = async () => {
-      if (!user?._id) { setLoading(false); return; }
+      if (!user?.userId && !user?._id) { setLoading(false); return; }
+
+
       try {
         setFetchError(null);
-        const data = await getMyIntents(user._id);
+        //const data = await getMyIntents(user._id);
+        const data = await getMyIntents(user.userId || user._id);
+
         const all = data.items || [];
 
         const latest = all
@@ -313,7 +326,7 @@ export default function ReviewModifyIntentPage() {
   const firstItem = allItems[0];
 
   const formatWindowDate = (epoch) =>
-              Number.isFinite(epoch) ? new Date(epoch).toLocaleString() : "N/A";
+    Number.isFinite(epoch) ? new Date(epoch).toLocaleString() : "N/A";
 
   return (
     <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-background-light font-display text-text-main">
@@ -503,16 +516,15 @@ export default function ReviewModifyIntentPage() {
                       </button>
                     </div>
 
-                    <div className={`inline-flex w-fit rounded-full px-3 py-1 text-xs font-bold ${
-                      itemWindowStatus === "open"
-                        ? "bg-primary/10 text-text-main"
-                        : "bg-red-100 text-red-800"
-                    }`}>
+                    <div className={`inline-flex w-fit rounded-full px-3 py-1 text-xs font-bold ${itemWindowStatus === "open"
+                      ? "bg-primary/10 text-text-main"
+                      : "bg-red-100 text-red-800"
+                      }`}>
                       {itemWindowStatus === "open"
                         ? "Aggregation window open"
                         : itemWindowStatus === "upcoming"
-                        ? "Aggregation window upcoming"
-                        : "🔒 Window closed"}
+                          ? "Aggregation window upcoming"
+                          : "🔒 Window closed"}
                     </div>
 
                     <p className="text-xs text-text-muted">

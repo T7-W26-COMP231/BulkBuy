@@ -21,6 +21,13 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { useToast } from "../../contexts/ToastProvider.jsx"; // adjust path if needed
+
+import { useAuth } from "../../contexts/AuthContext.jsx";
+import { useOpsContext } from "../../contexts/OpsContex.jsx";
+
+// after successful login API returns { accessToken, refreshToken, user }
+import { initSocket, identifyUserAfterLogin } from "../../comms-js/socket";
+
 import "./AuthTabs.css";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -31,9 +38,12 @@ function passwordStrength(pw) {
   let score = 0;
   if (!pw || pw.length < 8) reasons.push("At least 8 characters");
   else score++;
-  if (/[A-Z]/.test(pw)) score++; else reasons.push("Include an uppercase letter");
-  if (/[a-z]/.test(pw)) score++; else reasons.push("Include a lowercase letter");
-  if (/[0-9]/.test(pw)) score++; else reasons.push("Include a number");
+  if (/[A-Z]/.test(pw)) score++;
+  else reasons.push("Include an uppercase letter");
+  if (/[a-z]/.test(pw)) score++;
+  else reasons.push("Include a lowercase letter");
+  if (/[0-9]/.test(pw)) score++;
+  else reasons.push("Include a number");
   return { score: Math.min(score, 4), reasons };
 }
 
@@ -48,7 +58,11 @@ export default function AuthTabs(props) {
     style = {},
   } = props;
 
-  const { showToast: globalShowToast, dismissToast: globalDismissToast, clearAll : globalClearAllToasts } = useToast();
+  const {
+    showToast: globalShowToast,
+    dismissToast: globalDismissToast,
+    clearAll: globalClearAllToasts,
+  } = useToast();
 
   const [isLogin, setIsLogin] = useState(Boolean(defaultIsLogin));
 
@@ -67,6 +81,9 @@ export default function AuthTabs(props) {
 
   const [busy, setBusy] = useState(false);
   const emailInputRef = useRef(null);
+
+  const { user, accessToken } = useAuth();
+  const { ops_region, setOps_region, socket, setSocket, backendUrl } = useOpsContext();
 
   useEffect(() => {
     const t = setTimeout(() => {
@@ -119,7 +136,14 @@ export default function AuthTabs(props) {
       try {
         toastcontrols.update({
           content: (
-            <div style={{ padding: 12, display: "flex", gap: 12, alignItems: "center" }}>
+            <div
+              style={{
+                padding: 12,
+                display: "flex",
+                gap: 12,
+                alignItems: "center",
+              }}
+            >
               <div
                 style={{
                   width: 28,
@@ -133,7 +157,9 @@ export default function AuthTabs(props) {
               />
               <div>
                 <strong>{title}</strong>
-                <div style={{ marginTop: 6, fontSize: 13, color: "#444" }}>Please wait…</div>
+                <div style={{ marginTop: 6, fontSize: 13, color: "#444" }}>
+                  Please wait…
+                </div>
               </div>
             </div>
           ),
@@ -149,7 +175,14 @@ export default function AuthTabs(props) {
     // Fallback: create a global sticky toast and return its id
     if (typeof globalShowToast === "function") {
       const id = globalShowToast(
-        <div style={{ padding: 12, display: "flex", gap: 12, alignItems: "center" }}>
+        <div
+          style={{
+            padding: 12,
+            display: "flex",
+            gap: 12,
+            alignItems: "center",
+          }}
+        >
           <div
             style={{
               width: 28,
@@ -163,10 +196,18 @@ export default function AuthTabs(props) {
           />
           <div>
             <strong>{title}</strong>
-            <div style={{ marginTop: 6, fontSize: 13, color: "#444" }}>Please wait…</div>
+            <div style={{ marginTop: 6, fontSize: 13, color: "#444" }}>
+              Please wait…
+            </div>
           </div>
         </div>,
-        { value: "HVC", IsToStack: false, IsToStick: true, duration: null, toastName: title }
+        {
+          value: "HVC",
+          IsToStack: false,
+          IsToStick: true,
+          duration: null,
+          toastName: title,
+        },
       );
       return { usedUpdate: false, id: id || null };
     }
@@ -206,7 +247,11 @@ export default function AuthTabs(props) {
 
     if (toastcontrols && typeof toastcontrols.update === "function") {
       try {
-        toastcontrols.update({ content, duration: ok ? 3500 : 5000, IsToStick: false });
+        toastcontrols.update({
+          content,
+          duration: ok ? 3500 : 5000,
+          IsToStick: false,
+        });
         return;
       } catch {
         // fallback
@@ -214,7 +259,12 @@ export default function AuthTabs(props) {
     }
 
     if (typeof globalShowToast === "function") {
-      globalShowToast(content, { value: "TR", IsToStack: false, duration: ok ? 3500 : 5000, toastName: title });
+      globalShowToast(content, {
+        value: "TR",
+        IsToStack: false,
+        duration: ok ? 3500 : 5000,
+        toastName: title,
+      });
     }
   };
 
@@ -223,7 +273,10 @@ export default function AuthTabs(props) {
     e && e.preventDefault();
     if (!validateSignIn()) return;
 
-    const payload = { email: trim(siEmail).toLowerCase(), password: siPassword };
+    const payload = {
+      email: trim(siEmail).toLowerCase(),
+      password: siPassword,
+    };
     setBusy(true);
     const proc = showProcessing("Signing in");
 
@@ -237,10 +290,30 @@ export default function AuthTabs(props) {
       if (res && res.ok) {
         showResult(true, `Welcome, ${res.user?.firstName || "User"}!`);
         setTimeout(() => {
-          if (globalClearAllToasts && typeof globalClearAllToasts === "function") globalClearAllToasts();
+          if (
+            globalClearAllToasts &&
+            typeof globalClearAllToasts === "function"
+          )
+            globalClearAllToasts();
         }, 3000);
+
+        try {
+          // socket.io
+          // console.log("Socket Initialization s-in---> | ", ops_region, backendUrl); //--------------------------
+          // if (socket) socket.close(); // close anonymouse socket connection to reinnitialise.
+          // setSocket(initSocket(res.accessToken || null, { user: res.user, region: ops_region, url : backendUrl, getAuth: () => useAuth()}));
+            
+          console.log("Socket Initialization s-up---> | ", res.user.userId, backendUrl); //--------------------------
+          identifyUserAfterLogin({token : res.accessToken, userId : res.user._id}, { user: user, region: ops_region, url : backendUrl, getAuth: () => useAuth()});
+        } catch (error) {
+          console.log("Socket Initializtion error ---> | ", error);
+        }
       } else {
-        showResult(false, "Sign in failed", (res && res.error) || "Invalid credentials");
+        showResult(
+          false,
+          "Sign in failed",
+          (res && res.error) || "Invalid credentials",
+        );
       }
     } catch (err) {
       dismissProcessing(proc);
@@ -258,7 +331,14 @@ export default function AuthTabs(props) {
     const payload = {
       firstName: trim(suFirstName),
       lastName: trim(suLastName) || "",
-      emails: [{ address: trim(suEmail).toLowerCase(), verified: false, primary: true, verifiedAt: null }],
+      emails: [
+        {
+          address: trim(suEmail).toLowerCase(),
+          verified: false,
+          primary: true,
+          verifiedAt: null,
+        },
+      ],
       password: suPassword,
       role: "customer",
     };
@@ -274,12 +354,34 @@ export default function AuthTabs(props) {
       setBusy(false);
 
       if (res && res.ok) {
-        showResult(true, "Account created", `Welcome, ${res.user?.firstName || "new user"}!`);
+        showResult(
+          true,
+          "Account created",
+          `Welcome, ${res.user?.firstName || "new user"}!`,
+        );
         setTimeout(() => {
-          if (globalClearAllToasts && typeof globalClearAllToasts === "function") globalClearAllToasts();
+          if (
+            globalClearAllToasts &&
+            typeof globalClearAllToasts === "function"
+          )
+            globalClearAllToasts();
         }, 3000);
+
+        try {
+          console.log("Socket Initialization s-up---> | ", res.user.userId,  backendUrl); //--------------------------
+          // socket.io
+          // initSocket(res.accessToken || null, { user: user, region: ops_region, url : backendUrl});
+          identifyUserAfterLogin({token : res.accessToken, userId : res.user._id }, { user: user, region: ops_region, url : backendUrl, getAuth: () => useAuth()});
+        } catch (error) {
+          console.log("Socket Initializtion error ---> | ", error);
+        }
+
       } else {
-        showResult(false, "Registration failed", (res && res.error) || "Registration error");
+        showResult(
+          false,
+          "Registration failed",
+          (res && res.error) || "Registration error",
+        );
       }
     } catch (err) {
       dismissProcessing(proc);
@@ -293,12 +395,37 @@ export default function AuthTabs(props) {
 
   /* Render (note: we never spread `props` onto DOM elements) */
   return (
-    <div className={`auth-tabs-folder ${className}`} style={{ width: 520, maxWidth: "calc(100% - 24px)", ...style }}>
+    <div
+      className={`auth-tabs-folder ${className}`}
+      style={{ width: 520, maxWidth: "calc(100% - 24px)", ...style }}
+    >
       <div className="folder-flap" aria-hidden="true">
-        <div style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", justifyContent: "flex-start" }}>
-          <div style={{ fontSize: 14, width:"fit-content", color: "#6b6b6b", fontWeight: 700 }}> [ Account ] </div>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
+            width: "100%",
+            justifyContent: "flex-start",
+          }}
+        >
+          <div
+            style={{
+              fontSize: 14,
+              width: "fit-content",
+              color: "#6b6b6b",
+              fontWeight: 700,
+            }}
+          >
+            {" "}
+            [ Account ]{" "}
+          </div>
           <div style={{ flex: 1 }} />
-          <div className="markers" role="tablist" aria-label="Authentication tabs">
+          <div
+            className="markers"
+            role="tablist"
+            aria-label="Authentication tabs"
+          >
             <button
               id="tab-signin"
               type="button"
@@ -332,7 +459,11 @@ export default function AuthTabs(props) {
         </div>
       </div>
 
-      <div className="folder-body" role="tabpanel" aria-labelledby={isLogin ? "tab-signin" : "tab-signup"}>
+      <div
+        className="folder-body"
+        role="tabpanel"
+        aria-labelledby={isLogin ? "tab-signin" : "tab-signup"}
+      >
         {isLogin ? (
           <form onSubmit={handleSignIn} aria-labelledby="tab-signin" noValidate>
             <div style={{ display: "grid", gap: 12 }}>
@@ -348,7 +479,11 @@ export default function AuthTabs(props) {
                   placeholder="alice@example.com"
                   disabled={busy}
                 />
-                {siErrors.email && <div className="field-error" role="alert">{siErrors.email}</div>}
+                {siErrors.email && (
+                  <div className="field-error" role="alert">
+                    {siErrors.email}
+                  </div>
+                )}
               </div>
 
               <div>
@@ -362,15 +497,19 @@ export default function AuthTabs(props) {
                   placeholder="Enter your password"
                   disabled={busy}
                 />
-                {siErrors.password && <div className="field-error" role="alert">{siErrors.password}</div>}
+                {siErrors.password && (
+                  <div className="field-error" role="alert">
+                    {siErrors.password}
+                  </div>
+                )}
               </div>
 
               <div className="actions">
                 <button
                   type="button"
                   onClick={() => {
-                    setSiEmail("admin@bulkbuy.example.com");
-                    setSiPassword("AdminPass!234");
+                    setSiEmail("aisha.khan@bulkbuy.org");
+                    setSiPassword("AdminPass!2026");
                   }}
                   className="btn"
                   disabled={busy}
@@ -402,7 +541,11 @@ export default function AuthTabs(props) {
                     type="text"
                     disabled={busy}
                   />
-                  {suErrors.firstName && <div className="field-error" role="alert">{suErrors.firstName}</div>}
+                  {suErrors.firstName && (
+                    <div className="field-error" role="alert">
+                      {suErrors.firstName}
+                    </div>
+                  )}
                 </div>
 
                 <div>
@@ -415,7 +558,11 @@ export default function AuthTabs(props) {
                     type="text"
                     disabled={busy}
                   />
-                  {suErrors.lastName && <div className="field-error" role="alert">{suErrors.lastName}</div>}
+                  {suErrors.lastName && (
+                    <div className="field-error" role="alert">
+                      {suErrors.lastName}
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -433,10 +580,18 @@ export default function AuthTabs(props) {
                   required
                   disabled={busy}
                 />
-                {suErrors.email && <div className="field-error" role="alert">{suErrors.email}</div>}
+                {suErrors.email && (
+                  <div className="field-error" role="alert">
+                    {suErrors.email}
+                  </div>
+                )}
               </div>
 
-              <div className="two-col" role="group" aria-label="Password fields">
+              <div
+                className="two-col"
+                role="group"
+                aria-label="Password fields"
+              >
                 <div>
                   <label htmlFor="su-password" className="required">
                     Password
@@ -451,7 +606,11 @@ export default function AuthTabs(props) {
                     required
                     disabled={busy}
                   />
-                  {suErrors.password && <div className="field-error" role="alert">{suErrors.password}</div>}
+                  {suErrors.password && (
+                    <div className="field-error" role="alert">
+                      {suErrors.password}
+                    </div>
+                  )}
                 </div>
 
                 <div>
@@ -468,13 +627,25 @@ export default function AuthTabs(props) {
                     required
                     disabled={busy}
                   />
-                  {suErrors.confirm && <div className="field-error" role="alert">{suErrors.confirm}</div>}
+                  {suErrors.confirm && (
+                    <div className="field-error" role="alert">
+                      {suErrors.confirm}
+                    </div>
+                  )}
                 </div>
               </div>
 
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  gap: 12,
+                }}
+              >
                 <div className="hint">
-                  Password must be at least 8 characters and include uppercase, lowercase, and a number.
+                  Password must be at least 8 characters and include uppercase,
+                  lowercase, and a number.
                 </div>
 
                 <div style={{ display: "flex", gap: 8 }}>

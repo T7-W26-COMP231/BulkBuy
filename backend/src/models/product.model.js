@@ -10,6 +10,8 @@ const mongoose = require('mongoose');
 
 const { Schema } = mongoose;
 
+const { generateDefaultIdStr } = require('./generateDefaultIdStr');
+
 /* -------------------------
  * Sub-schemas
  * ------------------------- */
@@ -37,6 +39,7 @@ const ItemRefSchema = new Schema({
  * ------------------------- */
 
 const ProductSchema = new Schema({
+  _id: { type: String, required: true, trim: true }, // only for testing
   // Basic identity
   name: { type: String, required: true, trim: true },
 
@@ -119,6 +122,19 @@ ProductSchema.pre('save', function () {
   const now = Date.now();
   if (!this.createdAt) this.createdAt = now;
   this.updatedAt = now;
+});
+
+
+ProductSchema.pre('validate', async function () {
+  // 1. Only run if the schema expects a String for _id
+  if (this.schema.path('_id').instance !== 'String') return;
+
+  // 2. Only generate if no _id exists (is undefined or null)
+  if (!this._id) {
+    // If generateDefaultId throws the "max attempts" error, 
+    // Mongoose will catch it and stop the save automatically.
+    this._id = await generateDefaultIdStr(this, { length: 20 });
+  }
 });
 
 /* -------------------------
@@ -213,5 +229,7 @@ ProductSchema.methods.softDelete = async function (deletedBy = null) {
 /* -------------------------
  * Export model
  * ------------------------- */
+
+// ProductSchema.plugin(require('./castLegacyIds'));
 
 module.exports = mongoose.models.Product || mongoose.model('Product', ProductSchema);

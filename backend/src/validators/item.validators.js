@@ -46,9 +46,15 @@ function adminOnly(req, res, next) {
  * Param validators
  * ------------------------- */
 
+// const idParam = [
+//   param('id').exists().withMessage('id is required').bail()
+//     .custom((v) => isObjectId(v)).withMessage('id must be a valid ObjectId'),
+//   runValidation
+// ];
+
 const idParam = [
   param('id').exists().withMessage('id is required').bail()
-    .custom((v) => isObjectId(v)).withMessage('id must be a valid ObjectId'),
+    .isString().trim().notEmpty().withMessage('id must be a non-empty string'),
   runValidation
 ];
 
@@ -57,6 +63,7 @@ const skuParam = [
     .isString().trim().notEmpty().withMessage('sku must be a non-empty string'),
   runValidation
 ];
+
 
 /* -------------------------
  * Create validator

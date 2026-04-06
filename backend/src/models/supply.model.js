@@ -21,6 +21,8 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
+const { generateDefaultIdStr } = require('./generateDefaultIdStr');
+
 const DiscountBracketSchema = new Schema(
   {
     minQty: { type: Number, required: true, min: 0 },
@@ -44,7 +46,10 @@ const QuoteSchema = new Schema(
 
 const ItemSchema = new Schema(
   {
-    itemId: { type: Schema.Types.ObjectId, required: true, ref: 'Item' },
+    //itemId: { type: Schema.Types.ObjectId, required: true, ref: 'Item' },
+    itemId: { type: String, required: true, ref: 'Item' },
+
+
     quotes: { type: [QuoteSchema], default: [] },
     requestedQuantity: { type: Number, min: 0 },
     meta: { type: Schema.Types.Mixed, default: {} }
@@ -82,8 +87,17 @@ const STATUS = [
 
 const SupplySchema = new Schema(
   {
-    supplierId: { type: Schema.Types.ObjectId, required: true, ref: 'User' },
-    requesterId: { type: Schema.Types.ObjectId, ref: 'User', default: null },
+    _id: { type: String, required: true, trim: true }, // only for testing
+
+    //supplierId: { type: Schema.Types.ObjectId, required: true, ref: 'User' },
+
+    supplierId: { type: String, required: true, ref: 'User' },
+
+
+    //requesterId: { type: Schema.Types.ObjectId, ref: 'User', default: null },
+    requesterId: { type: String, ref: 'User', default: null },
+
+
     items: { type: [ItemSchema], required: true, validate: [(v) => Array.isArray(v) && v.length > 0, 'items must be a non-empty array'] },
     deliveryLocation: { type: AddressSchema, default: {} },
     status: { type: String, enum: STATUS, default: 'quote', index: true },
@@ -117,6 +131,19 @@ function docToJSON(doc, ret) {
 SupplySchema.index({ supplierId: 1, status: 1, createdAt: -1 });
 SupplySchema.index({ 'items.itemId': 1 });
 SupplySchema.index({ ops_region: 1, status: 1 });
+
+
+SupplySchema.pre('validate', async function () {
+  // 1. Only run if the schema expects a String for _id
+  if (this.schema.path('_id').instance !== 'String') return;
+
+  // 2. Only generate if no _id exists (is undefined or null)
+  if (!this._id) {
+    // If generateDefaultId throws the "max attempts" error, 
+    // Mongoose will catch it and stop the save automatically.
+    this._id = await generateDefaultIdStr(this, { length: 20 });
+  }
+});
 
 /* Instance helpers */
 
@@ -192,5 +219,8 @@ SupplySchema.statics.findActiveById = function findActiveById(id, opts = {}) {
 SupplySchema.statics.softDeleteById = function softDeleteById(id, deletedBy = null) {
   return this.findByIdAndUpdate(id, { deleted: true, 'metadata.deletedBy': deletedBy }, { new: true });
 };
+
+
+// SupplySchema.plugin(require('./castLegacyIds'));
 
 module.exports = mongoose.model('Supply', SupplySchema);

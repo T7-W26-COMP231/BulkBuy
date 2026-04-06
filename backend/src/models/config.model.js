@@ -22,6 +22,8 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
+const { generateDefaultIdStr } = require('./generateDefaultIdStr');
+
 const THEME_ENUM = ['light', 'dark', 'system'];
 
 function transformToJSON(doc, ret) {
@@ -54,7 +56,9 @@ const LocationSchema = new Schema(
 
 const ConfigSchema = new Schema(
   {
-    userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, unique: true, index: true },
+    _id: { type: String, required: true, trim: true }, // only for testing
+    //userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, unique: true, index: true },
+    userId: { type: String, required: true, trim: true },// only for testing
     location: { type: LocationSchema, default: () => ({}) },
     theme: { type: String, enum: THEME_ENUM, default: 'system' },
     isPrivate: { type: Boolean, default: true, index: true },
@@ -74,6 +78,19 @@ const ConfigSchema = new Schema(
 ConfigSchema.index({ ops_region: 1 });
 // NOTE: Avoid declaring an additional index for `theme` here because the field-level index was removed
 // If you prefer an explicit schema index instead, add: ConfigSchema.index({ theme: 1 }); and keep theme without index: true
+
+
+ConfigSchema.pre('validate', async function () {
+  // 1. Only run if the schema expects a String for _id
+  if (this.schema.path('_id').instance !== 'String') return;
+
+  // 2. Only generate if no _id exists (is undefined or null)
+  if (!this._id) {
+    // If generateDefaultId throws the "max attempts" error, 
+    // Mongoose will catch it and stop the save automatically.
+    this._id = await generateDefaultIdStr(this, { length: 20 });
+  }
+});
 
 /* Instance methods */
 
@@ -174,6 +191,8 @@ ConfigSchema.virtual('summary').get(function summary() {
     ops_region: this.ops_region
   };
 });
+
+// ConfigSchema.plugin(require('./castLegacyIds'))
 
 /* Export model safely to avoid recompilation duplicate-index warnings in dev/hot-reload */
 module.exports = mongoose.models.Config || mongoose.model('Config', ConfigSchema);

@@ -5,7 +5,7 @@
  * - Consistent audit logging and correlationId propagation
  */
 const { sendQuoteApproved, sendQuoteRejected } = require('../services/email.service');
-const { emitToUser, getSocketIO } = require('../socket');
+const { emitToUser, getSocketIO } = require('../../../bb-docs+/socket');
 
 const userService = require('../services/user.service');
 
@@ -75,11 +75,17 @@ async function listSupplies(req, res) {
     }
 
     if (req.query.supplierId) {
-      filter.supplierId = req.query.supplierId;
+      //filter.supplierId = req.query.supplierId;
+      filter.supplierId = req.user.userId || req.user._id;
+
     }
-    // 👇 add this
+    /* 👇 add this
     if (req.user?.role === 'supplier') {
       filter.supplierId = req.user._id;
+    }*/
+
+    if (req.user?.role === 'supplier') {
+      filter.supplierId = req.user.userId || req.user._id;
     }
 
     const result = await supplyService.listSupplies(filter, {

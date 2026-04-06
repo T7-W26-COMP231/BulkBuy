@@ -74,11 +74,14 @@ export default function AdminSidebar() {
       {/* ── Logo ────────────────────────────────────────────────────── */}
       <div className="border-b border-neutral-light px-6 py-6">
         <div className="flex items-center gap-3">
-          <div className="flex size-12 items-center justify-center rounded-2xl bg-primary text-text-main">
+          <div className="flex size-12 items-center justify-center rounded-2xl bg-primary text-text-main shadow-sm">
             <span className="material-symbols-outlined">shopping_cart</span>
           </div>
           <div>
             <h2 className="text-xl font-bold text-text-main">BulkBuy Admin</h2>
+            <p className="text-xs font-medium tracking-wide text-text-muted">
+              Navigation Console
+            </p>
           </div>
         </div>
       </div>
@@ -91,9 +94,9 @@ export default function AdminSidebar() {
             to={item.to}
             end={item.to === "/admin"}
             className={({ isActive }) =>
-              `flex items-center gap-4 rounded-2xl px-4 py-4 text-base font-semibold transition ${isActive
-                ? "bg-primary text-text-main"
-                : "text-text-muted hover:bg-neutral-light"
+              `flex items-center gap-4 rounded-2xl px-4 py-4 text-base font-semibold transition-all duration-200 ${isActive
+                ? "bg-primary text-text-main shadow-sm"
+                : "text-text-muted hover:bg-neutral-light hover:translate-x-1"
               }`
             }
           >
@@ -125,7 +128,9 @@ export default function AdminSidebar() {
                 <p className="truncate text-sm font-semibold text-text-main">
                   {displayName || "User"}
                 </p>
-                <p className="truncate text-xs text-text-muted">{user.role ?? "Account"}</p>
+                <p className="inline-flex rounded-full bg-neutral-light px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-text-muted">
+  {user.role ?? "Account"}
+</p>
                 {email && <p className="truncate text-xs text-text-muted">{email}</p>}
               </div>
             </div>

@@ -46,12 +46,18 @@ export default function AdminDashboard() {
                 <p className="text-sm font-semibold uppercase tracking-[0.16em] text-text-muted">
                   Admin Overview
                 </p>
+
                 <h2 className="mt-3 text-3xl font-bold text-text-main">
                   Welcome back to the BulkBuy admin dashboard
                 </h2>
+
                 <p className="mt-3 max-w-3xl text-base text-text-muted">
                   Monitor supplier activity, product availability, active
                   aggregation windows, and system alerts from one place.
+                </p>
+
+                <p className="mt-2 text-sm text-text-muted">
+                  Last updated: Today
                 </p>
               </section>
 
@@ -61,6 +67,7 @@ export default function AdminDashboard() {
                   label="Pending Quotes"
                   value="12"
                   extra="+3 today"
+                  badge="Quotes"
                 />
                 <AdminSummaryCard
                   label="Active Windows"
@@ -84,9 +91,15 @@ export default function AdminDashboard() {
                 {/* Alerts Panel */}
                 <div className="rounded-2xl border border-neutral-light bg-white p-6 shadow-sm xl:col-span-2">
                   <div className="flex items-center justify-between gap-4">
-                    <h3 className="text-xl font-bold text-text-main">
-                      System Alerts
-                    </h3>
+                    <div className="flex items-center gap-2">
+                      <span className="material-symbols-outlined text-text-muted">
+                        warning
+                      </span>
+                      <h3 className="text-xl font-bold text-text-main">
+                        System Alerts
+                      </h3>
+                    </div>
+
                     <span className="rounded-md bg-neutral-light px-3 py-1 text-sm font-semibold text-text-muted">
                       {alerts.length} active
                     </span>
@@ -133,9 +146,14 @@ export default function AdminDashboard() {
               <section className="grid gap-6 lg:grid-cols-2">
                 {/* Recent Activity */}
                 <div className="rounded-2xl border border-neutral-light bg-white p-6 shadow-sm">
-                  <h3 className="text-xl font-bold text-text-main">
-                    Recent Activity
-                  </h3>
+                  <div className="flex items-center gap-2">
+                    <span className="material-symbols-outlined text-text-muted">
+                      history
+                    </span>
+                    <h3 className="text-xl font-bold text-text-main">
+                      Recent Activity
+                    </h3>
+                  </div>
 
                   <div className="mt-5 space-y-4">
                     {recentActivity.map((item, index) => (
@@ -149,11 +167,17 @@ export default function AdminDashboard() {
                   </div>
                 </div>
 
-                {/* Admin Notes / Placeholder Widget */}
+                {/* Admin Notes */}
                 <div className="rounded-2xl border border-neutral-light bg-white p-6 shadow-sm">
-                  <h3 className="text-xl font-bold text-text-main">
-                    Dashboard Notes
-                  </h3>
+                  <div className="flex items-center gap-2">
+                    <span className="material-symbols-outlined text-text-muted">
+                      edit_note
+                    </span>
+                    <h3 className="text-xl font-bold text-text-main">
+                      Dashboard Notes
+                    </h3>
+                  </div>
+
                   <p className="mt-4 text-sm leading-7 text-text-muted">
                     This section can later be connected to live dashboard
                     metrics, notifications, or internal admin reminders. For

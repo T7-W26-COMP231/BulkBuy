@@ -1,7 +1,7 @@
 import { NavLink, useNavigate } from "react-router-dom";
-import { useAuth } from "../../contexts/AuthContext.jsx"; // adjust path if needed
-import { useToast } from "../../contexts/ToastProvider.jsx"; // adjust path if needed
-import AuthTabs from "../sign-in-up/AuthTabs.jsx"; // adjust path if needed
+import { useAuth } from "../../contexts/AuthContext.jsx";
+import { useToast } from "../../contexts/ToastProvider.jsx";
+import AuthTabs from "../sign-in-up/AuthTabs.jsx";
 
 const sidebarItems = [
   { label: "Dashboard", icon: "dashboard", to: "/admin" },
@@ -14,17 +14,15 @@ const sidebarItems = [
 ];
 
 function ToastAuthWrapper({ toastControls }) {
-  const { signIn, signOut } = useAuth(); // add signOut here
+  const { signIn, signOut } = useAuth();
 
   const handleSignIn = async (payload) => {
     try {
       const res = await signIn(payload);
-
       if (res?.user?.role !== "administrator") {
         await signOut();
         return { ok: false, error: "Access denied. Administrator credentials required." };
       }
-
       toastControls?.dismiss?.();
       return { ok: true, user: res.user };
     } catch (err) {
@@ -64,7 +62,7 @@ export default function AdminSidebar() {
     try {
       await signOut();
       clearAll();
-      navigate("/", { replace: true }); // added this to redirect to homepage (bulk buy recommended tab)
+      navigate("/", { replace: true });
     } catch (err) {
       console.error("signOut error:", err);
     }
@@ -72,26 +70,30 @@ export default function AdminSidebar() {
 
   return (
     <aside className="hidden w-72 border-r border-neutral-light bg-white lg:flex lg:flex-col">
+
+      {/* ── Logo ────────────────────────────────────────────────────── */}
       <div className="border-b border-neutral-light px-6 py-6">
         <div className="flex items-center gap-3">
           <div className="flex size-12 items-center justify-center rounded-2xl bg-primary text-text-main">
             <span className="material-symbols-outlined">shopping_cart</span>
           </div>
           <div>
-            <h2 className="text-xl font-bold text-text-main">BulkBuy</h2>
-            <p className="text-sm text-text-muted">Admin Portal</p>
+            <h2 className="text-xl font-bold text-text-main">BulkBuy Admin</h2>
           </div>
         </div>
       </div>
 
-      <nav className="flex flex-1 flex-col gap-4 px-5 py-6">
+      {/* ── Nav links ───────────────────────────────────────────────── */}
+      <nav className="flex flex-1 flex-col gap-1 px-5 py-6">
         {sidebarItems.map((item) => (
           <NavLink
             key={item.to}
             to={item.to}
             end={item.to === "/admin"}
             className={({ isActive }) =>
-              `flex items-center gap-4 rounded-2xl px-4 py-4 text-base font-semibold transition ${isActive ? "bg-primary/15 text-text-main" : "text-[#4B9CA2] hover:bg-neutral-light"
+              `flex items-center gap-4 rounded-2xl px-4 py-4 text-base font-semibold transition ${isActive
+                ? "bg-primary text-text-main"
+                : "text-text-muted hover:bg-neutral-light"
               }`
             }
           >
@@ -100,44 +102,58 @@ export default function AdminSidebar() {
           </NavLink>
         ))}
       </nav>
+      {/* ── Export Report button ─────────────────────────────────────── */}
+      <div className="px-5 pb-5">
+        <button
+          type="button"
+          className="flex w-full items-center justify-center gap-2 rounded-2xl bg-primary px-4 py-3.5 text-sm font-bold text-text-main transition hover:opacity-90"
+        >
+          <span className="material-symbols-outlined text-[20px]">download</span>
+          Export Report
+        </button>
+      </div>
 
-      {/* Bottom user section */}
+      {/* ── User section ────────────────────────────────────────────── */}
       <div className="border-t border-neutral-light px-6 py-5">
         {user ? (
           <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3 min-w-0">
+            <div className="flex min-w-0 items-center gap-3">
               <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-orange-100 text-sm font-bold text-orange-600">
                 {initials}
               </div>
               <div className="min-w-0">
-                <p className="text-sm font-semibold text-text-main truncate">{displayName || "User"}</p>
-                <p className="text-xs text-text-muted truncate">{user.role ?? "Account"}</p>
-                {email && <p className="text-xs text-text-muted truncate">{email}</p>}
+                <p className="truncate text-sm font-semibold text-text-main">
+                  {displayName || "User"}
+                </p>
+                <p className="truncate text-xs text-text-muted">{user.role ?? "Account"}</p>
+                {email && <p className="truncate text-xs text-text-muted">{email}</p>}
               </div>
             </div>
 
-            {/* Sign out button */}
+
             <button
               type="button"
               onClick={handleSignOut}
               title="Sign out"
-              className="shrink-0 flex items-center justify-center rounded-lg p-1.5 text-red-400 hover:bg-red-50 hover:text-red-600 transition-colors"
+              className="flex shrink-0 items-center justify-center rounded-lg p-1.5 text-red-400 transition-colors hover:bg-red-50 hover:text-red-600"
             >
               <span className="material-symbols-outlined text-[20px]">logout</span>
             </button>
           </div>
         ) : (
-          // No user — show sign in button
           <button
             type="button"
             onClick={openAuthToast}
-            className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold text-[#4B9CA2] hover:bg-neutral-light transition"
+            className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold text-text-muted transition hover:bg-neutral-light"
           >
             <span className="material-symbols-outlined text-[24px]">login</span>
             <span>Sign in / Register</span>
           </button>
         )}
       </div>
+
+
+
     </aside>
   );
 }

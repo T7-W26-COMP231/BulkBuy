@@ -124,7 +124,7 @@ export default function App() {
         <Route path="/supplier/profile" element={<SupplierProfilePage />} />
         <Route path="/supplier/approved-items" element={<SupplierApprovedItemsPage />} />
         <Route path="/supplier/quotes" element={<SupplierQuotesPage />} />
-        <Route path="/supplier/orders" element={<SupplierOrdersPage />} />
+        <Route path="/supplier/order-requests" element={<SupplierOrdersPage />} />
         <Route path="/supplier/demand-status" element={<SupplierDemandStatusPage />} />
         <Route path="/supplier/reports" element={<SupplierReportsPage />} />
         <Route path="/supplier/order-requests/:id/fulfillment" element={<SupplierFulfillmentPage />} />

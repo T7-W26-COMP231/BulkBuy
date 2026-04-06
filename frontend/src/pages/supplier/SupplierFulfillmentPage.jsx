@@ -17,6 +17,7 @@ const STATUS_STYLES = {
     declined: "bg-red-100 text-red-700",
     dispatched: "bg-blue-100 text-blue-700",
     fulfilled: "bg-emerald-100 text-emerald-700",
+    confirmed: "bg-slate-100 text-slate-700",
 };
 
 export default function SupplierFulfillmentPage() {
@@ -30,6 +31,7 @@ export default function SupplierFulfillmentPage() {
 
     const [deliveryDate, setDeliveryDate] = useState("");
     const [fulfillmentNotes, setFulfillmentNotes] = useState("");
+    const [confirmError, setConfirmError] = useState("");
 
     const [confirming, setConfirming] = useState(false);
 
@@ -40,7 +42,7 @@ export default function SupplierFulfillmentPage() {
 
     const [checklist, setChecklist] = useState([
         { id: 1, label: "Batch quality certificate attached", checked: true },
-        { id: 2, label: "Standard pallet dimensions (48\" x 40\") used", checked: true },
+        { id: 2, label: 'Standard pallet dimensions (48" x 40") used', checked: true },
         { id: 3, label: "Moisture-proof wrapping applied", checked: false },
     ]);
 
@@ -49,6 +51,7 @@ export default function SupplierFulfillmentPage() {
             try {
                 setLoadingOrder(true);
                 setOrderError("");
+
                 const response = await fetch(
                     `${import.meta.env.VITE_API_URL}/api/ordrs/${id}`,
                     {
@@ -57,8 +60,10 @@ export default function SupplierFulfillmentPage() {
                             : {},
                     }
                 );
+
                 const data = await response.json();
                 if (!response.ok) throw new Error(data?.message || "Failed to load order");
+
                 setOrder(data.data);
             } catch (err) {
                 setOrderError(err.message || "Failed to load order");
@@ -66,30 +71,43 @@ export default function SupplierFulfillmentPage() {
                 setLoadingOrder(false);
             }
         };
+
         if (id) fetchOrder();
     }, [id, accessToken]);
 
     const handleConfirmFulfillment = async () => {
+        if (!deliveryDate) {
+            setConfirmError("Expected delivery date is required.");
+            return;
+        }
 
         try {
             setConfirming(true);
+            setConfirmError("");
 
             const response = await fetch(
-                `${import.meta.env.VITE_API_URL}/api/ordrs/${id}/fulfill`,
+                `${import.meta.env.VITE_API_URL}/api/ordrs/${id}/confirm-fulfillment`,
                 {
                     method: "PATCH",
                     headers: {
                         "Content-Type": "application/json",
                         ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
                     },
-                    body: JSON.stringify({ deliveryDate, notes: fulfillmentNotes }),
+                    body: JSON.stringify({
+                        expectedDeliveryDate: deliveryDate,
+                        notes: fulfillmentNotes,
+                    }),
                 }
             );
+
             const data = await response.json();
-            if (!response.ok) throw new Error(data?.message || "Failed to confirm fulfillment");
+            if (!response.ok) {
+                throw new Error(data?.message || "Failed to confirm fulfillment");
+            }
+
             navigate("/supplier/order-requests");
         } catch (err) {
-
+            setConfirmError(err.message || "Failed to confirm fulfillment");
         } finally {
             setConfirming(false);
         }
@@ -100,9 +118,11 @@ export default function SupplierFulfillmentPage() {
             setDeclineError("Decline reason is required.");
             return;
         }
+
         try {
             setDeclining(true);
             setDeclineError("");
+
             const response = await fetch(
                 `${import.meta.env.VITE_API_URL}/api/ordrs/${id}/decline`,
                 {
@@ -114,9 +134,11 @@ export default function SupplierFulfillmentPage() {
                     body: JSON.stringify({ reason: declineReason.trim() }),
                 }
             );
+
             const data = await response.json();
             if (!response.ok) throw new Error(data?.message || "Failed to decline");
-            navigate("/supplier/order-requests");
+
+            navigate("/supplier/orders-requests");
         } catch (err) {
             setDeclineError(err.message || "Failed to decline");
         } finally {
@@ -124,51 +146,47 @@ export default function SupplierFulfillmentPage() {
         }
     };
 
-    // Derived order values
     const items = Array.isArray(order?.items) ? order.items : [];
 
     const totalQty = items.reduce(
-    (sum, item) => sum + Number(item?.quantity || item?.meta?.quantity || 0),
-    0
+        (sum, item) => sum + Number(item?.quantity || item?.meta?.quantity || 0),
+        0
     );
 
     const firstItem = items[0] || {};
 
     const productName =
-    items.length > 1
-        ? `${items.length} items`
-        : firstItem.productId
-        ? `Product ${String(firstItem.productId).slice(-6)}`
-        : "N/A";
+        items.length > 1
+            ? `${items.length} items`
+            : firstItem.productId
+            ? `Product ${String(firstItem.productId).slice(-6)}`
+            : "N/A";
 
-    const productSubtitle =
-    firstItem?.pricingSnapshot?.meta?.currency
+    const productSubtitle = firstItem?.pricingSnapshot?.meta?.currency
         ? `Currency: ${firstItem.pricingSnapshot.meta.currency}`
         : "Order item details";
 
     const deliveryCity =
-    order?.deliveryLocation?.city ||
-    order?.orderLocation?.city ||
-    order?.ops_region ||
-    "N/A";
+        order?.deliveryLocation?.city ||
+        order?.orderLocation?.city ||
+        order?.ops_region ||
+        "N/A";
 
     const orderIdDisplay = order?._id ? `#${order._id}` : "N/A";
 
     const windowStart = order?.salesWindow?.fromEpoch
-    ? formatEpochDate(order.salesWindow.fromEpoch)
-    : "N/A";
+        ? formatEpochDate(order.salesWindow.fromEpoch)
+        : "N/A";
 
     const windowEnd = order?.salesWindow?.toEpoch
-    ? formatEpochDate(order.salesWindow.toEpoch)
-    : "N/A";
+        ? formatEpochDate(order.salesWindow.toEpoch)
+        : "N/A";
 
     const orderStatus = (order?.status || "approved").toLowerCase();
 
     return (
         <SupplierLayout>
             <div className="flex flex-col gap-6">
-
-                {/* Breadcrumb */}
                 <nav className="flex items-center gap-2 text-sm text-text-muted">
                     <button
                         type="button"
@@ -181,7 +199,6 @@ export default function SupplierFulfillmentPage() {
                     <span className="font-semibold text-text-main">Confirm Fulfillment</span>
                 </nav>
 
-                {/* Hero */}
                 <section className="overflow-hidden rounded-3xl bg-[#083b2d] px-8 py-8 text-white shadow-lg">
                     <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
                         Fulfillment Confirmation
@@ -192,7 +209,6 @@ export default function SupplierFulfillmentPage() {
                     </p>
                 </section>
 
-                {/* Loading / Error */}
                 {loadingOrder ? (
                     <div className="rounded-2xl border border-neutral-light bg-white px-6 py-16 text-center text-sm text-text-muted shadow-sm">
                         Loading order details...
@@ -203,23 +219,20 @@ export default function SupplierFulfillmentPage() {
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-
-                        {/* LEFT COLUMN */}
                         <div className="flex flex-col gap-6 lg:col-span-2">
-
-                            {/* Order Summary */}
                             <section className="rounded-2xl border border-neutral-light bg-white p-6 shadow-sm">
                                 <div className="mb-5 flex items-center justify-between">
                                     <h2 className="text-base font-bold text-text-main">Order Summary</h2>
                                     <span
-                                        className={`rounded-lg px-3 py-1 text-xs font-bold uppercase ${STATUS_STYLES[orderStatus] ?? "bg-slate-100 text-slate-700"}`}
+                                        className={`rounded-lg px-3 py-1 text-xs font-bold uppercase ${
+                                            STATUS_STYLES[orderStatus] ?? "bg-slate-100 text-slate-700"
+                                        }`}
                                     >
                                         {orderStatus}
                                     </span>
                                 </div>
 
-                                {/* Order meta */}
-                                <div className="grid grid-cols-3 gap-4 mb-5">
+                                <div className="mb-5 grid grid-cols-3 gap-4">
                                     <div>
                                         <p className="text-xs font-semibold uppercase tracking-wide text-text-muted">
                                             Order ID
@@ -246,12 +259,21 @@ export default function SupplierFulfillmentPage() {
                                     </div>
                                 </div>
 
-                                {/* Product card */}
                                 <div className="rounded-2xl border border-neutral-light bg-neutral-light/20 p-4">
                                     <div className="flex items-center gap-4">
                                         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10">
-                                            <svg className="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10" />
+                                            <svg
+                                                className="h-5 w-5 text-primary"
+                                                fill="none"
+                                                viewBox="0 0 24 24"
+                                                stroke="currentColor"
+                                            >
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={2}
+                                                    d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10"
+                                                />
                                             </svg>
                                         </div>
                                         <div className="flex-1">
@@ -260,8 +282,18 @@ export default function SupplierFulfillmentPage() {
                                         </div>
                                         <div className="flex items-center gap-4 text-xs text-text-muted">
                                             <span className="flex items-center gap-1">
-                                                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                <svg
+                                                    className="h-3.5 w-3.5"
+                                                    fill="none"
+                                                    viewBox="0 0 24 24"
+                                                    stroke="currentColor"
+                                                >
+                                                    <path
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth={2}
+                                                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                                    />
                                                 </svg>
                                                 {windowStart} - {windowEnd}
                                             </span>
@@ -270,7 +302,6 @@ export default function SupplierFulfillmentPage() {
                                 </div>
                             </section>
 
-                            {/* Quality & Packing Checklist */}
                             <section className="rounded-2xl border border-neutral-light bg-white p-6 shadow-sm">
                                 <h2 className="mb-4 text-base font-bold text-text-main">
                                     Quality & Packing Checklist
@@ -286,18 +317,31 @@ export default function SupplierFulfillmentPage() {
                                                 onClick={() =>
                                                     setChecklist((prev) =>
                                                         prev.map((c) =>
-                                                            c.id === item.id ? { ...c, checked: !c.checked } : c
+                                                            c.id === item.id
+                                                                ? { ...c, checked: !c.checked }
+                                                                : c
                                                         )
                                                     )
                                                 }
-                                                className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 transition ${item.checked
-                                                    ? "border-primary bg-primary"
-                                                    : "border-neutral-light bg-white"
-                                                    }`}
+                                                className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 transition ${
+                                                    item.checked
+                                                        ? "border-primary bg-primary"
+                                                        : "border-neutral-light bg-white"
+                                                }`}
                                             >
                                                 {item.checked && (
-                                                    <svg className="h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                                    <svg
+                                                        className="h-3.5 w-3.5 text-white"
+                                                        fill="none"
+                                                        viewBox="0 0 24 24"
+                                                        stroke="currentColor"
+                                                    >
+                                                        <path
+                                                            strokeLinecap="round"
+                                                            strokeLinejoin="round"
+                                                            strokeWidth={3}
+                                                            d="M5 13l4 4L19 7"
+                                                        />
                                                     </svg>
                                                 )}
                                             </button>
@@ -306,13 +350,9 @@ export default function SupplierFulfillmentPage() {
                                     ))}
                                 </div>
                             </section>
-
                         </div>
 
-                        {/* RIGHT COLUMN */}
                         <div className="flex flex-col gap-6">
-
-                            {/* Fulfillment Details */}
                             <section className="rounded-2xl border border-neutral-light bg-white p-6 shadow-sm">
                                 <h2 className="mb-5 text-base font-bold text-text-main">
                                     Fulfillment Details
@@ -321,16 +361,26 @@ export default function SupplierFulfillmentPage() {
                                 <div className="flex flex-col gap-4">
                                     <div>
                                         <label className="mb-2 block text-sm font-semibold text-text-main">
-                                            Expected Delivery Date{" "}
-                                            <span className="text-red-500">*</span>
+                                            Expected Delivery Date <span className="text-red-500">*</span>
                                         </label>
                                         <input
                                             type="date"
                                             value={deliveryDate}
-                                            onChange={(e) => setDeliveryDate(e.target.value)}
-                                            className="w-full rounded-xl border border-neutral-light px-4 py-2.5 text-sm outline-none focus:border-primary"
+                                            onChange={(e) => {
+                                                setDeliveryDate(e.target.value);
+                                                setConfirmError("");
+                                            }}
+                                            className={`w-full rounded-xl border px-4 py-2.5 text-sm outline-none ${
+                                                confirmError
+                                                    ? "border-red-300 focus:border-red-500"
+                                                    : "border-neutral-light focus:border-primary"
+                                            }`}
                                         />
-
+                                        {confirmError && (
+                                            <p className="mt-2 text-sm font-medium text-red-600">
+                                                {confirmError}
+                                            </p>
+                                        )}
                                     </div>
 
                                     <div>
@@ -352,8 +402,18 @@ export default function SupplierFulfillmentPage() {
                                         disabled={confirming}
                                         className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3 text-sm font-bold text-text-main transition hover:opacity-90 disabled:opacity-50"
                                     >
-                                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                                        <svg
+                                            className="h-4 w-4"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth={2.5}
+                                                d="M5 13l4 4L19 7"
+                                            />
                                         </svg>
                                         {confirming ? "Confirming..." : "Confirm Fulfillment"}
                                     </button>
@@ -368,18 +428,27 @@ export default function SupplierFulfillmentPage() {
                                         disabled={confirming}
                                         className="flex w-full items-center justify-center gap-2 rounded-xl border border-red-200 py-3 text-sm font-bold text-red-600 transition hover:bg-red-50 disabled:opacity-50"
                                     >
-                                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                                        <svg
+                                            className="h-4 w-4"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth={2.5}
+                                                d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"
+                                            />
                                         </svg>
                                         {declining ? "Declining..." : "Decline Fulfillment"}
                                     </button>
                                 </div>
                             </section>
 
-                            {/* Logistics Note */}
                             <div className="rounded-2xl border border-blue-100 bg-blue-50 p-4">
                                 <div className="flex items-start gap-3">
-                                    <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-500 mt-0.5">
+                                    <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-500">
                                         <span className="text-[10px] font-bold text-white">i</span>
                                     </div>
                                     <div>
@@ -391,13 +460,11 @@ export default function SupplierFulfillmentPage() {
                                     </div>
                                 </div>
                             </div>
-
                         </div>
                     </div>
                 )}
             </div>
 
-            {/* Decline Modal */}
             {showDeclineModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
                     <div className="w-full max-w-lg rounded-3xl bg-white shadow-2xl">
@@ -443,10 +510,11 @@ export default function SupplierFulfillmentPage() {
                                 type="button"
                                 disabled={!declineReason.trim() || declining}
                                 onClick={handleDecline}
-                                className={`rounded-xl px-4 py-2 text-sm font-bold text-white transition ${declineReason.trim() && !declining
-                                    ? "bg-red-600 hover:opacity-90"
-                                    : "cursor-not-allowed bg-red-300"
-                                    }`}
+                                className={`rounded-xl px-4 py-2 text-sm font-bold text-white transition ${
+                                    declineReason.trim() && !declining
+                                        ? "bg-red-600 hover:opacity-90"
+                                        : "cursor-not-allowed bg-red-300"
+                                }`}
                             >
                                 {declining ? "Declining..." : "Submit Decline"}
                             </button>

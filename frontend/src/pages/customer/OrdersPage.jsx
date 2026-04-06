@@ -25,10 +25,17 @@ export default function OrdersPage() {
 
   useEffect(() => {
     const fetchOrders = async () => {
-      if (!user?._id) { setLoading(false); return; }
+      //if (!user?._id) { setLoading(false); return; }
+      if (!user?.userId && !user?._id) { setLoading(false); return; }
+
+
       try {
         setError(null);
-        const res = await api.get(`/api/ordrs/user/${user._id}`);
+        //const res = await api.get(`/ordrs/user/${user._id}`);
+
+        const res = await api.get(`/ordrs/user/${user.userId || user._id}`);
+
+
         const all = res.data?.items || [];
         const relevantOrders = all
           .filter(o => ["submitted", "confirmed", "dispatched", "fulfilled", "cancelled"].includes(o.status))
@@ -38,7 +45,7 @@ export default function OrdersPage() {
           relevantOrders.flatMap(o => o.items.map(i => i.itemId?._id || i.itemId)).filter(Boolean)
         )];
         const itemResponses = await Promise.all(
-          uniqueItemIds.map(id => api.get(`/api/items/${id}`).then(r => r.data).catch(() => null))
+          uniqueItemIds.map(id => api.get(`/items/${id}`).then(r => r.data).catch(() => null))
         );
         const itemMap = {};
         itemResponses.forEach((res, i) => {

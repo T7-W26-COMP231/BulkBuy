@@ -176,9 +176,11 @@ async function getUiProducts(opts = {}) {
       const swResult = await SalesWindowService.listAllCurrentProducts(region, swOpts);
       const payload = _normalize(swResult, page, limit);
       cache.set(key, payload, DEFAULT_TTL, STALE_TTL);
+      // console.log(`---/// success getting ui products @ ======================>: ${JSON.stringify(payload)}`) //---------------------
       return payload;
     } catch (err) {
       // if there is a stale entry, return it; otherwise bubble error
+      // console.log(`---/// error getting ui products @ ======================>: ${JSON.stringify(err)}`) //---------------------
       const stale = cache.get(key);
       if (stale && stale.payload) return stale.payload;
       if (err && err.status) throw err;

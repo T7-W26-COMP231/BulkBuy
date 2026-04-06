@@ -35,6 +35,8 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 const slugify = require('slugify');
 
+const { generateDefaultIdStr } = require('./generateDefaultIdStr');
+
 const MEDIA_TYPES = ['video', 'image'];
 const STATUS_ENUM = ['active', 'suspended', 'draft'];
 
@@ -138,6 +140,7 @@ const RatingsSchema = new Schema(
 
 const ItemSchema = new Schema(
   {
+    _id: { type: String, required: true, trim: true }, // only for testing
     sku: { type: String, required: true, unique: true, index: true, trim: true },
     title: { type: String, required: true, trim: true },
     slug: { type: String, required: true, unique: true, trim: true },
@@ -180,7 +183,7 @@ const ItemSchema = new Schema(
 
     status: { type: String, enum: STATUS_ENUM, default: 'draft', index: true },
 
-    ops_region: { type: String, trim: true, default: '' },
+    ops_regions: { type: [String], trim: true, default: [] },
 
     published: { type: Boolean, default: false, index: true }
   },
@@ -211,6 +214,19 @@ ItemSchema.pre('validate', function () {
     }
   } catch (error) {
     throw new Error(`item alidation failed: ${error.message}`)
+  }
+});
+
+
+ItemSchema.pre('validate', async function () {
+  // 1. Only run if the schema expects a String for _id
+  if (this.schema.path('_id').instance !== 'String') return;
+
+  // 2. Only generate if no _id exists (is undefined or null)
+  if (!this._id) {
+    // If generateDefaultId throws the "max attempts" error, 
+    // Mongoose will catch it and stop the save automatically.
+    this._id = await generateDefaultIdStr(this, { length: 20 });
   }
 });
 
@@ -362,4 +378,7 @@ ItemSchema.virtual('summary').get(function () {
 /* -------------------------
  * Export model
  * ------------------------- */
+
+// ItemSchema.plugin(require('./castLegacyIds'));
+
 module.exports = mongoose.models.Item || mongoose.model('Item', ItemSchema);

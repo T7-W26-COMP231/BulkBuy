@@ -48,9 +48,16 @@ export default function ItemDetail() {
                 console.log(prodData)
                 console.log(prodRes)
                 console.log(product)
+
                 if (prodRes.ok && product?._id) {
+                    // TO - simple and works for plain strings
                     const itemIds = (product.items ?? [])
-                        .map((i) => i.itemId?.$oid || i.itemId?.toString?.() || i.itemId)
+                        .map((i) => {
+                            if (!i.itemId) return null;
+                            if (typeof i.itemId === "string") return i.itemId;
+                            if (i.itemId?.$oid) return i.itemId.$oid;
+                            return String(i.itemId);
+                        })
                         .filter(Boolean);
 
                     const itemsRes = await Promise.all(
@@ -71,9 +78,11 @@ export default function ItemDetail() {
                     // ✅ Preserve product.items order (no sorting)
                     const sortedItems = (product.items ?? [])
                         .map(pi => {
-                            const piId = pi.itemId?.$oid || pi.itemId?.toString?.() || String(pi.itemId);
+                            const piId = typeof pi.itemId === "string" ? pi.itemId : pi.itemId?.$oid || String(pi.itemId);
+
                             return items.find(item => {
-                                const itemId = item._id?.$oid || item._id?.toString?.() || String(item._id);
+                                const itemId = typeof item._id === "string" ? item._id : item._id?.$oid || String(item._id);
+
                                 return itemId === piId;
                             });
                         })
@@ -83,7 +92,8 @@ export default function ItemDetail() {
 
                     // ✅ mainItem is now defined
                     const mainItem = sortedItems[0];
-                    const mainItemIdStr = mainItem._id?.$oid || mainItem._id?.toString?.() || String(mainItem._id);
+                    const mainItemIdStr = typeof mainItem._id === "string" ? mainItem._id : mainItem._id?.$oid || String(mainItem._id);
+
 
 
                     // ✅ Match salesPrice by item ID
@@ -226,7 +236,7 @@ export default function ItemDetail() {
 
         try {
             const payload = buildIntentPayload({
-                userId: user._id,
+                userId: user.userId || user._id || user.id,
                 productId: productData?._id ?? null,
                 itemId: item._id,
                 quantity,
@@ -239,7 +249,9 @@ export default function ItemDetail() {
 
             await createIntent(payload);
 
-            const cartStorageKey = user?._id ? `cartItems_${user._id}` : "cartItems_guest";
+            const cartStorageKey = (user?.userId || user?._id)
+                ? `cartItems_${user.userId || user._id}`
+                : "cartItems_guest";
             const existingCartItems = JSON.parse(sessionStorage.getItem(cartStorageKey) || "[]");
 
 

@@ -104,26 +104,29 @@ class OrderRepository {
     const skip = (page - 1) * limit;
 
     const f = { ...filter };
-
-    const [items, total] = await Promise.all([
-      Order.find(f)
-        .select(opts.select || '')
-        .sort(opts.sort || { createdAt: -1 })
-        .skip(skip)
-        .limit(limit)
-        .populate(opts.populate || '')
-        .lean()
-        .exec(),
-      Order.countDocuments(f).exec()
-    ]);
-
-    return {
-      items,
-      total,
-      page,
-      limit,
-      pages: Math.max(1, Math.ceil(total / limit))
-    };
+    
+    try {
+      const [items, total] = await Promise.all([
+        Order.find(f)
+          .select(opts.select || '')
+          .sort(opts.sort || { createdAt: -1 })
+          .skip(skip)
+          .limit(limit)
+          .populate(opts.populate || '')
+          .lean()
+          .exec(),
+        Order.countDocuments(f).exec()
+      ]);
+      return {
+        items,
+        total,
+        page,
+        limit,
+        pages: Math.max(1, Math.ceil(total / limit))
+      };
+    } catch (error) {
+      console.log("\nFetch pagination of orders repo error ", error);
+    }
   }
 
   /**

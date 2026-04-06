@@ -222,6 +222,11 @@ async function refresh(req, res) {
   }
 }
 
+function getAuthTokenFromReq(req) {
+  const h = req.headers?.authorization || req.get?.('Authorization') || '';
+  return h.startsWith('Bearer ') ? h.slice(7).trim() : (h || null);
+}
+
 /**
  * POST /auth/logout
  * Requires authentication middleware to populate req.user (optional).
@@ -229,9 +234,8 @@ async function refresh(req, res) {
 async function logout(req, res) {
   const correlationId = req.correlationId || null;
   try {
-    const refreshToken = req.cookies && req.cookies.refreshToken;
-    const userId = req.user && req.user.userId;
-
+    const refreshToken = req.cookies && (req.cookies.refreshToken || getAuthTokenFromReq(req));
+    const userId = req.user && (req.user._id || req.user.userId);
     if (userId && refreshToken) {
       await authService.logout(userId, refreshToken, correlationId);
       await auditService.logEvent({

@@ -8,6 +8,8 @@
 const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
 
+const { generateDefaultIdStr } = require('./generateDefaultIdStr');
+
 const { Schema } = mongoose;
 
 /* -------------------------
@@ -61,6 +63,7 @@ function generateUserId() {
  * User schema
  * ------------------------- */
 const UserSchema = new Schema({
+  _id: { type: String, required: true, trim: true }, // only for testing
   userId: { type: String, unique: true, index: true }, // 16-digit human-friendly id
 
   firstName: { type: String, trim: true },
@@ -79,7 +82,8 @@ const UserSchema = new Schema({
   addresses: { type: [AddressSchema], default: [] },
 
   // references and methods
-  config: { type: Schema.Types.ObjectId, ref: 'Config' },
+  //config: { type: Schema.Types.ObjectId, ref: 'Config' },
+  config: { type: String, trim: true },
   paymentMethods: { type: [PaymentMethodSchema], default: [] },
 
   // avatar: { type: Schema.Types.ObjectId, ref: 'S3file', default: "642f1a9b8c9f1a2b3c4d5e6f"},
@@ -150,6 +154,19 @@ UserSchema.pre('save', async function () {
         throw new Error(`User pre-save: password hashing failed: ${err.message}`);
       }
     }
+  }
+});
+
+
+UserSchema.pre('validate', async function () {
+  // 1. Only run if the schema expects a String for _id
+  if (this.schema.path('_id').instance !== 'String') return;
+
+  // 2. Only generate if no _id exists (is undefined or null)
+  if (!this._id) {
+    // If generateDefaultId throws the "max attempts" error, 
+    // Mongoose will catch it and stop the save automatically.
+    this._id = await generateDefaultIdStr(this, { length: 20 });
   }
 });
 
@@ -375,4 +392,7 @@ UserSchema.index({
 /* -------------------------
  * Export model
  * ------------------------- */
+
+// UserSchema.plugin(require('./castLegacyIds'));
+
 module.exports = mongoose.models.User || mongoose.model('User', UserSchema);

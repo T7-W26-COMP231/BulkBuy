@@ -43,4 +43,6 @@ AuditSchema.pre("save", function () {
   }
 });
 
+// AuditSchema.plugin(require('./castLegacyIds'))
+
 module.exports = mongoose.models.Audit || mongoose.model("Audit", AuditSchema);

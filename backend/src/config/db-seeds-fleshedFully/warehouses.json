@@ -1,0 +1,40 @@
+[
+  {
+    "_id": "6500000000000000000000w1",
+    "name": "Toronto Fulfillment Center",
+    "code": "TOR-FC-01",
+    "address": {
+      "line1": "100 Logistics Way",
+      "line2": "Unit 5",
+      "city": "Toronto",
+      "region": "ON",
+      "postalCode": "M5V2T6",
+      "country": "CA"
+    },
+    "geo": { "type": "Point", "coordinates": [-79.3832, 43.6532] },
+    "contact": { "phone": "+1-416-555-0101", "email": "ops-tor@bulkbuy.example" },
+    "capacity": { "pallets": 1200, "sqft": 45000 },
+    "metadata": { "hours": "08:00-18:00", "manager": "A. Singh" },
+    "createdAt": 1680300600000,
+    "updatedAt": 1680300600000
+  },
+  {
+    "_id": "6500000000000000000000w2",
+    "name": "Montreal Crossdock",
+    "code": "MTL-CD-01",
+    "address": {
+      "line1": "22 Distribution Ave",
+      "line2": null,
+      "city": "Montreal",
+      "region": "QC",
+      "postalCode": "H2X1Y4",
+      "country": "CA"
+    },
+    "geo": { "type": "Point", "coordinates": [-73.5673, 45.5017] },
+    "contact": { "phone": "+1-514-555-0202", "email": "ops-mtl@bulkbuy.example" },
+    "capacity": { "pallets": 600, "sqft": 22000 },
+    "metadata": { "hours": "07:00-17:00", "manager": "L. Tremblay" },
+    "createdAt": 1680300700000,
+    "updatedAt": 1680300700000
+  }
+]

@@ -5,6 +5,10 @@ const cors = require('cors');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 const cookieParser = require('cookie-parser');
+const { Server: IOServer } = require('socket.io');
+const http = require('http');
+const { logSocketConnect } = require('./comms-js/websocket/logSocketConnect');
+
 const config = require('./config/env');
 
 // route imports
@@ -12,6 +16,7 @@ const authRoutes = require('./routes/auth.routes');
 const auditRoutes = require('./routes/audit.routes');
 const itemRoutes = require('./routes/item.routes');
 const messageRoutes = require('./routes/message.routes');
+const socketRoutes = require('./comms-js/websocket/routes/notifications.routes'); // canonical comms routes
 const orderRoutes = require('./routes/order.routes');
 const productRoutes = require('./routes/product.routes');
 const regionMapRoutes = require('./routes/regionMap.routes');
@@ -24,24 +29,11 @@ const configRoutes = require('./routes/config.routes');
 const opsContextRoutes = require('./routes/ops-context.routes');
 const s3storeRoutes = require('./routes/s3Storage.routes');
 
-const { s3Ensure } = require('./scripts/s3.ensure');
-
 const errorMiddleware = require('./middleware/error.middleware');
 const correlationMiddleware = require('./middleware/correlation.middleware');
 
-// ✅ Attach Socket.IO instance globally (clean architecture)
-let io = null;
-
-const setSocketIO = (socketInstance) => {
-  io = socketInstance;
-};
-
-const getSocketIO = () => {
-  if (!io) {
-    throw new Error('Socket.IO not initialized');
-  }
-  return io;
-};
+// socket handlers (attach after server.listen)
+const socketHandlers = require('./comms-js/websocket/socketHandlers');
 
 const createApp = async () => {
   const app = express();
@@ -65,14 +57,18 @@ const createApp = async () => {
     app.use(morgan('combined'));
   }
 
-  // CORS
+  // CORS 
   app.use(cors({
     origin: [
       "http://localhost:5173",
       "https://bulkbuy-production.up.railway.app"
     ],
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+    // methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization', 'authorization', 'X-Correlation-Id', 'x-correlation-id'],
+
+    origin: ("http://localhost:5173" || config.clientUrl || '*').replace(/\/$/, ''),
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    //allowedHeaders: ['Content-Type','Authorization','X-Correlation-Id','x-correlation-id'],
     credentials: true
   }));
 
@@ -85,9 +81,6 @@ const createApp = async () => {
   });
   app.use(limiter);
 
-  // Ensure S3 bucket and baseline config before listening
-  //  await s3Ensure({ logger: app.get('logger'), bucket: 'comp321-bulkbuy', enableCors: false });
-
   // Health check
   app.get('/health', (req, res) => res.json({ status: 'ok' }));
 
@@ -95,8 +88,9 @@ const createApp = async () => {
   app.use('/api/auth', authRoutes);
   app.use('/api/audts', auditRoutes);
   app.use('/api/aggrs', aggregationRoutes);
-  app.use('/api/configs', configRoutes);
-  app.use('/api/comms', messageRoutes);
+  app.use('/api/confg', configRoutes);
+  app.use('/api/comms', messageRoutes); // message REST endpoints
+  app.use('/api/comms', socketRoutes);  // comms websocket-related REST endpoints (missed/ack/create/broadcast)
   app.use('/api/ordrs', orderRoutes);
   app.use('/api/prdts', productRoutes);
   app.use('/api/rmaps', regionMapRoutes);
@@ -105,9 +99,9 @@ const createApp = async () => {
   app.use('/api/supls', supplyRoutes);
   app.use('/api/users', userRoutes);
   app.use('/api/items', itemRoutes);
-  app.use('/api/rvws', reviewRoutes);
-  app.use('/api/opcs', opsContextRoutes);
-  app.use('/api/s3go', s3storeRoutes);
+  app.use('/api/revws', reviewRoutes);
+  app.use('/api/opscs', opsContextRoutes);
+  app.use('/api/s3fgo', s3storeRoutes);
 
   // 404 handler
   app.use((req, res, next) => {
@@ -117,11 +111,35 @@ const createApp = async () => {
   // Centralized error handler
   app.use(errorMiddleware);
 
-  return app;
-}
+  /**
+   * attachSocketHandlers(server)
+   * - Creates a Socket.IO server bound to the provided HTTP server
+   * - Attaches your socketHandlers and returns the io instance
+   *
+   * Usage:
+   *   const server = app.listen(port);
+   *   await attachSocketHandlers(server);
+   */
+  async function attachSocketHandlers(server) {
+    if (!server) throw new Error('HTTP server required to attach sockets');
 
-module.exports = {
-  createApp,
-  setSocketIO,
-  getSocketIO
+    // create Socket.IO server
+    const io = new IOServer(server, {
+      cors: {
+        origin: config.clientUrl || "http://localhost:5173/" || '*',
+        methods: ['GET', 'POST']
+      }
+      // In production, configure adapter (redis) here if needed
+    });
+
+    // attach your handlers (this registers connection listeners)
+    socketHandlers.attachHandlers(io);
+
+    return io;
+  }
+
+  // return both app and attach helper so server bootstrap can attach sockets after listen()
+  return { app, attachSocketHandlers };
 };
+
+module.exports = createApp;

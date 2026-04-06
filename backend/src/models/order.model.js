@@ -13,6 +13,8 @@ const mongoose = require('mongoose');
 
 const { Schema } = mongoose;
 
+const { generateDefaultIdStr } = require('./generateDefaultIdStr');
+
 /* -------------------------
  * Sub-schemas
  * ------------------------- */
@@ -61,8 +63,12 @@ const PricingSnapshotSchema = new Schema({
 }, { _id: false });
 
 const OrderItemSchema = new Schema({
-  productId: { type: Schema.Types.ObjectId, ref: 'Product', required: true },
-  itemId: { type: Schema.Types.ObjectId, ref: 'Item', required: true },
+  // productId: { type: Schema.Types.ObjectId, ref: 'Product', required: true },
+  // itemId: { type: Schema.Types.ObjectId, ref: 'Item', required: true },
+
+  productId: { type: String, ref: 'Product', required: true },
+  itemId: { type: String, ref: 'Item', required: true },
+
   pricingSnapshot: { type: [PricingSnapshotSchema], default: [() => ({})] },
   saveForLater: { type: Boolean, default: false },
   quantity: { type: Number, default: 1, min: 1 },
@@ -83,7 +89,9 @@ const SalesWindowSchema = new Schema({
  * ------------------------- */
 
 const OrderSchema = new Schema({
-  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
+  _id: { type: String, required: true, trim: true }, // only for testing
+  // userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
+  userId: { type: String, required: true, trim: true, index: true }, // only for testing
 
   items: { type: [OrderItemSchema], default: [], index: true },
 
@@ -100,15 +108,10 @@ const OrderSchema = new Schema({
 
   metadata: { type: Map, of: Schema.Types.Mixed, default: {} },
   declineReason: {
-  type: String,
-  trim: true,
-  default: null
-},
-expectedDeliveryDate: {
-  type: Number,
-  default: null
-},
-
+    type: String,
+    trim: true,
+    default: null
+  },
 
   // draft here means in cart. once submitted, a new blank order is created.
   // the cart is always the latest draft order; on new blank cart creation,
@@ -174,6 +177,19 @@ OrderSchema.pre('save', function () {
   const now = Date.now();
   if (!this.createdAt) this.createdAt = now;
   this.updatedAt = now;
+});
+
+
+OrderSchema.pre('validate', async function () {
+  // 1. Only run if the schema expects a String for _id
+  if (this.schema.path('_id').instance !== 'String') return;
+
+  // 2. Only generate if no _id exists (is undefined or null)
+  if (!this._id) {
+    // If generateDefaultId throws the "max attempts" error, 
+    // Mongoose will catch it and stop the save automatically.
+    this._id = await generateDefaultIdStr(this, { length: 20 });
+  }
 });
 
 /* -------------------------
@@ -350,5 +366,7 @@ OrderSchema.methods.extractSaveForLater = function () {
 /* -------------------------
  * Export model
  * ------------------------- */
+
+// OrderSchema.plugin(require('./castLegacyIds'));
 
 module.exports = mongoose.models.Order || mongoose.model('Order', OrderSchema);

@@ -25,6 +25,8 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
+const { generateDefaultIdStr } = require('./generateDefaultIdStr');
+
 const TYPE_ENUM = ['issue_wall', 'email', 'notification', 'order', 'review'];
 const STATUS_ENUM = ['draft', 'submitted', 'deleted', 'read', 'unread'];
 
@@ -38,6 +40,7 @@ const RecipientsSchema = new Schema(
 
 const MessageSchema = new Schema(
   {
+    _id: { type: String, required: true, trim: true }, // only for testing
     avatar: { type: Schema.Types.ObjectId, ref: 'S3File', default: null },
     type: { type: String, enum: TYPE_ENUM, required: true, index: true },
     recipients: { type: RecipientsSchema, default: () => ({ all: false, users: [] }) },
@@ -72,6 +75,19 @@ function docToJSON(doc, ret) {
 MessageSchema.index({ type: 1, status: 1, createdAt: -1 });
 MessageSchema.index({ 'recipients.users': 1 });
 MessageSchema.index({ fromUserId: 1 });
+
+
+MessageSchema.pre('validate', async function () {
+  // 1. Only run if the schema expects a String for _id
+  if (this.schema.path('_id').instance !== 'String') return;
+
+  // 2. Only generate if no _id exists (is undefined or null)
+  if (!this._id) {
+    // If generateDefaultId throws the "max attempts" error, 
+    // Mongoose will catch it and stop the save automatically.
+    this._id = await generateDefaultIdStr(this, { length: 20 });
+  }
+});
 
 /* Instance methods */
 
@@ -187,5 +203,7 @@ MessageSchema.statics.softDeleteById = function softDeleteById(id, deletedBy = n
   if (deletedBy) update['metadata.deletedBy'] = deletedBy;
   return this.findByIdAndUpdate(id, update, { new: true, ...opts });
 };
+
+// MessageSchema.plugin(require('./castLegacyIds'));
 
 module.exports = mongoose.model('Message', MessageSchema);

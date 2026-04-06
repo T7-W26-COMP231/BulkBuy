@@ -1,0 +1,398 @@
+[
+  {
+    "_id": "990000000000000000000001",
+    "supplierId": "660000000000000000000002",
+    "requesterId": "660000000000000000000004",
+    "items": [
+      {
+        "_id": "a90000000000000000000001",
+        "itemId": "6800000000000000000000i01",
+        "requestedQuantity": 500,
+        "quotes": [
+          {
+            "_id": "b90000000000000000000001",
+            "pricePerBulkUnit": 11.5,
+            "numberOfBulkUnits": 50,
+            "discountingScheme": [
+              { "minQty": 10, "discountPercent": 5, "description": "5% at 10+" },
+              { "minQty": 50, "discountPercent": 12, "description": "12% at 50+" }
+            ],
+            "isAccepted": false,
+            "meta": { "leadTimeDays": 7, "packaging": "polybag-5" },
+            "createdAt": 1712000000000
+          },
+          {
+            "_id": "b90000000000000000000002",
+            "pricePerBulkUnit": 10.95,
+            "numberOfBulkUnits": 200,
+            "discountingScheme": [
+              { "minQty": 50, "discountPercent": 12, "description": "12% bulk" },
+              { "minQty": 200, "discountPercent": 18, "description": "18% super-bulk" }
+            ],
+            "isAccepted": true,
+            "meta": { "leadTimeDays": 10, "promo": "SPRING-SAVE" },
+            "createdAt": 1712080000000
+          }
+        ],
+        "meta": { "preferredWarehouse": "6500000000000000000000w1" }
+      },
+      {
+        "_id": "a90000000000000000000002",
+        "itemId": "6800000000000000000000i21",
+        "requestedQuantity": 1000,
+        "quotes": [
+          {
+            "_id": "b90000000000000000000003",
+            "pricePerBulkUnit": 3.25,
+            "numberOfBulkUnits": 100,
+            "discountingScheme": [],
+            "isAccepted": false,
+            "meta": { "leadTimeDays": 5 },
+            "createdAt": 1712085000000
+          }
+        ],
+        "meta": {}
+      }
+    ],
+    "deliveryLocation": {
+      "label": "Main Warehouse",
+      "line1": "100 Logistics Way",
+      "city": "Toronto",
+      "region": "ON",
+      "postalCode": "M5V2T6",
+      "country": "CA",
+      "geo": { "type": "Point", "coordinates": [-79.3832, 43.6532] }
+    },
+    "status": "accepted",
+    "ops_region": "north-america:ca-on",
+    "metadata": { "purchaseOrderRef": "PO-2026-1001", "currency": "CAD" },
+    "internalNotes": "Accepted quote for bulk reusable totes; supplier to confirm palletization details.",
+    "deleted": false,
+    "createdAt": 1712080000000,
+    "updatedAt": 1712080000000
+  },
+  {
+    "_id": "990000000000000000000002",
+    "supplierId": "660000000000000000000003",
+    "requesterId": "660000000000000000000009",
+    "items": [
+      {
+        "_id": "a90000000000000000000003",
+        "itemId": "6800000000000000000000i05",
+        "requestedQuantity": 120,
+        "quotes": [
+          {
+            "_id": "b90000000000000000000004",
+            "pricePerBulkUnit": 72.0,
+            "numberOfBulkUnits": 12,
+            "discountingScheme": [{ "minQty": 25, "discountPercent": 14, "description": "case discount" }],
+            "isAccepted": false,
+            "meta": { "leadTimeDays": 4 },
+            "createdAt": 1712100000000
+          },
+          {
+            "_id": "b90000000000000000000005",
+            "pricePerBulkUnit": 69.0,
+            "numberOfBulkUnits": 50,
+            "discountingScheme": [{ "minQty": 50, "discountPercent": 14, "description": "bulk case" }],
+            "isAccepted": false,
+            "meta": { "notes": "includes recycled material certification" },
+            "createdAt": 1712110000000
+          }
+        ],
+        "meta": { "preferredPack": "50-pack" }
+      }
+    ],
+    "deliveryLocation": {
+      "label": "Retail HQ",
+      "line1": "77 King St W",
+      "city": "Toronto",
+      "region": "ON",
+      "postalCode": "M5H1A1",
+      "country": "CA",
+      "geo": { "type": "Point", "coordinates": [-79.383, 43.648] }
+    },
+    "status": "quote",
+    "ops_region": "north-america:ca-on",
+    "metadata": { "quoteExpiresAt": 1712704800000 },
+    "internalNotes": "Customer requested expedited shipping options; awaiting supplier confirmation.",
+    "deleted": false,
+    "createdAt": 1712100000000,
+    "updatedAt": 1712110000000
+  },
+  {
+    "_id": "990000000000000000000003",
+    "supplierId": "660000000000000000000002",
+    "requesterId": "660000000000000000000010",
+    "items": [
+      {
+        "_id": "a90000000000000000000004",
+        "itemId": "6800000000000000000000i06",
+        "requestedQuantity": 30,
+        "quotes": [
+          {
+            "_id": "b90000000000000000000006",
+            "pricePerBulkUnit": 58.0,
+            "numberOfBulkUnits": 6,
+            "discountingScheme": [{ "minQty": 3, "discountPercent": 8, "description": "3+ case discount" }],
+            "isAccepted": true,
+            "meta": { "leadTimeDays": 2, "dispenserCompatible": true },
+            "createdAt": 1712150000000
+          }
+        ],
+        "meta": { "coreDiameterMm": 76 }
+      },
+      {
+        "_id": "a90000000000000000000005",
+        "itemId": "6800000000000000000000i07",
+        "requestedQuantity": 10,
+        "quotes": [
+          {
+            "_id": "b90000000000000000000007",
+            "pricePerBulkUnit": 149.0,
+            "numberOfBulkUnits": 2,
+            "discountingScheme": [],
+            "isAccepted": false,
+            "meta": { "hazmat": false },
+            "createdAt": 1712155000000
+          }
+        ],
+        "meta": {}
+      }
+    ],
+    "deliveryLocation": {
+      "label": "Oakville Depot",
+      "line1": "9 River Rd",
+      "city": "Oakville",
+      "region": "ON",
+      "postalCode": "L6J2K3",
+      "country": "CA",
+      "geo": { "type": "Point", "coordinates": [-79.6877, 43.4675] }
+    },
+    "status": "accepted",
+    "ops_region": "north-america:ca-on",
+    "metadata": { "purchaseOrderRef": "PO-2026-1005", "requestedByTeam": "operations" },
+    "internalNotes": "Tape and sanitizer combined order; supplier confirmed pallet consolidation.",
+    "deleted": false,
+    "createdAt": 1712150000000,
+    "updatedAt": 1712150000000
+  },
+  {
+    "_id": "990000000000000000000004",
+    "supplierId": "660000000000000000000003",
+    "requesterId": null,
+    "items": [
+      {
+        "_id": "a90000000000000000000006",
+        "itemId": "6800000000000000000000i03",
+        "requestedQuantity": 200,
+        "quotes": [
+          {
+            "_id": "b90000000000000000000008",
+            "pricePerBulkUnit": 33.5,
+            "numberOfBulkUnits": 20,
+            "discountingScheme": [{ "minQty": 50, "discountPercent": 10, "description": "10% at 50+" }],
+            "isAccepted": false,
+            "meta": { "leadTimeDays": 6 },
+            "createdAt": 1712200000000
+          }
+        ],
+        "meta": { "labelType": "thermal" }
+      }
+    ],
+    "deliveryLocation": {
+      "label": "Distribution Center B",
+      "line1": "44 Seaside Blvd",
+      "city": "Toronto",
+      "region": "ON",
+      "postalCode": "M5V3K2",
+      "country": "CA",
+      "geo": { "type": "Point", "coordinates": [-79.370, 43.640] }
+    },
+    "status": "dispatched",
+    "ops_region": "north-america:ca-on",
+    "metadata": { "carrier": "LocalFreightCo", "tracking": "LF-TRK-7782" },
+    "internalNotes": "Dispatched from supplier warehouse; ETA 3 days.",
+    "deleted": false,
+    "createdAt": 1712200000000,
+    "updatedAt": 1712280000000
+  },
+  {
+    "_id": "990000000000000000000005",
+    "supplierId": "660000000000000000000002",
+    "requesterId": "660000000000000000000013",
+    "items": [
+      {
+        "_id": "a90000000000000000000007",
+        "itemId": "6800000000000000000000i08",
+        "requestedQuantity": 10000,
+        "quotes": [
+          {
+            "_id": "b90000000000000000000009",
+            "pricePerBulkUnit": 127.0,
+            "numberOfBulkUnits": 10,
+            "discountingScheme": [{ "minQty": 100, "discountPercent": 10, "description": "10% at 100+" }],
+            "isAccepted": false,
+            "meta": { "certifiedCompostable": true },
+            "createdAt": 1712300000000
+          },
+          {
+            "_id": "b9000000000000000000000a",
+            "pricePerBulkUnit": 119.0,
+            "numberOfBulkUnits": 50,
+            "discountingScheme": [{ "minQty": 50, "discountPercent": 6, "description": "6% at 50+" }],
+            "isAccepted": false,
+            "meta": { "memberOffer": true },
+            "createdAt": 1712310000000
+          }
+        ],
+        "meta": { "packaging": "bulk-bale" }
+      }
+    ],
+    "deliveryLocation": {
+      "label": "Catering Hub",
+      "line1": "55 College St",
+      "city": "Toronto",
+      "region": "ON",
+      "postalCode": "M5G1K5",
+      "country": "CA",
+      "geo": { "type": "Point", "coordinates": [-79.395, 43.659] }
+    },
+    "status": "quote",
+    "ops_region": "north-america:ca-on",
+    "metadata": { "quoteExpiresAt": 1712904800000, "preferredDeliveryWindow": "morning" },
+    "internalNotes": "Large compostable napkin request; supplier requested lead-time confirmation for 10k units.",
+    "deleted": false,
+    "createdAt": 1712300000000,
+    "updatedAt": 1712310000000
+  },
+  {
+    "_id": "990000000000000000000006",
+    "supplierId": "660000000000000000000003",
+    "requesterId": "660000000000000000000015",
+    "items": [
+      {
+        "_id": "a90000000000000000000008",
+        "itemId": "6800000000000000000000i10",
+        "requestedQuantity": 2500,
+        "quotes": [
+          {
+            "_id": "b9000000000000000000000b",
+            "pricePerBulkUnit": 125.0,
+            "numberOfBulkUnits": 25,
+            "discountingScheme": [{ "minQty": 100, "discountPercent": 12, "description": "12% at 100+" }],
+            "isAccepted": false,
+            "meta": { "printable": true, "leadTimeDays": 12 },
+            "createdAt": 1712350000000
+          },
+          {
+            "_id": "b9000000000000000000000c",
+            "pricePerBulkUnit": 119.0,
+            "numberOfBulkUnits": 100,
+            "discountingScheme": [{ "minQty": 100, "discountPercent": 12, "description": "12% bulk" }],
+            "isAccepted": true,
+            "meta": { "customPrintIncluded": true },
+            "createdAt": 1712360000000
+          }
+        ],
+        "meta": { "material": "polypropylene", "waterproof": true }
+      }
+    ],
+    "deliveryLocation": {
+      "label": "Marketing Fulfillment",
+      "line1": "33 Parkside Ave",
+      "city": "Mississauga",
+      "region": "ON",
+      "postalCode": "L5B3Y2",
+      "country": "CA",
+      "geo": { "type": "Point", "coordinates": [-79.650, 43.590] }
+    },
+    "status": "accepted",
+    "ops_region": "north-america:ca-on",
+    "metadata": { "purchaseOrderRef": "PO-2026-1020", "printSpecs": { "colors": 2, "finish": "matte" } },
+    "internalNotes": "Accepted quote includes custom printing; supplier to provide print proof within 5 business days.",
+    "deleted": false,
+    "createdAt": 1712350000000,
+    "updatedAt": 1712360000000
+  },
+  {
+    "_id": "990000000000000000000007",
+    "supplierId": "660000000000000000000002",
+    "requesterId": "660000000000000000000012",
+    "items": [
+      {
+        "_id": "a90000000000000000000009",
+        "itemId": "6800000000000000000000i04",
+        "requestedQuantity": 2,
+        "quotes": [
+          {
+            "_id": "b9000000000000000000000d",
+            "pricePerBulkUnit": 210.0,
+            "numberOfBulkUnits": 2,
+            "discountingScheme": [],
+            "isAccepted": false,
+            "meta": { "memberOnly": true },
+            "createdAt": 1712400000000
+          }
+        ],
+        "meta": { "bulkOrder": true }
+      }
+    ],
+    "deliveryLocation": {
+      "label": "Brampton Pickup",
+      "line1": "45 Maple St",
+      "city": "Brampton",
+      "region": "ON",
+      "postalCode": "L6T1X2",
+      "country": "CA",
+      "geo": { "type": "Point", "coordinates": [-79.760, 43.683] }
+    },
+    "status": "cancelled",
+    "ops_region": "north-america:ca-on",
+    "metadata": { "cancelReason": "requester changed requirements" },
+    "internalNotes": "Requester cancelled due to change in roast date window; supplier notified.",
+    "deleted": false,
+    "createdAt": 1712400000000,
+    "updatedAt": 1712403600000
+  },
+  {
+    "_id": "990000000000000000000008",
+    "supplierId": "660000000000000000000003",
+    "requesterId": "660000000000000000000017",
+    "items": [
+      {
+        "_id": "a9000000000000000000000a",
+        "itemId": "6800000000000000000000i11",
+        "requestedQuantity": 500,
+        "quotes": [
+          {
+            "_id": "b9000000000000000000000e",
+            "pricePerBulkUnit": 78.0,
+            "numberOfBulkUnits": 50,
+            "discountingScheme": [{ "minQty": 200, "discountPercent": 10, "description": "10% at 200+" }],
+            "isAccepted": false,
+            "meta": { "sizes": ["small","medium","large"], "nonToxic": true },
+            "createdAt": 1712450000000
+          }
+        ],
+        "meta": {}
+      }
+    ],
+    "deliveryLocation": {
+      "label": "Seaside Distribution",
+      "line1": "44 Seaside Blvd",
+      "city": "Toronto",
+      "region": "ON",
+      "postalCode": "M5V3K2",
+      "country": "CA",
+      "geo": { "type": "Point", "coordinates": [-79.370, 43.640] }
+    },
+    "status": "delivered",
+    "ops_region": "north-america:ca-on",
+    "metadata": { "deliveredAt": 1712520000000, "carrier": "ColdChainExpress" },
+    "internalNotes": "Delivered to dock 3; receiver signed and confirmed temperature log within range.",
+    "deleted": false,
+    "createdAt": 1712450000000,
+    "updatedAt": 1712520000000
+  }
+]

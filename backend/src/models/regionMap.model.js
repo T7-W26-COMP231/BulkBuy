@@ -31,6 +31,8 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
+const { generateDefaultIdStr } = require('./generateDefaultIdStr');
+
 const DescriptionSchema = new Schema(
   {
     subject: { type: String, trim: true, default: '' },
@@ -99,6 +101,7 @@ const LocationSchema = new Schema(
 
 const RegionMapSchema = new Schema(
   {
+    _id: { type: String, required: true, trim: true }, // only for testing
     ops_region: { type: String, trim: true, index: true, required: true },
     code: { type: String, trim: true, required: true, unique: true, index: true },
     name: { type: String, trim: true, required: true },
@@ -122,7 +125,7 @@ RegionMapSchema.index({ 'locations.geo': '2dsphere' }, { name: 'locations_geo_2d
 /* -------------------------
  * Pre hooks
  * ------------------------- */
-RegionMapSchema.pre('save', function (next) {
+RegionMapSchema.pre('save', function () {
   // update nested location timestamps
   if (Array.isArray(this.locations)) {
     const now = new Date();
@@ -131,7 +134,19 @@ RegionMapSchema.pre('save', function (next) {
       loc.updatedAt = now;
     });
   }
-  next();
+});
+
+
+RegionMapSchema.pre('validate', async function () {
+  // 1. Only run if the schema expects a String for _id
+  if (this.schema.path('_id').instance !== 'String') return;
+
+  // 2. Only generate if no _id exists (is undefined or null)
+  if (!this._id) {
+    // If generateDefaultId throws the "max attempts" error, 
+    // Mongoose will catch it and stop the save automatically.
+    this._id = await generateDefaultIdStr(this, { length: 20 });
+  }
 });
 
 /* -------------------------
@@ -243,4 +258,7 @@ RegionMapSchema.statics.findNearestLocations = async function findNearestLocatio
 /* -------------------------
  * Export model
  * ------------------------- */
+
+// RegionMapSchema.plugin(require('./castLegacyIds'));
+
 module.exports = mongoose.models.RegionMap || mongoose.model('RegionMap', RegionMapSchema);

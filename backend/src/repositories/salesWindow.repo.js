@@ -178,7 +178,7 @@ class SalesWindowRepo {
     if (o.populate) q.populate(o.populate);
     if (o.session) q.session(o.session);
     if (o.lean) q.lean();
-    return q.exec();
+    return await q.exec();
   }
 
   async findLatestBefore(epochMs = null, opts = {}) {

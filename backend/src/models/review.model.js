@@ -25,6 +25,8 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
+const { generateDefaultIdStr } = require('./generateDefaultIdStr');
+
 const STATUS_ENUM = ['draft', 'submitted', 'deleted'];
 
 function docToJSON(doc, ret) {
@@ -38,8 +40,9 @@ function docToJSON(doc, ret) {
 
 const ReviewSchema = new Schema(
   {
+    _id: { type: String, required: true, trim: true }, // only for testing
     reviewerId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
-    revieweeId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
+    revieweeId: { type: Schema.Types.ObjectId, ref: 'User', default: null, index: true },
     productId: { type: Schema.Types.ObjectId, ref: 'Product', default: null, index: true },
     itemId: { type: Schema.Types.ObjectId, ref: 'Item', default: null, index: true },
     messageId: { type: Schema.Types.ObjectId, ref: 'Message', default: null },
@@ -69,6 +72,19 @@ const ReviewSchema = new Schema(
 /* Indexes for common queries */
 ReviewSchema.index({ reviewerId: 1, revieweeId: 1, productId: 1 });
 ReviewSchema.index({ rating: -1, createdAt: -1 });
+
+
+ReviewSchema.pre('validate', async function () {
+  // 1. Only run if the schema expects a String for _id
+  if (this.schema.path('_id').instance !== 'String') return;
+
+  // 2. Only generate if no _id exists (is undefined or null)
+  if (!this._id) {
+    // If generateDefaultId throws the "max attempts" error, 
+    // Mongoose will catch it and stop the save automatically.
+    this._id = await generateDefaultIdStr(this, { length: 20 });
+  }
+});
 
 /* Instance methods */
 
@@ -126,5 +142,7 @@ ReviewSchema.virtual('summary').get(function summary() {
   if (this.productId) r.productId = this.productId;
   return r;
 });
+
+// ReviewSchema.plugin(require('./castLegacyIds'));
 
 module.exports = mongoose.model('Review', ReviewSchema);

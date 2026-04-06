@@ -1,0 +1,32 @@
+- First read the models carefully and note the dependencies( like ids, etc) and nested objects
+
+- I want us to generate full fleshed data points for these models assets, dependencies, nested objects, etc
+
+- Notice how the models are inter depended by id and all
+
+- Make sure the ids that are passed around for dependences are real and consistent.
+
+- We can use a mongoose playground to seed those collections.
+
+- Make sure to vary the data points by status, role, etc. we need enough seeds to fully test the application.
+
+- Fully fleshed as set down by the medels. for images, use urls to opensourse assets.
+
+- Carefully mind the create sequence and give it to me.
+
+- After that we will have the data and seed the collections one a time
+
+the db name is ops-db-bulkbuy+ 
+
+give me the json files to run ont the mongo playgound to create those fully fleshd collections
+
+first do the logical sequencing and then one at a time according to the sequnce give me the files.
+
+
+alternively, you give me scripts that will create and then update. still, there will be a sequence to it.
+
+First give me the squence and then the files, proper and polished, one at a time
+
+
+
+

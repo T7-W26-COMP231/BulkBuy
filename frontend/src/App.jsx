@@ -47,7 +47,15 @@ function PlaceholderPage({ title }) {
 function AdminRoute({ children }) {
   const { user } = useAuth();
 
-  if (!user || user.role !== "administrator") {
+  if (!user) {
+    return <Navigate to="/" replace />;
+  }
+
+  if (user.role === "supplier") {
+    return <Navigate to="/supplier/dashboard" replace />;
+  }
+
+  if (user.role !== "administrator") {
     return <Navigate to="/" replace />;
   }
 

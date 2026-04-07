@@ -238,6 +238,66 @@ export default function AdminDashboard() {
                 />
               </section>
 
+              {/* ── System Alerts Widget ─────────────────────────────── */}
+              <section className="rounded-2xl border border-neutral-light bg-white p-6 shadow-sm">
+                <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                  <div>
+                    <h2 className="text-2xl font-bold text-text-main">
+                      System Alerts Widget
+                    </h2>
+                    <p className="mt-1 text-sm text-text-muted">
+                      Live monitoring of critical platform alerts and failed workflows
+                    </p>
+                  </div>
+
+                  <span
+                    className={`inline-flex rounded-xl px-4 py-2 text-sm font-bold ${stats.criticalAlerts > 0
+                      ? "bg-red-100 text-red-600"
+                      : "bg-emerald-100 text-emerald-600"
+                      }`}
+                  >
+                    {stats.criticalAlerts > 0
+                      ? `${stats.criticalAlerts} active alerts`
+                      : "System stable"}
+                  </span>
+                </div>
+
+                <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3">
+                  <div className="rounded-2xl bg-neutral-light/40 p-5">
+                    <p className="text-xs font-bold uppercase tracking-[0.16em] text-text-muted">
+                      Critical Alerts
+                    </p>
+                    <p className="mt-3 text-3xl font-bold text-red-500">
+                      {stats.criticalAlerts}
+                    </p>
+                  </div>
+
+                  <div className="rounded-2xl bg-neutral-light/40 p-5">
+                    <p className="text-xs font-bold uppercase tracking-[0.16em] text-text-muted">
+                      Alert Severity
+                    </p>
+                    <p className="mt-3 text-lg font-bold text-text-main">
+                      {stats.criticalAlerts === 0
+                        ? "Stable"
+                        : stats.criticalAlerts > 3
+                          ? "High"
+                          : "Moderate"}
+                    </p>
+                  </div>
+
+                  <div className="rounded-2xl bg-neutral-light/40 p-5">
+                    <p className="text-xs font-bold uppercase tracking-[0.16em] text-text-muted">
+                      Recommended Action
+                    </p>
+                    <p className="mt-3 text-sm font-semibold text-text-main">
+                      {stats.criticalAlerts > 0
+                        ? "Review declined and cancelled supply orders"
+                        : "No action required"}
+                    </p>
+                  </div>
+                </div>
+              </section>
+
               {/* ── Upcoming Window Closures ──────────────────────────── */}
               <section className="overflow-hidden rounded-2xl border border-neutral-light bg-white shadow-sm">
                 <div className="flex flex-col gap-3 border-b border-neutral-light px-6 py-5 md:flex-row md:items-start md:justify-between">

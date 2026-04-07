@@ -214,10 +214,18 @@ export default function AdminDashboard() {
                 <AdminStatCard
                   label="Active Aggregation Windows"
                   value={stats.activeWindows}
-                  extra="Active"
+                  extra={
+                    stats.activeWindows > 0
+                      ? `${stats.activeWindows} live windows running`
+                      : "No active windows"
+                  }
                   icon="schedule"
                   accent="text-primary"
-                  extraColor="text-green-600"
+                  extraColor={
+                    stats.activeWindows > 0
+                      ? "text-green-600"
+                      : "text-text-muted"
+                  }
                 />
 
                 <AdminStatCard

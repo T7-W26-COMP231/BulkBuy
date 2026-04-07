@@ -104,19 +104,19 @@ export default function AdminDashboard() {
     const fetchDashboardMetrics = async () => {
       try {
         console.log("ADMIN TOKEN:", accessToken);
-       const response = await fetch(
-  `${import.meta.env.VITE_API_URL}/api/orders/dashboard-metrics`,
-  {
-    method: "GET",
-    cache: "no-store",
-    headers: {
-      "Content-Type": "application/json",
-      ...(accessToken
-        ? { Authorization: `Bearer ${accessToken}` }
-        : {}),
-    },
-  }
-);
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/api/orders/dashboard-metrics`,
+          {
+            method: "GET",
+            cache: "no-store",
+            headers: {
+              "Content-Type": "application/json",
+              ...(accessToken
+                ? { Authorization: `Bearer ${accessToken}` }
+                : {}),
+            },
+          }
+        );
 
         const result = await response.json();
 
@@ -195,12 +195,20 @@ export default function AdminDashboard() {
               {/* ── Stat cards ────────────────────────────────────────── */}
               <section className="grid grid-cols-1 gap-4 md:grid-cols-3">
                 <AdminStatCard
-                  label="Pending Quote Reviews"
+                  label="Pending Supplier Quotes"
                   value={stats.pendingQuotes}
-                  extra="Live"
-                  icon="description"
+                  extra={
+                    stats.pendingQuotes > 0
+                      ? `${stats.pendingQuotes} awaiting supplier action`
+                      : "No pending quotes"
+                  }
+                  icon="request_quote"
                   accent="text-primary"
-                  extraColor="text-text-muted"
+                  extraColor={
+                    stats.pendingQuotes > 0
+                      ? "text-amber-600"
+                      : "text-text-muted"
+                  }
                 />
 
                 <AdminStatCard
@@ -208,16 +216,16 @@ export default function AdminDashboard() {
                   value={stats.activeWindows}
                   extra="Active"
                   icon="schedule"
-                  accent="text-emerald-600"
-                  extraColor="text-emerald-600"
+                  accent="text-primary"
+                  extraColor="text-green-600"
                 />
 
                 <AdminStatCard
                   label="Critical Alerts"
                   value={stats.criticalAlerts}
                   extra="Critical"
-                  icon="error"
-                  accent="text-red-500"
+                  icon="warning"
+                  accent="text-primary"
                   extraColor="text-red-500"
                 />
               </section>

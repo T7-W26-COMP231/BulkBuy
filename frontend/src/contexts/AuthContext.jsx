@@ -590,6 +590,28 @@ export function AuthProvider({
     [accessToken, apiFetch, endpoints.updateProfile, normalizeResponse, user]
   );
 
+  // restore accessToken from persisted storage and set runtime state
+  const restoreAccessTokenFromStorage = useCallback(() => {
+    try {
+      if (typeof window === 'undefined') return null;
+      const raw = localStorage.getItem(storageKey);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      const token = parsed?.accessToken ?? null;
+      if (token) {
+        // set both state and the ref used by apiFetch
+        setAccessToken(token);
+        accessTokenRef.current = token;
+      }
+      return token;
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.warn('AuthProvider.restoreAccessTokenFromStorage error', err);
+      return null;
+    }
+  }, [storageKey]);
+
+
   const clearError = useCallback(() => setError(null), []);
 
   const value = useMemo(
@@ -598,16 +620,23 @@ export function AuthProvider({
       accessToken,
       refreshToken,
       loading,
-      initializing,
-      error,
-      signIn,
-      signUp,
-      signOut,
+      initializing, error,
+      signIn, signUp, signOut,
       refreshSession,
       updateProfile,
-      clearError
+      clearError,
+       // new helper
+      restoreAccessTokenFromStorage
     }),
-    [user, accessToken, refreshToken, loading, initializing, error, signIn, signUp, signOut, refreshSession, updateProfile, clearError]
+    [user, accessToken, 
+      refreshToken, loading, 
+      initializing, error, 
+      signIn, signUp, signOut, 
+      refreshSession, 
+      updateProfile, clearError,  
+      // new helper
+      restoreAccessTokenFromStorage
+    ]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

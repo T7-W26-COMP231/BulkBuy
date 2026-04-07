@@ -12,6 +12,7 @@ const auditService = require('./audit.service');
 const SalesWindowService = require('./salesWindow.service');
 const UserRepo = require('../repositories/user.repo');
 const { sendOrderConfirmation } = require('./email.service');
+const { getById } = require('./item.service');
 
 function sanitizeForClient(doc) {
   if (!doc) return doc;
@@ -577,8 +578,8 @@ class OrderService {
       const r = o.ops_region || '__null__';
       if (!regionToOrders.has(r)) regionToOrders.set(r, []);
       regionToOrders.get(r).push(o);
-    }
-
+    }    
+    
     // 3) For each region, collect unique product/item ids to request from SalesWindow
     const regionLookups = new Map(); // region -> { productId -> { itemId -> swItem } }
     for (const [region, ordersForRegion] of regionToOrders.entries()) {
@@ -607,24 +608,85 @@ class OrderService {
       }
     }
 
+    //-------------------------------------------------
+    function replacer(key, value) {
+    if (value instanceof Map) {
+      return Object.fromEntries(value);
+    }
+    return value;
+    }
+
+    const getItemObj = async (item = {}, itemId = null) => {
+      let safe = Object.assign({}, item);
+      if(Object.keys(safe).length <= 0){
+        safe = await getById(itemId);
+      }
+      const images = Array.isArray(safe?.images) ? safe?.images : [];
+      const primaryImage = images.length > 0 ? safe.images[0] : null;
+      return {
+        // Your custom mappings
+        _id: safe._id,
+        sku: safe.sku,
+        title: safe.title,
+        slug: safe.slug,
+        shortDescription: safe.shortDescription || safe.description || '',
+        images: images, // using your variable
+        image: primaryImage, // using your variable
+        published: safe.published,
+        status: safe.status,
+
+        // Adding the missing fields from your list
+        description: safe.description,
+        brand: safe.brand,
+        categories: safe.categories,
+        tags: safe.tags,
+        media: safe.media,
+        inventory: safe.inventory,
+        variants: safe.variants,
+        weight: safe.weight,
+        dimensions: safe.dimensions,
+        taxClass: safe.taxClass,
+        ratings: safe.ratings,
+        reviews: safe.reviews,
+        relatedProducts: safe.relatedProducts,
+        seller: safe.seller,
+        metadata: safe.metadata,
+        ops_region: safe.ops_region,
+        createdAt: safe.createdAt,
+        updatedAt: safe.updatedAt,
+      };
+    }
+
+    // console.log('\nthese are the regionLookups ---------> | ', JSON.stringify(JSON.stringify(regionLookups, replacer, 2)));//-----------------------------
+
+    //-------------------------------------------------
+
     // 4) Enrich orders in-memory; collect persistence updates if persist === true
     const ordersToPersist = []; // { orderId, updatedItems } for submitted orders
     const enrichedOrders = [];
 
     for (const order of orders) {
+
+      // If status is NOT 'draft' or 'submitted'
+      if (!['draft', 'submitted'].includes(order.status)) {
+        enrichedOrders.push(order);
+        continue; // Skips the rest of THIS loop iteration
+      }
+
       const r = order.ops_region || '__null__';
       const productMap = regionLookups.get(r) || new Map();
 
       // clone order shallow to avoid mutating original repo result
       const enriched = Object.assign({}, order);
-      enriched.items = (order.items || []).map((it) => {
+      enriched.items = await Promise.all((order.items || []).map(async (it) => {
         const out = Object.assign({}, it);
+        out.ItemSysInfo = await getItemObj({}, it.itemId);
         out.latestPricingSnapshot = null;
         out.availableQty = null;
         out.qtySold = null;
         out.pricing_tiers = null;
         out.missingInWindow = false;
-
+        
         const pid = String(it.productId);
         const iid = String(it.itemId);
         const pEntry = productMap.get(pid);
@@ -656,9 +718,9 @@ class OrderService {
           if (snap.createdAt && snap.createdAt instanceof Date) snap.createdAt = snap.createdAt.getTime();
           out.latestPricingSnapshot = snap;
         }
-
+        
         return out;
-      });
+      }));
 
       // If persist requested and order is submitted, prepare to append snapshots where missing or stale
       if (persist && order.status === 'submitted') {
@@ -715,7 +777,6 @@ class OrderService {
         }
       }
     }
-
     // 6) Return paginated enriched shape
     return {
       items: enrichedOrders.map(sanitizeForClient),

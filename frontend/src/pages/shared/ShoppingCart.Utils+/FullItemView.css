@@ -1,0 +1,196 @@
+/* src/components/FullItemView.css
+ *
+ * Polished, production-ready styles for FullItemView.jsx
+ * - Clean, compact, and consistent with the cart theme
+ * - Carousel with scroll-snap, thumbnail row with chevrons on same row
+ * - Accessible focus states, reduced-motion support, responsive
+ */
+
+/* Design tokens */
+:root{
+  --color-bg:#ffffff;
+  --color-surface:#f7fafb;
+  --color-muted:#6b7280;
+  --color-text:#0f1724;
+  --color-accent:#0fb3a6;
+  --color-accent-600:#0aa79a;
+  --color-success:#2bb673;
+  --color-danger:#e74c3c;
+  --color-border:#e6eef0;
+  --shadow-strong:rgba(15,23,36,0.16);
+  --shadow-soft:rgba(15,23,36,0.06);
+  --radius-md:12px;
+  --gap:14px;
+  --font-sans:system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  --transition-fast:160ms ease;
+  --max-width:980px;
+}
+
+/* Root */
+.full-item-view{
+  width:100%;
+  /* max-width:var(--max-width); */
+  background:linear-gradient(180deg,var(--color-bg) 0%, #fbfeff 100%);
+  border-radius:var(--radius-md);
+  border:1px solid var(--color-border);
+  box-shadow:0 18px 40px var(--shadow-strong), 0 6px 18px var(--shadow-soft);
+  padding:18px;
+  box-sizing:border-box;
+  font-family:var(--font-sans);
+  color:var(--color-text);
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  outline:none;
+}
+
+/* Header */
+.full-item-header{ display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.title-block{ display:flex; flex-direction:column; gap:6px; }
+.item-title{ margin:0; font-size:18px; font-weight:700; line-height:1.15; }
+.meta-row{ font-size:13px; color:var(--color-muted); display:flex; gap:10px; align-items:center; }
+
+/* Buttons */
+.btn{ font-family:var(--font-sans); font-size:14px; padding:8px 12px; border-radius:8px; cursor:pointer; border:1px solid transparent; transition:transform var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast); }
+.btn-ghost{ background:transparent; color:var(--color-text); border:1px solid var(--color-border); }
+.btn-ghost:hover:not(:disabled){ background:var(--color-surface); transform:translateY(-1px); }
+.btn-primary{ background:linear-gradient(180deg,var(--color-accent) 0%, var(--color-accent-600) 100%); color:#fff; border-radius:10px; padding:10px 14px; font-weight:700; border:1px solid rgba(0,0,0,0.04); box-shadow:0 8px 20px rgba(15,179,166,0.10); }
+.btn-outline{ background:transparent; color:var(--color-text); border:1px solid var(--color-border); padding:10px 12px; border-radius:10px; }
+.btn-link.danger{ background:transparent; color:var(--color-danger); border:none; padding:8px 10px; }
+
+/* Layout */
+.full-item-body{ display:grid; grid-template-columns:360px 1fr; gap:18px; align-items:start; }
+.left-col{ display:flex; flex-direction:column; gap:10px; position:relative; }
+.right-col{ display:flex; flex-direction:column; gap:12px; }
+
+/* Image viewport (carousel) */
+.image-viewport{
+  width:100%;
+  border-radius:10px;
+  background:var(--color-surface);
+  border:1px solid var(--color-border);
+  min-height:260px;
+  position:relative;
+  overflow:hidden;
+  -webkit-overflow-scrolling:touch;
+  cursor:grab;
+}
+.image-track{
+  display:flex;
+  height:100%;
+  align-items:center;
+  scroll-snap-type:x mandatory;
+  scroll-behavior:smooth;
+  overflow-x:auto;
+  overflow-y:hidden;
+  gap:8px;
+  padding:8px 0;
+}
+.image-slide{
+  flex:0 0 100%;
+  width:100%;
+  height:100%;
+  scroll-snap-align:center;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-sizing:border-box;
+  outline:none;
+}
+.image-slide img,
+.primary-image{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  display:block;
+  background:#fff;
+  user-select:none;
+  -webkit-user-drag:none;
+  pointer-events:auto;
+  transition:transform 220ms var(--transition-fast), filter 220ms var(--transition-fast);
+}
+
+/* Thumbnails row with chevrons */
+.thumb-row{ display:flex; align-items:center; gap:8px; margin-top:8px; }
+.chevron{
+  width:40px; height:40px; border-radius:10px; display:inline-flex; align-items:center; justify-content:center;
+  background:rgba(255,255,255,0.96); border:1px solid rgba(15,23,36,0.06); box-shadow:0 6px 18px rgba(15,23,36,0.06);
+  cursor:pointer; transition:transform 140ms ease, box-shadow 140ms ease;
+}
+.chevron:disabled{ opacity:0.5; cursor:not-allowed; }
+.chevron svg{ width:18px; height:18px; fill:var(--color-text); }
+.thumb-strip{ display:flex; gap:8px; overflow-x:auto; flex:1; padding:4px 0; }
+.thumb{ width:64px; height:48px; object-fit:cover; border-radius:6px; border:1px solid var(--color-border); cursor:pointer; flex:0 0 auto; transition:transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease; }
+.thumb.small{ width:48px; height:36px; }
+.thumb.large{ width:88px; height:66px; }
+.thumb.active{ transform:translateY(-2px) scale(1.03); box-shadow:0 6px 18px rgba(15,23,36,0.08); border-color:var(--color-accent); }
+
+/* Pricing & meta */
+.pricing-row{ display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.price{ display:flex; flex-direction:column; gap:4px; }
+.price-now{ font-size:20px; font-weight:800; color:var(--color-accent); }
+.price-meta{ font-size:13px; color:var(--color-muted); }
+.availability{ font-size:13px; color:var(--color-muted); }
+.in-stock{ color:var(--color-success); font-weight:700; }
+.out-of-stock{ color:var(--color-danger); font-weight:700; }
+
+/* Description */
+.description{ font-size:14px; color:var(--color-text); line-height:1.45; max-height:6.5em; overflow:auto; padding-right:4px; }
+
+/* Quantity */
+.qty-controls{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:6px; }
+.qty-btns{ display:inline-flex; align-items:center; gap:8px; background:#fff; border-radius:8px; padding:6px; border:1px solid var(--color-border); }
+.qty-btn{ width:36px; height:36px; border-radius:8px; background:transparent; border:1px solid transparent; font-size:18px; display:inline-flex; align-items:center; justify-content:center; cursor:pointer; }
+.qty-btn:hover:not(:disabled){ background:rgba(15,179,166,0.06); color:var(--color-accent-600); }
+.qty-input{ width:72px; text-align:center; border:none; font-size:15px; padding:6px 8px; outline:none; color:var(--color-text); background:transparent; -moz-appearance:textfield; }
+.line-total{ font-weight:700; color:var(--color-text); font-size:16px; }
+
+/* Extra meta & footer */
+.extra-meta{ display:flex; gap:12px; flex-wrap:wrap; color:var(--color-muted); font-size:13px; }
+.full-item-footer{ display:flex; align-items:center; justify-content:space-between; gap:12px; border-top:1px solid var(--color-border); padding-top:12px; }
+.footer-left .muted{ color:var(--color-muted); font-size:13px; }
+.footer-right .btn{ min-width:96px; }
+
+/* Focus & accessibility */
+.image-viewport:focus, .qty-input:focus, .btn:focus, .thumb:focus, .image-slide:focus{ outline:none; box-shadow:0 0 0 6px rgba(15,179,166,0.08); border-color:rgba(15,179,166,0.12); border-radius:8px; }
+.image-slide:focus img, .image-slide:hover img{ transform:scale(1.01); filter:saturate(1.02); }
+
+/* Scrollbar styling (subtle) */
+.image-track::-webkit-scrollbar{ height:8px; }
+.image-track::-webkit-scrollbar-thumb{ background:rgba(15,23,36,0.06); border-radius:8px; }
+.image-track{ scrollbar-width:thin; scrollbar-color:rgba(15,23,36,0.06) transparent; }
+
+/* Defensive host rules (narrow and explicit) */
+/* If your toast host uses a different class, adjust these selectors. They only prevent host-level re-open when necessary. */
+.toast .full-item-view .image-viewport,
+.hvc-toast .full-item-view .image-viewport,
+.toast-card .full-item-view .image-viewport {
+  /* keep pointer events for chevrons and thumbnails via more specific selectors below */
+  pointer-events:auto;
+}
+.toast .full-item-view .thumb,
+.hvc-toast .full-item-view .thumb,
+.toast-card .full-item-view .thumb { pointer-events:auto; }
+.toast .full-item-view .chevron,
+.hvc-toast .full-item-view .chevron,
+.toast-card .full-item-view .chevron { pointer-events:auto; }
+
+/* Responsive */
+@media (max-width:920px){
+  .full-item-body{ grid-template-columns:1fr; }
+  .image-viewport{ min-height:200px; }
+  .qty-input{ width:56px; }
+  .primary-image{ object-fit:cover; }
+  .thumb-row{ gap:6px; }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion:reduce){
+  .image-track, .image-slide img, .thumb, .chevron { transition:none !important; scroll-behavior:auto !important; transform:none !important; }
+}
+
+/* Print */
+@media print{
+  .full-item-view{ box-shadow:none; border:1px solid #ddd; background:#fff; }
+  .btn, .qty-input, .thumb-strip, .chevron { display:none !important; }
+}

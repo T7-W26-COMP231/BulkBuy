@@ -115,6 +115,8 @@ export function OpsContextProvider({
   const [backendUrl, setBackendUrl] = useState("http://localhost:5000");
   const [socket, setSocket] = useState(null);
 
+  const [cart, setCart] = useState({});
+
   /* In-memory caches */
   const productsCacheRef = useRef(new Map());
   const ordersCacheRef = useRef(new Map());
@@ -581,12 +583,13 @@ export function OpsContextProvider({
       products,
       productsMeta,
       wsuproducts, setWsuproducts,
-      orders,
+      orders, setOrders,
       ordersMeta,
       wsuorders, setWsuorders,
       ops_region, setOps_region,
       backendUrl, setBackendUrl,
       socket, setSocket,
+      cart, setCart,
       /* fetch + state setters */
       fetchAndSetUiProducts,
       refreshUiProducts,
@@ -614,12 +617,13 @@ export function OpsContextProvider({
       products,
       productsMeta,
       wsuproducts, setWsuproducts,
-      orders,
+      orders, setOrders,
       ordersMeta,
       wsuorders, setWsuorders,
       ops_region, setOps_region,
       backendUrl, setBackendUrl,
       socket, setSocket,
+      cart, setCart,
       fetchAndSetUiProducts,
       refreshUiProducts,
       appendUiProducts,

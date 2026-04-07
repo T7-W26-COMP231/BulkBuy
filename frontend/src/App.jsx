@@ -6,7 +6,7 @@ import SupplierDashboard from "./pages/supplier/SupplierDashboard";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import ProductDetailsPage from "./pages/customer/ProductDetailsPage";
 import ProductListPage from "./pages/customer/ProductListPage";
-import CartPage from "./pages/customer/CartPage";
+import CartPage from "./pages/shared/ShoppingCart";
 import Shop from "./pages/customer/Marketplace";
 import Item from "./pages/customer/Itemsdetails";
 

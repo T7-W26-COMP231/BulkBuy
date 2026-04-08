@@ -129,6 +129,7 @@ export default function AdminProductCatalogPage() {
   const [selectedItemDetails, setSelectedItemDetails] = useState(null);
   const [detailsView, setDetailsView] = useState("product");
   const [itemLoading, setItemLoading] = useState(false);
+  const [productError, setProductError] = useState(false);
 
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
@@ -198,6 +199,20 @@ export default function AdminProductCatalogPage() {
   };
 
   const handleSelectProduct = async (product) => {
+    setProductError(false);
+
+
+    try {
+      // verify product still exists on backend
+      await api.get(`/prdts/${product._id}`);
+    } catch (err) {
+      setProductError(true);
+      setIsDetailsOpen(true);
+      setSelectedProduct(product);
+      return;
+    }
+
+
     const firstItem = product.items?.[0] ?? null;
     setSelectedProduct(product);
     setSelectedItem(firstItem);
@@ -218,6 +233,8 @@ export default function AdminProductCatalogPage() {
     setIsDetailsOpen(false);
     setSelectedProduct(null); setSelectedItem(null);
     setSelectedItemDetails(null); setDetailsView("product");
+    setProductError(false); // add this
+
   };
 
   const handleProductUpdated = (updatedFromBackend, fallbackPayload) => {
@@ -346,6 +363,7 @@ export default function AdminProductCatalogPage() {
                 {/* Details panel */}
                 {isDetailsOpen && selectedProduct && (
                   <ProductDetailsPanel
+                    productError={productError}
                     selectedProduct={selectedProduct}
                     selectedItem={selectedItem}
                     selectedItemDetails={selectedItemDetails}

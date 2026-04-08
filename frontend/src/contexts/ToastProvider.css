@@ -121,7 +121,7 @@ html.utoast-theme { font-family: var(--utoast-font); }
   box-shadow: var(--utoast-shadow);
   transform-origin: center;
   cursor: default;
-  background-color: #0adbc6;
+  background-color: transparent;/* #0adbc6;*/
 }
 
 /* Carousel viewport (top center) */

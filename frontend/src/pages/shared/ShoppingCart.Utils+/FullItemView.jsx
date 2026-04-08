@@ -243,16 +243,15 @@ export default function FullItemView({ item, toastControls = {} }) {
   const nextSlide = useCallback(() => scrollToIndex(currentIndex + 1), [currentIndex, scrollToIndex]);
 
   return (
-    <div
-      className="full-item-view"
+    <div className="full-item-view"
       role="dialog"
       aria-modal="false"
       aria-label={`Details for ${itemInfo?.title ?? "item"}`}
       onMouseEnter={onBringToFront}
       onFocus={onBringToFront}
       tabIndex={-1}
-    >
-      <header className="full-item-header">
+      style={{border: '1em solid #0fb3a6', borderRadius: '10px'/*, padding: '2em'*/}}>
+      <header className="full-item-header" style={{borderRadius:'10px'}}>
         <div className="title-block">
           <h2 className="item-title">{itemInfo?.title}</h2>
           <div className="meta-row">

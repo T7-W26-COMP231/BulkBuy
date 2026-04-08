@@ -268,12 +268,6 @@ export default function ShoppingCart({ onContinueShopping }) {
   }
 
   /* --------------------------------------------------------------------------
-     Payment & Delivery form (reused in Cart main and Checkout)
-     - Prepopulated from cart.order when available
-  -------------------------------------------------------------------------- */
-  // ---?? moved to another to a standalone module
-
-  /* --------------------------------------------------------------------------
      Render
   -------------------------------------------------------------------------- */
   return (
@@ -304,7 +298,9 @@ export default function ShoppingCart({ onContinueShopping }) {
       <div className="cart-body">
         <div className="cart-main">
           {/* Search & filter */}
-          <div className="cart-controls">
+          {
+            activeTab === 1 &&
+            <div className="cart-controls">
             <div className="search-filter">
               <input type="search" className="search-input" placeholder="Search by title, SKU, brand..." value={query} onChange={(e) => setQuery(e.target.value)} aria-label="Search cart items" />
               <select className="brand-filter" value={filterBrand} onChange={(e) => setFilterBrand(e.target.value)} aria-label="Filter by brand">
@@ -323,6 +319,8 @@ export default function ShoppingCart({ onContinueShopping }) {
               </button>
             </div>
           </div>
+          }
+          
 
           {/* Tab content */}
           {activeTab === 1 && (

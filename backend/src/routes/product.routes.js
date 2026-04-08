@@ -30,6 +30,20 @@ const asyncHandler = (fn) => (req, res, next) => {
  * POST   /products/bulk               -> bulk create products
  */
 
+
+/* product can in large number so for better UI enhancement, use below example to get limited products at first
+* Then will add button to retrieve more products
+ * List products
+ * Supports:
+ * ?page=1
+ * ?limit=30
+ * ?search=egg
+ * ?filter={"status":"active"}
+ *
+ * Example:
+ * GET /api/prdts?page=1&limit=30
+ */
+
 /* Create product */
 router.post(
   '/',

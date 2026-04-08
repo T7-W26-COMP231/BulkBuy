@@ -38,6 +38,20 @@ const asyncHandler = (fn) => (req, res, next) => {
 
 /* Routes */
 
+/**
+ * Public catalog -  we cannot retrieve all items from DB as it will slower UI so need to use limits, like example below
+ * Then will add button to retrieve more items
+ * Supports:
+ * ?page=1
+ * ?limit=30
+ * ?search=egg
+ * ?status=active
+ * ?category=Dairy
+ *
+ * Example:
+ * GET /api/items/catalog?page=1&limit=30
+ */
+
 /* Create item */
 router.post(
   '/',

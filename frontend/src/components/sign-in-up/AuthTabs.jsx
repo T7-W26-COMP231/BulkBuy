@@ -23,7 +23,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useToast } from "../../contexts/ToastProvider.jsx"; // adjust path if needed
 
 import { useAuth } from "../../contexts/AuthContext.jsx";
-import { useOpsContext } from "../../contexts/OpsContex.jsx";
+import { useOpsContext } from "../../contexts/OpsContext.jsx";
 
 // after successful login API returns { accessToken, refreshToken, user }
 import { initSocket, identifyUserAfterLogin } from "../../comms-js/socket";

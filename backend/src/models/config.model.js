@@ -57,8 +57,9 @@ const LocationSchema = new Schema(
 const ConfigSchema = new Schema(
   {
     _id: { type: String, required: true, trim: true }, // only for testing
-    //userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, unique: true, index: true },
-    userId: { type: String, required: true, trim: true },// only for testing
+    // userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, unique: true, index: true },
+    userId: { type: String, required: true, trim: true }, // only for testing
+
     location: { type: LocationSchema, default: () => ({}) },
     theme: { type: String, enum: THEME_ENUM, default: 'system' },
     isPrivate: { type: Boolean, default: true, index: true },

@@ -42,10 +42,8 @@ export default function Navbar({
 
   const headerRef = useRef(null);
 
-  const { user, signOut } = useAuth();
-  const { showToast, clearAll } = useToast()
-
-
+  const { user, accessToken, signOut } = useAuth();
+  const { showToast, clearAll } = useToast();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -128,6 +126,7 @@ export default function Navbar({
       await signOut();
       try { clearAll(); } catch { }
       showToast(() => <div style={{ padding: 12 }}><strong>Signed out</strong></div>, { value: "TR", IsToStack: false, duration: 2500, toastName: "Signed out", mt: '2em' });
+      window.location.href = "/";
     } catch (err) {
       console.error("signOut error:", err);
       showToast(() => (
@@ -296,9 +295,12 @@ export default function Navbar({
               <span className="material-symbols-outlined">notifications</span>
             </Link>
 
-            <Link to="/cart" className="flex h-10 w-10 items-center justify-center rounded-lg bg-neutral-light transition-colors hover:bg-primary/20" aria-label="Cart">
-              <span className="material-symbols-outlined">shopping_cart</span>
-            </Link>
+            {
+              window.location.pathname !== "/cart" &&
+              <Link to={accessToken ? '/cart' : '/'} className="flex h-10 w-10 items-center justify-center rounded-lg bg-neutral-light transition-colors hover:bg-primary/20" aria-label="Cart">
+                <span className="material-symbols-outlined">shopping_cart</span>
+              </Link>
+            }
 
             <div className="relative" ref={profileRef}>
               {user ? (

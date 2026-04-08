@@ -6,7 +6,7 @@ import Sidebar from "../../components/Sidebar";
 import Footer from "../../components/Footer";
 import { getCityData, getFeaturedAggregation } from "../../data/mockData";
 import { useAuth } from "../../contexts/AuthContext.jsx";
-import { useOpsContext } from "../../contexts/OpsContex.jsx";
+import { useOpsContext } from "../../contexts/OpsContext.jsx";
 
 import { initSocket } from "../../comms-js/socket";
 
@@ -131,9 +131,11 @@ export default function HomePage() {
     const run = async () => {
       try {
         // If there's no user at all, clear ops and exit early.
-        if (!user || !user.userId) {
-          clearOpsState();
-          return;
+        if (!user || !user.userId || !accessToken) {
+          if (!accessToken) {
+            clearOpsState();
+            return;
+          }
         }
         if (!mounted || controller.signal.aborted) return;
 
@@ -217,6 +219,8 @@ export default function HomePage() {
   // }, [applyRealtimeUpdate]);
 
   // Location modal logic
+
+
 
   useEffect(() => {
     const savedCity = sessionStorage.getItem("detectedCity");

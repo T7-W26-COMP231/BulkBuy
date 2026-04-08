@@ -82,8 +82,9 @@ const UserSchema = new Schema({
   addresses: { type: [AddressSchema], default: [] },
 
   // references and methods
-  //config: { type: Schema.Types.ObjectId, ref: 'Config' },
-  config: { type: String, trim: true },
+  // config: { type: Schema.Types.ObjectId, ref: 'Config' },
+  config: { type: String, trim: true }, // only for testing
+
   paymentMethods: { type: [PaymentMethodSchema], default: [] },
 
   // avatar: { type: Schema.Types.ObjectId, ref: 'S3file', default: "642f1a9b8c9f1a2b3c4d5e6f"},

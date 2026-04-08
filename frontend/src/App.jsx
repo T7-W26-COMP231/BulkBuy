@@ -24,7 +24,7 @@ import AdminSettingsPage from "./pages/admin/AdminSettingsPage";
 
 import ProductDetailsPage from "./pages/customer/ProductDetailsPage";
 import ProductListPage from "./pages/customer/ProductListPage";
-import CartPage from "./pages/customer/CartPage";
+import CartPage from "./pages/shared/ShoppingCart";
 import Shop from "./pages/customer/Marketplace";
 import Item from "./pages/customer/Itemsdetails";
 import ReviewModifyIntentPage from "./pages/customer/ReviewModifyIntentPage";

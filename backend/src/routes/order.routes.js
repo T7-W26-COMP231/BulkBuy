@@ -33,6 +33,7 @@ const asyncHandler = (fn) => (req, res, next) => {
  * POST   /orders                      -> create order
  * POST   /orders/bulk                 -> bulk create orders
  * GET    /orders                      -> list orders (pagination/filter via query)
+ * GET    /orders/:id/invoice          -> get finalized invoice data for an order
  * GET    /orders/:id                  -> get order by Mongo _id
  * GET    /orders/user/:userId         -> find orders by userId
  * GET    /orders/user/:userId/enriched-> enriched, read-intensive orders for user
@@ -129,6 +130,24 @@ router.get(
   requireAuth,
   requireAdmin,
   asyncHandler(OrderController.getDashboardMetrics)
+);
+
+/* -------------------------------------------------------------------------- */
+/* Get finalized order invoice by id
+ * purpose: Retrieve invoice-ready data for a single order, including final pricing,
+ *          totals, savings, and pending-pricing state when the aggregation window
+ *          has not closed yet
+ * method: GET
+ * path: /orders/:id/invoice
+ * params:
+ *   - path: id (order id)
+ * validators: orderValidators.idParam
+ * controller: OrderController.getInvoiceById
+ */
+router.get(
+  '/:id/invoice',
+  orderValidators && orderValidators.idParam,
+  asyncHandler(OrderController.getInvoiceById)
 );
 
 /* -------------------------------------------------------------------------- */

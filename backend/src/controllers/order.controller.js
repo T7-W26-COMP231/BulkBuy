@@ -57,6 +57,19 @@ const OrderController = {
   }),
 
   /**
+   * GET /orders/:id
+   */
+  getInvoiceById: asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    if (!id) throw createError(400, 'order id is required');
+
+    const opts = buildOpts(req);
+    const invoice = await OrderService.getInvoiceById(id, opts);
+
+    return send(res, 200, { success: true, data: invoice });
+  }),
+
+  /**
    * GET /orders/user/:userId
    */
   findByUserId: asyncHandler(async (req, res) => {

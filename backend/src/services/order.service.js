@@ -106,6 +106,116 @@ class OrderService {
     return sanitizeForClient(order);
   }
 
+  async getInvoiceById(orderId, opts = {}) {
+  if (!orderId) throw createError(400, 'orderId is required');
+
+  const order = await OrderRepo.findById(orderId, { lean: true });
+  if (!order) throw createError(404, 'Order not found');
+
+  const finalizedStatuses = new Set(['confirmed', 'dispatched', 'fulfilled']);
+  const isFinalized = finalizedStatuses.has(order.status);
+
+  const now = Date.now();
+  const isWindowClosed = order.salesWindow?.toEpoch
+    ? now > Number(order.salesWindow.toEpoch)
+    : false;
+
+  if (!isFinalized) {
+    let message = 'Final pricing is not available yet.';
+    let pricingPending = true;
+
+    if (order.status === 'declined') {
+      message = 'Invoice is not available because this order was declined.';
+      pricingPending = false;
+    } else if (order.status === 'cancelled') {
+      message = 'Invoice is not available because this order was cancelled.';
+      pricingPending = false;
+    } else if (order.status === 'draft' || order.status === 'submitted' || order.status === 'approved') {
+      message = 'Aggregation window is still active. Final pricing is not available yet.';
+      pricingPending = true;
+    }
+
+    return {
+      orderId: order._id,
+      orderNumber: order._id,
+      invoiceAvailable: false,
+      pricingPending,
+      status: order.status,
+      generatedAt: now,
+      items: [],
+      summary: null,
+      message
+    };
+  }
+
+  const statusLabelMap = {
+    confirmed: 'CONFIRMED / PAID',
+    dispatched: 'DISPATCHED',
+    fulfilled: 'FULFILLED'
+  };
+
+  const items = (order.items || []).map((item) => {
+    const snap = Array.isArray(item.pricingSnapshot)
+      ? (item.pricingSnapshot.length ? item.pricingSnapshot[item.pricingSnapshot.length - 1] : null)
+      : (item.pricingSnapshot || null);
+
+    const quantity = Number(item.quantity || 0);
+    const finalUnitPrice = Number(snap?.atInstantPrice || 0);
+    const discountPercent = Number(snap?.discountedPercentage || 0);
+
+    const baseUnitPrice =
+      discountPercent > 0 && discountPercent < 100
+        ? Number((finalUnitPrice / (1 - discountPercent / 100)).toFixed(2))
+        : finalUnitPrice;
+
+    const lineBaseTotal = Number((baseUnitPrice * quantity).toFixed(2));
+    const lineFinalTotal = Number((finalUnitPrice * quantity).toFixed(2));
+    const lineSavings = Number((lineBaseTotal - lineFinalTotal).toFixed(2));
+
+    return {
+      itemId: item.itemId,
+      productId: item.productId,
+      quantity,
+      baseUnitPrice,
+      finalUnitPrice,
+      lineBaseTotal,
+      lineFinalTotal,
+      lineSavings,
+      discountPercent,
+      tierLabel: snap?.discountBracket?.final != null
+        ? `Tier ${snap.discountBracket.final}`
+        : 'Final Bulk Tier'
+    };
+  });
+
+  const baseTotal = Number(items.reduce((sum, i) => sum + i.lineBaseTotal, 0).toFixed(2));
+  const finalTotal = Number(items.reduce((sum, i) => sum + i.lineFinalTotal, 0).toFixed(2));
+  const totalSavings = Number((baseTotal - finalTotal).toFixed(2));
+  const savingsPercent = baseTotal > 0
+    ? Number(((totalSavings / baseTotal) * 100).toFixed(2))
+    : 0;
+
+  return {
+    orderId: order._id,
+    orderNumber: order._id,
+    invoiceAvailable: true,
+    pricingPending: false,
+    generatedAt: now,
+    status: order.status,
+    statusLabel: statusLabelMap[order.status] || String(order.status || '').toUpperCase(),
+    statusNote: 'Aggregation window closed · Final pricing locked',
+    summary: {
+      totalQuantity: items.reduce((sum, i) => sum + i.quantity, 0),
+      baseTotal,
+      finalTotal,
+      totalSavings,
+      savingsPercent,
+      finalPricePerUnit: items.length ? items[0].finalUnitPrice : 0
+    },
+    items
+  };
+}
+
   async findByUserId(userId, opts = {}) {
     if (!userId) throw createError(400, 'userId is required');
     const results = await OrderRepo.findByUserId(userId, opts);

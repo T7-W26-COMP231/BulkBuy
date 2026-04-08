@@ -183,7 +183,8 @@ const ItemSchema = new Schema(
 
     status: { type: String, enum: STATUS_ENUM, default: 'draft', index: true },
 
-    ops_regions: { type: [String], trim: true, default: [] },
+    //ops_regions: { type: [String], trim: true, default: [] },
+    ops_region: { type: [String], trim: true, default: [] }, //I changed to ops_region as in mogno it's ops_region req so Patch will work now
 
     published: { type: Boolean, default: false, index: true }
   },

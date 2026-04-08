@@ -3,7 +3,7 @@ import NotificationBell from "../../pages/shared/NotificationBell";
 
 const CITIES = ["Seattle", "New York", "San Francisco", "Chicago", "Toronto"];
 
-export default function AdminTopbar({ title = "Admin" }) {
+export default function AdminTopbar({ title = "Admin", onSearch, searchPlaceholder = "Search system metrics..." }) {
   const [city, setCity] = useState("Seattle");
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
@@ -13,16 +13,16 @@ export default function AdminTopbar({ title = "Admin" }) {
 
         {/* ── Left: Search bar ──────────────────────────────────────── */}
         <div className="flex flex-1 max-w-sm items-center gap-2 rounded-2xl border border-neutral-light bg-neutral-light/50 px-4 py-2.5">
-          <span className="material-symbols-outlined text-[20px] text-text-muted">
-            search
-          </span>
+          <span className="material-symbols-outlined text-[20px] text-text-muted">search</span>
           <input
             type="text"
-            placeholder="Search system metrics..."
+            placeholder={searchPlaceholder}
+            onChange={onSearch ? (e) => onSearch(e.target.value) : undefined}
             className="flex-1 bg-transparent text-sm text-text-main placeholder:text-text-muted focus:outline-none"
           />
         </div>
 
+        {/* rest unchanged */}
         {/* ── Right: City dropdown + bell + avatar ─────────────────── */}
         <div className="ml-auto flex items-center gap-2">
 

@@ -38,6 +38,16 @@ export default function Marketplace() {
   }, [searchParams]);
 
   // ── Helpers ────────────────────────────────────────────────────────────────────
+  function highlightMatch(text, query) {
+    if (!query || !text) return text;
+    const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`, "gi");
+    const parts = text.split(regex);
+    return parts.map((part, i) =>
+      regex.test(part)
+        ? <mark key={i} className="bg-primary/30 text-text-main rounded px-0.5">{part}</mark>
+        : part
+    );
+  }
 
   const getTitle = (item) => {
     const en = item.descriptions?.find((d) => d.locale === "en");
@@ -156,7 +166,7 @@ export default function Marketplace() {
                   >
                     <ProductCard
                       id={id}
-                      title={getTitle(item)}
+                      title={highlightMatch(getTitle(item), searchTerm)}
                       category={getDescription(item)}
                       price={price}
                       image={item.image || item.images?.[0] || ""}

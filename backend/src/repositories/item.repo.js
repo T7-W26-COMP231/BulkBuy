@@ -208,7 +208,8 @@ class ItemRepo {
    * @param {Object} update
    * @param {Object} opts
    */
-  async updateById(id, update = {}, opts = {}) {
+
+  /*async updateById(id, update = {}, opts = {}) {
     const o = normalizeOpts(opts);
     if (!id) throw createError(400, 'id is required');
     if (!update || typeof update !== 'object') throw createError(400, 'update is required');
@@ -224,7 +225,35 @@ class ItemRepo {
     if (o.populate) q = q.populate(o.populate);
     if (o.lean) q = q.lean();
     return q.exec();
+  }*/
+
+  // item.repo.js — updateById
+  async updateById(id, update = {}, opts = {}) {
+    const o = normalizeOpts(opts);
+    if (!id) throw createError(400, 'id is required');
+    if (!update || typeof update !== 'object') throw createError(400, 'update is required');
+
+    const query = { _id: id };
+    if (!o.includeDeleted) query.status = { $ne: 'deleted' };
+
+    // wrap in $set if caller sent a plain object
+    const hasOperator = Object.keys(update).some((k) => k.startsWith('$'));
+    const mongoUpdate = hasOperator ? update : { $set: update };
+
+    const updateOpts = {
+      returnDocument: 'after',
+      session: o.session,
+      runValidators: false,
+    };
+    if (o.arrayFilters) updateOpts.arrayFilters = o.arrayFilters;
+
+    let q = Item.findOneAndUpdate(query, mongoUpdate, updateOpts);
+    if (o.select) q = q.select(o.select);
+    if (o.populate) q = q.populate(o.populate);
+    if (o.lean) q = q.lean();
+    return q.exec();
   }
+
 
   /**
    * Update one by filter

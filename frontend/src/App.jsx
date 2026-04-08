@@ -2,9 +2,8 @@ import { Routes, Route, Navigate, useNavigate, useLocation } from "react-router-
 import { useEffect } from "react";
 import { useAuth } from "./contexts/AuthContext";
 import { useNotifications } from "./contexts/NotificationContext";
-import SupplierFulfillmentPage from "./pages/supplier/SupplierFulfillmentPage";
-
 import { io } from "socket.io-client";
+
 import HomePage from "./pages/customer/HomePage";
 import SupplierDashboard from "./pages/supplier/SupplierDashboard";
 import SupplierProfilePage from "./pages/supplier/SupplierProfilePage";
@@ -13,22 +12,24 @@ import SupplierQuotesPage from "./pages/supplier/SupplierQuotesPage";
 import SupplierOrdersPage from "./pages/supplier/SupplierOrdersPage";
 import SupplierDemandStatusPage from "./pages/supplier/SupplierDemandStatusPage";
 import SupplierReportsPage from "./pages/supplier/SupplierReportsPage";
+import SupplierFulfillmentPage from "./pages/supplier/SupplierFulfillmentPage";
+
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminProductCatalogPage from "./pages/admin/AdminProductCatalogPage";
+import AdminBulkOrdersPage from "./pages/admin/AdminBulkOrdersPage";
+import PricingBracketsPage from "./pages/admin/PricingBracketsPage";
+import AdminQuotesReviewPage from "./pages/admin/AdminQuotesReviewPage";
+import CreateSalesWindowForm from "./pages/admin/CreateSalesWindowForm";
+import AdminSettingsPage from "./pages/admin/AdminSettingsPage";
+
 import ProductDetailsPage from "./pages/customer/ProductDetailsPage";
 import ProductListPage from "./pages/customer/ProductListPage";
 import CartPage from "./pages/customer/CartPage";
 import Shop from "./pages/customer/Marketplace";
 import Item from "./pages/customer/Itemsdetails";
 import ReviewModifyIntentPage from "./pages/customer/ReviewModifyIntentPage";
-import PricingBracketsPage from "./pages/admin/PricingBracketsPage"
-import AdminInventoryPage from "./pages/admin/AdminInventoryPage";
-import AdminBulkOrdersPage from "./pages/admin/AdminBulkOrdersPage";
-import AdminSettingsPage from "./pages/admin/AdminSettingsPage";
-import AdminQuotesReviewPage from "./pages/admin/AdminQuotesReviewPage"
 import OrdersPage from "./pages/customer/OrdersPage";
 import OrderDetailsPage from "./pages/customer/OrderDetails";
-import CreateSalesWindowForm from "./pages/admin/CreateSalesWindowForm";
-
 
 function PlaceholderPage({ title }) {
   return (
@@ -42,6 +43,7 @@ function PlaceholderPage({ title }) {
     </div>
   );
 }
+
 function AdminRoute({ children }) {
   const { user } = useAuth();
 
@@ -66,7 +68,6 @@ function RoleRedirect() {
   const location = useLocation();
 
   useEffect(() => {
-    // wait until auth is fully restored from localStorage
     if (initializing) return;
     if (!accessToken || !user) return;
 
@@ -81,15 +82,13 @@ function RoleRedirect() {
 
   return null;
 }
+
 export default function App() {
   const { addNotification } = useNotifications();
-
-  const { user, signIn, signUp } = useAuth();
+  const { user } = useAuth();
 
   useEffect(() => {
     const socket = io(`${import.meta.env.VITE_API_URL}`);
-
-    //const socket = io("http://localhost:5000")
 
     socket.on("connect", () => {
       console.log("🟢 Connected to server:", socket.id);
@@ -100,11 +99,10 @@ export default function App() {
       }
     });
 
-    socket.on("order_created", (data) => {
-      addNotification(`New order created`, "info");
+    socket.on("order_created", () => {
+      addNotification("New order created", "info");
       alert("🛒 New order created!");
     });
-    // new — fires when supplier submits a quote
 
     socket.on("quote_submitted", (data) => {
       if (user?.role === "administrator") {
@@ -118,7 +116,7 @@ export default function App() {
     return () => {
       socket.disconnect();
     };
-  }, [user]);
+  }, [user, addNotification]);
 
   return (
     <>
@@ -133,6 +131,7 @@ export default function App() {
         <Route path="/product/:id" element={<ProductDetailsPage />} />
         <Route path="/products" element={<ProductListPage />} />
         <Route path="/review-modify-intent" element={<ReviewModifyIntentPage />} />
+        <Route path="/order-details" element={<OrderDetailsPage />} />
 
         {/* Supplier routes */}
         <Route path="/supplier" element={<Navigate to="/supplier/dashboard" replace />} />
@@ -143,7 +142,10 @@ export default function App() {
         <Route path="/supplier/order-requests" element={<SupplierOrdersPage />} />
         <Route path="/supplier/demand-status" element={<SupplierDemandStatusPage />} />
         <Route path="/supplier/reports" element={<SupplierReportsPage />} />
-        <Route path="/supplier/order-requests/:id/fulfillment" element={<SupplierFulfillmentPage />} />
+        <Route
+          path="/supplier/order-requests/:id/fulfillment"
+          element={<SupplierFulfillmentPage />}
+        />
 
         {/* Admin routes */}
         <Route
@@ -156,12 +158,17 @@ export default function App() {
         />
 
         <Route
-          path="/admin/inventory"
+          path="/admin/product-catalog"
           element={
             <AdminRoute>
-              <AdminInventoryPage />
+              <AdminProductCatalogPage />
             </AdminRoute>
           }
+        />
+
+        <Route
+          path="/admin/inventory"
+          element={<Navigate to="/admin/product-catalog" replace />}
         />
 
         <Route
@@ -220,37 +227,9 @@ export default function App() {
         <Route path="/terms-of-service" element={<PlaceholderPage title="Terms of Service" />} />
         <Route path="/notifications" element={<PlaceholderPage title="Notifications" />} />
         <Route path="/profile" element={<PlaceholderPage title="Profile" />} />
-
-        {/* <Route
-          path="/login"
-          element={
-            <AuthTabs
-              onSignIn={async (payload) => {
-                const res = await signIn(payload);
-
-                if (res?.ok) {
-                  const role = res.user?.role;
-
-                  if (role === "supplier") {
-                    window.location.href = "/supplier/dashboard";
-                  } else if (role === "admin") {
-                    window.location.href = "/admin";
-                  } else {
-                    window.location.href = "/";
-                  }
-                }
-
-                return res;
-              }}
-              onSignUp={signUp}
-            />
-          }
-        /> */}
         <Route path="/community" element={<PlaceholderPage title="Community" />} />
         <Route path="/settings" element={<PlaceholderPage title="Settings" />} />
         <Route path="/savings" element={<PlaceholderPage title="Savings Vault" />} />
-        <Route path="/orders" element={<OrdersPage />} />
-        <Route path="/order-details" element={<OrderDetailsPage />} />
       </Routes>
     </>
   );

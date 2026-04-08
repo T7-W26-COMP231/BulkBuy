@@ -5,7 +5,7 @@ import AuthTabs from "../sign-in-up/AuthTabs.jsx";
 
 const sidebarItems = [
   { label: "Dashboard", icon: "dashboard", to: "/admin" },
-  { label: "Inventory", icon: "inventory_2", to: "/admin/inventory" },
+  { label: "Product Catalog", icon: "inventory_2", to: "/admin/product-catalog" },
   { label: "Bulk Orders", icon: "local_shipping", to: "/admin/bulk-orders" },
   { label: "Supplier Quotes", icon: "request_quote", to: "/admin/supplier-quotes" },
   { label: "Pricing Brackets", icon: "sell", to: "/admin/pricing-brackets" },
@@ -54,7 +54,16 @@ export default function AdminSidebar() {
   const openAuthToast = () => {
     showToast(
       ({ toastControls }) => <ToastAuthWrapper toastControls={toastControls} />,
-      { value: "HVC", IsToStack: true, toastName: "Auth", AllowedMultiple: false, IsToStick: true, blurBg: true, duration: null, animate: "TR" }
+      {
+        value: "HVC",
+        IsToStack: true,
+        toastName: "Auth",
+        AllowedMultiple: false,
+        IsToStick: true,
+        blurBg: true,
+        duration: null,
+        animate: "TR",
+      }
     );
   };
 
@@ -70,8 +79,6 @@ export default function AdminSidebar() {
 
   return (
     <aside className="hidden w-72 border-r border-neutral-light bg-white lg:flex lg:flex-col">
-
-      {/* ── Logo ────────────────────────────────────────────────────── */}
       <div className="border-b border-neutral-light px-6 py-6">
         <div className="flex items-center gap-3">
           <div className="flex size-12 items-center justify-center rounded-2xl bg-primary text-text-main shadow-sm">
@@ -86,7 +93,6 @@ export default function AdminSidebar() {
         </div>
       </div>
 
-      {/* ── Nav links ───────────────────────────────────────────────── */}
       <nav className="flex flex-1 flex-col gap-1 px-5 py-6">
         {sidebarItems.map((item) => (
           <NavLink
@@ -94,9 +100,10 @@ export default function AdminSidebar() {
             to={item.to}
             end={item.to === "/admin"}
             className={({ isActive }) =>
-              `flex items-center gap-4 rounded-2xl px-4 py-4 text-base font-semibold transition-all duration-200 ${isActive
-                ? "bg-primary text-text-main shadow-sm"
-                : "text-text-muted hover:bg-neutral-light hover:translate-x-1"
+              `flex items-center gap-4 rounded-2xl px-4 py-4 text-base font-semibold transition-all duration-200 ${
+                isActive
+                  ? "bg-primary text-text-main shadow-sm"
+                  : "text-text-muted hover:bg-neutral-light hover:translate-x-1"
               }`
             }
           >
@@ -105,7 +112,7 @@ export default function AdminSidebar() {
           </NavLink>
         ))}
       </nav>
-      {/* ── Export Report button ─────────────────────────────────────── */}
+
       <div className="px-5 pb-5">
         <button
           type="button"
@@ -116,7 +123,6 @@ export default function AdminSidebar() {
         </button>
       </div>
 
-      {/* ── User section ────────────────────────────────────────────── */}
       <div className="border-t border-neutral-light px-6 py-5">
         {user ? (
           <div className="flex items-center justify-between gap-3">
@@ -129,12 +135,11 @@ export default function AdminSidebar() {
                   {displayName || "User"}
                 </p>
                 <p className="inline-flex rounded-full bg-neutral-light px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-text-muted">
-  {user.role ?? "Account"}
-</p>
+                  {user.role ?? "Account"}
+                </p>
                 {email && <p className="truncate text-xs text-text-muted">{email}</p>}
               </div>
             </div>
-
 
             <button
               type="button"
@@ -156,9 +161,6 @@ export default function AdminSidebar() {
           </button>
         )}
       </div>
-
-
-
     </aside>
   );
 }

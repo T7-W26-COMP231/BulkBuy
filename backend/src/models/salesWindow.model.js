@@ -71,9 +71,15 @@ const PricingTierSchema = new Schema({//pricing tier are set before product go l
  */
 
 const ProductItemSchema = new Schema({
-  _id: { type: String, required: true, trim: true }, // only for testing
+  /*_id: { type: String, required: true, trim: true }, // only for testing
   itemId: { type: Schema.Types.ObjectId, required: true, index: true },
   productId: { type: Schema.Types.ObjectId, required: true, index: true },
+  */
+
+  //_id: { type: String, required: true, trim: true }, I commented this as it was creating nested _id inside saleswindow
+
+  itemId: { type: String, required: true, index: true },
+  productId: { type: String, required: true, index: true },
   pricing_snapshots: { type: [PricingSnapshotSchema], default: [] }, // the first one is the initial price setter, first pricing snapshot initial one 
 
   qtySold: { type: Number, default: 0 }, //
@@ -83,13 +89,14 @@ const ProductItemSchema = new Schema({
   metadata: { type: Schema.Types.Mixed, default: {} },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
-}, { _id: false });
+}, { _id: false, id: false });
 
 /**
  * ProductSchema
  */
 const ProductSchema = new Schema({
-  productId: { type: Schema.Types.ObjectId, required: true, index: true },
+  //productId: { type: Schema.Types.ObjectId, required: true, index: true },
+  productId: { type: String, required: true, index: true },
   items: { type: [ProductItemSchema], default: [] },
   metadata: { type: Schema.Types.Mixed, default: {} }
 }, { _id: false });
@@ -186,8 +193,10 @@ SalesWindowSchema.statics.upsertPricingSnapshot = async function (windowId, prod
   };
 
   const arrayFilters = [
-    { 'p.productId': mongoose.Types.ObjectId(String(productId)) },
-    { 'it.itemId': mongoose.Types.ObjectId(String(itemId)) }
+    //{ 'p.productId': mongoose.Types.ObjectId(String(productId)) },
+    //{ 'it.itemId': mongoose.Types.ObjectId(String(itemId)) }
+    { 'p.productId': String(productId) },
+    { 'it.itemId': String(itemId) }
   ];
 
   const options = { new: true, arrayFilters, session: opts.session || null };
@@ -220,7 +229,7 @@ SalesWindowSchema.statics.removeItem = async function (productId, itemId, opts =
 
   // Pull the item from any product that matches productId
   const filter = { 'products.productId': productId };
-  const update = { $pull: { 'products.$[p].items': { itemId: mongoose.Types.ObjectId(String(itemId)) } } };
+  const update = { $pull: { 'products.$[p].items': { itemId: String(itemId) /*itemId: mongoose.Types.ObjectId(String(itemId))*/ } } };
   const arrayFilters = [{ 'p.productId': mongoose.Types.ObjectId(String(productId)) }];
   const options = { arrayFilters, session: opts.session || null, multi: true };
 

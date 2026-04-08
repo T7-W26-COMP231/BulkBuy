@@ -30,7 +30,9 @@ const SalesPriceSchema = new Schema({
 }, { _id: false });
 
 const ItemRefSchema = new Schema({
-  itemId: { type: Schema.Types.ObjectId, ref: 'Item', required: true },
+  //itemId: { type: Schema.Types.ObjectId, ref: 'Item', required: true },
+  itemId: { type: String, required: true, trim: true },
+
   salesPrices: { type: [SalesPriceSchema], default: [] }
 }, { _id: false });
 

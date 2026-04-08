@@ -185,8 +185,8 @@ class SalesWindowRepo {
     const o = normalizeOpts(opts);
     const q = epochMs
       ? this.Model.findOne({
-          "window.fromEpoch": { $lt: Number(epochMs) },
-        }).sort({ "window.fromEpoch": -1 })
+        "window.fromEpoch": { $lt: Number(epochMs) },
+      }).sort({ "window.fromEpoch": -1 })
       : this.Model.findOne({}).sort({ "window.fromEpoch": -1 });
     if (o.select) q.select(o.select);
     if (o.populate) q.populate(o.populate);
@@ -422,11 +422,12 @@ class SalesWindowRepo {
     }
   }
 
-  async addOrUpdateItem(windowId, productId, itemId, payload = {}, opts = {}) {
+  /*async addOrUpdateItem(windowId, productId, itemId, payload = {}, opts = {}) {
     const sessionInfo = await this._maybeStartSession(opts);
     const session = sessionInfo.session || null;
     try {
       const doc = await this.Model.findById(windowId).session(session).exec();
+      
       if (!doc) {
         await this._maybeCommitSession(sessionInfo);
         return null;
@@ -437,6 +438,104 @@ class SalesWindowRepo {
       });
       await this._maybeCommitSession(sessionInfo);
       return res;
+    } catch (err) {
+      await this._maybeAbortSession(sessionInfo);
+      throw err;
+    }
+  }*/
+
+  async addOrUpdateItem(windowId, productId, itemId, payload = {}, opts = {}) {
+    const sessionInfo = await this._maybeStartSession(opts);
+    const session = sessionInfo.session || null;
+
+    try {
+      const now = new Date();
+      const pricingTiers = Array.isArray(payload.pricing_tiers)
+        ? payload.pricing_tiers
+        : [];
+
+      const newItem = {
+        //_id: `${String(productId)}_${String(itemId)}`,
+        itemId: String(itemId),
+        productId: String(productId),
+        pricing_tiers: pricingTiers,
+        pricing_snapshots: [],
+        qtySold: 0,
+        qtyAvailable: 0,
+        metadata: payload.metadata || {},
+        createdAt: now,
+        updatedAt: now,
+      };
+
+      // Step 1: item already exists → update pricing_tiers
+      const step1 = await this.Model.findOneAndUpdate(
+        {
+          _id: windowId,
+          "products.productId": String(productId),
+          "products.items.itemId": String(itemId),
+        },
+        {
+          $set: {
+            "products.$[p].items.$[it].pricing_tiers": pricingTiers,
+            "products.$[p].items.$[it].updatedAt": now,
+          },
+        },
+        {
+          new: true,
+          arrayFilters: [
+            { "p.productId": String(productId) },
+            { "it.itemId": String(itemId) },
+          ],
+          session,
+        }
+      ).exec();
+
+      if (step1) {
+        await this._maybeCommitSession(sessionInfo);
+        return step1;
+      }
+
+      // Step 2: product exists but item doesn't → push item into product
+      const step2 = await this.Model.findOneAndUpdate(
+        {
+          _id: windowId,
+          "products.productId": String(productId),
+        },
+        {
+          $push: { "products.$[p].items": newItem },
+        },
+        {
+          new: true,
+          arrayFilters: [{ "p.productId": String(productId) }],
+          session,
+        }
+      ).exec();
+
+      if (step2) {
+        await this._maybeCommitSession(sessionInfo);
+        return step2;
+      }
+
+      // Step 3: neither product nor item exists → push new product with item
+      const step3 = await this.Model.findOneAndUpdate(
+        { _id: windowId },
+        {
+          $push: {
+            products: {
+              productId: String(productId),
+              items: [newItem],
+              metadata: {},
+            },
+          },
+        },
+        { new: true, session }
+      ).exec();
+
+      if (!step3) throw createError(404, `SalesWindow not found: ${windowId}`);
+
+      await this._maybeCommitSession(sessionInfo);
+      return step3;
+
     } catch (err) {
       await this._maybeAbortSession(sessionInfo);
       throw err;

@@ -962,7 +962,7 @@ class SalesWindowService {
     if (!Array.isArray(windows) || windows.length === 0) {
       return { products: [], total: 0, page, limit, pages: 0 };
     }
-    
+
     // 2) fetch merged views for each window (repo/model is authoritative for merging)
     // const mergedPromises = windows.map((w) =>
     //   SalesWindowRepo.getWindowChain(
@@ -971,8 +971,8 @@ class SalesWindowService {
     //   ),
     // );
     // const mergedResults = await Promise.all(mergedPromises);
-    
-    
+
+
     // 3) aggregate products deduped by productId; items deduped by itemId (first-seen wins)
     const productMap = new Map();
 
@@ -981,7 +981,7 @@ class SalesWindowService {
       const sourceWindow = windows[wi];
       const sourceWindowId = sourceWindow && sourceWindow._id ? String(sourceWindow._id) : null;
       const sourceWindowFrom = sourceWindow && sourceWindow.window ? Number(sourceWindow.window.fromEpoch) : null;
-      const sourceWindowTo =  sourceWindow && sourceWindow.window ? Number(sourceWindow.window.toEpoch) : null;
+      const sourceWindowTo = sourceWindow && sourceWindow.window ? Number(sourceWindow.window.toEpoch) : null;
 
       if (!merged || !Array.isArray(merged.products)) continue;
 
@@ -1062,14 +1062,14 @@ class SalesWindowService {
       metadata: p.metadata,
     }));
 
-    
+
     // 5) paginate products (we will enrich each paged product one at a time)
     const total = allProducts.length;
     const pages = total === 0 ? 0 : Math.max(1, Math.ceil(total / limit));
     const start = (page - 1) * limit;
     const end = start + limit;
     const pagedProducts = allProducts.slice(start, end);
-    
+
     // 6) per-product enrichment: fetch item details for each product's items and merge
     // Select all item fields except `price` and `pricingTiers`.
     // Based on the Item model, include: _id, sku, title, slug, description, shortDescription,
@@ -1125,7 +1125,7 @@ class SalesWindowService {
           itemDetailsMap.set(idStr, dbItem);
         }
       }
-      
+
       // merge details into items, preserving stub fields (itemId, productId, windowId)
       const enrichedItems = prod.items.map((it) => {
         const idStr = String(it.itemId);

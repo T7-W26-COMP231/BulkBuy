@@ -45,20 +45,27 @@ function adminOnly(req, res, next) {
  * ------------------------- */
 
 const idParam = [
+  /* param('id').exists().withMessage('id is required').bail()
+     .custom((v) => isObjectId(v)).withMessage('id must be a valid ObjectId'),*/
   param('id').exists().withMessage('id is required').bail()
-    .custom((v) => isObjectId(v)).withMessage('id must be a valid ObjectId'),
+    .isString().notEmpty().withMessage('id must be a non-empty string'),
+
   runValidation
 ];
 
 const productIdParam = [
   param('productId').exists().withMessage('productId is required').bail()
-    .custom((v) => isObjectId(v)).withMessage('productId must be a valid ObjectId'),
+    .isString().notEmpty().withMessage('productId must be a non-empty string'),
+  /*param('productId').exists().withMessage('productId is required').bail()
+    .custom((v) => isObjectId(v)).withMessage('productId must be a valid ObjectId'),*/
   runValidation
 ];
 
 const itemIdParam = [
   param('itemId').exists().withMessage('itemId is required').bail()
-    .custom((v) => isObjectId(v)).withMessage('itemId must be a valid ObjectId'),
+    .isString().notEmpty().withMessage('itemId must be a non-empty string'),
+  /*param('itemId').exists().withMessage('itemId is required').bail()
+    .custom((v) => isObjectId(v)).withMessage('itemId must be a valid ObjectId'),*/
   runValidation
 ];
 
@@ -68,8 +75,10 @@ const itemIdParam = [
 
 const create = [
   body('window').exists().withMessage('window is required').bail().isObject().withMessage('window must be an object'),
+
   body('window.fromEpoch').exists().withMessage('window.fromEpoch is required').bail()
     .isInt({ min: 0 }).withMessage('window.fromEpoch must be an integer epoch ms'),
+
   body('window.toEpoch').exists().withMessage('window.toEpoch is required').bail()
     .isInt({ min: 0 }).withMessage('window.toEpoch must be an integer epoch ms')
     .custom((toEpoch, { req }) => {
@@ -78,11 +87,26 @@ const create = [
       if (Number(toEpoch) <= Number(from)) throw new Error('window.toEpoch must be greater than window.fromEpoch');
       return true;
     }),
+
   body('ops_region').optional().isString().withMessage('ops_region must be a string'),
   body('products').optional().isArray().withMessage('products must be an array'),
-  body('products.*.productId').optional().custom((v) => isObjectId(v)).withMessage('products.*.productId must be a valid ObjectId'),
+
+  //body('products.*.productId').optional().custom((v) => isObjectId(v)).withMessage('products.*.productId must be a valid ObjectId'),
+  body('products.*.productId')
+    .optional()
+    .isString()
+    .notEmpty()
+    .withMessage('products.*.productId must be a non-empty string'),
+
   body('products.*.items').optional().isArray().withMessage('products.*.items must be an array'),
-  body('products.*.items.*.itemId').optional().custom((v) => isObjectId(v)).withMessage('products.*.items.*.itemId must be a valid ObjectId'),
+
+  //body('products.*.items.*.itemId').optional().custom((v) => isObjectId(v)).withMessage('products.*.items.*.itemId must be a valid ObjectId'),
+  body('products.*.items.*.itemId')
+    .optional()
+    .isString()
+    .notEmpty()
+    .withMessage('products.*.items.*.itemId must be a non-empty string'),
+
   body('metadata').optional().custom((v) => {
     if (v === null) return true;
     if (typeof v === 'object' && !Array.isArray(v)) return true;
@@ -109,7 +133,17 @@ const updateById = [
   body('window').optional().isObject().withMessage('window must be an object'),
   body('window.fromEpoch').optional().isInt({ min: 0 }).withMessage('window.fromEpoch must be an integer epoch ms'),
   body('window.toEpoch').optional().isInt({ min: 0 }).withMessage('window.toEpoch must be an integer epoch ms'),
-  body('overflow_id').optional().custom((v) => isObjectId(v)).withMessage('overflow_id must be a valid ObjectId'),
+
+  //body('overflow_id').optional().custom((v) => isObjectId(v)).withMessage('overflow_id must be a valid ObjectId'),
+
+  body('overflow_id')
+    .optional({ nullable: true })
+    .custom((v) => {
+      if (v === null || v === undefined || v === '') return true;
+      if (isObjectId(v)) return true;
+      throw new Error('overflow_id must be a valid ObjectId');
+    }),
+
   body('metadata').optional().custom((v) => {
     if (v === null) return true;
     if (typeof v === 'object' && !Array.isArray(v)) return true;
@@ -144,7 +178,8 @@ const range = [
  * productId and itemId may be provided in body (preferred) or params (legacy)
  */
 const addOrUpdateItem = [
-  body('productId').optional().custom((v) => isObjectId(v)).withMessage('productId must be a valid ObjectId'),
+
+  /*body('productId').optional().custom((v) => isObjectId(v)).withMessage('productId must be a valid ObjectId'),
   body('itemId').optional().custom((v) => isObjectId(v)).withMessage('itemId must be a valid ObjectId'),
   body('pricing_snapshot').optional().isObject().withMessage('pricing_snapshot must be an object'),
   body('metadata').optional().custom((v) => {
@@ -152,6 +187,7 @@ const addOrUpdateItem = [
     if (typeof v === 'object' && !Array.isArray(v)) return true;
     throw new Error('metadata must be an object');
   }),
+  
   body().custom((value, { req }) => {
     const productId = req.params.productId || req.body.productId;
     const itemId = req.params.itemId || req.body.itemId;
@@ -162,6 +198,20 @@ const addOrUpdateItem = [
     if (!isObjectId(itemId)) throw new Error('itemId must be a valid ObjectId');
     return true;
   }),
+  runValidation*/
+
+  body('productId').optional().isString().withMessage('productId must be a string'),
+  body('itemId').optional().isString().withMessage('itemId must be a string'),
+  body('pricing_snapshot').optional().isObject(),
+  body('metadata').optional(),
+  body().custom((value, { req }) => {
+    const productId = req.params.productId || req.body.productId;
+    const itemId = req.params.itemId || req.body.itemId;
+    if (!productId || !itemId) {
+      throw new Error('productId and itemId are required');
+    }
+    return true;
+  }),
   runValidation
 ];
 
@@ -170,8 +220,12 @@ const addOrUpdateItem = [
  * ------------------------- */
 
 const deleteItemBody = [
-  body('productId').exists().withMessage('productId is required').bail().custom((v) => isObjectId(v)).withMessage('productId must be a valid ObjectId'),
-  body('itemId').exists().withMessage('itemId is required').bail().custom((v) => isObjectId(v)).withMessage('itemId must be a valid ObjectId'),
+  //body('productId').exists().withMessage('productId is required').bail().custom((v) => isObjectId(v)).withMessage('productId must be a valid ObjectId'),
+  //body('itemId').exists().withMessage('itemId is required').bail().custom((v) => isObjectId(v)).withMessage('itemId must be a valid ObjectId'),
+  body('productId').exists().withMessage('productId is required').bail()
+    .isString().notEmpty().withMessage('productId must be a non-empty string'),
+  body('itemId').exists().withMessage('itemId is required').bail()
+    .isString().notEmpty().withMessage('itemId must be a non-empty string'),
   runValidation
 ];
 
@@ -180,8 +234,14 @@ const deleteItemBody = [
  * ------------------------- */
 
 const getItemQuery = [
-  query('productId').exists().withMessage('productId is required').bail().custom((v) => isObjectId(v)).withMessage('productId must be a valid ObjectId'),
-  query('itemId').exists().withMessage('itemId is required').bail().custom((v) => isObjectId(v)).withMessage('itemId must be a valid ObjectId'),
+  //query('productId').exists().withMessage('productId is required').bail().custom((v) => isObjectId(v)).withMessage('productId must be a valid ObjectId'),
+  //query('itemId').exists().withMessage('itemId is required').bail().custom((v) => isObjectId(v)).withMessage('itemId must be a valid ObjectId'),
+
+  query('productId').exists().withMessage('productId is required').bail()
+    .isString().notEmpty().withMessage('productId must be a non-empty string'),
+  query('itemId').exists().withMessage('itemId is required').bail()
+    .isString().notEmpty().withMessage('itemId must be a non-empty string'),
+
   query('fallback').optional().isBoolean().withMessage('fallback must be boolean').toBoolean(),
   runValidation
 ];
@@ -191,7 +251,10 @@ const getItemQuery = [
  * ------------------------- */
 
 const addProduct = [
-  body('productId').exists().withMessage('productId is required').bail().custom((v) => isObjectId(v)).withMessage('productId must be a valid ObjectId'),
+  //body('productId').exists().withMessage('productId is required').bail().custom((v) => isObjectId(v)).withMessage('productId must be a valid ObjectId'),
+
+  body('productId').exists().withMessage('productId is required').bail()
+    .isString().notEmpty().withMessage('productId must be a non-empty string'),
   body('metadata').optional().custom((v) => {
     if (v === null) return true;
     if (typeof v === 'object' && !Array.isArray(v)) return true;
@@ -201,15 +264,26 @@ const addProduct = [
 ];
 
 const addProductItemBody = [
-  body('productId').exists().withMessage('productId is required').bail().custom((v) => isObjectId(v)).withMessage('productId must be a valid ObjectId'),
+  /*body('productId').exists().withMessage('productId is required').bail().custom((v) => isObjectId(v)).withMessage('productId must be a valid ObjectId'),
   body('itemPayload').optional().isObject().withMessage('itemPayload must be an object'),
   // allow direct item fields in body as fallback
-  body('itemId').optional().custom((v) => isObjectId(v)).withMessage('itemId must be a valid ObjectId'),
+  body('itemId').optional().custom((v) => isObjectId(v)).withMessage('itemId must be a valid ObjectId'),*/
+
+  body('productId').exists().withMessage('productId is required').bail()
+    .isString().notEmpty().withMessage('productId must be a non-empty string'),
+  body('itemPayload').optional().isObject().withMessage('itemPayload must be an object'),
+  body('itemId').optional()
+    .isString().notEmpty().withMessage('itemId must be a non-empty string'),
+
   runValidation
 ];
 
 const listProductItemsQuery = [
-  query('productId').exists().withMessage('productId is required').bail().custom((v) => isObjectId(v)).withMessage('productId must be a valid ObjectId'),
+  //query('productId').exists().withMessage('productId is required').bail().custom((v) => isObjectId(v)).withMessage('productId must be a valid ObjectId'),
+
+  query('productId').exists().withMessage('productId is required').bail()
+    .isString().notEmpty().withMessage('productId must be a non-empty string'),
+
   query('page').optional().isInt({ min: 1 }).toInt(),
   query('limit').optional().isInt({ min: 1, max: 200 }).toInt(),
   query('lean').optional().isBoolean().toBoolean(),
@@ -221,21 +295,40 @@ const listProductItemsQuery = [
  * ------------------------- */
 
 const pricingSnapshotBody = [
-  body('productId').exists().withMessage('productId is required').bail().custom((v) => isObjectId(v)).withMessage('productId must be a valid ObjectId'),
+  /*body('productId').exists().withMessage('productId is required').bail().custom((v) => isObjectId(v)).withMessage('productId must be a valid ObjectId'),
   body('itemId').exists().withMessage('itemId is required').bail().custom((v) => isObjectId(v)).withMessage('itemId must be a valid ObjectId'),
-  body('snapshot').exists().withMessage('snapshot is required').bail().isObject().withMessage('snapshot must be an object'),
+  body('snapshot').exists().withMessage('snapshot is required').bail().isObject().withMessage('snapshot must be an object'),*/
+
+  body('productId').exists().withMessage('productId is required').bail()
+    .isString().notEmpty().withMessage('productId must be a non-empty string'),
+  body('itemId').exists().withMessage('itemId is required').bail()
+    .isString().notEmpty().withMessage('itemId must be a non-empty string'),
+  body('snapshot').exists().withMessage('snapshot is required').bail()
+    .isObject().withMessage('snapshot must be an object'),
+
   runValidation
 ];
 
 const pricingSnapshotsQuery = [
-  query('productId').exists().withMessage('productId is required').bail().custom((v) => isObjectId(v)).withMessage('productId must be a valid ObjectId'),
-  query('itemId').exists().withMessage('itemId is required').bail().custom((v) => isObjectId(v)).withMessage('itemId must be a valid ObjectId'),
+  //query('productId').exists().withMessage('productId is required').bail().custom((v) => isObjectId(v)).withMessage('productId must be a valid ObjectId'),
+  //query('itemId').exists().withMessage('itemId is required').bail().custom((v) => isObjectId(v)).withMessage('itemId must be a valid ObjectId'),
+
+  query('productId').exists().withMessage('productId is required').bail()
+    .isString().notEmpty().withMessage('productId must be a non-empty string'),
+  query('itemId').exists().withMessage('itemId is required').bail()
+    .isString().notEmpty().withMessage('itemId must be a non-empty string'),
+
   runValidation
 ];
 
 const pricingTiersQuery = [
-  query('productId').exists().withMessage('productId is required').bail().custom((v) => isObjectId(v)).withMessage('productId must be a valid ObjectId'),
-  query('itemId').exists().withMessage('itemId is required').bail().custom((v) => isObjectId(v)).withMessage('itemId must be a valid ObjectId'),
+  //query('productId').exists().withMessage('productId is required').bail().custom((v) => isObjectId(v)).withMessage('productId must be a valid ObjectId'),
+  //query('itemId').exists().withMessage('itemId is required').bail().custom((v) => isObjectId(v)).withMessage('itemId must be a valid ObjectId'),
+
+  query('productId').exists().withMessage('productId is required').bail()
+    .isString().notEmpty().withMessage('productId must be a non-empty string'),
+  query('itemId').exists().withMessage('itemId is required').bail()
+    .isString().notEmpty().withMessage('itemId must be a non-empty string'),
   runValidation
 ];
 
@@ -253,8 +346,14 @@ const bulkProductsBody = [
 ];
 
 const bulkItemsBody = [
-  body('productId').exists().withMessage('productId is required').bail().custom((v) => isObjectId(v)).withMessage('productId must be a valid ObjectId'),
-  body('items').exists().withMessage('items is required').bail().isArray().withMessage('items must be an array'),
+  //body('productId').exists().withMessage('productId is required').bail().custom((v) => isObjectId(v)).withMessage('productId must be a valid ObjectId'),
+  //body('items').exists().withMessage('items is required').bail().isArray().withMessage('items must be an array'),
+
+  body('productId').exists().withMessage('productId is required').bail()
+    .isString().notEmpty().withMessage('productId must be a non-empty string'),
+  body('items').exists().withMessage('items is required').bail()
+    .isArray().withMessage('items must be an array'),
+
   runValidation
 ];
 

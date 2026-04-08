@@ -26,33 +26,6 @@ function AdminStatCard({ icon, label, value, extra, extraColor, accent }) {
   );
 }
 
-// ── Hard-coded data ────────────────────────────────────────────────────────
-const STAT_CARDS = [
-  {
-    label: "Pending Quote Reviews",
-    value: "1,482",
-    extra: "+12% vs last week",
-    icon: "description",
-    accent: "text-primary",
-    extraColor: "text-text-muted",
-  },
-  {
-    label: "Active Aggregation Windows",
-    value: "42",
-    extra: "Active",
-    icon: "schedule",
-    accent: "text-emerald-600",
-    extraColor: "text-emerald-600",
-  },
-  {
-    label: "Critical Alerts",
-    value: "03",
-    extra: "Critical",
-    icon: "error",
-    accent: "text-red-500",
-    extraColor: "text-red-500",
-  },
-];
 
 const STATUS_STYLES = {
   TRENDING: "bg-emerald-100 text-emerald-700",
@@ -60,35 +33,7 @@ const STATUS_STYLES = {
   STABLE: "bg-sky-100 text-sky-700",
 };
 
-const WINDOW_CLOSURES = [
-  {
-    id: 1,
-    city: "New York City",
-    code: "US-EAST-01",
-    status: "TRENDING",
-    participants: "4,281 users",
-    timeRemaining: "04h 21m",
-    target: "$840,000",
-  },
-  {
-    id: 2,
-    city: "San Francisco",
-    code: "US-WEST-02",
-    status: "NEAR TARGET",
-    participants: "2,104 users",
-    timeRemaining: "01h 15m",
-    target: "$1,200,000",
-  },
-  {
-    id: 3,
-    city: "Chicago",
-    code: "US-MID-04",
-    status: "STABLE",
-    participants: "942 users",
-    timeRemaining: "12h 44m",
-    target: "$320,000",
-  },
-];
+
 
 // ── Dashboard ──────────────────────────────────────────────────────────────
 export default function AdminDashboard() {
@@ -99,11 +44,12 @@ export default function AdminDashboard() {
     activeWindows: 0,
     criticalAlerts: 0,
   });
+  const [windowClosures, setWindowClosures] = useState([]);
 
   useEffect(() => {
     const fetchDashboardMetrics = async () => {
       try {
-        console.log("ADMIN TOKEN:", accessToken);
+        //console.log("ADMIN TOKEN:", accessToken);
         const response = await fetch(
           `${import.meta.env.VITE_API_URL}/api/orders/dashboard-metrics`,
           {
@@ -131,6 +77,83 @@ export default function AdminDashboard() {
     if (accessToken) {
       fetchDashboardMetrics();
     }
+  }, [accessToken]);
+
+  useEffect(() => {
+    const fetchWindowClosures = async () => {
+      try {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/swnds`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+          },
+        });
+        const result = await res.json();
+        console.log("API RESPONSE:", result);        // ← add this
+
+        const data = Array.isArray(result.items)
+          ? result.items
+          : Array.isArray(result.data)
+            ? result.data
+            : Array.isArray(result)
+              ? result
+              : [];
+        console.log("PARSED DATA LENGTH:", data.length);  // ← add this
+
+        const now = Date.now();
+
+        const upcoming = data
+          .filter((w) => {
+            const passes = w.window.toEpoch > now;
+            console.log(w._id, w.window.toEpoch, now, passes);
+            return passes;
+          })
+          .map((w) => {
+            let totalQtySold = 0, totalQtyAvailable = 0, target = 0;
+
+            for (const p of w.products || []) {
+              for (const it of p.items || []) {
+                totalQtySold += it.qtySold || 0;
+                totalQtyAvailable += it.qtyAvailable || 0;
+                const snaps = it.pricing_snapshots || [];
+                const latest = snaps[snaps.length - 1];
+                if (latest) target += (latest.atInstantPrice || 0) * (it.qtyAvailable || 0);
+              }
+            }
+
+            const msRemaining = w.window.toEpoch - now;
+            const hoursRemaining = msRemaining / 3600000;
+            const totalStock = totalQtySold + totalQtyAvailable;
+            const sellThrough = totalStock > 0 ? totalQtySold / totalStock : 0;
+
+            let status = "STABLE";
+            if (sellThrough >= 0.6 || hoursRemaining <= 2) status = "NEAR TARGET";
+            else if (sellThrough >= 0.3 || hoursRemaining <= 6) status = "TRENDING";
+
+            const h = Math.floor(msRemaining / 3600000);
+            const m = Math.floor((msRemaining % 3600000) / 60000);
+
+            return {
+              id: w._id,
+              msRemaining,
+              city: w.ops_region,
+              code: w.ops_region.toUpperCase(),
+              status,
+              participants: `${totalQtySold.toLocaleString()} users`,
+              timeRemaining: `${String(h).padStart(2, "0")}h ${String(m).padStart(2, "0")}m`,
+              target: `$${Math.round(target).toLocaleString()}`,
+            };
+          })
+          .sort((a, b) => a.msRemaining - b.msRemaining);
+
+        setWindowClosures(upcoming);
+      } catch (err) {
+        console.error("Failed to load window closures:", err);
+      }
+    };
+
+    if (accessToken) fetchWindowClosures();
   }, [accessToken]);
 
   return (
@@ -341,62 +364,73 @@ export default function AdminDashboard() {
                     </thead>
 
                     <tbody className="divide-y divide-neutral-light">
-                      {WINDOW_CLOSURES.map((row) => (
-                        <tr
-                          key={row.id}
-                          className="transition hover:bg-neutral-light/40"
-                        >
-                          {/* Region / City */}
-                          <td className="px-6 py-5">
-                            <div className="flex items-center gap-3">
-                              <div className="flex size-10 items-center justify-center rounded-xl bg-neutral-light text-text-muted">
-                                <span className="material-symbols-outlined text-[20px]">
-                                  map
-                                </span>
+                      {windowClosures.length > 0 ? (
+                        windowClosures.map((row) => (
+                          <tr
+                            key={row.id}
+                            className="transition hover:bg-neutral-light/40"
+                          >
+                            {/* Region / City */}
+                            <td className="px-6 py-5">
+                              <div className="flex items-center gap-3">
+                                <div className="flex size-10 items-center justify-center rounded-xl bg-neutral-light text-text-muted">
+                                  <span className="material-symbols-outlined text-[20px]">
+                                    map
+                                  </span>
+                                </div>
+                                <div>
+                                  <p className="text-sm font-semibold text-text-main">
+                                    {row.city}
+                                  </p>
+                                  <p className="mt-0.5 text-xs text-text-muted">
+                                    {row.code}
+                                  </p>
+                                </div>
                               </div>
-                              <div>
-                                <p className="text-sm font-semibold text-text-main">
-                                  {row.city}
-                                </p>
-                                <p className="mt-0.5 text-xs text-text-muted">
-                                  {row.code}
-                                </p>
-                              </div>
-                            </div>
-                          </td>
+                            </td>
 
-                          {/* Status */}
-                          <td className="px-6 py-5">
-                            <span
-                              className={`inline-flex rounded-lg px-3 py-1 text-xs font-bold ${STATUS_STYLES[row.status] ??
-                                "bg-slate-100 text-slate-700"
-                                }`}
-                            >
-                              {row.status}
-                            </span>
-                          </td>
-
-                          {/* Participants */}
-                          <td className="px-6 py-5 text-sm font-medium text-text-main">
-                            {row.participants}
-                          </td>
-
-                          {/* Time Remaining */}
-                          <td className="px-6 py-5 text-sm text-text-muted">
-                            <div className="flex items-center gap-2">
-                              <span className="material-symbols-outlined text-[16px]">
-                                schedule
+                            {/* Status */}
+                            <td className="px-6 py-5">
+                              <span
+                                className={`inline-flex rounded-lg px-3 py-1 text-xs font-bold ${STATUS_STYLES[row.status] ??
+                                  "bg-slate-100 text-slate-700"
+                                  }`}
+                              >
+                                {row.status}
                               </span>
-                              {row.timeRemaining}
-                            </div>
-                          </td>
+                            </td>
 
-                          {/* Target */}
-                          <td className="px-6 py-5 text-right text-sm font-bold text-text-main">
-                            {row.target}
+                            {/* Participants */}
+                            <td className="px-6 py-5 text-sm font-medium text-text-main">
+                              {row.participants}
+                            </td>
+
+                            {/* Time Remaining */}
+                            <td className="px-6 py-5 text-sm text-text-muted">
+                              <div className="flex items-center gap-2">
+                                <span className="material-symbols-outlined text-[16px]">
+                                  schedule
+                                </span>
+                                {row.timeRemaining}
+                              </div>
+                            </td>
+
+                            {/* Target */}
+                            <td className="px-6 py-5 text-right text-sm font-bold text-text-main">
+                              {row.target}
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td
+                            colSpan={5}
+                            className="px-6 py-10 text-center text-sm text-text-muted"
+                          >
+                            No upcoming window closures
                           </td>
                         </tr>
-                      ))}
+                      )}
                     </tbody>
                   </table>
                 </div>

@@ -28,8 +28,6 @@ import AdminQuotesReviewPage from "./pages/admin/AdminQuotesReviewPage"
 import OrdersPage from "./pages/customer/OrdersPage";
 import OrderDetailsPage from "./pages/customer/OrderDetails";
 import CreateSalesWindowForm from "./pages/admin/CreateSalesWindowForm";
-import AuthTabs from "./components/sign-in-up/AuthTabs";
-
 
 
 function PlaceholderPage({ title }) {
@@ -147,69 +145,69 @@ export default function App() {
         <Route path="/supplier/reports" element={<SupplierReportsPage />} />
         <Route path="/supplier/order-requests/:id/fulfillment" element={<SupplierFulfillmentPage />} />
 
-      {/* Admin routes */}
-<Route
-  path="/admin"
-  element={
-    <AdminRoute>
-      <AdminDashboard />
-    </AdminRoute>
-  }
-/>
+        {/* Admin routes */}
+        <Route
+          path="/admin"
+          element={
+            <AdminRoute>
+              <AdminDashboard />
+            </AdminRoute>
+          }
+        />
 
-<Route
-  path="/admin/inventory"
-  element={
-    <AdminRoute>
-      <AdminInventoryPage />
-    </AdminRoute>
-  }
-/>
+        <Route
+          path="/admin/inventory"
+          element={
+            <AdminRoute>
+              <AdminInventoryPage />
+            </AdminRoute>
+          }
+        />
 
-<Route
-  path="/admin/bulk-orders"
-  element={
-    <AdminRoute>
-      <AdminBulkOrdersPage />
-    </AdminRoute>
-  }
-/>
+        <Route
+          path="/admin/bulk-orders"
+          element={
+            <AdminRoute>
+              <AdminBulkOrdersPage />
+            </AdminRoute>
+          }
+        />
 
-<Route
-  path="/admin/pricing-brackets"
-  element={
-    <AdminRoute>
-      <PricingBracketsPage />
-    </AdminRoute>
-  }
-/>
+        <Route
+          path="/admin/pricing-brackets"
+          element={
+            <AdminRoute>
+              <PricingBracketsPage />
+            </AdminRoute>
+          }
+        />
 
-<Route
-  path="/admin/supplier-quotes"
-  element={
-    <AdminRoute>
-      <AdminQuotesReviewPage />
-    </AdminRoute>
-  }
-/>
+        <Route
+          path="/admin/supplier-quotes"
+          element={
+            <AdminRoute>
+              <AdminQuotesReviewPage />
+            </AdminRoute>
+          }
+        />
 
-<Route
-  path="/admin/sales-window"
-  element={
-    <AdminRoute>
-      <CreateSalesWindowForm />
-    </AdminRoute>
-  }
-/>
+        <Route
+          path="/admin/sales-window"
+          element={
+            <AdminRoute>
+              <CreateSalesWindowForm />
+            </AdminRoute>
+          }
+        />
 
-<Route
-  path="/admin/settings"
-  element={
-    <AdminRoute>
-      <AdminSettingsPage />
-    </AdminRoute>
-  }
-/>
+        <Route
+          path="/admin/settings"
+          element={
+            <AdminRoute>
+              <AdminSettingsPage />
+            </AdminRoute>
+          }
+        />
 
         {/* General placeholder routes */}
         <Route path="/about" element={<PlaceholderPage title="About Us" />} />

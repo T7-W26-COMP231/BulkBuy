@@ -3,7 +3,14 @@ import api from "../../api/api";
 import AdminSidebar from "../../components/admin/AdminSidebar";
 import AdminTopbar from "../../components/admin/AdminTopbar";
 
-
+const CATEGORY_OPTIONS = [
+  "All Products",
+  "Produce",
+  "Dairy & Eggs",
+  "Bakery",
+  "Pantry",
+  "Uncategorized",
+];
 
 function formatStatus(status) {
   if (status === "active") return "In Stock";
@@ -132,7 +139,40 @@ function getProductCategory(raw) {
 
   return "Uncategorized";
 }
+function normalizeProduct(raw) {
+  const metadataImages = Array.isArray(raw?.metadata?.images)
+    ? raw.metadata.images
+    : [];
 
+  const normalizedItems = Array.isArray(raw?.items)
+    ? raw.items.map((item) => ({
+      itemId: item.itemId,
+      name: item.name ?? null,
+      status: item.status ?? raw.status ?? "active",
+      unitLabel: item.unitLabel ?? "unit",
+      salesPrices: Array.isArray(item.salesPrices) ? item.salesPrices : [],
+    }))
+    : [];
+
+  return {
+    _id: raw?._id,
+    name: raw?.name ?? "Unnamed Product",
+    image: raw?.image ?? metadataImages[0] ?? null,
+    metadata: {
+      category: getProductCategory(raw),
+      brand: raw?.metadata?.brand ?? "N/A",
+      status: raw?.status ?? "unknown",
+      sku: raw?.metadata?.sku ?? null,
+      images: metadataImages,
+      price: Array.isArray(raw?.metadata?.price) ? raw.metadata.price : [],
+      tags: Array.isArray(raw?.metadata?.tags) ? raw.metadata.tags : [],
+    },
+    descriptions: Array.isArray(raw?.descriptions) ? raw.descriptions : [],
+    items: normalizedItems,
+    discountScheme: raw?.discountScheme ?? null,
+    status: raw?.status ?? "unknown",
+  };
+}
 export default function AdminProductCatalogPage() {
   const [selectedItemDetails, setSelectedItemDetails] = useState(null);
   const [products, setProducts] = useState([]);
@@ -318,35 +358,63 @@ export default function AdminProductCatalogPage() {
     setIsEditing(false);
   };
 
-  const handleSaveEditing = () => {
+  const handleSaveEditing = async () => {
     if (!selectedProduct) return;
 
-    const updatedProducts = products.map((product) => {
-      if (product._id !== selectedProduct._id) return product;
-
-      return {
-        ...product,
+    try {
+      const payload = {
         name: draftProduct.name,
-        metadata: {
-          ...product.metadata,
-          brand: draftProduct.brand,
-          category: draftProduct.category || "Uncategorized",
-        },
         descriptions: [
           {
-            ...(product.descriptions?.[0] ?? { locale: "en" }),
+            ...(selectedProduct.descriptions?.[0] ?? { locale: "en" }),
             locale: "en",
             title: draftProduct.name,
             body: draftProduct.description,
           },
         ],
+        metadata: {
+          ...selectedProduct.metadata,
+          brand: draftProduct.brand,
+          category: draftProduct.category || "Uncategorized",
+        },
       };
-    });
 
-    setProducts(updatedProducts);
-    setIsEditing(false);
+      const response = await api.patch(`/prdts/${selectedProduct._id}`, payload);
+      const updatedFromBackend = response.data?.data ?? null;
+
+      const normalizedUpdatedProduct = updatedFromBackend
+        ? normalizeProduct(updatedFromBackend)
+        : {
+          ...selectedProduct,
+          name: draftProduct.name,
+          metadata: {
+            ...selectedProduct.metadata,
+            brand: draftProduct.brand,
+            category: draftProduct.category || "Uncategorized",
+          },
+          descriptions: [
+            {
+              ...(selectedProduct.descriptions?.[0] ?? { locale: "en" }),
+              locale: "en",
+              title: draftProduct.name,
+              body: draftProduct.description,
+            },
+          ],
+        };
+
+      setProducts((prev) =>
+        prev.map((product) =>
+          product._id === selectedProduct._id ? normalizedUpdatedProduct : product
+        )
+      );
+
+      setSelectedProduct(normalizedUpdatedProduct);
+      setIsEditing(false);
+    } catch (err) {
+      console.error("Failed to update product:", err);
+      alert(err.response?.data?.message || "Failed to save product changes.");
+    }
   };
-
   const activeItem = selectedItemDetails || selectedItem;
 
   const activeDetails =

@@ -395,11 +395,13 @@ export default function OrdersPage() {
                                 <div className="flex flex-col gap-3 border-t border-neutral-light bg-neutral-light/40 px-6 py-4 text-sm md:flex-row md:items-center md:justify-between">
                                   <p className="text-text-muted">Order Ref: <span className="font-mono font-semibold">#{order._id?.slice(-8).toUpperCase()}</span></p>
                                   <div className="flex items-center gap-4">
-                                    <button onClick={() => navigate("/order-details")}
-                                      className="inline-flex items-center gap-1 font-semibold text-text-main hover:text-primary">
-                                      <span className="material-symbols-outlined text-base">open_in_new</span>
-                                      View Details
-                                    </button>
+                                    <button
+  onClick={() => navigate(`/order-details/${order._id}`)}
+  className="inline-flex items-center gap-1 font-semibold text-text-main hover:text-primary"
+>
+  <span className="material-symbols-outlined text-base">open_in_new</span>
+  View Details
+</button>
                                     <button onClick={() => navigate("/")}
                                       className="inline-flex items-center gap-2 font-semibold text-primary hover:underline">
                                       <span className="material-symbols-outlined text-base">refresh</span>

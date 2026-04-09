@@ -1,37 +1,37 @@
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import Sidebar from "../../components/Sidebar";
 import Footer from "../../components/Footer";
+import { fetchOrderInvoice } from "../../api/orderApi";
 
 export default function OrderDetailsPage() {
-  const order = {
-    orderNumber: "BB-8821",
-    breadcrumb: "Orders / Toronto Hub History",
-    status: "CONFIRMED / PAID",
-    statusNote: "Aggregation window closed · Final pricing locked",
-    finalPricePerUnit: "$1.10",
-    priceComparisonNote: "(-45% vs retail)",
-    totalSavings: "$10.80",
-    savingsNote: "Credited to Wallet",
-    achievement: "Tier 3 Reached",
-    achievementNote: "Maximum discount applied",
-    product: {
-      name: "Premium Organic Avocados (Box of 12)",
-      subtitle: "Grown in Mexico · Certified Organic",
-      quantity: "12 Units",
-      subtotal: "$13.20",
-      initialPrice: "$24.00",
-      bulkDiscountLabel: "Bulk Discount (Tier 3 Achievement)",
-      bulkDiscountValue: "-$10.80",
-      serviceFee: "$0.00 (Free for Hub Pickup)",
-      totalPaid: "$13.20",
-    },
-    pickup: {
-      title: "Toronto Hub - Liberty Village",
-      address: "62 Atlantic Ave, Toronto, ON M6K 1X9",
-      pickupDate: "Friday, Oct 27, 2025",
-      pickupWindow: "10:00 AM - 6:00 PM",
-    },
+const { orderId } = useParams();
+ const [order, setOrder] = useState(null);
+const [loading, setLoading] = useState(true);
+
+useEffect(() => {
+  const loadInvoice = async () => {
+    try {
+      const invoice = await fetchOrderInvoice(orderId);
+      setOrder(invoice);
+    } catch (error) {
+      console.error("Failed to load invoice:", error);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  loadInvoice();
+}, [orderId]);
+
+if (loading) {
+  return <div className="p-6">Loading invoice...</div>;
+}
+
+if (!order) {
+  return <div className="p-6">Invoice unavailable</div>;
+}
 
   return (
     <div className="min-h-screen bg-background-light font-display text-text-main">
@@ -132,83 +132,57 @@ export default function OrderDetailsPage() {
                   </h2>
 
                   <div className="mt-6 flex flex-col gap-5">
-                    <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-                      <div className="flex min-w-0 gap-4">
-                        <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl bg-primary/12 text-primary">
-                          <span className="material-symbols-outlined text-[32px]">
-                            nutrition
-                          </span>
-                        </div>
+  {order.items?.map((item, index) => (
+    <div
+      key={item.productId || index}
+      className="rounded-2xl border border-neutral-light p-5"
+    >
+      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+        <div className="flex min-w-0 gap-4">
+          <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl bg-primary/12 text-primary">
+            <span className="material-symbols-outlined text-[32px]">
+              inventory_2
+            </span>
+          </div>
 
-                        <div className="min-w-0">
-                          <h3 className="text-lg font-bold leading-snug text-text-main">
-                            {order.product.name}
-                          </h3>
+          <div className="min-w-0">
+            <h3 className="text-lg font-bold leading-snug text-text-main">
+              {item.productName}
+            </h3>
 
-                          <p className="mt-1 text-sm text-text-muted">
-                            {order.product.subtitle}
-                          </p>
+            <div className="mt-4">
+              <p className="text-xs font-bold uppercase tracking-[0.16em] text-text-muted">
+                Quantity
+              </p>
+              <p className="mt-1 text-sm font-semibold text-text-main">
+                {item.quantity}
+              </p>
+            </div>
 
-                          <div className="mt-4">
-                            <p className="text-xs font-bold uppercase tracking-[0.16em] text-text-muted">
-                              Quantity
-                            </p>
-                            <p className="mt-1 text-sm font-semibold text-text-main">
-                              {order.product.quantity}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
+            <div className="mt-3">
+              <p className="text-xs font-bold uppercase tracking-[0.16em] text-text-muted">
+                Unit Price
+              </p>
+              <p className="mt-1 text-sm font-semibold text-text-main">
+  ${Number(item.finalUnitPrice || 0).toFixed(2)}
+</p>
+            </div>
+          </div>
+        </div>
 
-                      <div className="md:text-right">
-                        <p className="text-xs font-bold uppercase tracking-[0.16em] text-text-muted">
-                          Subtotal
-                        </p>
-                        <p className="mt-2 text-3xl font-bold tracking-tight text-text-main">
-                          {order.product.subtotal}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="border-t border-neutral-light pt-5">
-                      <div className="space-y-4">
-                        <div className="flex items-center justify-between gap-4 text-sm">
-                          <span className="text-text-muted">
-                            Initial Estimated Price (Retail)
-                          </span>
-                          <span className="font-medium text-text-main">
-                            {order.product.initialPrice}
-                          </span>
-                        </div>
-
-                        <div className="flex items-center justify-between gap-4 text-sm">
-                          <span className="font-semibold text-primary">
-                            {order.product.bulkDiscountLabel}
-                          </span>
-                          <span className="font-bold text-primary">
-                            {order.product.bulkDiscountValue}
-                          </span>
-                        </div>
-
-                        <div className="flex items-center justify-between gap-4 text-sm">
-                          <span className="text-text-muted">Service Fee</span>
-                          <span className="font-medium text-text-main">
-                            {order.product.serviceFee}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="mt-5 flex items-center justify-between border-t border-neutral-light pt-4">
-                        <span className="text-2xl font-bold text-text-main">
-                          Total Paid
-                        </span>
-                        <span className="text-3xl font-bold tracking-tight text-text-main">
-                          {order.product.totalPaid}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </article>
+        <div className="md:text-right">
+          <p className="text-xs font-bold uppercase tracking-[0.16em] text-text-muted">
+            Line Total
+          </p>
+          <p className="mt-2 text-2xl font-bold tracking-tight text-text-main">
+  ${Number(item.lineFinalTotal || 0).toFixed(2)}
+</p>
+        </div>
+      </div>
+    </div>
+  ))}
+</div>
+ </article>
 
                 <article className="rounded-2xl border border-neutral-light bg-white p-5 shadow-sm">
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -253,10 +227,10 @@ export default function OrderDetailsPage() {
 
                   <div className="mt-4">
                     <h3 className="font-semibold text-text-main">
-                      {order.pickup.title}
+                     {order.pickup?.title || "Pickup hub will be assigned"}
                     </h3>
                     <p className="mt-1 text-sm text-text-muted">
-                      {order.pickup.address}
+                     {order.pickup?.address || "Address pending"}
                     </p>
                   </div>
 
@@ -274,7 +248,7 @@ export default function OrderDetailsPage() {
                           Pickup Date
                         </p>
                         <p className="mt-1 text-sm font-semibold text-text-main">
-                          {order.pickup.pickupDate}
+                          {order.pickup?.pickupDate || "TBD"}
                         </p>
                       </div>
                     </div>
@@ -288,7 +262,7 @@ export default function OrderDetailsPage() {
                           Pickup Window
                         </p>
                         <p className="mt-1 text-sm font-semibold text-text-main">
-                          {order.pickup.pickupWindow}
+                          {order.pickup?.pickupWindow || "TBD"}
                         </p>
                       </div>
                     </div>
@@ -325,3 +299,4 @@ export default function OrderDetailsPage() {
     </div>
   );
 }
+

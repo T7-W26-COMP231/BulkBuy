@@ -131,7 +131,7 @@ export default function App() {
         <Route path="/product/:id" element={<ProductDetailsPage />} />
         <Route path="/products" element={<ProductListPage />} />
         <Route path="/review-modify-intent" element={<ReviewModifyIntentPage />} />
-        <Route path="/order-details" element={<OrderDetailsPage />} />
+        <Route path="/order-details/:orderId" element={<OrderDetailsPage />} />
 
         {/* Supplier routes */}
         <Route path="/supplier" element={<Navigate to="/supplier/dashboard" replace />} />

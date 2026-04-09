@@ -75,25 +75,27 @@ export default function OrderDetailsPage() {
 
             {/* Summary cards */}
             <section className="grid grid-cols-1 gap-4 md:grid-cols-3">
+              {/* ✅ Task #207 */}
               <article className="rounded-2xl border border-neutral-light bg-white p-6 shadow-sm">
                 <p className="text-xs font-bold uppercase tracking-[0.16em] text-text-muted">
-                  Final Price / Unit
+                  Final Amount Payable
                 </p>
 
                 <div className="mt-3 flex flex-wrap items-end gap-2">
                   <span className="text-3xl font-bold tracking-tight text-text-main">
-                    {order.finalPricePerUnit}
+                    ${Number(order.summary?.finalTotal || 0).toFixed(2)}
                   </span>
                   <span className="text-sm font-semibold text-primary">
-                    {order.priceComparisonNote}
+                    after total savings applied
                   </span>
                 </div>
 
                 <div className="mt-4 h-2 overflow-hidden rounded-full bg-neutral-light">
-                  <div className="h-full w-[76%] rounded-full bg-primary" />
+                  <div className="h-full w-full rounded-full bg-primary" />
                 </div>
               </article>
 
+              {/* ✅ Task #206 */}
               <article className="rounded-2xl border border-neutral-light bg-white p-6 shadow-sm">
                 <p className="text-xs font-bold uppercase tracking-[0.16em] text-text-muted">
                   Total Savings
@@ -108,6 +110,7 @@ export default function OrderDetailsPage() {
                 </p>
               </article>
 
+              {/* Existing achievement */}
               <article className="rounded-2xl bg-primary p-6 shadow-sm">
                 <p className="text-xs font-bold uppercase tracking-[0.16em] text-text-main/70">
                   Achievement

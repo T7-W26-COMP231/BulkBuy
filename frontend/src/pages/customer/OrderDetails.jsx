@@ -94,8 +94,7 @@ export default function OrderDetailsPage() {
                   <div className="h-full w-full rounded-full bg-primary" />
                 </div>
               </article>
-
-              {/* ✅ Task #206 */}
+              {/* ✅ Task #206 + #208 */}
               <article className="rounded-2xl border border-neutral-light bg-white p-6 shadow-sm">
                 <p className="text-xs font-bold uppercase tracking-[0.16em] text-text-muted">
                   Total Savings
@@ -108,6 +107,14 @@ export default function OrderDetailsPage() {
                 <p className="mt-2 text-sm font-medium text-emerald-600">
                   {Number(order.summary?.savingsPercent || 0).toFixed(0)}% saved after tier threshold reached
                 </p>
+
+                {/* ✅ Task #208 visual savings badge */}
+                <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold uppercase tracking-wide text-emerald-700">
+                  <span className="material-symbols-outlined text-[16px]">
+                    verified
+                  </span>
+                  Tier Savings Unlocked
+                </div>
               </article>
 
               {/* Existing achievement */}

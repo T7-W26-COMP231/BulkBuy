@@ -32,6 +32,7 @@ if (loading) {
 if (!order) {
   return <div className="p-6">Invoice unavailable</div>;
 }
+const formatMoney = (value) => `$${Number(value || 0).toFixed(2)}`;
 
   return (
     <div className="min-h-screen bg-background-light font-display text-text-main">
@@ -127,62 +128,75 @@ if (!order) {
               {/* Left side */}
               <div className="flex min-w-0 flex-col gap-6">
                 <article className="rounded-2xl border border-neutral-light bg-white p-6 shadow-sm">
-                  <h2 className="text-2xl font-bold text-text-main">
-                    Product Summary
-                  </h2>
+  <h2 className="text-2xl font-bold text-text-main">
+    Product Summary
+  </h2>
 
-                  <div className="mt-6 flex flex-col gap-5">
-  {order.items?.map((item, index) => (
-    <div
-      key={item.productId || index}
-      className="rounded-2xl border border-neutral-light p-5"
-    >
-      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-        <div className="flex min-w-0 gap-4">
-          <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl bg-primary/12 text-primary">
-            <span className="material-symbols-outlined text-[32px]">
-              inventory_2
-            </span>
-          </div>
-
-          <div className="min-w-0">
-            <h3 className="text-lg font-bold leading-snug text-text-main">
-              {item.productName}
-            </h3>
-
-            <div className="mt-4">
-              <p className="text-xs font-bold uppercase tracking-[0.16em] text-text-muted">
-                Quantity
-              </p>
-              <p className="mt-1 text-sm font-semibold text-text-main">
-                {item.quantity}
-              </p>
+  <div className="mt-6 flex flex-col gap-5">
+    {order.items?.map((item, index) => (
+      <div
+        key={item.productId || index}
+        className="rounded-2xl border border-neutral-light p-5"
+      >
+        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+          <div className="flex min-w-0 gap-4">
+            <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl bg-primary/12 text-primary">
+              <span className="material-symbols-outlined text-[32px]">
+                inventory_2
+              </span>
             </div>
 
-            <div className="mt-3">
-              <p className="text-xs font-bold uppercase tracking-[0.16em] text-text-muted">
-                Unit Price
-              </p>
-              <p className="mt-1 text-sm font-semibold text-text-main">
-  ${Number(item.finalUnitPrice || 0).toFixed(2)}
-</p>
+            <div className="min-w-0">
+              <h3 className="text-lg font-bold leading-snug text-text-main">
+                {item.productName}
+              </h3>
+
+              <div className="mt-4">
+                <p className="text-xs font-bold uppercase tracking-[0.16em] text-text-muted">
+                  Quantity
+                </p>
+                <p className="mt-1 text-sm font-semibold text-text-main">
+                  {item.quantity}
+                </p>
+              </div>
+
+              <div className="mt-3">
+                <p className="text-xs font-bold uppercase tracking-[0.16em] text-text-muted">
+                  Unit Price
+                </p>
+                <p className="mt-1 text-sm font-semibold text-text-main">
+                  ${Number(item.finalUnitPrice || 0).toFixed(2)}
+                </p>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="md:text-right">
-          <p className="text-xs font-bold uppercase tracking-[0.16em] text-text-muted">
-            Line Total
-          </p>
-          <p className="mt-2 text-2xl font-bold tracking-tight text-text-main">
-  ${Number(item.lineFinalTotal || 0).toFixed(2)}
-</p>
+          <div className="md:text-right">
+            <p className="text-xs font-bold uppercase tracking-[0.16em] text-text-muted">
+              Line Total
+            </p>
+            <p className="mt-2 text-2xl font-bold tracking-tight text-text-main">
+              ${Number(item.lineFinalTotal || 0).toFixed(2)}
+            </p>
+          </div>
         </div>
       </div>
+    ))}
+  </div>
+
+  {/* ✅ Task #205 */}
+  <div className="mt-5 rounded-2xl border border-neutral-light bg-neutral-light/20 p-5">
+    <div className="flex items-center justify-between">
+      <span className="text-sm font-bold uppercase tracking-[0.16em] text-text-muted">
+        Total Before Bulk Discount
+      </span>
+      <span className="text-2xl font-bold tracking-tight text-text-main">
+        ${Number(order.summary?.baseTotal || 0).toFixed(2)}
+      </span>
     </div>
-  ))}
-</div>
- </article>
+  </div>
+</article>
+
 
                 <article className="rounded-2xl border border-neutral-light bg-white p-5 shadow-sm">
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">

@@ -44,6 +44,7 @@ export default function OrderDetailsPage() {
 
           <section className="flex min-w-0 flex-col gap-6">
             {/* Page header */}
+            {/* ✅ Task #209 Page header */}
             <section className="rounded-2xl border border-neutral-light bg-white p-6 shadow-sm">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                 <div>
@@ -59,7 +60,16 @@ export default function OrderDetailsPage() {
                     </span>
                   </div>
 
-                  <p className="mt-2 text-sm text-text-muted">
+                  {/* ✅ Task #209 invoice meta */}
+                  <div className="mt-3 flex flex-col gap-1 text-sm text-text-muted">
+                    <p>
+                      Invoice Generated:{" "}
+                      {new Date().toLocaleDateString("en-CA")}
+                    </p>
+                    <p>Reference #: {order.orderNumber}</p>
+                  </div>
+
+                  <p className="mt-3 text-sm text-text-muted">
                     {order.statusNote}
                   </p>
                 </div>

@@ -157,8 +157,9 @@ export default function OrderTrackingPage() {
     const [error, setError] = useState(null);
     const [itemDataMap, setItemDataMap] = useState({});
     const [statusData, setStatusData] = useState(null);
-
-        useEffect(() => {
+const [liveStatusAlert, setLiveStatusAlert] = useState(null);
+const [previousStatus, setPreviousStatus] = useState(null);
+    useEffect(() => {
         if (!orderId) return;
 
         let intervalId;
@@ -172,6 +173,25 @@ export default function OrderTrackingPage() {
                 setOrder(o);
 
                 const statusRes = await fetchOrderStatus(orderId);
+                const nextStatus = statusRes?.status || o?.status || null;
+
+                if (
+                    previousStatus &&
+                    nextStatus &&
+                    previousStatus !== nextStatus
+                ) {
+                    setLiveStatusAlert({
+                        status: nextStatus,
+                        message: `Order status updated to ${String(nextStatus)
+                            .replace(/_/g, " ")
+                            .replace(/\b\w/g, (char) =>
+                                char.toUpperCase()
+                            )}`,
+                        time: Date.now(),
+                    });
+                }
+
+                setPreviousStatus(nextStatus);
                 setStatusData(statusRes);
 
                 const ids = [
@@ -216,7 +236,17 @@ export default function OrderTrackingPage() {
         return () => {
             clearInterval(intervalId);
         };
-    }, [orderId]);
+    }, [orderId, previousStatus]);
+
+        useEffect(() => {
+        if (!liveStatusAlert) return;
+
+        const timeoutId = setTimeout(() => {
+            setLiveStatusAlert(null);
+        }, 4000);
+
+        return () => clearTimeout(timeoutId);
+    }, [liveStatusAlert]);
 
     const getItemDoc = (itemId) => {
         const id = itemId?._id || itemId;
@@ -384,8 +414,25 @@ const aggregationProgressPercent = Math.min(
 
             <main className="flex flex-1 flex-col gap-8 px-4 py-8 md:flex-row md:px-10 lg:px-20">
                 <Sidebar showSummary={false} />
-
                 <section className="flex flex-1 flex-col gap-6 min-w-0">
+
+                    {liveStatusAlert && (
+                        <div className="rounded-2xl border border-teal-200 bg-teal-50 px-5 py-4 shadow-sm">
+                            <div className="flex items-start gap-3">
+                                <span className="material-symbols-outlined text-teal-700">
+                                    notifications_active
+                                </span>
+                                <div>
+                                    <p className="text-sm font-bold text-teal-800">
+                                        Status updated
+                                    </p>
+                                    <p className="text-sm text-teal-700">
+                                        {liveStatusAlert.message}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     {/* Back button */}
                     <button

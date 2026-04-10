@@ -217,7 +217,7 @@ router.post(
  * Auth required.
  */
 router.delete(
-  '/:id',
+  '/:id', //mongoid
   requireAuth,
   validate(deleteFile, 'query'),
   async (req, res) => {

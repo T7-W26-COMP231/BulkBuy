@@ -14,6 +14,8 @@ const initialTiers = [
 const testItemId = "69c35324dec6d4f932a8063c";
 
 export default function PricingBracketsPage() {
+  const [sidebarOpen, setSidebarOpen] = useState(false); // ← ADD THIS
+
   const [tiers, setTiers] = useState(initialTiers);
   const [activeTierLabel, setActiveTierLabel] = useState("Loading...");
   const [aggregatedDemand, setAggregatedDemand] = useState(0);
@@ -133,10 +135,17 @@ export default function PricingBracketsPage() {
   return (
     <div className="min-h-screen bg-background-light text-text-main">
       <div className="flex min-h-screen">
-        <AdminSidebar />
-
+        {/* ✅ Sidebar FIRST */}
+        <AdminSidebar
+          isMobileOpen={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
+        />
         <div className="flex min-h-screen flex-1 flex-col">
-          <AdminTopbar title="Pricing Bracket Editor" />
+          {/* ✅ Topbar SECOND, inside the column div */}
+          <AdminTopbar
+            title="Pricing Bracket Editor"
+            onMenuClick={() => setSidebarOpen(true)}
+          />
 
           <main className="flex-1 px-6 py-8 md:px-8 lg:px-10">
             <div className="mx-auto flex max-w-6xl flex-col gap-8">
@@ -180,9 +189,8 @@ export default function PricingBracketsPage() {
                   {tiers.map((tier, index) => (
                     <div
                       key={tier.id}
-                      className={`grid grid-cols-1 gap-6 px-6 py-5 md:grid-cols-[1fr_1fr_auto] md:items-start ${
-                        index === 0 ? "bg-primary/5" : "bg-white"
-                      }`}
+                      className={`grid grid-cols-1 gap-6 px-6 py-5 md:grid-cols-[1fr_1fr_auto] md:items-start ${index === 0 ? "bg-primary/5" : "bg-white"
+                        }`}
                     >
                       <div>
                         <label className="mb-2 block text-sm font-semibold text-text-muted">
@@ -195,11 +203,10 @@ export default function PricingBracketsPage() {
                           value={tier.minQty}
                           onChange={(e) => handleTierChange(tier.id, "minQty", e.target.value)}
                           placeholder="e.g. 100"
-                          className={`w-full rounded-xl border bg-white px-4 py-3 text-sm text-text-main outline-none transition ${
-                            tier.qtyError
-                              ? "border-red-300 focus:border-red-400"
-                              : "border-neutral-light focus:border-primary"
-                          }`}
+                          className={`w-full rounded-xl border bg-white px-4 py-3 text-sm text-text-main outline-none transition ${tier.qtyError
+                            ? "border-red-300 focus:border-red-400"
+                            : "border-neutral-light focus:border-primary"
+                            }`}
                         />
                         {tier.qtyError && (
                           <p className="mt-2 text-xs font-medium italic text-red-500">
@@ -223,11 +230,10 @@ export default function PricingBracketsPage() {
                             value={tier.unitPrice}
                             onChange={(e) => handleTierChange(tier.id, "unitPrice", e.target.value)}
                             placeholder="e.g. 45.00"
-                            className={`w-full rounded-xl border bg-white py-3 pl-8 pr-4 text-sm text-text-main outline-none transition ${
-                              tier.priceError
-                                ? "border-red-300 focus:border-red-400"
-                                : "border-neutral-light focus:border-primary"
-                            }`}
+                            className={`w-full rounded-xl border bg-white py-3 pl-8 pr-4 text-sm text-text-main outline-none transition ${tier.priceError
+                              ? "border-red-300 focus:border-red-400"
+                              : "border-neutral-light focus:border-primary"
+                              }`}
                           />
                         </div>
                         {tier.priceError && (
@@ -268,11 +274,10 @@ export default function PricingBracketsPage() {
                       type="button"
                       onClick={handleSavePricingStrategy}
                       disabled={hasAnyError}
-                      className={`rounded-xl px-5 py-3 text-sm font-bold text-text-main transition ${
-                        hasAnyError
-                          ? "cursor-not-allowed bg-neutral-light text-text-muted opacity-60"
-                          : "bg-primary hover:opacity-90"
-                      }`}
+                      className={`rounded-xl px-5 py-3 text-sm font-bold text-text-main transition ${hasAnyError
+                        ? "cursor-not-allowed bg-neutral-light text-text-muted opacity-60"
+                        : "bg-primary hover:opacity-90"
+                        }`}
                     >
                       Save Pricing Strategy
                     </button>

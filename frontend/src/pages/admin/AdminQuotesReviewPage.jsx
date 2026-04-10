@@ -73,11 +73,11 @@ function mapSupplyToQuoteRows(supply) {
         submittedOn: formatDate(supply?.submittedAt || supply?.updatedAt || supply?.createdAt),
         tiers: Array.isArray(quoteDraft.tiers)
           ? quoteDraft.tiers.map((tier) => ({
-              minQty: tier.minQty,
-              unitPrice: tier.unitPrice,
-              discountPercent: null,
-              description: "",
-            }))
+            minQty: tier.minQty,
+            unitPrice: tier.unitPrice,
+            discountPercent: null,
+            description: "",
+          }))
           : [],
         status: mapBackendStatus(supply?.status),
         rawSupply: supply,
@@ -130,6 +130,8 @@ export default function AdminQuotesReviewPage() {
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
   const [notifySupplier, setNotifySupplier] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false); // ← ADD THIS
+
 
   // Ready for backend later
   const [supplies, setSupplies] = useState([]);
@@ -142,7 +144,7 @@ export default function AdminQuotesReviewPage() {
     Rejected: 0,
   });
 
-   const statusMap = {
+  const statusMap = {
     Pending: "pending_review",
     Approved: "accepted",
     Rejected: "cancelled",
@@ -219,8 +221,8 @@ export default function AdminQuotesReviewPage() {
 
     try {
       await approveQuote({
-  supplyId: selectedQuote.supplyId,
-});
+        supplyId: selectedQuote.supplyId,
+      });
 
       handleCloseModals();
       await loadCounts();
@@ -252,10 +254,16 @@ export default function AdminQuotesReviewPage() {
   return (
     <div className="min-h-screen bg-background-light text-text-main">
       <div className="flex min-h-screen">
-        <AdminSidebar />
+        <AdminSidebar
+          isMobileOpen={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
+        />
 
         <div className="flex min-h-screen flex-1 flex-col">
-          <AdminTopbar title="Supplier Quotes" />
+          <AdminTopbar
+            title="Supplier Quotes"
+            onMenuClick={() => setSidebarOpen(true)}
+          />
 
           <main className="flex-1 px-6 py-8 md:px-8 lg:px-10">
             <div className="mx-auto flex max-w-7xl flex-col gap-8">

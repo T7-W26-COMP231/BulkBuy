@@ -1,14 +1,22 @@
 import AdminSidebar from "../../components/admin/AdminSidebar";
 import AdminTopbar from "../../components/admin/AdminTopbar";
-
+import { useState } from "react";
 export default function AdminSettingsPage() {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   return (
     <div className="min-h-screen bg-background-light text-text-main">
       <div className="flex min-h-screen">
-        <AdminSidebar />
+        <AdminSidebar
+          isMobileOpen={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
+        />
 
         <div className="flex min-h-screen flex-1 flex-col">
-          <AdminTopbar title="Settings" />
+          <AdminTopbar
+            title="Settings"
+            onMenuClick={() => setSidebarOpen(true)}
+          />
 
           <main className="flex-1 px-6 py-8 md:px-8 lg:px-10">
             <div className="mx-auto max-w-6xl">

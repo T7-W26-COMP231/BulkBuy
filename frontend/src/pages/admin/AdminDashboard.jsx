@@ -37,6 +37,8 @@ const STATUS_STYLES = {
 
 // ── Dashboard ──────────────────────────────────────────────────────────────
 export default function AdminDashboard() {
+  const [sidebarOpen, setSidebarOpen] = useState(false); // ← add this
+
   const { accessToken } = useAuth();
 
   const [stats, setStats] = useState({
@@ -159,10 +161,16 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-background-light text-text-main">
       <div className="flex min-h-screen">
-        <AdminSidebar />
+        <AdminSidebar
+          isMobileOpen={sidebarOpen}                    // ← add this
+          onClose={() => setSidebarOpen(false)}         // ← add this
+        />
 
         <div className="flex min-h-screen flex-1 flex-col">
-          <AdminTopbar title="Admin Dashboard" />
+          <AdminTopbar
+            title="Admin Dashboard"
+            onMenuClick={() => setSidebarOpen(true)}    // ← add this
+          />
 
           <main className="flex-1 px-6 py-8 md:px-8 lg:px-10">
             <div className="mx-auto flex max-w-7xl flex-col gap-5">

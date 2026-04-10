@@ -3,13 +3,20 @@ import NotificationBell from "../../pages/shared/NotificationBell";
 
 const CITIES = ["Seattle", "New York", "San Francisco", "Chicago", "Toronto"];
 
-export default function AdminTopbar({ title = "Admin", onSearch, searchPlaceholder = "Search system metrics..." }) {
+export default function AdminTopbar({ title, onSearch, searchPlaceholder = "Search system metrics...", onMenuClick }) {
   const [city, setCity] = useState("Seattle");
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   return (
     <header className="border-b border-neutral-light bg-white px-6 py-3 md:px-8">
       <div className="flex items-center gap-4">
+
+        {/* ✅ ADD THIS THREE LINES */}
+        <button type="button" onClick={onMenuClick}
+          className="lg:hidden rounded-xl p-2 text-text-muted hover:bg-neutral-light">
+          <span className="material-symbols-outlined">menu</span>
+        </button>
+
 
         {/* ── Left: Search bar ──────────────────────────────────────── */}
         <div className="flex flex-1 max-w-sm items-center gap-2 rounded-2xl border border-neutral-light bg-neutral-light/50 px-4 py-2.5">

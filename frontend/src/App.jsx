@@ -30,6 +30,8 @@ import Item from "./pages/customer/Itemsdetails";
 import ReviewModifyIntentPage from "./pages/customer/ReviewModifyIntentPage";
 import OrdersPage from "./pages/customer/OrdersPage";
 import OrderDetailsPage from "./pages/customer/OrderDetails";
+import OrderTrackingPage from "./pages/customer/OrderTrackingPage";
+
 
 function PlaceholderPage({ title }) {
   return (
@@ -132,6 +134,7 @@ export default function App() {
         <Route path="/products" element={<ProductListPage />} />
         <Route path="/review-modify-intent" element={<ReviewModifyIntentPage />} />
         <Route path="/order-details/:orderId" element={<OrderDetailsPage />} />
+        <Route path="/order-tracking/:orderId" element={<OrderTrackingPage />} />  {/* ← ADDED THIS */}
 
         {/* Supplier routes */}
         <Route path="/supplier" element={<Navigate to="/supplier/dashboard" replace />} />

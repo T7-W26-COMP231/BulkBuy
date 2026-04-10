@@ -260,7 +260,10 @@ export default function AdminProductCatalogPage() {
         <AdminSidebar isMobileOpen={isMobileSidebarOpen} onClose={() => setIsMobileSidebarOpen(false)} />
 
         <div className="flex min-h-screen flex-1 flex-col">
-          <AdminTopbar title="Product Catalog" />
+          <AdminTopbar
+            title="Product Catalog"
+            onMenuClick={() => setIsMobileSidebarOpen(true)}
+          />
 
           <main className="flex-1 px-6 py-8 md:px-8 lg:px-10">
             <div className="mx-auto max-w-[1400px]">

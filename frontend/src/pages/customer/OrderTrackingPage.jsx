@@ -6,6 +6,7 @@ import Sidebar from "../../components/Sidebar";
 import Footer from "../../components/Footer";
 import { useAuth } from "../../contexts/AuthContext";
 import api from "../../api/api";
+import { fetchOrderStatus } from "../../api/orderApi";
 
 const STATUS_RANK = {
     draft: 0,
@@ -155,6 +156,7 @@ export default function OrderTrackingPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [itemDataMap, setItemDataMap] = useState({});
+    const [statusData, setStatusData] = useState(null);
 
     useEffect(() => {
         if (!orderId) return;
@@ -164,6 +166,9 @@ export default function OrderTrackingPage() {
                 const res = await api.get(`/ordrs/${orderId}`);
                 const o = res.data?.data || res.data;
                 setOrder(o);
+
+                const statusRes = await fetchOrderStatus(orderId);
+                setStatusData(statusRes);
 
                 const ids = [...new Set(
                     (o.items || []).map((i) => i.itemId?._id || i.itemId).filter(Boolean)
@@ -208,6 +213,56 @@ const stageIndex = lifecycleStages.length
         : Math.max(firstPendingIndex - 1, 0)
     : 0;
     const totalQty = (order?.items || []).reduce((s, it) => s + (it.quantity || 0), 0);
+
+    const fulfillmentStatusLabel = (() => {
+        const status = statusData?.status || order?.status;
+
+        switch (status) {
+            case "confirmed":
+                return "Confirmed by supplier";
+            case "dispatched":
+                return "In transit";
+            case "fulfilled":
+                return "Delivered / Ready for pickup";
+            case "submitted":
+            case "approved":
+                return "Pending fulfillment";
+            case "cancelled":
+                return "Cancelled";
+            case "declined":
+                return "Declined";
+            default:
+                return "Pending update";
+        }
+    })();
+
+    const estimatedDeliveryText = statusData?.expectedDeliveryDate
+        ? formatEpoch(statusData.expectedDeliveryDate)
+        : "Next update pending";
+
+    const fulfillmentNote = (() => {
+        const status = statusData?.status || order?.status;
+
+        if (status === "fulfilled") {
+            return order?.deliveryLocation
+                ? "Your order is ready for pickup."
+                : "Your order has been delivered.";
+        }
+
+        if (status === "dispatched") {
+            return "Your order is on the way.";
+        }
+
+        if (status === "confirmed") {
+            return "Supplier has confirmed fulfillment details.";
+        }
+
+        if (status === "cancelled" || status === "declined") {
+            return "This order no longer has an active fulfillment flow.";
+        }
+
+        return "The last known status has been recorded. The next update is pending.";
+    })();
 
     const alerts = order ? [
         // ✅ ADDED THIS FIRST — Tier 3 reached alert
@@ -449,6 +504,37 @@ const stageIndex = lifecycleStages.length
 
                             {/* ── Right column ── */}
                             <div className="flex flex-col gap-6">
+
+                                {/* Fulfillment status */}
+                                <article className="rounded-2xl border border-neutral-light bg-white p-6 shadow-sm">
+                                    <div className="flex items-start justify-between gap-4">
+                                        <div>
+                                            <h2 className="text-lg font-bold text-text-main">Fulfillment Status</h2>
+                                            <p className="mt-1 text-sm text-text-muted">{fulfillmentNote}</p>
+                                        </div>
+                                        <StatusBadge status={statusData?.status || order.status} />
+                                    </div>
+
+                                    <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                        <div className="rounded-xl bg-neutral-light p-4">
+                                            <p className="text-xs font-bold uppercase tracking-widest text-text-muted">
+                                                Current status
+                                            </p>
+                                            <p className="mt-1 font-semibold text-text-main">
+                                                {fulfillmentStatusLabel}
+                                            </p>
+                                        </div>
+
+                                        <div className="rounded-xl bg-primary/10 p-4">
+                                            <p className="text-xs font-bold uppercase tracking-widest text-teal-700">
+                                                Estimated delivery
+                                            </p>
+                                            <p className="mt-1 font-semibold text-teal-900">
+                                                {estimatedDeliveryText}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </article>
 
                                 {/* Alerts & Updates */}
                                 <article className="rounded-2xl border border-neutral-light bg-white shadow-sm">

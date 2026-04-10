@@ -276,9 +276,31 @@ const aggregationProgressPercent = Math.min(
         }
     })();
 
-    const estimatedDeliveryText = statusData?.expectedDeliveryDate
+       const estimatedDeliveryText = statusData?.expectedDeliveryDate
         ? formatEpoch(statusData.expectedDeliveryDate)
         : "Next update pending";
+
+    const supplierConfirmationText =
+        statusData?.confirmedAt ||
+        order?.confirmedAt ||
+        (order?.status === "confirmed" ||
+            order?.status === "dispatched" ||
+            order?.status === "fulfilled"
+            ? order?.updatedAt
+            : null);
+
+    const supplierConfirmationLabel = supplierConfirmationText
+        ? formatEpochFull(supplierConfirmationText)
+        : "Pending supplier confirmation";
+
+    const supplierConfirmationMethod =
+        getFulfillmentMode(order) === "delivery"
+            ? order?.trackingNumber
+                ? `Tracking #: ${order.trackingNumber}`
+                : "Delivery confirmed by supplier"
+            : order?.deliveryLocation?.city
+                ? `Pickup confirmed for ${order.deliveryLocation.city}`
+                : "Pickup confirmation pending";
 
     const fulfillmentNote = (() => {
         const status = statusData?.status || order?.status;
@@ -560,9 +582,8 @@ const aggregationProgressPercent = Math.min(
                                         </div>
                                         <StatusBadge status={statusData?.status || order.status} />
                                     </div>
-
-                                    <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                                        <div className="rounded-xl bg-neutral-light p-4">
+                                    <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-3">
+                                        <div className="rounded-xl bg-neutral-light p-4 min-h-[140px] flex flex-col">
                                             <p className="text-xs font-bold uppercase tracking-widest text-text-muted">
                                                 Current status
                                             </p>
@@ -571,12 +592,24 @@ const aggregationProgressPercent = Math.min(
                                             </p>
                                         </div>
 
-                                        <div className="rounded-xl bg-primary/10 p-4">
+                                        <div className="rounded-xl bg-primary/10 p-4 min-h-[140px] flex flex-col">
                                             <p className="text-xs font-bold uppercase tracking-widest text-teal-700">
                                                 Estimated delivery
                                             </p>
                                             <p className="mt-1 font-semibold text-teal-900">
                                                 {estimatedDeliveryText}
+                                            </p>
+                                        </div>
+
+                                        <div className="rounded-xl bg-blue-50 p-4 min-h-[140px] flex flex-col">
+                                            <p className="text-xs font-bold uppercase tracking-widest text-blue-700">
+                                                Supplier confirmation
+                                            </p>
+                                            <p className="mt-1 font-semibold text-text-main">
+                                                {supplierConfirmationLabel}
+                                            </p>
+                                            <p className="mt-1 text-xs text-text-muted">
+                                                {supplierConfirmationMethod}
                                             </p>
                                         </div>
                                     </div>

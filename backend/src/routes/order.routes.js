@@ -133,6 +133,60 @@ router.get(
 );
 
 /* -------------------------------------------------------------------------- */
+/* Get order status by id
+ * purpose: Retrieve current status snapshot for a single order
+ * method: GET
+ * path: /orders/:id/status
+ * params:
+ *   - path: id (order id)
+ * validators: requireAuth, getStatus
+ * controller: OrderController.getStatusById
+ */
+router.get(
+  '/:id/status',
+  requireAuth,
+  orderValidators && orderValidators.getStatus,
+  asyncHandler(OrderController.getStatusById)
+);
+
+/* -------------------------------------------------------------------------- */
+/* Get order history by id
+ * purpose: Retrieve status-change timeline for a single order
+ * method: GET
+ * path: /orders/:id/history
+ * params:
+ *   - path: id (order id)
+ *   - query: includeAudit (bool), page, limit
+ * validators: requireAuth, getHistory
+ * controller: OrderController.getHistoryById
+ */
+router.get(
+  '/:id/history',
+  requireAuth,
+  orderValidators && orderValidators.getHistory,
+  asyncHandler(OrderController.getHistoryById)
+);
+
+/* -------------------------------------------------------------------------- */
+/* Get user order history
+ * purpose: Retrieve paginated order history summaries for a user
+ * method: GET
+ * path: /orders/user/:userId/history
+ * params:
+ *   - path: userId
+ *   - query: status, afterEpoch, beforeEpoch, page, limit
+ * validators: requireAuth, getUserHistory
+ * controller: OrderController.getUserOrderHistory
+ */
+router.get(
+  '/user/:userId/history',
+  requireAuth,
+  orderValidators && orderValidators.getUserHistory,
+  asyncHandler(OrderController.getUserOrderHistory)
+);
+/* -------------------------------------------------------------------------- */
+
+/* -------------------------------------------------------------------------- */
 /* Get finalized order invoice by id
  * purpose: Retrieve invoice-ready data for a single order, including final pricing,
  *          totals, savings, and pending-pricing state when the aggregation window

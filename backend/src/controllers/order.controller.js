@@ -69,6 +69,44 @@ const OrderController = {
     return send(res, 200, { success: true, data: invoice });
   }),
 
+  //GET /api/orders/:id/status
+  getStatusById: asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    if (!id) throw createError(400, 'order id is required');
+    const opts = buildOpts(req);
+    const status = await OrderService.getStatusById(id, opts);
+    return send(res, 200, { success: true, data: status });
+  }),
+
+  //GET /api/orders/:id/history
+
+  getHistoryById: asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    if (!id) throw createError(400, 'order id is required');
+    const serviceOpts = {
+      includeAudit: req.query.includeAudit !== 'false',
+      page: req.query.page,
+      limit: req.query.limit,
+    };
+    const history = await OrderService.getOrderHistory(id, serviceOpts);
+    return send(res, 200, { success: true, data: history });
+  }),
+  //  GET / api / orders / user /: userId/history
+
+  getUserOrderHistory: asyncHandler(async (req, res) => {
+    const { userId } = req.params;
+    if (!userId) throw createError(400, 'userId is required');
+    const serviceOpts = {
+      status: req.query.status,
+      afterEpoch: req.query.afterEpoch ? Number(req.query.afterEpoch) : undefined,
+      beforeEpoch: req.query.beforeEpoch ? Number(req.query.beforeEpoch) : undefined,
+      page: req.query.page,
+      limit: req.query.limit,
+    };
+    const result = await OrderService.getUserOrderHistory(userId, serviceOpts);
+    return send(res, 200, { success: true, ...result });
+  }),
+
   /**
    * GET /orders/user/:userId
    */
@@ -159,10 +197,10 @@ const OrderController = {
   }),
 
 
-    /**
-   * GET /orders/dashboard-metrics
-   * Admin dashboard summary cards
-   */
+  /**
+ * GET /orders/dashboard-metrics
+ * Admin dashboard summary cards
+ */
   getDashboardMetrics: asyncHandler(async (req, res) => {
     const metrics = await OrderService.getDashboardMetrics();
 
@@ -205,7 +243,7 @@ const OrderController = {
       correlationId: req.headers['x-correlation-id'] || null
     });
     const updated = await OrderService.updateOne(filter, update, opts);
-   
+
     return send(res, 200, { success: true, data: updated });
   }),
 
@@ -268,69 +306,69 @@ const OrderController = {
  * PATCH /orders/:id/decline
  * Supplier declines order request with required reason
  */
-declineSupplierOrder: asyncHandler(async (req, res) => {
-  const { id } = req.params;
-  const { reason } = req.body || {};
+  declineSupplierOrder: asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const { reason } = req.body || {};
 
-  if (!id) {
-    throw createError(400, 'order id is required');
-  }
+    if (!id) {
+      throw createError(400, 'order id is required');
+    }
 
-  if (!reason || !reason.trim()) {
-    throw createError(400, 'decline reason is required');
-  }
+    if (!reason || !reason.trim()) {
+      throw createError(400, 'decline reason is required');
+    }
 
-  const opts = buildOpts(req);
-  const updated = await OrderService.declineSupplierOrder(
-    id,
-    reason.trim(),
-    opts
-  );
+    const opts = buildOpts(req);
+    const updated = await OrderService.declineSupplierOrder(
+      id,
+      reason.trim(),
+      opts
+    );
 
-  // Emit supplier decline event
-  try {
-    const io = getSocketIO();
-    io.emit('supplier_order_declined', updated);
-  } catch (err) {
-    console.warn('Socket.IO not ready:', err && err.message);
-  }
+    // Emit supplier decline event
+    try {
+      const io = getSocketIO();
+      io.emit('supplier_order_declined', updated);
+    } catch (err) {
+      console.warn('Socket.IO not ready:', err && err.message);
+    }
 
-  return send(res, 200, { success: true, data: updated });
-}),
+    return send(res, 200, { success: true, data: updated });
+  }),
 
-/**
- * PATCH /orders/:id/confirm-fulfillment
- * Supplier confirms fulfillment and records expected delivery date
- */
+  /**
+   * PATCH /orders/:id/confirm-fulfillment
+   * Supplier confirms fulfillment and records expected delivery date
+   */
 
-confirmFulfillment: asyncHandler(async (req, res) => {
-  const { id } = req.params;
-  const { expectedDeliveryDate } = req.body || {};
+  confirmFulfillment: asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const { expectedDeliveryDate } = req.body || {};
 
-  if (!id) {
-    throw createError(400, 'order id is required');
-  }
+    if (!id) {
+      throw createError(400, 'order id is required');
+    }
 
-  if (!expectedDeliveryDate) {
-    throw createError(400, 'expectedDeliveryDate is required');
-  }
+    if (!expectedDeliveryDate) {
+      throw createError(400, 'expectedDeliveryDate is required');
+    }
 
-  const opts = buildOpts(req);
-  const updated = await OrderService.confirmFulfillment(
-    id,
-    expectedDeliveryDate,
-    opts
-  );
+    const opts = buildOpts(req);
+    const updated = await OrderService.confirmFulfillment(
+      id,
+      expectedDeliveryDate,
+      opts
+    );
 
-  try {
-    const io = getSocketIO();
-    io.emit('order_fulfillment_confirmed', updated);
-  } catch (err) {
-    console.warn('Socket.IO not ready:', err && err.message);
-  }
+    try {
+      const io = getSocketIO();
+      io.emit('order_fulfillment_confirmed', updated);
+    } catch (err) {
+      console.warn('Socket.IO not ready:', err && err.message);
+    }
 
-  return send(res, 200, { success: true, data: updated });
-}),
+    return send(res, 200, { success: true, data: updated });
+  }),
 
 
 

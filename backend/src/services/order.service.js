@@ -107,120 +107,271 @@ class OrderService {
   }
 
   async getInvoiceById(orderId, opts = {}) {
-  if (!orderId) throw createError(400, 'orderId is required');
+    if (!orderId) throw createError(400, 'orderId is required');
 
-  const order = await OrderRepo.findById(orderId, { lean: true });
-  if (!order) throw createError(404, 'Order not found');
+    const order = await OrderRepo.findById(orderId, { lean: true });
+    if (!order) throw createError(404, 'Order not found');
 
-  const finalizedStatuses = new Set(['confirmed', 'dispatched', 'fulfilled']);
-  const isFinalized = finalizedStatuses.has(order.status);
+    const finalizedStatuses = new Set(['confirmed', 'dispatched', 'fulfilled']);
+    const isFinalized = finalizedStatuses.has(order.status);
 
-  const now = Date.now();
-  const isWindowClosed = order.salesWindow?.toEpoch
-    ? now > Number(order.salesWindow.toEpoch)
-    : false;
+    const now = Date.now();
+    const isWindowClosed = order.salesWindow?.toEpoch
+      ? now > Number(order.salesWindow.toEpoch)
+      : false;
 
-  if (!isFinalized) {
-    let message = 'Final pricing is not available yet.';
-    let pricingPending = true;
+    if (!isFinalized) {
+      let message = 'Final pricing is not available yet.';
+      let pricingPending = true;
 
-    if (order.status === 'declined') {
-      message = 'Invoice is not available because this order was declined.';
-      pricingPending = false;
-    } else if (order.status === 'cancelled') {
-      message = 'Invoice is not available because this order was cancelled.';
-      pricingPending = false;
-    } else if (order.status === 'draft' || order.status === 'submitted' || order.status === 'approved') {
-      message = 'Aggregation window is still active. Final pricing is not available yet.';
-      pricingPending = true;
+      if (order.status === 'declined') {
+        message = 'Invoice is not available because this order was declined.';
+        pricingPending = false;
+      } else if (order.status === 'cancelled') {
+        message = 'Invoice is not available because this order was cancelled.';
+        pricingPending = false;
+      } else if (order.status === 'draft' || order.status === 'submitted' || order.status === 'approved') {
+        message = 'Aggregation window is still active. Final pricing is not available yet.';
+        pricingPending = true;
+      }
+
+      return {
+        orderId: order._id,
+        orderNumber: order._id,
+        invoiceAvailable: false,
+        pricingPending,
+        status: order.status,
+        generatedAt: now,
+        items: [],
+        summary: null,
+        message
+      };
     }
+
+    const statusLabelMap = {
+      confirmed: 'CONFIRMED / PAID',
+      dispatched: 'DISPATCHED',
+      fulfilled: 'FULFILLED'
+    };
+
+    const items = (order.items || []).map((item) => {
+      const snap = Array.isArray(item.pricingSnapshot)
+        ? (item.pricingSnapshot.length ? item.pricingSnapshot[item.pricingSnapshot.length - 1] : null)
+        : (item.pricingSnapshot || null);
+
+      const quantity = Number(item.quantity || 0);
+      const finalUnitPrice = Number(snap?.atInstantPrice || 0);
+      const discountPercent = Number(snap?.discountedPercentage || 0);
+
+      const baseUnitPrice =
+        discountPercent > 0 && discountPercent < 100
+          ? Number((finalUnitPrice / (1 - discountPercent / 100)).toFixed(2))
+          : finalUnitPrice;
+
+      const lineBaseTotal = Number((baseUnitPrice * quantity).toFixed(2));
+      const lineFinalTotal = Number((finalUnitPrice * quantity).toFixed(2));
+      const lineSavings = Number((lineBaseTotal - lineFinalTotal).toFixed(2));
+
+      return {
+        itemId: item.itemId,
+        productId: item.productId,
+        quantity,
+        baseUnitPrice,
+        finalUnitPrice,
+        lineBaseTotal,
+        lineFinalTotal,
+        lineSavings,
+        discountPercent,
+        tierLabel: snap?.discountBracket?.final != null
+          ? `Tier ${snap.discountBracket.final}`
+          : 'Final Bulk Tier'
+      };
+    });
+
+    const baseTotal = Number(items.reduce((sum, i) => sum + i.lineBaseTotal, 0).toFixed(2));
+    const finalTotal = Number(items.reduce((sum, i) => sum + i.lineFinalTotal, 0).toFixed(2));
+    const totalSavings = Number((baseTotal - finalTotal).toFixed(2));
+    const savingsPercent = baseTotal > 0
+      ? Number(((totalSavings / baseTotal) * 100).toFixed(2))
+      : 0;
 
     return {
       orderId: order._id,
       orderNumber: order._id,
-      invoiceAvailable: false,
-      pricingPending,
-      status: order.status,
+      invoiceAvailable: true,
+      pricingPending: false,
       generatedAt: now,
-      items: [],
-      summary: null,
-      message
+      status: order.status,
+      statusLabel: statusLabelMap[order.status] || String(order.status || '').toUpperCase(),
+      statusNote: 'Aggregation window closed · Final pricing locked',
+      summary: {
+        totalQuantity: items.reduce((sum, i) => sum + i.quantity, 0),
+        baseTotal,
+        finalTotal,
+        totalSavings,
+        savingsPercent,
+        finalPricePerUnit: items.length ? items[0].finalUnitPrice : 0
+      },
+      items
     };
   }
-
-  const statusLabelMap = {
-    confirmed: 'CONFIRMED / PAID',
-    dispatched: 'DISPATCHED',
-    fulfilled: 'FULFILLED'
-  };
-
-  const items = (order.items || []).map((item) => {
-    const snap = Array.isArray(item.pricingSnapshot)
-      ? (item.pricingSnapshot.length ? item.pricingSnapshot[item.pricingSnapshot.length - 1] : null)
-      : (item.pricingSnapshot || null);
-
-    const quantity = Number(item.quantity || 0);
-    const finalUnitPrice = Number(snap?.atInstantPrice || 0);
-    const discountPercent = Number(snap?.discountedPercentage || 0);
-
-    const baseUnitPrice =
-      discountPercent > 0 && discountPercent < 100
-        ? Number((finalUnitPrice / (1 - discountPercent / 100)).toFixed(2))
-        : finalUnitPrice;
-
-    const lineBaseTotal = Number((baseUnitPrice * quantity).toFixed(2));
-    const lineFinalTotal = Number((finalUnitPrice * quantity).toFixed(2));
-    const lineSavings = Number((lineBaseTotal - lineFinalTotal).toFixed(2));
-
-    return {
-      itemId: item.itemId,
-      productId: item.productId,
-      quantity,
-      baseUnitPrice,
-      finalUnitPrice,
-      lineBaseTotal,
-      lineFinalTotal,
-      lineSavings,
-      discountPercent,
-      tierLabel: snap?.discountBracket?.final != null
-        ? `Tier ${snap.discountBracket.final}`
-        : 'Final Bulk Tier'
-    };
-  });
-
-  const baseTotal = Number(items.reduce((sum, i) => sum + i.lineBaseTotal, 0).toFixed(2));
-  const finalTotal = Number(items.reduce((sum, i) => sum + i.lineFinalTotal, 0).toFixed(2));
-  const totalSavings = Number((baseTotal - finalTotal).toFixed(2));
-  const savingsPercent = baseTotal > 0
-    ? Number(((totalSavings / baseTotal) * 100).toFixed(2))
-    : 0;
-
-  return {
-    orderId: order._id,
-    orderNumber: order._id,
-    invoiceAvailable: true,
-    pricingPending: false,
-    generatedAt: now,
-    status: order.status,
-    statusLabel: statusLabelMap[order.status] || String(order.status || '').toUpperCase(),
-    statusNote: 'Aggregation window closed · Final pricing locked',
-    summary: {
-      totalQuantity: items.reduce((sum, i) => sum + i.quantity, 0),
-      baseTotal,
-      finalTotal,
-      totalSavings,
-      savingsPercent,
-      finalPricePerUnit: items.length ? items[0].finalUnitPrice : 0
-    },
-    items
-  };
-}
 
   async findByUserId(userId, opts = {}) {
     if (!userId) throw createError(400, 'userId is required');
     const results = await OrderRepo.findByUserId(userId, opts);
     return (results || []).map(sanitizeForClient);
   }
+
+
+  static _statusLabel(status) {
+    const map = {
+      draft: 'Draft / In cart',
+      submitted: 'Submitted — awaiting approval',
+      approved: 'Approved',
+      declined: 'Declined',
+      cancelled: 'Cancelled',
+      confirmed: 'Confirmed — payment received',
+      dispatched: 'Dispatched',
+      fulfilled: 'Fulfilled',
+    };
+    return map[status] || String(status || '').toUpperCase();
+  }
+
+  static _cancellable(status) {
+    return ['draft', 'submitted'].includes(status);
+  }
+
+  static _syntheticTimeline(order) {
+    const LIFECYCLE = ['draft', 'submitted', 'approved', 'confirmed', 'dispatched', 'fulfilled'];
+    const TERMINAL = new Set(['declined', 'cancelled']);
+    const events = [];
+
+    events.push({
+      event: 'create.order',
+      fromStatus: null,
+      toStatus: 'draft',
+      actor: null,
+      timestamp: order.createdAt || null,
+      note: null,
+    });
+
+    const currentIdx = LIFECYCLE.indexOf(order.status);
+    if (currentIdx > 0) {
+      for (let i = 1; i <= currentIdx; i++) {
+        events.push({
+          event: `order.${LIFECYCLE[i]}`,
+          fromStatus: LIFECYCLE[i - 1],
+          toStatus: LIFECYCLE[i],
+          actor: null,
+          timestamp: i === currentIdx ? (order.updatedAt || null) : null,
+          timestampApproximate: i === currentIdx ? true : false,
+          note: null,
+        });
+      }
+    }
+
+    if (TERMINAL.has(order.status)) {
+      const isDecline = order.status === 'declined';
+      events.push({
+        event: isDecline ? 'supplier.order.decline' : 'order.cancel',
+        fromStatus: null,
+        toStatus: order.status,
+        actor: null,
+        timestamp: order.updatedAt || null,
+        note: isDecline ? (order.declineReason || null) : null,
+      });
+    }
+
+    return events;
+  }
+
+  async getStatusById(orderId, opts = {}) {
+    if (!orderId) throw createError(400, 'orderId is required');
+    const order = await OrderRepo.findById(orderId, { lean: true });
+    if (!order) throw createError(404, 'Order not found');
+
+    return {
+      orderId: order._id,
+      status: order.status,
+      statusLabel: OrderService._statusLabel(order.status),
+      canCancel: OrderService._cancellable(order.status),
+      declineReason: order.status === 'declined' ? (order.declineReason || null) : null,
+      expectedDeliveryDate: order.expectedDeliveryDate || null,
+      salesWindow: order.salesWindow
+        ? { fromEpoch: order.salesWindow.fromEpoch, toEpoch: order.salesWindow.toEpoch }
+        : null,
+      createdAt: order.createdAt,
+      updatedAt: order.updatedAt,
+      generatedAt: Date.now(),
+    };
+  }
+
+  async getOrderHistory(orderId, opts = {}) {
+    if (!orderId) throw createError(400, 'orderId is required');
+    const order = await OrderRepo.findById(orderId, { lean: true });
+    if (!order) throw createError(404, 'Order not found');
+
+    const events = OrderService._syntheticTimeline(order);
+
+    const page = Math.max(1, parseInt(opts.page, 10) || 1);
+    const limit = Math.max(1, parseInt(opts.limit, 10) || 50);
+    const total = events.length;
+    const slice = events.slice((page - 1) * limit, page * limit);
+
+    return {
+      orderId: order._id,
+      currentStatus: order.status,
+      events: slice,
+      total,
+      page,
+      limit,
+      pages: Math.max(1, Math.ceil(total / limit)),
+      generatedAt: Date.now(),
+    };
+  }
+
+  async getUserOrderHistory(userId, opts = {}) {
+    if (!userId) throw createError(400, 'userId is required');
+
+    const filter = { userId };
+
+    if (opts.status) {
+      let parsed = opts.status;
+      if (typeof parsed === 'string') {
+        try { parsed = JSON.parse(parsed); } catch (_) { }
+      }
+      filter.status = Array.isArray(parsed) ? { $in: parsed } : parsed;
+    }
+
+    if (opts.afterEpoch || opts.beforeEpoch) {
+      filter.createdAt = {};
+      if (opts.afterEpoch) filter.createdAt.$gte = Number(opts.afterEpoch);
+      if (opts.beforeEpoch) filter.createdAt.$lte = Number(opts.beforeEpoch);
+    }
+
+    const paged = await OrderRepo.paginate(filter, {
+      page: opts.page,
+      limit: opts.limit,
+      sort: { createdAt: -1 },
+      select: '_id status declineReason expectedDeliveryDate salesWindow ops_region createdAt updatedAt',
+    });
+
+    const items = (paged.items || []).map((o) => ({
+      orderId: o._id,
+      status: o.status,
+      statusLabel: OrderService._statusLabel(o.status),
+      canCancel: OrderService._cancellable(o.status),
+      declineReason: o.status === 'declined' ? (o.declineReason || null) : null,
+      expectedDeliveryDate: o.expectedDeliveryDate || null,
+      salesWindow: o.salesWindow ? { fromEpoch: o.salesWindow.fromEpoch, toEpoch: o.salesWindow.toEpoch } : null,
+      ops_region: o.ops_region || null,
+      createdAt: o.createdAt,
+      updatedAt: o.updatedAt,
+    }));
+
+    return { items, total: paged.total, page: paged.page, limit: paged.limit, pages: paged.pages };
+  }
+
 
   async listOrders(filter = {}, opts = {}) {
     const f = typeof filter === 'object' && filter !== null ? { ...filter } : {};
@@ -397,68 +548,68 @@ class OrderService {
   }
 
   async declineSupplierOrder(orderId, reason, opts = {}) {
-  if (!orderId) {
-    throw createError(400, 'orderId is required');
-  }
+    if (!orderId) {
+      throw createError(400, 'orderId is required');
+    }
 
-  if (!reason || !reason.trim()) {
-    throw createError(400, 'decline reason is required');
-  }
+    if (!reason || !reason.trim()) {
+      throw createError(400, 'decline reason is required');
+    }
 
-  const actor = actorFromOpts(opts);
-  const correlationId = opts.correlationId || null;
+    const actor = actorFromOpts(opts);
+    const correlationId = opts.correlationId || null;
 
-  try {
-    const updated = await OrderRepo.updateById(
-      orderId,
-      {
-        status: 'declined',
-        declineReason: reason.trim(),
-        updatedAt: Date.now()
-      },
-      { new: true }
-    );
+    try {
+      const updated = await OrderRepo.updateById(
+        orderId,
+        {
+          status: 'declined',
+          declineReason: reason.trim(),
+          updatedAt: Date.now()
+        },
+        { new: true }
+      );
 
-    if (!updated) {
+      if (!updated) {
+        await this._audit(
+          'supplier.order.decline',
+          actor,
+          orderId,
+          'failure',
+          'warn',
+          correlationId,
+          { reason: 'not_found' }
+        );
+        throw createError(404, 'Order not found');
+      }
+
+      await this._audit(
+        'supplier.order.decline',
+        actor,
+        orderId,
+        'success',
+        'info',
+        correlationId,
+        {
+          status: 'declined',
+          declineReason: reason.trim()
+        }
+      );
+
+      return sanitizeForClient(updated);
+    } catch (err) {
       await this._audit(
         'supplier.order.decline',
         actor,
         orderId,
         'failure',
-        'warn',
+        'error',
         correlationId,
-        { reason: 'not_found' }
+        { error: err && err.message }
       );
-      throw createError(404, 'Order not found');
+      throw err;
     }
-
-    await this._audit(
-      'supplier.order.decline',
-      actor,
-      orderId,
-      'success',
-      'info',
-      correlationId,
-      {
-        status: 'declined',
-        declineReason: reason.trim()
-      }
-    );
-
-    return sanitizeForClient(updated);
-  } catch (err) {
-    await this._audit(
-      'supplier.order.decline',
-      actor,
-      orderId,
-      'failure',
-      'error',
-      correlationId,
-      { error: err && err.message }
-    );
-    throw err;
   }
-}
 
 
   async confirmFulfillment(orderId, expectedDeliveryDate, opts = {}) {
@@ -891,8 +1042,8 @@ class OrderService {
       const r = o.ops_region || '__null__';
       if (!regionToOrders.has(r)) regionToOrders.set(r, []);
       regionToOrders.get(r).push(o);
-    }    
-    
+    }
+
     // 3) For each region, collect unique product/item ids to request from SalesWindow
     const regionLookups = new Map(); // region -> { productId -> { itemId -> swItem } }
     for (const [region, ordersForRegion] of regionToOrders.entries()) {
@@ -923,15 +1074,15 @@ class OrderService {
 
     //-------------------------------------------------
     function replacer(key, value) {
-    if (value instanceof Map) {
-      return Object.fromEntries(value);
-    }
-    return value;
+      if (value instanceof Map) {
+        return Object.fromEntries(value);
+      }
+      return value;
     }
 
     const getItemObj = async (item = {}, itemId = null) => {
       let safe = Object.assign({}, item);
-      if(Object.keys(safe).length <= 0){
+      if (Object.keys(safe).length <= 0) {
         safe = await getById(itemId);
       }
       const images = Array.isArray(safe?.images) ? safe?.images : [];
@@ -999,7 +1150,7 @@ class OrderService {
         out.qtySold = null;
         out.pricing_tiers = null;
         out.missingInWindow = false;
-        
+
         const pid = String(it.productId);
         const iid = String(it.itemId);
         const pEntry = productMap.get(pid);
@@ -1031,7 +1182,7 @@ class OrderService {
           if (snap.createdAt && snap.createdAt instanceof Date) snap.createdAt = snap.createdAt.getTime();
           out.latestPricingSnapshot = snap;
         }
-        
+
         return out;
       }));
 
@@ -1143,7 +1294,7 @@ class OrderService {
     }
   }
 
-       async getDashboardMetrics() {
+  async getDashboardMetrics() {
     const pendingQuotes = await this.count({
       status: "submitted",
     });

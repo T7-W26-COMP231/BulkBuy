@@ -258,6 +258,30 @@ function adminOnly(req, res, next) {
   return next();
 }
 
+
+const getStatus = [
+  param('id').exists().isString().trim().notEmpty().withMessage('id must be a non-empty string'),
+  runValidation
+];
+
+const getHistory = [
+  param('id').exists().isString().trim().notEmpty().withMessage('id must be a non-empty string'),
+  query('includeAudit').optional().isBoolean().toBoolean(),
+  query('page').optional().isInt({ min: 1 }).toInt(),
+  query('limit').optional().isInt({ min: 1, max: 100 }).toInt(),
+  runValidation
+];
+
+const getUserHistory = [
+  param('userId').exists().isString().trim().notEmpty().withMessage('userId must be a non-empty string'),
+  query('status').optional().isString(),
+  query('page').optional().isInt({ min: 1 }).toInt(),
+  query('limit').optional().isInt({ min: 1, max: 100 }).toInt(),
+  query('afterEpoch').optional().isInt({ min: 0 }).toInt(),
+  query('beforeEpoch').optional().isInt({ min: 0 }).toInt(),
+  runValidation
+];
+
 /* -------------------------
  * Exports
  * ------------------------- */
@@ -276,5 +300,8 @@ module.exports = {
   updateItem,
   bulkCreate,
   adminOnly,
-  pricingSnapshotRules
+  pricingSnapshotRules,
+  getStatus,
+  getHistory,
+  getUserHistory
 };

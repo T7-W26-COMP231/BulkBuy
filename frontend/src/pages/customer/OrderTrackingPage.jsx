@@ -7,21 +7,110 @@ import Footer from "../../components/Footer";
 import { useAuth } from "../../contexts/AuthContext";
 import api from "../../api/api";
 
-const LIFECYCLE_STAGES = [
-    { key: "aggregation_open", label: "Aggregation Open", icon: "group_add" },
-    { key: "aggregation_closed", label: "Aggregation Closed", icon: "lock" },
-    { key: "confirmed", label: "Confirmed", icon: "check_circle" },
-    { key: "fulfilled", label: "Fulfilled", icon: "local_shipping" },
-];
-
-const STATUS_TO_STAGE = {
+const STATUS_RANK = {
     draft: 0,
     submitted: 0,
     approved: 1,
     confirmed: 2,
     dispatched: 3,
-    fulfilled: 3,
+    fulfilled: 4,
 };
+
+function getStatusRank(status) {
+    return STATUS_RANK[String(status || "").toLowerCase()] ?? 0;
+}
+
+function getFulfillmentMode(order) {
+    const explicitMode = String(
+        order?.fulfillmentMethod || order?.deliveryMethod || ""
+    ).toLowerCase();
+
+    if (explicitMode === "pickup" || explicitMode === "delivery") {
+        return explicitMode;
+    }
+
+    if (order?.trackingNumber) {
+        return "delivery";
+    }
+
+    if (order?.deliveryLocation) {
+        return "pickup";
+    }
+
+    return "unknown";
+}
+
+function buildLifecycleStages(order) {
+    const status = String(order?.status || "").toLowerCase();
+    const rank = getStatusRank(status);
+    const fulfillmentMode = getFulfillmentMode(order);
+
+    const fulfillmentLabel =
+        fulfillmentMode === "pickup"
+            ? "Ready for Pickup"
+            : fulfillmentMode === "delivery"
+                ? "Shipped"
+                : "Fulfillment Update";
+
+    const completedLabel =
+        fulfillmentMode === "pickup"
+            ? "Picked Up"
+            : fulfillmentMode === "delivery"
+                ? "Delivered"
+                : "Completed";
+
+    return [
+        {
+            key: "submitted",
+            label: "Order Submitted",
+            icon: "shopping_bag",
+            completed: rank >= 0,
+            timestamp: order?.createdAt || null,
+        },
+        {
+            key: "aggregation_closed",
+            label: "Aggregation Closed",
+            icon: "groups",
+            completed:
+                Boolean(order?.salesWindow?.toEpoch) &&
+                Number(order.salesWindow.toEpoch) <= Date.now(),
+            timestamp: order?.salesWindow?.toEpoch || null,
+        },
+        {
+            key: "confirmed",
+            label: "Confirmed",
+            icon: "check_circle",
+            completed: rank >= 2,
+            timestamp:
+                order?.confirmedAt ||
+                (rank >= 2 ? order?.updatedAt : null) ||
+                null,
+        },
+        {
+            key: "fulfillment_update",
+            label: fulfillmentLabel,
+            icon: fulfillmentMode === "pickup" ? "store" : "local_shipping",
+            completed: rank >= 3,
+            timestamp:
+                order?.dispatchedAt ||
+                order?.fulfillmentUpdatedAt ||
+                (rank >= 3 ? order?.updatedAt : null) ||
+                null,
+        },
+        {
+            key: "completed",
+            label: completedLabel,
+            icon: "inventory_2",
+            completed: rank >= 4,
+            timestamp:
+                order?.fulfilledAt ||
+                order?.deliveredAt ||
+                order?.pickedUpAt ||
+                (rank >= 4 ? order?.updatedAt : null) ||
+                null,
+        },
+    ];
+}
 
 function formatEpoch(epoch) {
     if (!epoch) return "Pending";
@@ -108,7 +197,16 @@ export default function OrderTrackingPage() {
             ? item.pricingSnapshot[item.pricingSnapshot.length - 1]
             : item.pricingSnapshot || {};
 
-    const stageIndex = order ? (STATUS_TO_STAGE[order.status] ?? 0) : 0;
+    const lifecycleStages = order ? buildLifecycleStages(order) : [];
+   const firstPendingIndex = lifecycleStages.findIndex(
+    (stage) => !stage.completed
+);
+
+const stageIndex = lifecycleStages.length
+    ? firstPendingIndex === -1
+        ? lifecycleStages.length - 1
+        : Math.max(firstPendingIndex - 1, 0)
+    : 0;
     const totalQty = (order?.items || []).reduce((s, it) => s + (it.quantity || 0), 0);
 
     const alerts = order ? [
@@ -298,34 +396,48 @@ export default function OrderTrackingPage() {
                                         <div className="absolute left-5 right-5 top-5 h-0.5 bg-neutral-light" style={{ zIndex: 0 }}>
                                             <div
                                                 className="h-full bg-primary transition-all duration-700"
-                                                style={{ width: `${(stageIndex / (LIFECYCLE_STAGES.length - 1)) * 100}%` }}
+                                                style={{
+                                                    width: `${lifecycleStages.length > 1
+                                                            ? (stageIndex / (lifecycleStages.length - 1)) * 100
+                                                            : 0
+                                                        }%`,
+                                                }}
                                             />
                                         </div>
 
-                                        {LIFECYCLE_STAGES.map((stage, idx) => {
-                                            const done = idx <= stageIndex;
+                                        {lifecycleStages.map((stage, idx) => {
+                                            const done = stage.completed;
+
                                             return (
-                                                <div key={stage.key} className="relative z-10 flex flex-1 flex-col items-center gap-2">
-                                                    <div className={`flex h-10 w-10 items-center justify-center rounded-full border-2 transition-all ${done
-                                                        ? "border-primary bg-primary"
-                                                        : "border-neutral-light bg-white"
-                                                        }`}>
-                                                        <span className={`material-symbols-outlined text-[18px] ${done ? "text-white" : "text-text-muted"}`}>
+                                                <div
+                                                    key={stage.key}
+                                                    className="relative z-10 flex flex-1 flex-col items-center gap-2"
+                                                >
+                                                    <div
+                                                        className={`flex h-10 w-10 items-center justify-center rounded-full border-2 transition-all ${done
+                                                                ? "border-primary bg-primary"
+                                                                : "border-neutral-light bg-white"
+                                                            }`}
+                                                    >
+                                                        <span
+                                                            className={`material-symbols-outlined text-[18px] ${done ? "text-white" : "text-text-muted"
+                                                                }`}
+                                                        >
                                                             {stage.icon}
                                                         </span>
                                                     </div>
-                                                    <p className={`text-center text-xs font-semibold ${done ? "text-text-main" : "text-text-muted"}`}>
+
+                                                    <p
+                                                        className={`text-center text-xs font-semibold ${done ? "text-text-main" : "text-text-muted"
+                                                            }`}
+                                                    >
                                                         {stage.label}
                                                     </p>
+
                                                     <p className="text-center text-xs text-text-muted">
-                                                        {idx === 0 && formatEpoch(order.createdAt)}
-                                                        {idx === 1 && formatEpoch(order.salesWindow?.toEpoch)}
-                                                        {idx === 2 && formatEpoch(order.updatedAt)}
-                                                        {idx === 3 && (
-                                                            order.expectedDeliveryDate
-                                                                ? `Expected ${formatEpoch(order.expectedDeliveryDate)}`
-                                                                : "Pending"
-                                                        )}
+                                                        {stage.timestamp
+                                                            ? formatEpoch(stage.timestamp)
+                                                            : "Next update pending"}
                                                     </p>
                                                 </div>
                                             );

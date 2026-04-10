@@ -158,11 +158,15 @@ export default function OrderTrackingPage() {
     const [itemDataMap, setItemDataMap] = useState({});
     const [statusData, setStatusData] = useState(null);
 
-    useEffect(() => {
+        useEffect(() => {
         if (!orderId) return;
-        const load = async () => {
+
+        let intervalId;
+
+        const load = async (showLoader = false) => {
             try {
-                setLoading(true);
+                if (showLoader) setLoading(true);
+
                 const res = await api.get(`/ordrs/${orderId}`);
                 const o = res.data?.data || res.data;
                 setOrder(o);
@@ -170,26 +174,48 @@ export default function OrderTrackingPage() {
                 const statusRes = await fetchOrderStatus(orderId);
                 setStatusData(statusRes);
 
-                const ids = [...new Set(
-                    (o.items || []).map((i) => i.itemId?._id || i.itemId).filter(Boolean)
-                )];
+                const ids = [
+                    ...new Set(
+                        (o.items || [])
+                            .map((i) => i.itemId?._id || i.itemId)
+                            .filter(Boolean)
+                    ),
+                ];
+
                 const responses = await Promise.all(
-                    ids.map((id) => api.get(`/items/${id}`).then((r) => r.data).catch(() => null))
+                    ids.map((id) =>
+                        api
+                            .get(`/items/${id}`)
+                            .then((r) => r.data)
+                            .catch(() => null)
+                    )
                 );
+
                 const map = {};
                 responses.forEach((r, i) => {
                     if (!r) return;
                     const d = r.data ?? r;
                     if (d?._id) map[ids[i]] = d;
                 });
+
                 setItemDataMap(map);
+                setError(null);
             } catch {
                 setError("Could not load order tracking details.");
             } finally {
-                setLoading(false);
+                if (showLoader) setLoading(false);
             }
         };
-        load();
+
+        load(true);
+
+        intervalId = setInterval(() => {
+            load(false);
+        }, 10000);
+
+        return () => {
+            clearInterval(intervalId);
+        };
     }, [orderId]);
 
     const getItemDoc = (itemId) => {

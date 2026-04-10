@@ -212,7 +212,21 @@ const stageIndex = lifecycleStages.length
         ? lifecycleStages.length - 1
         : Math.max(firstPendingIndex - 1, 0)
     : 0;
-    const totalQty = (order?.items || []).reduce((s, it) => s + (it.quantity || 0), 0);
+    const currentDemandQty = (order?.items || []).reduce(
+    (sum, item) => sum + Number(item?.quantity || 0),
+    0
+);
+
+const aggregationTargetQty =
+    Number(order?.aggregationWindow?.targetQuantity) ||
+    Number(order?.targetQuantity) ||
+    Number(order?.minimumOrderQuantity) ||
+    Math.max(currentDemandQty, 1);
+
+const aggregationProgressPercent = Math.min(
+    (currentDemandQty / aggregationTargetQty) * 100,
+    100
+);
 
     const fulfillmentStatusLabel = (() => {
         const status = statusData?.status || order?.status;
@@ -406,39 +420,45 @@ const stageIndex = lifecycleStages.length
                                     </div>
                                 </article>
 
-                                {/* Live demand progress */}
+                                                                {/* Live demand progress */}
                                 <article className="rounded-2xl border border-neutral-light bg-white p-6 shadow-sm">
                                     <div className="mb-5 flex items-center justify-between">
                                         <div>
-                                            <h2 className="text-lg font-bold text-text-main">Live Demand Progress</h2>
-                                            <p className="text-sm text-text-muted">Group aggregation target achieved</p>
+                                            <h2 className="text-lg font-bold text-text-main">
+                                                Live Demand Progress
+                                            </h2>
+                                            <p className="text-sm text-text-muted">
+                                                Current aggregation window progress
+                                            </p>
                                         </div>
+
                                         <span className="text-2xl font-extrabold text-primary">
-                                            1,000
-                                            <span className="ml-1 text-base font-medium text-text-muted">/ 1,000 units fulfilled</span>
+                                            {currentDemandQty}
+                                            <span className="ml-1 text-base font-medium text-text-muted">
+                                                / {aggregationTargetQty} units
+                                            </span>
                                         </span>
                                     </div>
 
                                     <div className="h-4 w-full overflow-hidden rounded-full bg-neutral-light">
                                         <div
                                             className="h-full rounded-full bg-primary transition-all duration-700"
-                                            style={{ width: "100%" }}
+                                            style={{
+                                                width: `${aggregationProgressPercent}%`,
+                                            }}
                                         />
                                     </div>
 
-                                    <div className="mt-3 grid grid-cols-3 text-xs text-text-muted">
-                                        <div>
-                                            <p className="font-bold text-text-main">Tier 1</p>
-                                            <p>$1.50</p>
-                                        </div>
-                                        <div className="text-center">
-                                            <p className="font-bold text-text-main">Tier 2</p>
-                                            <p>$1.25</p>
-                                        </div>
-                                        <div className="text-right">
-                                            <p className="font-bold text-primary">Tier 3 (Max)</p>
-                                            <p className="text-primary">$1.10</p>
-                                        </div>
+                                    <div className="mt-3 flex items-center justify-between text-xs text-text-muted">
+                                        <span>
+                                            {aggregationProgressPercent.toFixed(0)}% completed
+                                        </span>
+                                        <span>
+                                            {Math.max(
+                                                aggregationTargetQty - currentDemandQty,
+                                                0
+                                            )} units remaining
+                                        </span>
                                     </div>
                                 </article>
 

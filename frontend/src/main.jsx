@@ -12,7 +12,7 @@ import { NotificationProvider } from "./contexts/NotificationContext.jsx";
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <AuthProvider>
-      <OpsContextProvider apiBase="http://localhost:5000/api/opscs">
+      <OpsContextProvider apiBase={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/opscs`}>
         <ToastProvider>
           <BrowserRouter>
             <NotificationProvider>

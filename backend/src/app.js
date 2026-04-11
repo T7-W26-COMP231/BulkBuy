@@ -59,16 +59,9 @@ const createApp = async () => {
 
   // CORS 
   app.use(cors({
-    origin: [
-      "http://localhost:5173",
-      "https://bulkbuy-production.up.railway.app"
-    ],
-    // methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'authorization', 'X-Correlation-Id', 'x-correlation-id'],
-
-    origin: ("http://localhost:5173" || config.clientUrl || '*').replace(/\/$/, ''),
+    origin: config.clientUrl,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    //allowedHeaders: ['Content-Type','Authorization','X-Correlation-Id','x-correlation-id'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'authorization', 'X-Correlation-Id', 'x-correlation-id'],
     credentials: true
   }));
 
@@ -91,7 +84,7 @@ const createApp = async () => {
   app.use('/api/confg', configRoutes);
   app.use('/api/comms', messageRoutes); // message REST endpoints
   app.use('/api/comms', socketRoutes);  // comms websocket-related REST endpoints (missed/ack/create/broadcast)
-   app.use('/api/ordrs', orderRoutes);   // legacy teammate route
+  app.use('/api/ordrs', orderRoutes);   // legacy teammate route
   app.use('/api/orders', orderRoutes);  // admin dashboard + clean route
   app.use('/api/prdts', productRoutes);
   app.use('/api/rmaps', regionMapRoutes);
@@ -127,10 +120,9 @@ const createApp = async () => {
     // create Socket.IO server
     const io = new IOServer(server, {
       cors: {
-        origin: config.clientUrl || "http://localhost:5173/" || '*',
+        origin: config.clientUrl,
         methods: ['GET', 'POST']
       }
-      // In production, configure adapter (redis) here if needed
     });
 
     // attach your handlers (this registers connection listeners)

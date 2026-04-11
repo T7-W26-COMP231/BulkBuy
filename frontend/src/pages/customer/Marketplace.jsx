@@ -4,7 +4,8 @@ import Navbar from "../../components/Navbar";
 import Sidebar from "../../components/Sidebar";
 import Footer from "../../components/Footer";
 import ProductCard from "../../components/ProductCard";
-import { fetchItemCatalog } from "../../api/itemApi";
+import { fetchItemCatalog, fetchItemById } from "../../api/itemApi";
+
 
 export default function Marketplace() {
   const [searchParams] = useSearchParams();
@@ -21,7 +22,29 @@ export default function Marketplace() {
       try {
         setLoading(true);
         const data = await fetchItemCatalog();
-        setProducts(Array.isArray(data.items) ? data.items : []);
+        const rawProducts = Array.isArray(data.items) ? data.items : [];
+
+        // Enrich each product by fetching full item data for featured item
+        const enriched = await Promise.all(
+          rawProducts.map(async (product) => {
+            const stub = product.items?.[0];
+            if (!stub?.itemId) return product;
+            try {
+              const fullItem = await fetchItemById(stub.itemId);
+              return {
+                ...product,
+                items: [
+                  { ...stub, ...fullItem },
+                  ...product.items.slice(1),
+                ],
+              };
+            } catch {
+              return product; // keep stub if item fetch fails
+            }
+          })
+        );
+
+        setProducts(enriched);
       } catch (err) {
         console.error(err);
         setError("Could not load products.");
@@ -49,42 +72,98 @@ export default function Marketplace() {
     );
   }
 
-  const getTitle = (item) => {
-    const en = item.descriptions?.find((d) => d.locale === "en");
-    return en?.title || item.name || "";
+  const getTitle = (product) => {
+    const en = product.descriptions?.find((d) => d.locale === "en");
+    return en?.title || product.name || "";
   };
 
-  const getDescription = (item) => {
-    const en = item.descriptions?.find((d) => d.locale === "en");
+  const getDescription = (product) => {
+    const en = product.descriptions?.find((d) => d.locale === "en");
     return en?.body || "";
   };
 
-  const getDisplayPrice = (item) => {
-    const prices = (item.items ?? [])
-      .flatMap((i) => i.salesPrices ?? [])
-      .filter((sp) => sp.currency === "USD")
-      .map((sp) => sp.price);
-
-    return prices.length ? Math.min(...prices) : 0;
+  const getFeaturedItem = (product) => {
+    const productItems = product.items ?? [];
+    if (!productItems.length) return null;
+    return productItems[0];
   };
 
-  const getMinTierPrice = (item, basePrice) => {
-    const tier = item.discountScheme?.tiers?.[0];
-    if (!tier || !basePrice) return null;
-    return +(basePrice * (1 - tier.discountPct / 100)).toFixed(2);
+  const getDisplayPrice = (product) => {
+    const featuredItem = getFeaturedItem(product);
+
+    if (featuredItem) {
+      // 1) item.price[].sale or .list
+      const itemPrice = featuredItem.price?.find(
+        (p) => p.currency === "CAD" || p.currency === "USD"
+      );
+      if (itemPrice) return itemPrice.sale ?? itemPrice.list ?? null;
+
+      // 2) item.salesPrices[]
+      const salePrices = (featuredItem.salesPrices ?? [])
+        .filter((sp) => sp.currency === "CAD" || sp.currency === "USD")
+        .map((sp) => Number(sp.price))
+        .filter((p) => !Number.isNaN(p));
+      if (salePrices.length) return Math.min(...salePrices);
+    }
+
+    // 3) product root price[] fallback
+    const rootPrice = product.price?.find(
+      (p) => p.currency === "CAD" || p.currency === "USD"
+    );
+    if (rootPrice) return rootPrice.sale ?? rootPrice.list ?? null;
+
+    return null;
+  };
+
+  const isSalePrice = (product) => {
+    const featuredItem = getFeaturedItem(product);
+    if (featuredItem?.price?.some((p) => p.sale != null)) return true;
+    return product.price?.some((p) => p.sale != null) ?? false;
+  };
+
+  const getTierInfo = (product) => {
+    const featuredItem = getFeaturedItem(product);
+    const basePrice = getDisplayPrice(product);
+
+    const tiers = featuredItem?.pricingTiers ?? featuredItem?.tiers ?? [];
+    if (!tiers.length) return null;
+
+    const firstTier = tiers[0];
+    const discounts = tiers.map((tier) => {
+      if (typeof tier.discountPct === "number") return tier.discountPct;
+      if (typeof tier.price === "number" && typeof basePrice === "number" && basePrice > 0)
+        return Math.round(((basePrice - tier.price) / basePrice) * 100);
+      return 0;
+    });
+
+    return {
+      minQty: firstTier.minQty ?? null,
+      firstDiscountPct:
+        typeof firstTier.discountPct === "number"
+          ? firstTier.discountPct
+          : typeof firstTier.price === "number" && basePrice > 0
+            ? Math.round(((basePrice - firstTier.price) / basePrice) * 100)
+            : null,
+      maxDiscountPct: Math.max(...discounts),
+    };
+  };
+
+  const getCardSubtitle = (product) => {
+    const count = (product.items ?? []).length;
+    if (count > 1) return `From ${count} options`;
+    if (count === 1) return "Single option available";
+    return getDescription(product);
   };
 
   const getId = (item, index) =>
     item._id?.$oid || item._id || String(index);
 
   // ── Filtering ──────────────────────────────────────────────────────────────────
-
   let filteredProducts = products.filter((item) =>
     getTitle(item).toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   // ── Sorting ────────────────────────────────────────────────────────────────────
-
   if (sortOption === "priceLow") {
     filteredProducts = [...filteredProducts].sort(
       (a, b) => getDisplayPrice(a) - getDisplayPrice(b)
@@ -96,13 +175,12 @@ export default function Marketplace() {
   }
 
   // ── Render ─────────────────────────────────────────────────────────────────────
-
   return (
     <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-background-light font-display text-text-main">
-      <Navbar label="Organic / Produce" showLocation={false}
-        onSearch={(value) => setSearchTerm(value)
-
-        }
+      <Navbar
+        label="Organic / Produce"
+        showLocation={false}
+        onSearch={(value) => setSearchTerm(value)}
       />
 
       <main className="flex flex-1 flex-col gap-8 rounded-2xl border border-neutral-light px-4 py-8 md:flex-row md:px-20 lg:px-40">
@@ -152,11 +230,11 @@ export default function Marketplace() {
 
           {!loading && !error && filteredProducts.length > 0 && (
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-              {filteredProducts.map((item, index) => {
-                const id = getId(item, index);
-                const price = getDisplayPrice(item);
-                //console.log(price)
-                const minTierPrice = getMinTierPrice(item, price);
+              {filteredProducts.map((product, index) => {
+                const id = getId(product, index);
+                const price = getDisplayPrice(product);
+                const tierInfo = getTierInfo(product);
+                const hasMultipleItems = (product.items ?? []).length > 1;
 
                 return (
                   <div
@@ -166,15 +244,31 @@ export default function Marketplace() {
                   >
                     <ProductCard
                       id={id}
-                      title={highlightMatch(getTitle(item), searchTerm)}
-                      category={getDescription(item)}
-                      price={price}
-                      image={item.image || item.images?.[0] || ""}
+                      title={highlightMatch(getTitle(product), searchTerm)}
+                      category={getCardSubtitle(product)}
+                      price={price ?? 0}
+                      image={
+                        product.previewImage ||
+                        product.image ||
+                        product.images?.[0] ||
+                        ""
+                      }
                       size="large"
-                      minTierPrice={minTierPrice}      // ← uncomment
-                      minTierQty={item.discountScheme?.tiers?.[0]?.minQty ?? null}  // ← uncomment
-                      estimatedSavings={item.estimatedSavings ?? 0}
-
+                      minTierPrice={null}
+                      minTierQty={tierInfo?.minQty ?? null}
+                      estimatedSavings={tierInfo?.maxDiscountPct ?? null}
+                      pricePrefix={hasMultipleItems ? "From" : ""}
+                      salePrice={
+                        isSalePrice(product) ? getDisplayPrice(product) : null
+                      }
+                      listPrice={(() => {
+                        const fi = getFeaturedItem(product);
+                        return (
+                          fi?.price?.find((p) => p.currency === "CAD")?.list ??
+                          product.price?.find((p) => p.currency === "CAD")?.list ??
+                          null
+                        );
+                      })()}
                     />
                   </div>
                 );

@@ -46,13 +46,14 @@ import React, {
 } from 'react';
 
 
-const DEFAULT_API_BASE = 'http://localhost:5000/api/opcs';
+const DEFAULT_API_BASE = 'http://localhost:5000/api/opscs';
 const DEFAULT_ENDPOINTS = {
   getUiProducts: '/products',
   getEnrichedOrders: '/orders/enriched',
   evictProductsRegion: '/products/evict',
   evictOrdersUser: '/orders/evict-user',
-  evictOrdersRegion: '/orders/evict-region'
+  evictOrdersRegion: '/orders/evict-region',
+  getRegions: '/regions',          // <-- add this
 };
 
 function safeParseJSON(raw) {
@@ -111,6 +112,9 @@ export function OpsContextProvider({
   const [ordersMeta, setOrdersMeta] = useState({ userId: null, region: null, page: 1, limit: 25, fetchedAt: null });
   const [wsuorders, setWsuorders] = useState(0);
 
+  const [regions, setRegions] = useState([]);
+  const [loadingRegions, setLoadingRegions] = useState(false);
+
   const [ops_region, setOps_region] = useState("");
   const [backendUrl, setBackendUrl] = useState("http://localhost:5000");
   const [socket, setSocket] = useState(null);
@@ -127,7 +131,7 @@ export function OpsContextProvider({
   useEffect(() => {
     return () => {
       abortControllersRef.current.forEach((c) => {
-        try { c.abort(); } catch {}
+        try { c.abort(); } catch { }
       });
       abortControllersRef.current.clear();
     };
@@ -207,14 +211,14 @@ export function OpsContextProvider({
       const page = Number.isFinite(Number(opts.page)) ? Number(opts.page) : 1;
       const limit = Number.isFinite(Number(opts.limit)) ? Number(opts.limit) : 25;
       const key = productsKey({ region: opts.region, page, limit });
-      
+
       // cached
       const cached = productsCacheRef.current.get(key);
       if (cached && !opts.force) return cached;
-      
+
       if (method === 'GET') {
         const qs = buildQuery({ region: opts.region, page, limit });
-        const res = await apiFetch(`${endpoints.getUiProducts}${qs}`, {...opts, method: 'GET', signal: opts.signal });
+        const res = await apiFetch(`${endpoints.getUiProducts}${qs}`, { ...opts, method: 'GET', signal: opts.signal });
         if (!res.ok) {
           const msg = (res.raw && (res.raw.error || res.raw.message)) || `HTTP ${res.status}`;
           throw Object.assign(new Error(msg), { status: res.status, payload: res.raw });
@@ -261,7 +265,7 @@ export function OpsContextProvider({
       });
       const cached = ordersCacheRef.current.get(key);
       if (cached && !opts.force) return cached;
-      
+
       if (method === 'GET') {
         const qs = buildQuery({
           userId: opts.userId,
@@ -273,7 +277,7 @@ export function OpsContextProvider({
           persist
         });
         try {
-          const res = await apiFetch(`${endpoints.getEnrichedOrders}${qs}`, {...opts, method: 'GET', signal: opts.signal });
+          const res = await apiFetch(`${endpoints.getEnrichedOrders}${qs}`, { ...opts, method: 'GET', signal: opts.signal });
           if (!res.ok) {
             const msg = (res.raw && (res.raw.error || res.raw.message)) || `HTTP ${res.status}`;
             throw Object.assign(new Error(msg), { status: res.status, payload: res.raw });
@@ -284,7 +288,7 @@ export function OpsContextProvider({
         } catch (error) {
           console.log('Authenticated user orders fetch error ----------> | ', error);
         }
-      
+
       }
 
       // POST
@@ -310,6 +314,19 @@ export function OpsContextProvider({
       return payload;
     },
     [apiFetch, endpoints.getEnrichedOrders, ordersKey]
+  );
+
+
+  const _fetchRegions = useCallback(
+    async (opts = {}) => {
+      const res = await apiFetch(endpoints.getRegions, { method: 'GET', signal: opts.signal });
+      if (!res.ok) {
+        const msg = (res.raw && (res.raw.error || res.raw.message)) || `HTTP ${res.status}`;
+        throw Object.assign(new Error(msg), { status: res.status, payload: res.raw });
+      }
+      return res.raw ?? [];
+    },
+    [apiFetch, endpoints.getRegions]
   );
 
 
@@ -430,6 +447,26 @@ export function OpsContextProvider({
       return fetchAndSetEnrichedOrders(Object.assign({}, opts, { force: true }));
     },
     [fetchAndSetEnrichedOrders, ordersKey]
+  );
+
+
+  const fetchAndSetRegions = useCallback(
+    async (opts = {}) => {
+      setLoadingRegions(true);
+      setError(null);
+      try {
+        const payload = await _fetchRegions(opts);
+        const list = Array.isArray(payload) ? payload : (payload?.data ?? []);
+        setRegions(list);
+        return list;
+      } catch (err) {
+        setError(err);
+        throw err;
+      } finally {
+        setLoadingRegions(false);
+      }
+    },
+    [_fetchRegions]
   );
 
   /* -------------------------
@@ -587,6 +624,10 @@ export function OpsContextProvider({
       ordersMeta,
       wsuorders, setWsuorders,
       ops_region, setOps_region,
+
+      regions, setRegions,            // <-- add
+      loadingRegions,                 // <-- add
+
       backendUrl, setBackendUrl,
       socket, setSocket,
       cart, setCart,
@@ -595,6 +636,7 @@ export function OpsContextProvider({
       refreshUiProducts,
       appendUiProducts,
       fetchAndSetEnrichedOrders,
+      fetchAndSetRegions,
       refreshEnrichedOrders,
       /* realtime helper */
       applyRealtimeUpdate,
@@ -620,6 +662,10 @@ export function OpsContextProvider({
       orders, setOrders,
       ordersMeta,
       wsuorders, setWsuorders,
+
+      regions, setRegions,          // <-- add
+      loadingRegions,               // <-- add
+
       ops_region, setOps_region,
       backendUrl, setBackendUrl,
       socket, setSocket,
@@ -628,6 +674,7 @@ export function OpsContextProvider({
       refreshUiProducts,
       appendUiProducts,
       fetchAndSetEnrichedOrders,
+      fetchAndSetRegions,
       refreshEnrichedOrders,
       applyRealtimeUpdate,
       evictProductsRegion,

@@ -9,39 +9,37 @@ export default function ProductCard({
   size = "large",
   minTierPrice = null,
   minTierQty = null,
-  estimatedSavings = 0,
+  estimatedSavings = null,
   tags = [],
   salePrice = null,
   listPrice = null,
+  pricePrefix = "",
 }) {
   const isSmall = size === "small";
 
-  // Derive tier label + progress from props available
-  const tierLabel = minTierPrice ? "TIER 1" : null;
-  const progress = minTierPrice && price
-    ? Math.min(100, Math.round(((price - minTierPrice) / price) * 100 + 30))
+  const tierLabel = minTierQty ? "TIER 1" : null;
+  const progress = estimatedSavings
+    ? Math.min(100, Math.max(15, estimatedSavings * 4))
     : null;
   const isHighProgress = progress != null && progress >= 80;
 
   return (
     <div className="w-full overflow-hidden rounded-2xl border border-neutral-light bg-white shadow-sm transition hover:shadow-lg">
 
-      {/* ── Image ── */}
-      <div className={`relative flex items-center justify-center bg-neutral-light text-text-muted ${isSmall ? "h-48" : "h-64"}`}>
+      {/* Image */}
+      <div className={`relative flex items-center justify-center bg-neutral-light text-text-muted ${isSmall ? "h-48" : "h-48"}`}>
         {image ? (
           <img src={image} alt={title} className="h-full w-full object-cover" />
         ) : (
-          <span className="text-xl">Image</span>
+          <span className="text-xl text-neutral-300">Image</span>
         )}
 
-        {/* Tier badge top-left */}
-        {tierLabel && (
+        {tierLabel && isHighProgress && (
           <span className="absolute left-2 top-2 rounded bg-teal-400 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-white shadow">
             {tierLabel} ACTIVE
           </span>
         )}
 
-        {/* Heart top-right */}
         <button
           onClick={(e) => e.stopPropagation()}
           className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-white shadow hover:scale-110 transition-transform"
@@ -54,43 +52,53 @@ export default function ProductCard({
         </button>
       </div>
 
-      {/* ── Body ── */}
-      <div className={`flex flex-col ${isSmall ? "gap-2 p-4" : "gap-3 p-4"}`}>
+      {/* Body */}
+      <div className="flex flex-col gap-2 p-4">
 
-        {/* Title */}
         <h3 className="text-sm font-bold leading-snug line-clamp-2 text-neutral-900">
           {title}
         </h3>
 
-        {/* Description */}
         <p className="text-xs text-text-muted line-clamp-1">{category}</p>
 
         {/* Price row */}
-        <div className="flex items-baseline gap-1">
+        <div className="flex items-baseline gap-1 flex-wrap">
+          {listPrice && salePrice && (
+            <span className="text-xs text-text-muted line-through mr-1">
+              ${listPrice.toFixed(2)}
+            </span>
+          )}
           <span className="text-xl font-extrabold text-neutral-900">
+            {pricePrefix ? `${pricePrefix} ` : ""}
             ${typeof price === "number" ? price.toFixed(2) : price}
           </span>
           <span className="text-xs text-text-muted">/unit</span>
 
-          {tierLabel && (
-            <span className="ml-auto text-[10px] font-bold uppercase tracking-wide text-neutral-400">
-              {tierLabel}
+          {salePrice && (
+            <span className="ml-1 rounded bg-red-100 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-red-600">
+              Sale
+            </span>
+          )}
+
+          {/* Inline tier status — matches mockup */}
+          {tierLabel && progress != null && (
+            <span className="ml-auto text-[10px] font-bold uppercase tracking-wide text-neutral-400 whitespace-nowrap">
+              {isHighProgress
+                ? `${tierLabel} FULL`
+                : progress >= 50
+                  ? `ALMOST ${tierLabel}`
+                  : `${Math.round(progress)}% TO ${tierLabel}`}
             </span>
           )}
         </div>
 
-        {/* Progress bar + label */}
+        {/* Progress bar — clean strip, no labels */}
         {progress != null && (
-          <div className="flex flex-col gap-1">
-            <div className="h-1.5 w-full overflow-hidden rounded-full bg-neutral-200">
-              <div
-                className="h-full rounded-full bg-teal-400 transition-all duration-500"
-                style={{ width: `${progress}%` }}
-              />
-            </div>
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-teal-600">
-              {progress}% to {tierLabel}
-            </p>
+          <div className="h-1.5 w-full overflow-hidden rounded-full bg-neutral-200">
+            <div
+              className="h-full rounded-full bg-teal-400 transition-all duration-500"
+              style={{ width: `${progress}%` }}
+            />
           </div>
         )}
 

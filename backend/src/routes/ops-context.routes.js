@@ -27,7 +27,7 @@ const OpsContextController = require('../controllers/ops-context.controller');
 const validators = require('../validators/ops-context.validators');
 const { requireAuth, optionalAuth } = require('../middleware/auth.middleware');
 const { requireRole, requireAnyRole } = require('../middleware/rbac.middleware');
-
+const Region = require('../models/regionMap.model');
 const router = express.Router();
 
 /**
@@ -155,6 +155,25 @@ router.post(
   // requireRole('administrator'),
   validators && validators.evictOrdersRegion,
   asyncHandler(OpsContextController.evictOrdersRegion)
+);
+
+
+/* -------------------------------------------------------------------------- */
+/* GET /api/ops-context/regions
+ * purpose: Return all available regions for UI region picker and geolocation
+ * method: GET
+ * path: /regions
+ * auth: none (public)
+ */
+router.get(
+  '/regions',
+  asyncHandler(async (req, res) => {
+    const regions = await Region.find(
+      {},
+      'code displayName coordinates currency locale timezone'
+    ).lean();
+    res.json({ success: true, data: regions });
+  })
 );
 
 module.exports = router;

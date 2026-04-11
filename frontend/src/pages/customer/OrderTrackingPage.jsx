@@ -157,8 +157,8 @@ export default function OrderTrackingPage() {
     const [error, setError] = useState(null);
     const [itemDataMap, setItemDataMap] = useState({});
     const [statusData, setStatusData] = useState(null);
-const [liveStatusAlert, setLiveStatusAlert] = useState(null);
-const [previousStatus, setPreviousStatus] = useState(null);
+    const [liveStatusAlert, setLiveStatusAlert] = useState(null);
+    const [previousStatus, setPreviousStatus] = useState(null);
     useEffect(() => {
         if (!orderId) return;
 
@@ -238,7 +238,7 @@ const [previousStatus, setPreviousStatus] = useState(null);
         };
     }, [orderId, previousStatus]);
 
-        useEffect(() => {
+    useEffect(() => {
         if (!liveStatusAlert) return;
 
         const timeoutId = setTimeout(() => {
@@ -259,30 +259,30 @@ const [previousStatus, setPreviousStatus] = useState(null);
             : item.pricingSnapshot || {};
 
     const lifecycleStages = order ? buildLifecycleStages(order) : [];
-   const firstPendingIndex = lifecycleStages.findIndex(
-    (stage) => !stage.completed
-);
+    const firstPendingIndex = lifecycleStages.findIndex(
+        (stage) => !stage.completed
+    );
 
-const stageIndex = lifecycleStages.length
-    ? firstPendingIndex === -1
-        ? lifecycleStages.length - 1
-        : Math.max(firstPendingIndex - 1, 0)
-    : 0;
+    const stageIndex = lifecycleStages.length
+        ? firstPendingIndex === -1
+            ? lifecycleStages.length - 1
+            : Math.max(firstPendingIndex - 1, 0)
+        : 0;
     const currentDemandQty = (order?.items || []).reduce(
-    (sum, item) => sum + Number(item?.quantity || 0),
-    0
-);
+        (sum, item) => sum + Number(item?.quantity || 0),
+        0
+    );
 
-const aggregationTargetQty =
-    Number(order?.aggregationWindow?.targetQuantity) ||
-    Number(order?.targetQuantity) ||
-    Number(order?.minimumOrderQuantity) ||
-    Math.max(currentDemandQty, 1);
+    const aggregationTargetQty =
+        Number(order?.aggregationWindow?.targetQuantity) ||
+        Number(order?.targetQuantity) ||
+        Number(order?.minimumOrderQuantity) ||
+        Math.max(currentDemandQty, 1);
 
-const aggregationProgressPercent = Math.min(
-    (currentDemandQty / aggregationTargetQty) * 100,
-    100
-);
+    const aggregationProgressPercent = Math.min(
+        (currentDemandQty / aggregationTargetQty) * 100,
+        100
+    );
 
     const fulfillmentStatusLabel = (() => {
         const status = statusData?.status || order?.status;
@@ -306,7 +306,7 @@ const aggregationProgressPercent = Math.min(
         }
     })();
 
-       const estimatedDeliveryText = statusData?.expectedDeliveryDate
+    const estimatedDeliveryText = statusData?.expectedDeliveryDate
         ? formatEpoch(statusData.expectedDeliveryDate)
         : "Next update pending";
 
@@ -407,7 +407,9 @@ const aggregationProgressPercent = Math.min(
             time: formatEpochFull(order.updatedAt),
         },
     ].filter(Boolean) : [];
-
+    const firstItem = order?.items?.[0];
+    const firstItemDoc = firstItem ? getItemDoc(firstItem?.itemId) : {};
+    const firstSnap = firstItem ? getSnap(firstItem) : {};
     return (
         <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-background-light font-display text-text-main">
             <Navbar showLocation={false} />
@@ -470,11 +472,11 @@ const aggregationProgressPercent = Math.min(
                                                 </span>
                                             </div>
                                             <h1 className="mt-2 text-3xl font-extrabold tracking-tight">
-                                                Premium Organic Avocados
+                                                {firstItemDoc?.title || firstItemDoc?.name || "Item"}
                                             </h1>
                                             <p className="mt-1 flex items-center gap-1 text-sm text-text-muted">
                                                 <span className="material-symbols-outlined text-base">location_on</span>
-                                                Toronto Hub - Front St West
+                                                {order?.deliveryLocation?.city || order?.ops_region || "N/A"}
                                             </p>
                                         </div>
                                         <button
@@ -490,16 +492,23 @@ const aggregationProgressPercent = Math.min(
                                     {/* Stats row */}
                                     {/* FIND the entire grid grid-cols-3 div and REPLACE WITH: */}
                                     <div className="mt-6 grid grid-cols-3 gap-4">
+
                                         <div className="flex flex-col gap-1">
                                             <p className="text-xs font-bold uppercase tracking-widest text-text-muted">Package info</p>
-                                            <p className="font-semibold text-text-main">Box of 12 Units</p>
-                                            <p className="text-sm text-text-muted">Premium Grade A</p>
+                                            <p className="font-semibold text-text-main">
+                                                {firstItemDoc?.title || firstItemDoc?.name || "—"}
+                                            </p>
+                                            <p className="text-sm text-text-muted">
+                                                {firstItemDoc?.sku || firstItemDoc?.ops_region || "—"}
+                                            </p>
                                         </div>
 
                                         <div className="flex flex-col gap-1">
                                             <p className="text-xs font-bold uppercase tracking-widest text-text-muted">Quantity</p>
-                                            <p className="font-semibold text-text-main">12 Boxes Purchased</p>
-                                            <p className="text-sm text-text-muted">Total 144 Avocados</p>
+                                            <p className="font-semibold text-text-main">{currentDemandQty} units purchased</p>
+                                            <p className="text-sm text-text-muted">
+                                                {order?.items?.length > 1 ? `${order.items.length} item types` : "Single item"}
+                                            </p>
                                         </div>
 
                                         <div className="flex flex-col gap-1 rounded-xl bg-primary/10 p-4">
@@ -508,14 +517,15 @@ const aggregationProgressPercent = Math.min(
                                             </p>
                                             <p className="font-bold text-teal-800">Final price locked</p>
                                             <p className="text-2xl font-extrabold text-teal-900">
-                                                $1.10
+                                                ${firstSnap?.atInstantPrice?.toFixed(2) ?? "—"}
                                                 <span className="ml-1 text-sm font-medium text-teal-700">per unit</span>
                                             </p>
                                         </div>
+
                                     </div>
                                 </article>
 
-                                                                {/* Live demand progress */}
+                                {/* Live demand progress */}
                                 <article className="rounded-2xl border border-neutral-light bg-white p-6 shadow-sm">
                                     <div className="mb-5 flex items-center justify-between">
                                         <div>
@@ -568,8 +578,8 @@ const aggregationProgressPercent = Math.min(
                                                 className="h-full bg-primary transition-all duration-700"
                                                 style={{
                                                     width: `${lifecycleStages.length > 1
-                                                            ? (stageIndex / (lifecycleStages.length - 1)) * 100
-                                                            : 0
+                                                        ? (stageIndex / (lifecycleStages.length - 1)) * 100
+                                                        : 0
                                                         }%`,
                                                 }}
                                             />
@@ -585,8 +595,8 @@ const aggregationProgressPercent = Math.min(
                                                 >
                                                     <div
                                                         className={`flex h-10 w-10 items-center justify-center rounded-full border-2 transition-all ${done
-                                                                ? "border-primary bg-primary"
-                                                                : "border-neutral-light bg-white"
+                                                            ? "border-primary bg-primary"
+                                                            : "border-neutral-light bg-white"
                                                             }`}
                                                     >
                                                         <span

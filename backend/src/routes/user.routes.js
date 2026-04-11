@@ -71,13 +71,11 @@ router.get(
   asyncHandler(UserController.listUsers)
 );
 
-/* Get user by Mongo _id */
-router.get(
-  '/:id',
-  userValidators.idParam,
+/* Customer self profile update */
+router.patch(
+  '/profile',
   requireAuth,
-  requireRole('administrator'),
-  asyncHandler(UserController.getUserById)
+  asyncHandler(UserController.updateCustomerProfile)
 );
 
 /* Get user by human-friendly userId */
@@ -92,6 +90,15 @@ router.get(
 router.get(
   '/by-email',
   asyncHandler(UserController.getUserByEmail)
+);
+
+/* Get user by Mongo _id */
+router.get(
+  '/:id',
+  userValidators.idParam,
+  requireAuth,
+  requireRole('administrator'),
+  asyncHandler(UserController.getUserById)
 );
 
 /* Update user by _id (partial update) */

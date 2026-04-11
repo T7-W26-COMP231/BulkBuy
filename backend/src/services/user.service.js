@@ -519,6 +519,68 @@ class UserService {
     }
   }
 
+/**
+ * Customer self profile update
+ * Reuses updateUserById to keep validation and audit logic centralized
+ */
+async updateCustomerProfile(userId, payload = {}, opts = {}) {
+  if (!userId) {
+    throw createError(401, "Unauthorized");
+  }
+
+  const existingUser = await this.getUserById(userId);
+
+  const existingAddresses = Array.isArray(existingUser?.addresses)
+    ? [...existingUser.addresses]
+    : [];
+
+  if (existingAddresses.length > 0) {
+    existingAddresses[0] = {
+      ...existingAddresses[0],
+      line1: payload.addressLine1,
+      city: payload.city,
+      postalCode: payload.postalCode,
+    };
+  } else {
+    existingAddresses.push({
+      label: "Home",
+      line1: payload.addressLine1,
+      city: payload.city,
+      postalCode: payload.postalCode,
+      country: "Canada",
+    });
+  }
+
+  const safePayload = {
+    firstName: payload.firstName,
+    lastName: payload.lastName,
+    addresses: existingAddresses,
+  };
+
+  if (payload.email) {
+    const existingEmails = Array.isArray(existingUser?.emails)
+      ? [...existingUser.emails]
+      : [];
+
+    if (existingEmails.length > 0) {
+      existingEmails[0] = {
+        ...existingEmails[0],
+        address: String(payload.email).toLowerCase().trim(),
+      };
+
+      safePayload.emails = existingEmails;
+    } else {
+      safePayload.emails = [
+        {
+          address: String(payload.email).toLowerCase().trim(),
+          primary: true,
+        },
+      ];
+    }
+  }
+
+  return this.updateUserById(userId, safePayload, opts);
+}
   /**
    * Update one user by filter
    */

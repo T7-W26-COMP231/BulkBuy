@@ -1,4 +1,8 @@
 import { useState } from "react";
+import api from "../../api/api";
+import Navbar from "../../components/Navbar";
+import Sidebar from "../../components/Sidebar";
+import Footer from "../../components/Footer";
 
 const tabs = [
   { id: "profile", label: "Profile", icon: "person" },
@@ -29,110 +33,128 @@ export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState("profile");
   const [priceTierAlerts, setPriceTierAlerts] = useState(true);
   const [orderUpdates, setOrderUpdates] = useState(true);
-const [profileForm, setProfileForm] = useState({
-  fullName: "",
-  email: "",
-  addressLine1: "",
-  city: "",
-  postalCode: "",
-});
-const [profileErrors, setProfileErrors] = useState({});
+  const [profileForm, setProfileForm] = useState({
+    fullName: "",
+    email: "",
+    addressLine1: "",
+    city: "",
+    postalCode: "",
+  });
+  const [profileErrors, setProfileErrors] = useState({});
+  const [saveMessage, setSaveMessage] = useState("");
+  const [saveError, setSaveError] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
 
-const handleProfileInputChange = (event) => {
-  const { name, value } = event.target;
+  const handleProfileInputChange = (event) => {
+    const { name, value } = event.target;
 
-  setProfileForm((prev) => ({
-    ...prev,
-    [name]: value,
-  }));
+    setProfileForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
 
-  setProfileErrors((prev) => ({
-    ...prev,
-    [name]: "",
-  }));
-};
+    setProfileErrors((prev) => ({
+      ...prev,
+      [name]: "",
+    }));
+  };
 
-const handleProfileSave = () => {
-  const nextErrors = {};
+  const handleProfileSave = async () => {
+    const nextErrors = {};
 
-  if (!profileForm.fullName.trim()) {
-    nextErrors.fullName = "Full name is required";
-  }
+    setSaveMessage("");
+    setSaveError("");
 
-  if (!profileForm.email.trim()) {
-    nextErrors.email = "Email address is required";
-  } else if (!/\S+@\S+\.\S+/.test(profileForm.email)) {
-    nextErrors.email = "Enter a valid email address";
-  }
+    if (!profileForm.fullName.trim()) {
+      nextErrors.fullName = "Full name is required";
+    }
 
-  if (!profileForm.addressLine1.trim()) {
-    nextErrors.addressLine1 = "Address is required";
-  }
+    if (!profileForm.email.trim()) {
+      nextErrors.email = "Email address is required";
+    } else if (!/\S+@\S+\.\S+/.test(profileForm.email)) {
+      nextErrors.email = "Enter a valid email address";
+    }
 
-  if (!profileForm.city.trim()) {
-    nextErrors.city = "City is required";
-  }
+    if (!profileForm.addressLine1.trim()) {
+      nextErrors.addressLine1 = "Address is required";
+    }
 
-  if (!profileForm.postalCode.trim()) {
-    nextErrors.postalCode = "Postal code is required";
-  }
+    if (!profileForm.city.trim()) {
+      nextErrors.city = "City is required";
+    }
 
-  setProfileErrors(nextErrors);
+    if (!profileForm.postalCode.trim()) {
+      nextErrors.postalCode = "Postal code is required";
+    }
 
-  if (Object.keys(nextErrors).length > 0) {
-    return;
-  }
+    setProfileErrors(nextErrors);
 
-  console.log("✅ Ready for API save:", profileForm);
-};
+    if (Object.keys(nextErrors).length > 0) {
+      return;
+    }
 
-return (
-  <div className="min-h-screen bg-background-light px-6 py-8">
-    <div className="mx-auto max-w-6xl space-y-6">
-      {/* Top right action icons */}
-      <div className="flex justify-end gap-3">
-        <button
-          type="button"
-          className="flex h-10 w-10 items-center justify-center rounded-xl border border-neutral-light bg-white shadow-sm"
-        >
-          <span className="material-symbols-outlined text-text-muted">
-            notifications
-          </span>
-        </button>
+    try {
+      setIsSaving(true);
 
-        <button
-          type="button"
-          className="flex h-10 w-10 items-center justify-center rounded-full border border-neutral-light bg-white shadow-sm"
-        >
-          <span className="material-symbols-outlined text-text-muted">
-            person
-          </span>
-        </button>
-      </div>
+      const [firstName = "", ...rest] = profileForm.fullName
+        .trim()
+        .split(" ");
+      const lastName = rest.join(" ");
 
-      {/* Hero */}
-      <section className="rounded-2xl border border-neutral-light bg-white p-6 shadow-sm">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-          <div className="flex h-24 w-24 items-center justify-center rounded-full border-4 border-primary/30 bg-neutral-light">
-            <span className="material-symbols-outlined text-5xl text-text-muted">
-              person
-            </span>
-          </div>
+      await api.patch("/users/profile", {
+        firstName,
+        lastName,
+        email: profileForm.email,
+        addressLine1: profileForm.addressLine1,
+        city: profileForm.city,
+        postalCode: profileForm.postalCode,
+      });
+
+      setSaveMessage("Profile updated successfully.");
+    } catch (error) {
+      setSaveError(
+        error?.response?.data?.message ||
+        "Could not save profile changes."
+      );
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  return (
+  <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-background-light text-text-main font-display">
+    <Navbar />
+
+    <main className="flex flex-1 flex-col gap-8 px-4 py-8 md:flex-row md:px-20 lg:px-40">
+      <Sidebar
+  totalSavings={Number(profileForm.totalSavings || 0)}
+  savingsLabel="Saved this month"
+/>
+
+      <section className="flex flex-1 flex-col gap-6">
+        {/* Hero */}
+        <section className="rounded-2xl border border-neutral-light bg-white p-6 shadow-sm">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+            <div className="flex h-24 w-24 items-center justify-center rounded-full border-4 border-primary/30 bg-neutral-light">
+              <span className="material-symbols-outlined text-5xl text-text-muted">
+                person
+              </span>
+            </div>
 
             <div className="flex-1">
               <h1 className="text-3xl font-bold text-text-main">
-                John Doe
+                {profileForm.fullName || "Customer Profile"}
               </h1>
               <p className="mt-1 text-sm font-medium text-text-muted">
-                Toronto City Assignment
+                {profileForm.city || "Profile settings"}
               </p>
 
               <div className="mt-3 flex flex-wrap gap-2">
                 <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-bold text-text-main">
-                  ACCOUNT MANAGER
+                  CUSTOMER
                 </span>
                 <span className="rounded-full bg-neutral-light px-3 py-1 text-xs font-bold text-text-muted">
-                  US-C9 TIER
+                  BULKBUY USER
                 </span>
               </div>
             </div>
@@ -141,7 +163,6 @@ return (
 
         {/* Main content */}
         <section className="rounded-2xl border border-neutral-light bg-white shadow-sm">
-          {/* Tabs */}
           <div className="flex flex-wrap border-b border-neutral-light">
             {tabs.map((tab) => (
               <button
@@ -210,144 +231,97 @@ return (
               </div>
             </section>
 
-            {/* Payment methods */}
-            <section>
-              <div className="mb-3 flex items-center justify-between">
+            {/* Profile form */}
+            <section className="rounded-2xl bg-neutral-light p-5">
+              <div className="mb-4">
                 <h3 className="font-bold text-text-main">
-                  Saved Payment Methods
+                  Profile Details
                 </h3>
-                <button className="text-sm font-semibold text-primary">
-                  + Add Card
-                </button>
+                <p className="mt-1 text-sm text-text-muted">
+                  Update your account information and contact details
+                </p>
               </div>
 
               <div className="grid gap-4 md:grid-cols-2">
-                <div className="rounded-2xl border border-primary bg-primary/5 p-5">
-                  <p className="font-semibold text-text-main">
-                    •••• •••• •••• 4242
-                  </p>
-                  <p className="mt-2 text-sm text-text-muted">
-                    Visa Corporate
-                  </p>
-                  <p className="text-xs text-text-muted">12/25</p>
+                <div>
+                  <label className="mb-2 block text-sm font-semibold text-text-main">
+                    Full Name
+                  </label>
+                  <input
+                    type="text"
+                    name="fullName"
+                    value={profileForm.fullName}
+                    onChange={handleProfileInputChange}
+                    className="w-full rounded-xl border border-neutral-light bg-white px-4 py-3"
+                  />
                 </div>
 
-                <div className="flex items-center justify-center rounded-2xl border border-dashed border-neutral-light p-5 text-sm font-semibold text-text-muted">
-                  Add New Payment Method
+                <div>
+                  <label className="mb-2 block text-sm font-semibold text-text-main">
+                    Email Address
+                  </label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={profileForm.email}
+                    onChange={handleProfileInputChange}
+                    className="w-full rounded-xl border border-neutral-light bg-white px-4 py-3"
+                  />
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="mb-2 block text-sm font-semibold text-text-main">
+                    Address Line
+                  </label>
+                  <input
+                    type="text"
+                    name="addressLine1"
+                    value={profileForm.addressLine1}
+                    onChange={handleProfileInputChange}
+                    className="w-full rounded-xl border border-neutral-light bg-white px-4 py-3"
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-sm font-semibold text-text-main">
+                    City
+                  </label>
+                  <input
+                    type="text"
+                    name="city"
+                    value={profileForm.city}
+                    onChange={handleProfileInputChange}
+                    className="w-full rounded-xl border border-neutral-light bg-white px-4 py-3"
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-sm font-semibold text-text-main">
+                    Postal Code
+                  </label>
+                  <input
+                    type="text"
+                    name="postalCode"
+                    value={profileForm.postalCode}
+                    onChange={handleProfileInputChange}
+                    className="w-full rounded-xl border border-neutral-light bg-white px-4 py-3"
+                  />
                 </div>
               </div>
             </section>
 
-            {/* Profile form */}
-<section className="rounded-2xl bg-neutral-light p-5">
-  <div className="mb-4">
-    <h3 className="font-bold text-text-main">
-      Profile Details
-    </h3>
-    <p className="mt-1 text-sm text-text-muted">
-      Update your account information and contact details
-    </p>
-  </div>
+            {saveMessage && (
+              <div className="rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm font-semibold text-green-700">
+                {saveMessage}
+              </div>
+            )}
 
-  <div className="grid gap-4 md:grid-cols-2">
-    <div>
-      <label className="mb-2 block text-sm font-semibold text-text-main">
-        Full Name
-      </label>
-      <input
-        type="text"
-        name="fullName"
-        value={profileForm.fullName}
-        onChange={handleProfileInputChange}
-        placeholder="Enter your full name"
-        className="w-full rounded-xl border border-neutral-light bg-white px-4 py-3 text-sm text-text-main outline-none transition focus:border-primary"
-      />
-      {profileErrors.fullName && (
-        <p className="mt-1 text-xs font-medium text-red-600">
-          {profileErrors.fullName}
-        </p>
-      )}
-    </div>
+            {saveError && (
+              <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
+                {saveError}
+              </div>
+            )}
 
-    <div>
-      <label className="mb-2 block text-sm font-semibold text-text-main">
-        Email Address
-      </label>
-      <input
-        type="email"
-        name="email"
-        value={profileForm.email}
-        onChange={handleProfileInputChange}
-        placeholder="Enter your email address"
-        className="w-full rounded-xl border border-neutral-light bg-white px-4 py-3 text-sm text-text-main outline-none transition focus:border-primary"
-      />
-      {profileErrors.email && (
-        <p className="mt-1 text-xs font-medium text-red-600">
-          {profileErrors.email}
-        </p>
-      )}
-    </div>
-
-    <div className="md:col-span-2">
-      <label className="mb-2 block text-sm font-semibold text-text-main">
-        Address Line
-      </label>
-      <input
-        type="text"
-        name="addressLine1"
-        value={profileForm.addressLine1}
-        onChange={handleProfileInputChange}
-        placeholder="Enter your street address"
-        className="w-full rounded-xl border border-neutral-light bg-white px-4 py-3 text-sm text-text-main outline-none transition focus:border-primary"
-      />
-      {profileErrors.addressLine1 && (
-        <p className="mt-1 text-xs font-medium text-red-600">
-          {profileErrors.addressLine1}
-        </p>
-      )}
-    </div>
-
-    <div>
-      <label className="mb-2 block text-sm font-semibold text-text-main">
-        City
-      </label>
-      <input
-        type="text"
-        name="city"
-        value={profileForm.city}
-        onChange={handleProfileInputChange}
-        placeholder="Enter your city"
-        className="w-full rounded-xl border border-neutral-light bg-white px-4 py-3 text-sm text-text-main outline-none transition focus:border-primary"
-      />
-      {profileErrors.city && (
-        <p className="mt-1 text-xs font-medium text-red-600">
-          {profileErrors.city}
-        </p>
-      )}
-    </div>
-
-    <div>
-      <label className="mb-2 block text-sm font-semibold text-text-main">
-        Postal Code
-      </label>
-      <input
-        type="text"
-        name="postalCode"
-        value={profileForm.postalCode}
-        onChange={handleProfileInputChange}
-        placeholder="Enter your postal code"
-        className="w-full rounded-xl border border-neutral-light bg-white px-4 py-3 text-sm text-text-main outline-none transition focus:border-primary"
-      />
-      {profileErrors.postalCode && (
-        <p className="mt-1 text-xs font-medium text-red-600">
-          {profileErrors.postalCode}
-        </p>
-      )}
-    </div>
-  </div>
-</section>
-
-                       {/* Footer buttons */}
             <div className="flex justify-end gap-3">
               <button
                 type="button"
@@ -359,9 +333,10 @@ return (
               <button
                 type="button"
                 onClick={handleProfileSave}
+                disabled={isSaving}
                 className="rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-text-main"
               >
-                Save Changes
+                {isSaving ? "Saving..." : "Save Changes"}
               </button>
             </div>
           </div>
@@ -390,7 +365,10 @@ return (
             </div>
           ))}
         </section>
-      </div>
-    </div>
-  );
+      </section>
+    </main>
+
+    <Footer />
+  </div>
+);
 }

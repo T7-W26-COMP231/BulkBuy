@@ -29,6 +29,62 @@ export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState("profile");
   const [priceTierAlerts, setPriceTierAlerts] = useState(true);
   const [orderUpdates, setOrderUpdates] = useState(true);
+const [profileForm, setProfileForm] = useState({
+  fullName: "",
+  email: "",
+  addressLine1: "",
+  city: "",
+  postalCode: "",
+});
+const [profileErrors, setProfileErrors] = useState({});
+
+const handleProfileInputChange = (event) => {
+  const { name, value } = event.target;
+
+  setProfileForm((prev) => ({
+    ...prev,
+    [name]: value,
+  }));
+
+  setProfileErrors((prev) => ({
+    ...prev,
+    [name]: "",
+  }));
+};
+
+const handleProfileSave = () => {
+  const nextErrors = {};
+
+  if (!profileForm.fullName.trim()) {
+    nextErrors.fullName = "Full name is required";
+  }
+
+  if (!profileForm.email.trim()) {
+    nextErrors.email = "Email address is required";
+  } else if (!/\S+@\S+\.\S+/.test(profileForm.email)) {
+    nextErrors.email = "Enter a valid email address";
+  }
+
+  if (!profileForm.addressLine1.trim()) {
+    nextErrors.addressLine1 = "Address is required";
+  }
+
+  if (!profileForm.city.trim()) {
+    nextErrors.city = "City is required";
+  }
+
+  if (!profileForm.postalCode.trim()) {
+    nextErrors.postalCode = "Postal code is required";
+  }
+
+  setProfileErrors(nextErrors);
+
+  if (Object.keys(nextErrors).length > 0) {
+    return;
+  }
+
+  console.log("✅ Ready for API save:", profileForm);
+};
 
 return (
   <div className="min-h-screen bg-background-light px-6 py-8">
@@ -182,41 +238,129 @@ return (
               </div>
             </section>
 
-            {/* Assignment */}
-            <section className="rounded-2xl bg-neutral-light p-5">
-              <h3 className="font-bold text-text-main">
-                Assignment Details
-              </h3>
+            {/* Profile form */}
+<section className="rounded-2xl bg-neutral-light p-5">
+  <div className="mb-4">
+    <h3 className="font-bold text-text-main">
+      Profile Details
+    </h3>
+    <p className="mt-1 text-sm text-text-muted">
+      Update your account information and contact details
+    </p>
+  </div>
 
-              <div className="mt-4 grid gap-4 md:grid-cols-[1fr_220px]">
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-wider text-text-muted">
-                    Current Region
-                  </p>
-                  <p className="mt-1 font-semibold text-text-main">
-                    Greater Toronto Area (GTA)
-                  </p>
+  <div className="grid gap-4 md:grid-cols-2">
+    <div>
+      <label className="mb-2 block text-sm font-semibold text-text-main">
+        Full Name
+      </label>
+      <input
+        type="text"
+        name="fullName"
+        value={profileForm.fullName}
+        onChange={handleProfileInputChange}
+        placeholder="Enter your full name"
+        className="w-full rounded-xl border border-neutral-light bg-white px-4 py-3 text-sm text-text-main outline-none transition focus:border-primary"
+      />
+      {profileErrors.fullName && (
+        <p className="mt-1 text-xs font-medium text-red-600">
+          {profileErrors.fullName}
+        </p>
+      )}
+    </div>
 
-                  <p className="mt-4 text-xs font-bold uppercase tracking-wider text-text-muted">
-                    Workplace ID
-                  </p>
-                  <p className="mt-1 font-semibold text-text-main">
-                    BB-TO-9921
-                  </p>
-                </div>
+    <div>
+      <label className="mb-2 block text-sm font-semibold text-text-main">
+        Email Address
+      </label>
+      <input
+        type="email"
+        name="email"
+        value={profileForm.email}
+        onChange={handleProfileInputChange}
+        placeholder="Enter your email address"
+        className="w-full rounded-xl border border-neutral-light bg-white px-4 py-3 text-sm text-text-main outline-none transition focus:border-primary"
+      />
+      {profileErrors.email && (
+        <p className="mt-1 text-xs font-medium text-red-600">
+          {profileErrors.email}
+        </p>
+      )}
+    </div>
 
-                <div className="rounded-xl bg-white p-4 text-center text-sm text-text-muted">
-                  Map preview
-                </div>
-              </div>
-            </section>
+    <div className="md:col-span-2">
+      <label className="mb-2 block text-sm font-semibold text-text-main">
+        Address Line
+      </label>
+      <input
+        type="text"
+        name="addressLine1"
+        value={profileForm.addressLine1}
+        onChange={handleProfileInputChange}
+        placeholder="Enter your street address"
+        className="w-full rounded-xl border border-neutral-light bg-white px-4 py-3 text-sm text-text-main outline-none transition focus:border-primary"
+      />
+      {profileErrors.addressLine1 && (
+        <p className="mt-1 text-xs font-medium text-red-600">
+          {profileErrors.addressLine1}
+        </p>
+      )}
+    </div>
 
-            {/* Footer buttons */}
+    <div>
+      <label className="mb-2 block text-sm font-semibold text-text-main">
+        City
+      </label>
+      <input
+        type="text"
+        name="city"
+        value={profileForm.city}
+        onChange={handleProfileInputChange}
+        placeholder="Enter your city"
+        className="w-full rounded-xl border border-neutral-light bg-white px-4 py-3 text-sm text-text-main outline-none transition focus:border-primary"
+      />
+      {profileErrors.city && (
+        <p className="mt-1 text-xs font-medium text-red-600">
+          {profileErrors.city}
+        </p>
+      )}
+    </div>
+
+    <div>
+      <label className="mb-2 block text-sm font-semibold text-text-main">
+        Postal Code
+      </label>
+      <input
+        type="text"
+        name="postalCode"
+        value={profileForm.postalCode}
+        onChange={handleProfileInputChange}
+        placeholder="Enter your postal code"
+        className="w-full rounded-xl border border-neutral-light bg-white px-4 py-3 text-sm text-text-main outline-none transition focus:border-primary"
+      />
+      {profileErrors.postalCode && (
+        <p className="mt-1 text-xs font-medium text-red-600">
+          {profileErrors.postalCode}
+        </p>
+      )}
+    </div>
+  </div>
+</section>
+
+                       {/* Footer buttons */}
             <div className="flex justify-end gap-3">
-              <button className="rounded-xl border border-neutral-light px-5 py-2.5 text-sm font-semibold text-text-muted">
+              <button
+                type="button"
+                className="rounded-xl border border-neutral-light px-5 py-2.5 text-sm font-semibold text-text-muted"
+              >
                 Discard
               </button>
-              <button className="rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-text-main">
+
+              <button
+                type="button"
+                onClick={handleProfileSave}
+                className="rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-text-main"
+              >
                 Save Changes
               </button>
             </div>

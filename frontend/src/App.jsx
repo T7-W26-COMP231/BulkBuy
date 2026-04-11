@@ -31,6 +31,7 @@ import ReviewModifyIntentPage from "./pages/customer/ReviewModifyIntentPage";
 import OrdersPage from "./pages/customer/OrdersPage";
 import OrderDetailsPage from "./pages/customer/OrderDetails";
 import OrderTrackingPage from "./pages/customer/OrderTrackingPage";
+import ProfilePage from "./pages/customer/ProfilePage";
 
 
 function PlaceholderPage({ title }) {
@@ -229,7 +230,7 @@ export default function App() {
         <Route path="/privacy-policy" element={<PlaceholderPage title="Privacy Policy" />} />
         <Route path="/terms-of-service" element={<PlaceholderPage title="Terms of Service" />} />
         <Route path="/notifications" element={<PlaceholderPage title="Notifications" />} />
-        <Route path="/profile" element={<PlaceholderPage title="Profile" />} />
+        <Route path="/profile" element={<ProfilePage />} />
         <Route path="/community" element={<PlaceholderPage title="Community" />} />
         <Route path="/settings" element={<PlaceholderPage title="Settings" />} />
         <Route path="/savings" element={<PlaceholderPage title="Savings Vault" />} />

@@ -5,7 +5,7 @@
  * - Consistent audit logging and correlationId propagation
  */
 const { sendQuoteApproved, sendQuoteRejected } = require('../services/email.service');
-const { emitToUser, getSocketIO } = require('../../../bb-docs+/socket');
+const { emitToUser, getSocketIO } = require('../../socket');
 
 const userService = require('../services/user.service');
 

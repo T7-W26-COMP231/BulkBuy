@@ -84,10 +84,14 @@ const UserSchema = new Schema({
   // references and methods
   // config: { type: Schema.Types.ObjectId, ref: 'Config' },
   config: { type: String, trim: true }, // only for testing
+paymentMethods: { type: [PaymentMethodSchema], default: [] },
 
-  paymentMethods: { type: [PaymentMethodSchema], default: [] },
+notificationPreferences: {
+  priceTierAlerts: { type: Boolean, default: true },
+  orderUpdates: { type: Boolean, default: true }
+},
 
-  // avatar: { type: Schema.Types.ObjectId, ref: 'S3file', default: "642f1a9b8c9f1a2b3c4d5e6f"},
+// avatar: { type: Schema.Types.ObjectId, ref: 'S3file', default: "642f1a9b8c9f1a2b3c4d5e6f"},
   avatar: { type: String, default: "https://cfg-j.s3.us-east-1.amazonaws.com/avataaars.png" },
 
   // soft-delete metadata (epoch ms)

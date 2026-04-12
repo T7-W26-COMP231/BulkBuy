@@ -241,6 +241,32 @@ const UserController = {
   },
 
   /**
+ * PATCH /users/notifications
+ * Customer updates notification preferences only
+ */
+async updateNotificationPreferences(req, res, next) {
+  try {
+    const userId = req.user?._id;
+    if (!userId) throw createError(401, "Unauthorized");
+
+    const payload = req.body || {};
+
+    const updated = await UserService.updateNotificationPreferences(
+      userId,
+      payload
+    );
+
+    return send(res, 200, {
+      success: true,
+      message: "Notification preferences updated successfully",
+      data: updated,
+    });
+  } catch (err) {
+    return next(err);
+  }
+},
+
+  /**
  * PATCH /users/payment-methods
  * Customer adds payment method
  */

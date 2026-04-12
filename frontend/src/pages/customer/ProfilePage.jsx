@@ -207,6 +207,31 @@ export default function ProfilePage() {
       setIsSaving(false);
     }
   };
+  const handleNotificationSave = async () => {
+    setSaveMessage("");
+    setSaveError("");
+
+    try {
+      setIsSaving(true);
+
+      await api.patch("/users/notifications", {
+        priceTierAlerts,
+        orderUpdates,
+      });
+
+      setSaveMessage(
+        "Notification preferences updated successfully."
+      );
+    } catch (error) {
+      setSaveError(
+        error?.response?.data?.message ||
+        "Could not save notification preferences."
+      );
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const handlePaymentSave = async () => {
     setPaymentMessage("");
     setPaymentError("");
@@ -251,7 +276,6 @@ export default function ProfilePage() {
       );
     }
   };
-
   const handleRemovePayment = async (paymentId) => {
     setPaymentMessage("");
     setPaymentError("");
@@ -409,7 +433,7 @@ export default function ProfilePage() {
 
                   {saveMessage && (
                     <div className="rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm font-semibold text-green-700">
-                      ✅ Notification preferences updated successfully.
+                      ✅ Profile updated successfully.
                     </div>
                   )}
                   {saveError && (
@@ -582,12 +606,13 @@ export default function ProfilePage() {
                   <div className="flex justify-end pt-4">
                     <button
                       type="button"
-                      onClick={handleProfileSave}
+                      onClick={handleNotificationSave}
                       className="rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-text-main transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-md hover:brightness-95"
                     >
                       Save Notification Preferences
                     </button>
                   </div>
+
                 </section>
               )}
 
@@ -743,7 +768,7 @@ export default function ProfilePage() {
             </section>
           )}
 
-            {/* Quick actions */}
+          {/* Quick actions */}
           <section className="grid gap-4 md:grid-cols-3">
             {quickActions.map((action) => (
               <button

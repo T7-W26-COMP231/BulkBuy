@@ -7,12 +7,27 @@ import api from './api';
  */
 export const createIntent = async (intentData) => {
   try {
-    //const response = await api.post('/api/ordrs', intentData);
-    const response = await api.post('/ordrs', intentData);
+    // 1. Check if user already has a draft order
+    const existingRes = await api.get(`/ordrs/user/${intentData.userId}`);
+    const allOrders = existingRes.data?.items || [];
+    const existingDraft = allOrders.find(o => o.status === 'draft');
 
+    if (existingDraft) {
+      // 2. Add item to existing draft
+      const response = await api.post(
+        `/ordrs/${existingDraft._id}/add-item`,
+        intentData.items[0]
+      );
+      return response.data;
+    }
+
+    // 3. No draft exists — create new order
+    const response = await api.post('/ordrs', intentData);
     return response.data;
+
   } catch (error) {
     console.error('Error creating intent:', error);
+    console.error('Backend error response:', error.response?.data);
     throw error;
   }
 };
@@ -47,8 +62,8 @@ export const buildIntentPayload = ({
         }
       }
     ],
-    status: 'submitted',
-    ...(ops_region ? { ops_region } : {}),
+    status: 'draft',
+    ...(ops_region ? { ops_region: Array.isArray(ops_region) ? ops_region[0] : ops_region } : {}), // ← only this line changed
     metadata: {
       source: 'confirm-intent',
       ...metadata

@@ -837,11 +837,52 @@ class OrderService {
         productLookup.set(pid, { product: p, itemMap, windowId: p.windowId, window: p.window });
       }
 
-      const missing = [];
+      /*const missing = [];
       for (const it of orderDoc.items || []) {
         const pid = String(it.productId);
         const iid = String(it.itemId);
         const pEntry = productLookup.get(pid);
+        if (!pEntry) {
+          missing.push({ productId: pid, itemId: iid });
+          continue;
+        }
+        const swItem = pEntry.itemMap.get(iid);
+        if (!swItem) {
+          missing.push({ productId: pid, itemId: iid });
+        }
+      }*/
+
+      /*const missing = [];
+      for (const it of orderDoc.items || []) {
+        const pid = String(it.productId);
+        const iid = String(it.itemId);
+        const pEntry = productLookup.get(pid);
+        if (!pEntry) {
+          missing.push({ productId: pid, itemId: iid });
+          continue;
+        }
+        const swItem = pEntry.itemMap.get(iid);
+        if (!swItem) {
+          missing.push({ productId: pid, itemId: iid });
+        }
+      }*/
+
+      const missing = [];
+      for (const it of orderDoc.items || []) {
+        const pid = String(it.productId);
+        const iid = String(it.itemId);
+
+        let pEntry = productLookup.get(pid);
+        if (!pEntry) {
+          for (const [, entry] of productLookup) {
+            if (entry.itemMap.has(iid)) {
+              pEntry = entry;
+              it.productId = entry.product.productId;
+              break;
+            }
+          }
+        }
+
         if (!pEntry) {
           missing.push({ productId: pid, itemId: iid });
           continue;
@@ -856,11 +897,29 @@ class OrderService {
         throw createError(409, `Some items are not available in current sales window: ${JSON.stringify(missing)}`);
       }
 
-      for (const it of orderDoc.items || []) {
+      /*for (const it of orderDoc.items || []) {
         const pid = String(it.productId);
         const iid = String(it.itemId);
         const pEntry = productLookup.get(pid);
+        const swItem = pEntry.itemMap.get(iid);*/
+
+      for (const it of orderDoc.items || []) {
+        const pid = String(it.productId);
+        const iid = String(it.itemId);
+
+        // ✅ Same fallback lookup
+        let pEntry = productLookup.get(pid);
+        if (!pEntry) {
+          for (const [, entry] of productLookup) {
+            if (entry.itemMap.has(iid)) {
+              pEntry = entry;
+              break;
+            }
+          }
+        }
+        if (!pEntry) continue;
         const swItem = pEntry.itemMap.get(iid);
+        if (!swItem) continue;
 
         let latestSnapshot = null;
         if (Array.isArray(swItem.pricing_snapshots) && swItem.pricing_snapshots.length > 0) {
@@ -879,9 +938,14 @@ class OrderService {
         const currentQtySold = Number(swItem.qtySold || 0);
         const increment = Number(it.quantity || 1);
         const newQtySold = currentQtySold + increment;
-
+        console.log("🔍 windowId being used:", pEntry.windowId);
+        console.log("🔍 productId:", pid);
+        console.log("🔍 itemId:", iid);
+        console.log("🔍 newQtySold:", newQtySold);
         try {
-          await SalesWindowService.addOrUpdateItem(pEntry.windowId, pid, iid, { qtySold: newQtySold }, { session, actor, correlationId });
+          //await SalesWindowService.addOrUpdateItem(pEntry.windowId, pid, iid, { qtySold: newQtySold }, { session, actor, correlationId });
+          await SalesWindowService.addOrUpdateItem(pEntry.windowId, pid, iid, { qtySold: newQtySold }, { actor, correlationId });
+
         } catch (e) {
           // non-fatal for submission
           // eslint-disable-next-line no-console
@@ -909,13 +973,27 @@ class OrderService {
 
       const updatedPlain = await OrderRepo.findById(orderDoc._id, { lean: true });
       return sanitizeForClient(updatedPlain);
-    } catch (err) {
+    }
+    catch (err) {
+      try {
+        if (session.inTransaction()) {
+          await session.abortTransaction();
+        }
+      } catch (abortErr) {
+        console.warn('abortTransaction failed:', abortErr.message);
+      }
+      session.endSession();
+      await this._audit('order.submit', actor, orderId, 'failure', 'error', correlationId, { error: err && err.message });
+      throw err;
+    }
+    /*catch (err) {
       await session.abortTransaction();
       session.endSession();
 
       await this._audit('order.submit', actor, orderId, 'failure', 'error', correlationId, { error: err && err.message });
       throw err;
-    }
+    }*/
+
   }
 
   async cancelOrder(orderId, opts = {}) {

@@ -35,7 +35,7 @@ export default function CartSummary({
   const cart = useCart();
   const toast = useToastService();
   // const items = useMemo(() => ( itemsList || cart.items || []).filter((it) => !it?.saveForLater && it?.status !== "savedForLater"), [cart.items]);
-  
+
   // 1. Define items as state so React tracks changes
   const [items, setItems] = useState([]);
 
@@ -45,7 +45,7 @@ export default function CartSummary({
       const filtered = (itemsList || cart.items || []).filter(
         (it) => !it?.saveForLater && it?.status !== "savedForLater"
       );
-      
+
       // 3. Wait for the values and update state
       const resolvedItems = await Promise.all(filtered);
       setItems(resolvedItems);
@@ -153,7 +153,7 @@ export default function CartSummary({
       }
       // fallback: call cart.submitOrder as a best-effort submit intent
       try {
-        await cart.submitOrder?.({ orderId: cart.orderId, paymentPayload: { intent: "submit_intent" } });
+        //await cart.submitOrder?.({ orderId: cart.orderId, paymentPayload: { intent: "submit_intent" } });
         toast.showSuccess("Submit intent recorded.");
       } catch {
         toast.showError("Could not submit intent.");
@@ -186,7 +186,7 @@ export default function CartSummary({
             <div className="empty-row">No items in your cart.</div>
           ) : (
             lineItems.map((li) => (
-              <div key={li.key} className="receipt-line" style={{ fontStyle:'italic'}}>
+              <div key={li.key} className="receipt-line" style={{ fontStyle: 'italic' }}>
                 <div className="rl-left">
                   <div className="rl-title">{li.title}</div>
                   <div className="rl-meta small muted">Qty {li.qty} × {formatCurrency(li.unit, currency)}</div>
@@ -260,7 +260,7 @@ export default function CartSummary({
               disabled={lineItems.length === 0}
               aria-disabled={lineItems.length === 0}
             >
-             Checkout
+              Checkout
             </button>
 
             <button type="button" className="btn btn-outline btn-continue" onClick={handleContinue}>

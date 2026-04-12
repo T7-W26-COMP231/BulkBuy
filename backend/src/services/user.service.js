@@ -520,6 +520,207 @@ class UserService {
   }
 
   /**
+   * Customer self profile update
+   * Reuses updateUserById to keep validation and audit logic centralized
+   */
+  async updateCustomerProfile(userId, payload = {}, opts = {}) {
+    if (!userId) {
+      throw createError(401, "Unauthorized");
+    }
+
+    const existingUser = await this.getUserById(userId);
+
+    const existingAddresses = Array.isArray(existingUser?.addresses)
+      ? [...existingUser.addresses]
+      : [];
+
+    if (existingAddresses.length > 0) {
+      existingAddresses[0] = {
+        ...existingAddresses[0],
+        line1: payload.addressLine1,
+        city: payload.city,
+        postalCode: payload.postalCode,
+      };
+    } else {
+      existingAddresses.push({
+        label: "Home",
+        line1: payload.addressLine1,
+        city: payload.city,
+        postalCode: payload.postalCode,
+        country: "Canada",
+      });
+    }
+
+    const safePayload = {
+  firstName: payload.firstName,
+  lastName: payload.lastName,
+  addresses: existingAddresses,
+  notificationPreferences: {
+    priceTierAlerts:
+      payload.notificationPreferences?.priceTierAlerts ?? true,
+    orderUpdates:
+      payload.notificationPreferences?.orderUpdates ?? true,
+  },
+};
+
+    if (payload.email) {
+      const existingEmails = Array.isArray(existingUser?.emails)
+        ? [...existingUser.emails]
+        : [];
+
+      if (existingEmails.length > 0) {
+        existingEmails[0] = {
+          ...existingEmails[0],
+          address: String(payload.email).toLowerCase().trim(),
+        };
+
+        safePayload.emails = existingEmails;
+      } else {
+        safePayload.emails = [
+          {
+            address: String(payload.email).toLowerCase().trim(),
+            primary: true,
+          },
+        ];
+      }
+    }
+
+    return this.updateUserById(userId, safePayload, opts);
+  }
+
+  /**
+ * Update customer notification preferences only
+ */
+async updateNotificationPreferences(userId, payload = {}, opts = {}) {
+  if (!userId) {
+    throw createError(401, "Unauthorized");
+  }
+
+  const existingUser = await this.getUserById(userId);
+
+  const existingPreferences =
+    existingUser?.notificationPreferences || {};
+
+  const safePayload = {
+    notificationPreferences: {
+      priceTierAlerts:
+        payload.priceTierAlerts ??
+        existingPreferences.priceTierAlerts ??
+        true,
+      orderUpdates:
+        payload.orderUpdates ??
+        existingPreferences.orderUpdates ??
+        true,
+    },
+  };
+
+  return this.updateUserById(userId, safePayload, opts);
+}
+
+
+  /**
+   * Add customer payment method
+   */
+  async addPaymentMethod(userId, payload = {}, opts = {}) {
+    if (!userId) {
+      throw createError(401, "Unauthorized");
+    }
+
+    const existingUser = await this.getUserById(userId);
+
+    const existingMethods = Array.isArray(existingUser?.paymentMethods)
+      ? [...existingUser.paymentMethods]
+      : [];
+
+    const nextMethod = {
+      type: payload.type || "card",
+      last4: String(payload.cardNumber || "").slice(-4),
+      provider: payload.provider || "visa",
+      expiry: payload.expiryDate,
+      tokenRef: payload.tokenRef || `pm_${Date.now()}`,
+      isDefault: existingMethods.length === 0,
+    };
+
+    existingMethods.push(nextMethod);
+
+    return this.updateUserById(
+      userId,
+      { paymentMethods: existingMethods },
+      opts
+    );
+  }
+
+  /**
+   * Remove customer payment method
+   */
+  async removePaymentMethod(userId, paymentId, opts = {}) {
+    if (!userId) {
+      throw createError(401, "Unauthorized");
+    }
+
+    const existingUser = await this.getUserById(userId);
+
+    let existingMethods = Array.isArray(existingUser?.paymentMethods)
+      ? [...existingUser.paymentMethods]
+      : [];
+
+    existingMethods = existingMethods.filter(
+      (method) => method.tokenRef !== paymentId
+    );
+
+    if (
+      existingMethods.length > 0 &&
+      !existingMethods.some((method) => method.isDefault)
+    ) {
+      existingMethods[0] = {
+        ...existingMethods[0],
+        isDefault: true,
+      };
+    }
+
+    return this.updateUserById(
+      userId,
+      { paymentMethods: existingMethods },
+      opts
+    );
+  }
+
+  /**
+   * Set default customer payment method
+   */
+  async setDefaultPaymentMethod(userId, paymentId, opts = {}) {
+    if (!userId) {
+      throw createError(401, "Unauthorized");
+    }
+
+    const existingUser = await this.getUserById(userId);
+
+    const existingMethods = Array.isArray(existingUser?.paymentMethods)
+      ? [...existingUser.paymentMethods]
+      : [];
+
+    const paymentExists = existingMethods.some(
+      (method) => method.tokenRef === paymentId
+    );
+
+    if (!paymentExists) {
+      throw createError(404, "Payment method not found");
+    }
+
+    const updatedMethods = existingMethods.map((method) => ({
+      ...method,
+      isDefault: method.tokenRef === paymentId,
+    }));
+
+    return this.updateUserById(
+      userId,
+      { paymentMethods: updatedMethods },
+      opts
+    );
+  }
+
+
+  /**
    * Update one user by filter
    */
   async updateOne(filter = {}, update = {}, opts = {}) {

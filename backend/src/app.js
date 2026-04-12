@@ -68,11 +68,16 @@ const createApp = async () => {
   // Rate limiting
   const limiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 100,
+    //max: 100,
+    max: process.env.NODE_ENV === 'production' ? 100 : 10000, // ← high in dev
     standardHeaders: true,
     legacyHeaders: false
   });
-  app.use(limiter);
+
+  if (process.env.NODE_ENV === 'production') {
+    app.use(limiter);
+  }
+  //app.use(limiter);
 
   // Health check
   app.get('/health', (req, res) => res.json({ status: 'ok' }));

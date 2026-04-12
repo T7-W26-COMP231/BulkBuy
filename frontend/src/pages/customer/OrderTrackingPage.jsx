@@ -463,44 +463,38 @@ export default function OrderTrackingPage() {
 
                                 {/* Header card */}
                                 <article className="rounded-2xl border border-neutral-light bg-white p-6 shadow-sm">
-                                    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                                        <div>
-                                            <div className="flex items-center gap-3">
-                                                <StatusBadge status={order.status} />
-                                                <span className="text-sm font-semibold text-text-muted">
-                                                    Order #{String(order._id || "").slice(-8).toUpperCase()}
-                                                </span>
-                                            </div>
-                                            <h1 className="mt-2 text-3xl font-extrabold tracking-tight">
-                                                {firstItemDoc?.title || firstItemDoc?.name || "Item"}
-                                            </h1>
-                                            <p className="mt-1 flex items-center gap-1 text-sm text-text-muted">
-                                                <span className="material-symbols-outlined text-base">location_on</span>
-                                                {order?.deliveryLocation?.city || order?.ops_region || "N/A"}
-                                            </p>
-                                        </div>
-                                        <button
-                                            type="button"
-                                            onClick={() => navigate(`/order-details/${order._id}`)}
-                                            className="inline-flex items-center gap-2 rounded-xl border border-neutral-light bg-white px-4 py-2.5 text-sm font-semibold text-text-main transition hover:bg-neutral-light whitespace-nowrap"
-                                        >
-                                            <span className="material-symbols-outlined text-base">receipt_long</span>
-                                            View Invoice
-                                        </button>
+                                    <div className="mt-2 flex flex-col gap-1">
+                                        {order.items?.map((item, i) => {
+                                            const itemDoc = getItemDoc(item.itemId);
+                                            const snap = getSnap(item);
+                                            return (
+                                                <div key={i} className="flex items-center justify-between gap-4">
+                                                    <h1 className={`font-extrabold tracking-tight ${order.items.length > 1 ? "text-xl" : "text-3xl"}`}>
+                                                        {itemDoc?.title || itemDoc?.name || "Item"}
+                                                    </h1>
+                                                    <span className="text-lg font-bold text-primary">
+                                                        ${snap?.atInstantPrice?.toFixed(2) ?? "—"}/unit × {item.quantity}
+                                                    </span>
+                                                </div>
+                                            );
+                                        })}
                                     </div>
 
                                     {/* Stats row */}
                                     {/* FIND the entire grid grid-cols-3 div and REPLACE WITH: */}
                                     <div className="mt-6 grid grid-cols-3 gap-4">
-
+                                        {/* // ✅ NEW */}
                                         <div className="flex flex-col gap-1">
-                                            <p className="text-xs font-bold uppercase tracking-widest text-text-muted">Package info</p>
-                                            <p className="font-semibold text-text-main">
-                                                {firstItemDoc?.title || firstItemDoc?.name || "—"}
-                                            </p>
-                                            <p className="text-sm text-text-muted">
-                                                {firstItemDoc?.sku || firstItemDoc?.ops_region || "—"}
-                                            </p>
+                                            <p className="text-xs font-bold uppercase tracking-widest text-text-muted">Items</p>
+                                            {order.items?.map((item, i) => {
+                                                const itemDoc = getItemDoc(item.itemId);
+                                                return (
+                                                    <div key={i}>
+                                                        <p className="font-semibold text-text-main">{itemDoc?.title || "Item"}</p>
+                                                        <p className="text-sm text-text-muted">{itemDoc?.sku || "—"} · Qty: {item.quantity}</p>
+                                                    </div>
+                                                );
+                                            })}
                                         </div>
 
                                         <div className="flex flex-col gap-1">
@@ -512,14 +506,17 @@ export default function OrderTrackingPage() {
                                         </div>
 
                                         <div className="flex flex-col gap-1 rounded-xl bg-primary/10 p-4">
-                                            <p className="text-xs font-bold uppercase tracking-widest text-teal-700">
-                                                Pricing status
-                                            </p>
+                                            <p className="text-xs font-bold uppercase tracking-widest text-teal-700">Pricing status</p>
                                             <p className="font-bold text-teal-800">Final price locked</p>
-                                            <p className="text-2xl font-extrabold text-teal-900">
-                                                ${firstSnap?.atInstantPrice?.toFixed(2) ?? "—"}
-                                                <span className="ml-1 text-sm font-medium text-teal-700">per unit</span>
-                                            </p>
+                                            {order.items?.map((item, i) => {
+                                                const snap = getSnap(item);
+                                                const itemDoc = getItemDoc(item.itemId);
+                                                return (
+                                                    <p key={i} className="text-sm font-semibold text-teal-900">
+                                                        {itemDoc?.title || "Item"}: ${snap?.atInstantPrice?.toFixed(2) ?? "—"}/unit
+                                                    </p>
+                                                );
+                                            })}
                                         </div>
 
                                     </div>

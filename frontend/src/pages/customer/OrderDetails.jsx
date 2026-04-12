@@ -4,17 +4,25 @@ import Navbar from "../../components/Navbar";
 import Sidebar from "../../components/Sidebar";
 import Footer from "../../components/Footer";
 import { fetchOrderInvoice } from "../../api/orderApi";
+import { useSavings } from "../../contexts/SavingsContext";
 
 export default function OrderDetailsPage() {
   const { orderId } = useParams();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
+  const { recordOrderSavings } = useSavings(); // ← add this
 
   useEffect(() => {
     const loadInvoice = async () => {
       try {
         const invoice = await fetchOrderInvoice(orderId);
         setOrder(invoice);
+        // ← add these 3 lines
+        const savings = invoice?.summary?.totalSavings ?? 0;
+        const isConfirmed = ["confirmed", "submitted", "completed", "fulfilled"]
+          .includes(invoice?.status?.toLowerCase());
+        if (isConfirmed) recordOrderSavings(orderId, savings);
+
       } catch (error) {
         console.error("Failed to load invoice:", error);
       } finally {

@@ -141,29 +141,42 @@ export function AuthProvider({
   /* Restore session from localStorage */
   useEffect(() => {
     try {
-      const raw = typeof window !== "undefined" ? localStorage.getItem(storageKey) : null;
-      const parsed = raw ? safeParseJSON(raw) : null;
-      if (parsed && parsed.accessToken) {
-        setAccessToken(parsed.accessToken);
-        setRefreshToken(parsed.refreshToken || null);
-        setUser(parsed.user || null);
-        accessTokenRef.current = parsed.accessToken || null;
-        // call onInit asynchronously so mount completes quickly
-        if (typeof onInit === "function") {
-          // pass the restored session object
-          Promise.resolve().then(() => {
-            try {
-              onInit({ accessToken: parsed.accessToken, refreshToken: parsed.refreshToken, user: parsed.user });
-            } catch (e) {
-              // swallow callback errors
-              // eslint-disable-next-line no-console
-              console.warn("AuthProvider.onInit callback error", e);
-            }
-          });
-        }
-      } else {
-        accessTokenRef.current = null;
+      const raw =
+  typeof window !== "undefined"
+    ? localStorage.getItem(storageKey)
+    : null;
+
+const parsed = raw ? safeParseJSON(raw) : null;
+
+const restoredToken =
+  parsed?.accessToken ||
+  parsed?.token ||
+  parsed?.authToken ||
+  null;
+
+if (parsed && restoredToken) {
+  setAccessToken(restoredToken);
+  setRefreshToken(parsed.refreshToken || null);
+  setUser(parsed.user || null);
+  accessTokenRef.current = restoredToken;
+
+  // call onInit asynchronously so mount completes quickly
+  if (typeof onInit === "function") {
+    Promise.resolve().then(() => {
+      try {
+        onInit({
+          accessToken: restoredToken,
+          refreshToken: parsed.refreshToken,
+          user: parsed.user,
+        });
+      } catch (e) {
+        console.warn("AuthProvider.onInit callback error", e);
       }
+    });
+  }
+} else {
+  accessTokenRef.current = null;
+}
     } catch (err) {
       console.warn("AuthProvider: failed to restore session", err);
       accessTokenRef.current = null;
@@ -174,19 +187,25 @@ export function AuthProvider({
   }, [storageKey]);
 
   /* Persist session */
-  useEffect(() => {
-    try {
-      if (accessToken) {
-        localStorage.setItem(storageKey, JSON.stringify({ accessToken, refreshToken, user }));
-      } else {
-        localStorage.removeItem(storageKey);
-      }
-    } catch (err) {
-      console.warn("AuthProvider: failed to persist session", err);
+ useEffect(() => {
+  if (initializing) return;
+
+  try {
+    if (accessToken) {
+      localStorage.setItem(
+        storageKey,
+        JSON.stringify({ accessToken, refreshToken, user })
+      );
+    } else {
+      localStorage.removeItem(storageKey);
     }
-    // keep ref in sync whenever token state changes
-    accessTokenRef.current = accessToken || null;
-  }, [accessToken, refreshToken, user, storageKey]);
+  } catch (err) {
+    console.warn("AuthProvider: failed to persist session", err);
+  }
+
+  // keep ref in sync whenever token state changes
+  accessTokenRef.current = accessToken || null;
+}, [accessToken, refreshToken, user, storageKey, initializing]);
 
   /* Schedule refresh when JWT exp present */
   useEffect(() => {

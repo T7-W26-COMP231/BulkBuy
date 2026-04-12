@@ -71,13 +71,25 @@ router.get(
   asyncHandler(UserController.listUsers)
 );
 
-/* Get user by Mongo _id */
+/* Customer gets own profile */
 router.get(
-  '/:id',
-  userValidators.idParam,
+  '/profile',
   requireAuth,
-  requireRole('administrator'),
-  asyncHandler(UserController.getUserById)
+  asyncHandler(UserController.getCustomerProfile)
+);
+
+/* Customer self profile update */
+router.patch(
+  '/profile',
+  requireAuth,
+  asyncHandler(UserController.updateCustomerProfile)
+);
+
+/* Customer notification preferences update */
+router.patch(
+  '/notifications',
+  requireAuth,
+  asyncHandler(UserController.updateNotificationPreferences)
 );
 
 /* Get user by human-friendly userId */
@@ -92,6 +104,36 @@ router.get(
 router.get(
   '/by-email',
   asyncHandler(UserController.getUserByEmail)
+);
+
+/* Add customer payment method */
+router.patch(
+  '/payment-methods',
+  requireAuth,
+  asyncHandler(UserController.addPaymentMethod)
+);
+
+/* Set default customer payment method */
+router.patch(
+  '/payment-methods/:paymentId/default',
+  requireAuth,
+  asyncHandler(UserController.setDefaultPaymentMethod)
+);
+
+/* Remove customer payment method */
+router.delete(
+  '/payment-methods/:paymentId',
+  requireAuth,
+  asyncHandler(UserController.removePaymentMethod)
+);
+
+/* Get user by Mongo _id */
+router.get(
+  '/:id',
+  userValidators.idParam,
+  requireAuth,
+  requireRole('administrator'),
+  asyncHandler(UserController.getUserById)
 );
 
 /* Update user by _id (partial update) */

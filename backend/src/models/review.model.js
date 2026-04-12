@@ -44,7 +44,9 @@ const ReviewSchema = new Schema(
     reviewerId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
     revieweeId: { type: Schema.Types.ObjectId, ref: 'User', default: null, index: true },
     productId: { type: Schema.Types.ObjectId, ref: 'Product', default: null, index: true },
-    itemId: { type: Schema.Types.ObjectId, ref: 'Item', default: null, index: true },
+    //itemId: { type: Schema.Types.ObjectId, ref: 'Item', default: null, index: true },
+    itemId: { type: String, ref: 'Item', default: null, index: true },
+
     messageId: { type: Schema.Types.ObjectId, ref: 'Message', default: null },
     rating: {
       type: Number,

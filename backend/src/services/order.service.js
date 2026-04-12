@@ -837,11 +837,52 @@ class OrderService {
         productLookup.set(pid, { product: p, itemMap, windowId: p.windowId, window: p.window });
       }
 
-      const missing = [];
+      /*const missing = [];
       for (const it of orderDoc.items || []) {
         const pid = String(it.productId);
         const iid = String(it.itemId);
         const pEntry = productLookup.get(pid);
+        if (!pEntry) {
+          missing.push({ productId: pid, itemId: iid });
+          continue;
+        }
+        const swItem = pEntry.itemMap.get(iid);
+        if (!swItem) {
+          missing.push({ productId: pid, itemId: iid });
+        }
+      }*/
+
+      /*const missing = [];
+      for (const it of orderDoc.items || []) {
+        const pid = String(it.productId);
+        const iid = String(it.itemId);
+        const pEntry = productLookup.get(pid);
+        if (!pEntry) {
+          missing.push({ productId: pid, itemId: iid });
+          continue;
+        }
+        const swItem = pEntry.itemMap.get(iid);
+        if (!swItem) {
+          missing.push({ productId: pid, itemId: iid });
+        }
+      }*/
+
+      const missing = [];
+      for (const it of orderDoc.items || []) {
+        const pid = String(it.productId);
+        const iid = String(it.itemId);
+
+        let pEntry = productLookup.get(pid);
+        if (!pEntry) {
+          for (const [, entry] of productLookup) {
+            if (entry.itemMap.has(iid)) {
+              pEntry = entry;
+              it.productId = entry.product.productId;
+              break;
+            }
+          }
+        }
+
         if (!pEntry) {
           missing.push({ productId: pid, itemId: iid });
           continue;
@@ -856,11 +897,29 @@ class OrderService {
         throw createError(409, `Some items are not available in current sales window: ${JSON.stringify(missing)}`);
       }
 
-      for (const it of orderDoc.items || []) {
+      /*for (const it of orderDoc.items || []) {
         const pid = String(it.productId);
         const iid = String(it.itemId);
         const pEntry = productLookup.get(pid);
+        const swItem = pEntry.itemMap.get(iid);*/
+
+      for (const it of orderDoc.items || []) {
+        const pid = String(it.productId);
+        const iid = String(it.itemId);
+
+        // ✅ Same fallback lookup
+        let pEntry = productLookup.get(pid);
+        if (!pEntry) {
+          for (const [, entry] of productLookup) {
+            if (entry.itemMap.has(iid)) {
+              pEntry = entry;
+              break;
+            }
+          }
+        }
+        if (!pEntry) continue;
         const swItem = pEntry.itemMap.get(iid);
+        if (!swItem) continue;
 
         let latestSnapshot = null;
         if (Array.isArray(swItem.pricing_snapshots) && swItem.pricing_snapshots.length > 0) {

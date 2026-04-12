@@ -30,7 +30,8 @@ import "./ShoppingCart.Utils+/ShoppingCart.css";
 
 export default function ShoppingCart({ onContinueShopping }) {
   const toast = useToastService();
-
+  // Add this with your other state declarations at the top:
+  const [orderStatus, setOrderStatus] = useState(null);
   // Auth + Ops contexts
   const { user, accessToken, restoreAccessTokenFromStorage } = useAuth() ?? {};
   const {
@@ -173,7 +174,7 @@ export default function ShoppingCart({ onContinueShopping }) {
         console.log("🛒 userOrders found:", payload.items.length);
 
         const userOrders = payload.items.filter((o) =>
-          o && ['draft', 'submitted'].includes(o.status)
+          o && ['draft'].includes(o.status)
           && String(o.userId) === String(userId || user._id)
         );
 
@@ -353,14 +354,44 @@ export default function ShoppingCart({ onContinueShopping }) {
     if (typeof window !== "undefined") window.location.href = "/";
   }, [onContinueShopping]);
 
-  const handleSubmitIntent = useCallback(async () => {
+  /*const handleSubmitIntent = useCallback(async () => {
     try {
       await cart.submitOrder?.({ orderId: cart.orderId, paymentPayload: { intent: "submit_intent" } });
       toast.showSuccess("Submit intent recorded.");
     } catch {
       toast.showError("Could not submit intent. Try again.");
     }
-  }, [cart, toast]);
+  }, [cart, toast]);*/
+
+  const handleSubmitIntent = useCallback(async () => {
+    if (orderStatus === 'submitted') {
+      toast.showInfo("Order already submitted.");
+      return;
+    }
+    try {
+      await cart.submitOrder?.({
+        orderId: cart.orderId,
+        paymentPayload: { intent: "submit_intent" }
+      });
+      // ✅ Update local cart status immediately
+      setCart(prev => prev ? { ...prev, status: 'submitted' } : prev);
+      setCartItems([]); // ✅ Clear cart items so they don't show anymore
+      setOrderStatus('submitted');
+      toast.showSuccess("Order submitted successfully! 🎉");
+
+      // ✅ Reload the page after 2 seconds so cart shows fresh state
+      setTimeout(() => {
+        window.location.href = "/";
+      }, 2000);
+
+    } catch (err) {
+      if (err?.status === 409 || err?.message?.includes('draft')) {
+        toast.showSuccess("Order already submitted.");
+        return;
+      }
+      toast.showError("Could not submit intent. Try again.");
+    }
+  }, [cart, toast, setCart]);
 
   //---------------------------------------------------------------------------
 
@@ -578,8 +609,15 @@ export default function ShoppingCart({ onContinueShopping }) {
             <CartSummary {...summaryProps} />
             <div className="side-ops">
               <small className="muted">
-                Draft order status: <strong>{cart.order?.status ?? "—"}</strong>
+                Order status: <strong style={{
+                  color: (orderStatus || cart.order?.status) === 'submitted' ? '#048748' : 'inherit'
+                }}>
+                  {(orderStatus || cart.order?.status) === 'submitted'
+                    ? '✅ submitted'
+                    : (orderStatus || cart.order?.status) ?? "—"}
+                </strong>
               </small>
+
               <small className="muted">Last updated: {cart.lastUpdatedAt ? new Date(cart.lastUpdatedAt).toLocaleString() : "—"}</small>
             </div>
           </aside>

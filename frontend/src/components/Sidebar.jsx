@@ -1,5 +1,6 @@
 import { NavLink } from "react-router-dom";
 import SavingsSummaryCard from "./SavingsSummaryCard";
+import { useSavings } from "../contexts/SavingsContext";
 
 const navItems = [
   { to: "/", icon: "grid_view", label: "BulkBuy (Recommended)" },
@@ -11,7 +12,9 @@ const navItems = [
   { to: "/profile", icon: "settings", label: "Settings" },
 ];
 
-export default function Sidebar({ showSummary = true }) {
+export default function Sidebar({ showSummary = true, goal = 600, city = "Toronto" }) {
+  const { totalSaved } = useSavings();
+
   return (
     <aside className="flex w-full flex-col gap-6 md:w-64">
       <nav className="flex flex-col gap-1">
@@ -19,6 +22,7 @@ export default function Sidebar({ showSummary = true }) {
           <NavLink
             key={item.to}
             to={item.to}
+            end={item.to === "/"}
             className={({ isActive }) =>
               `flex items-center gap-3 rounded-xl px-4 py-3 transition-colors ${isActive
                 ? "bg-primary/10 font-semibold text-text-main"
@@ -34,9 +38,9 @@ export default function Sidebar({ showSummary = true }) {
 
       {showSummary && (
         <SavingsSummaryCard
-          saved={412.5}
-          goal={600}
-          city="Toronto"
+          saved={totalSaved}
+          goal={goal}
+          city={city}
           monthLabel="this month"
         />
       )}

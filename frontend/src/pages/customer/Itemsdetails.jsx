@@ -237,7 +237,7 @@ export default function ItemDetail() {
         try {
             const payload = buildIntentPayload({
                 userId: user.userId || user._id || user.id,
-                productId: productData?._id ?? null,
+                productId: productData?._id ?? item._id,
                 itemId: item._id,
                 quantity,
                 atInstantPrice: displayPrice,
@@ -248,60 +248,8 @@ export default function ItemDetail() {
             });
 
             await createIntent(payload);
+            navigate("/review-modify-intent");
 
-            const cartStorageKey = (user?.userId || user?._id)
-                ? `cartItems_${user.userId || user._id}`
-                : "cartItems_guest";
-            const existingCartItems = JSON.parse(sessionStorage.getItem(cartStorageKey) || "[]");
-
-
-            // ✅ FIXED nextItem — all fields included
-            const nextItem = {
-                id: item._id,
-                productId: productData?._id ?? null,
-                itemId: item._id,
-                name: item.name || item.title || item.label || productData?.name || "Unnamed item",
-                supplier: item.supplier || productData?.brand || "BulkBuy Brand",
-                quantity,
-                unitPrice: displayPrice,
-                imageLabel: "🛒",
-                // ✅ display
-                image: item.images?.[0] || item.metadata?.imageUrl || null,
-                description: item.description || item.shortDescription || "",
-                city: item.ops_region || productData?.ops_region || "",
-                // ✅ tiers
-                pricingTiers: tiers,
-                activeTier: activeTier,
-                // ✅ community progress
-                aggregatedDemand: aggregatedDemand,
-                nextThresholdQty: nextThresholdQty,
-                nextTierPrice: nextTier?.price ?? null,
-            };
-
-            const existingIndex = existingCartItems.findIndex(
-                (cartItem) => cartItem.itemId === nextItem.itemId
-            );
-
-            let updatedCartItems;
-
-            if (existingIndex >= 0) {
-                updatedCartItems = [...existingCartItems];
-                updatedCartItems[existingIndex] = {
-                    ...updatedCartItems[existingIndex],
-                    quantity,
-                    unitPrice: displayPrice,
-                };
-            } else {
-                updatedCartItems = [...existingCartItems, nextItem];
-            }
-
-            sessionStorage.setItem(cartStorageKey, JSON.stringify(updatedCartItems));
-
-            navigate("/cart", {
-                state: {
-                    cartItems: updatedCartItems,
-                },
-            });
         } catch (err) {
             console.error("Add to intent error:", err);
             alert("Could not add to intent. Please try again.");

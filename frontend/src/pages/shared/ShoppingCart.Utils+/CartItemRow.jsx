@@ -34,7 +34,11 @@ export default function CartItemRow({ item, requestRemoveWithConfirm }) {
   // Derived values
   const itemInfo = item?.ItemSysInfo ?? {};
   const currency = item?.pricingSnapshot?.meta?.currency ?? "CAD";
-  const unitPrice = Number(item?.pricingSnapshot?.atInstantPrice ?? 0);
+  //const unitPrice = Number(item?.pricingSnapshot?.atInstantPrice ?? 0);
+  const snap = Array.isArray(item?.pricingSnapshot)
+    ? item.pricingSnapshot[0]
+    : item?.pricingSnapshot;
+  const unitPrice = Number(snap?.atInstantPrice ?? 0);
 
   const inventoryAvailable = useMemo(() => {
     const inv = itemInfo?.inventory;
@@ -195,13 +199,13 @@ export default function CartItemRow({ item, requestRemoveWithConfirm }) {
   const ariaLabelTitle = `${itemInfo.title ?? "Product"}${itemInfo.sku ? ` — ${itemInfo.sku}` : ""}`;
 
   return (
-    <div className="cart-item-row" role="row" aria-rowindex={1} style={{border: '1px dashed black' }}>
+    <div className="cart-item-row" role="row" aria-rowindex={1} style={{ border: '1px dashed black' }}>
       <div className="col col-thumb" role="gridcell">
         <button
           type="button"
           className="thumb-btn"
           onClick={openFullView}
-          style={{border: '1px solid green'}}
+          style={{ border: '1px solid green' }}
           aria-label={`Open details for ${ariaLabelTitle}`}
           disabled={busy}
         >
@@ -281,35 +285,35 @@ export default function CartItemRow({ item, requestRemoveWithConfirm }) {
         </div>
       </div>
 
-      <div className="col col-line-total" role="gridcell" style={{ justifyContent: "center"}}>
+      <div className="col col-line-total" role="gridcell" style={{ justifyContent: "center" }}>
         <div className="line-total">{formatCurrency(lineTotal, currency)}</div>
       </div>
 
-      <div className="col col-actions" role="gridcell">        
-      
-      <div className="action-buttons" style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-evenly' }}>
-        <button
-          type="button"
-          className="btn btn-link"
-          style={{ width: '4rem', border: '1px solid orangered', fontSize:'0.5em', }}
-          onClick={item?.saveForLater ? handleMoveToActive : handleSaveForLater}
-          disabled={busy || (item?.saveForLater ? false : Boolean(item?.saveForLater))}
-          aria-disabled={busy || (item?.saveForLater ? false : Boolean(item?.saveForLater))}
-        >
-          {item?.saveForLater ? "Move to Cart" : "Save for later"}
-        </button>
+      <div className="col col-actions" role="gridcell">
 
-        <button
-          type="button"
-          className="btn btn-link danger"
-          style={{ border: '1px solid red' }}
-          onClick={handleRemove}
-          disabled={busy}
-          aria-disabled={busy}
-        >
-          Remove
-        </button>
-      </div>
+        <div className="action-buttons" style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-evenly' }}>
+          <button
+            type="button"
+            className="btn btn-link"
+            style={{ width: '4rem', border: '1px solid orangered', fontSize: '0.5em', }}
+            onClick={item?.saveForLater ? handleMoveToActive : handleSaveForLater}
+            disabled={busy || (item?.saveForLater ? false : Boolean(item?.saveForLater))}
+            aria-disabled={busy || (item?.saveForLater ? false : Boolean(item?.saveForLater))}
+          >
+            {item?.saveForLater ? "Move to Cart" : "Save for later"}
+          </button>
+
+          <button
+            type="button"
+            className="btn btn-link danger"
+            style={{ border: '1px solid red' }}
+            onClick={handleRemove}
+            disabled={busy}
+            aria-disabled={busy}
+          >
+            Remove
+          </button>
+        </div>
 
       </div>
     </div>

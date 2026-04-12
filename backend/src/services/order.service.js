@@ -879,9 +879,14 @@ class OrderService {
         const currentQtySold = Number(swItem.qtySold || 0);
         const increment = Number(it.quantity || 1);
         const newQtySold = currentQtySold + increment;
-
+        console.log("🔍 windowId being used:", pEntry.windowId);
+        console.log("🔍 productId:", pid);
+        console.log("🔍 itemId:", iid);
+        console.log("🔍 newQtySold:", newQtySold);
         try {
-          await SalesWindowService.addOrUpdateItem(pEntry.windowId, pid, iid, { qtySold: newQtySold }, { session, actor, correlationId });
+          //await SalesWindowService.addOrUpdateItem(pEntry.windowId, pid, iid, { qtySold: newQtySold }, { session, actor, correlationId });
+          await SalesWindowService.addOrUpdateItem(pEntry.windowId, pid, iid, { qtySold: newQtySold }, { actor, correlationId });
+
         } catch (e) {
           // non-fatal for submission
           // eslint-disable-next-line no-console
@@ -909,13 +914,27 @@ class OrderService {
 
       const updatedPlain = await OrderRepo.findById(orderDoc._id, { lean: true });
       return sanitizeForClient(updatedPlain);
-    } catch (err) {
+    }
+    catch (err) {
+      try {
+        if (session.inTransaction()) {
+          await session.abortTransaction();
+        }
+      } catch (abortErr) {
+        console.warn('abortTransaction failed:', abortErr.message);
+      }
+      session.endSession();
+      await this._audit('order.submit', actor, orderId, 'failure', 'error', correlationId, { error: err && err.message });
+      throw err;
+    }
+    /*catch (err) {
       await session.abortTransaction();
       session.endSession();
 
       await this._audit('order.submit', actor, orderId, 'failure', 'error', correlationId, { error: err && err.message });
       throw err;
-    }
+    }*/
+
   }
 
   async cancelOrder(orderId, opts = {}) {

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { getMyIntents, updateIntentItem, removeIntentItem } from "../../api/intentApi";
 import { useAuth } from "../../contexts/AuthContext";
 import Navbar from "../../components/Navbar";
@@ -9,7 +9,7 @@ import Sidebar from "../../components/Sidebar";
 export default function ReviewModifyIntentPage() {
   const { user } = useAuth();
   const location = useLocation();
-
+  const navigate = useNavigate(); // ← ADD THIS
   const cartItems = (() => {
     if (location.state?.cartItems?.length) return location.state.cartItems;
     try {
@@ -47,11 +47,14 @@ export default function ReviewModifyIntentPage() {
         setFetchError(null);
         //const data = await getMyIntents(user._id);
         const data = await getMyIntents(user.userId || user._id);
+        //const data = await getMyIntents(user.userId || user._id);
+        console.log("🔍 intents data:", data);
+        console.log("🔍 user:", user.userId, user._id);
 
         const all = data.items || [];
 
         const latest = all
-          .filter((o) => o.status === "submitted" || !o.status)
+          .filter((o) => o.status === "draft" || !o.status)
           .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
         setIntents(latest);
@@ -580,7 +583,31 @@ export default function ReviewModifyIntentPage() {
             </div>
 
             <button
-              onClick={() => firstItem && handleSaveChanges(firstItem.intentId, firstItem.itemId)}
+              onClick={async () => {
+                try {
+                  // 1. Save ALL edited quantities
+                  await Promise.all(
+                    allItems.map(async (item) => {
+                      const key = `${item.intentId}::${item.itemId}`;
+                      const editedQty = editedQtys[key];
+                      const originalQty = item.quantity;
+                      if (editedQty !== undefined && editedQty !== originalQty) {
+                        await updateIntentItem(item.intentId, item.itemId, editedQty);
+                      }
+                    })
+                  );
+
+                  // 2. Navigate to cart — status stays DRAFT
+                  navigate("/cart");
+
+                } catch (err) {
+                  if (err.locked) {
+                    alert("🔒 This window is locked. No changes are allowed.");
+                  } else {
+                    alert("Could not confirm intent. Please try again.");
+                  }
+                }
+              }}
               disabled={windowLocked || !firstItem}
               className="w-full rounded-xl bg-primary px-5 py-3 font-bold text-text-main transition hover:opacity-90 disabled:opacity-50"
             >

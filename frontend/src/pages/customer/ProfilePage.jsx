@@ -58,42 +58,42 @@ export default function ProfilePage() {
   const [paymentMethods, setPaymentMethods] = useState([]);
 
   useEffect(() => {
-  const loadCustomerProfile = async () => {
-    try {
-      const response = await api.get("/users/profile");
+    const loadCustomerProfile = async () => {
+      try {
+        const response = await api.get("/users/profile");
 
-      const user =
-        response?.data?.data?.user ||
-        response?.data?.data ||
-        {};
+        const user =
+          response?.data?.data?.user ||
+          response?.data?.data ||
+          {};
 
-      setPaymentMethods(user.paymentMethods || []);
+        setPaymentMethods(user.paymentMethods || []);
 
-      const primaryEmail =
-        user.emails?.find((email) => email.primary)?.address ||
-        "";
+        const primaryEmail =
+          user.emails?.find((email) => email.primary)?.address ||
+          "";
 
-      const primaryAddress = user.addresses?.[0] || {};
+        const primaryAddress = user.addresses?.[0] || {};
 
-      setProfileForm({
-        fullName: `${user.firstName || ""} ${user.lastName || ""}`.trim(),
-        email: primaryEmail,
-        addressLine1:
-          primaryAddress.line1 ||
-          primaryAddress.addressLine1 ||
-          "",
-        city: primaryAddress.city || "",
-        postalCode: primaryAddress.postalCode || "",
-      });
+        setProfileForm({
+          fullName: `${user.firstName || ""} ${user.lastName || ""}`.trim(),
+          email: primaryEmail,
+          addressLine1:
+            primaryAddress.line1 ||
+            primaryAddress.addressLine1 ||
+            "",
+          city: primaryAddress.city || "",
+          postalCode: primaryAddress.postalCode || "",
+        });
 
-      setOriginalEmail(primaryEmail);
-    } catch (error) {
-      console.error("Failed to load profile", error);
-    }
-  };
+        setOriginalEmail(primaryEmail);
+      } catch (error) {
+        console.error("Failed to load profile", error);
+      }
+    };
 
-  loadCustomerProfile();
-}, []);
+    loadCustomerProfile();
+  }, []);
 
   const handleProfileInputChange = (event) => {
     const { name, value } = event.target;
@@ -194,100 +194,100 @@ export default function ProfilePage() {
       setIsSaving(false);
     }
   };
-const handlePaymentSave = async () => {
-  setPaymentMessage("");
-  setPaymentError("");
+  const handlePaymentSave = async () => {
+    setPaymentMessage("");
+    setPaymentError("");
 
-  if (
-    !paymentForm.cardholderName.trim() ||
-    !paymentForm.cardNumber.trim() ||
-    !paymentForm.expiryDate.trim() ||
-    !paymentForm.cvv.trim()
-  ) {
-    setPaymentError("All payment fields are required.");
-    return;
-  }
+    if (
+      !paymentForm.cardholderName.trim() ||
+      !paymentForm.cardNumber.trim() ||
+      !paymentForm.expiryDate.trim() ||
+      !paymentForm.cvv.trim()
+    ) {
+      setPaymentError("All payment fields are required.");
+      return;
+    }
 
-  try {
-    const response = await api.patch("/users/payment-methods", {
-      cardNumber: paymentForm.cardNumber,
-      expiryDate: paymentForm.expiryDate,
-      provider: "visa",
-      tokenRef: `pm_${Date.now()}`,
-    });
+    try {
+      const response = await api.patch("/users/payment-methods", {
+        cardNumber: paymentForm.cardNumber,
+        expiryDate: paymentForm.expiryDate,
+        provider: "visa",
+        tokenRef: `pm_${Date.now()}`,
+      });
 
-   const savedMethods =
-  response?.data?.data?.paymentMethods ||
-  response?.data?.data?.user?.paymentMethods ||
-  response?.data?.paymentMethods ||
-  [];
+      const savedMethods =
+        response?.data?.data?.paymentMethods ||
+        response?.data?.data?.user?.paymentMethods ||
+        response?.data?.paymentMethods ||
+        [];
 
-    setPaymentMethods(savedMethods);
-    setPaymentMessage("Payment method added successfully.");
+      setPaymentMethods(savedMethods);
+      setPaymentMessage("Payment method added successfully.");
 
-    setPaymentForm({
-      cardholderName: "",
-      cardNumber: "",
-      expiryDate: "",
-      cvv: "",
-    });
-  } catch (error) {
-    setPaymentError(
-      error?.response?.data?.message ||
+      setPaymentForm({
+        cardholderName: "",
+        cardNumber: "",
+        expiryDate: "",
+        cvv: "",
+      });
+    } catch (error) {
+      setPaymentError(
+        error?.response?.data?.message ||
         "Could not save payment method."
-    );
-  }
-};
+      );
+    }
+  };
 
-const handleRemovePayment = async (paymentId) => {
-  setPaymentMessage("");
-  setPaymentError("");
+  const handleRemovePayment = async (paymentId) => {
+    setPaymentMessage("");
+    setPaymentError("");
 
-  try {
-    const response = await api.delete(
-      `/users/payment-methods/${paymentId}`
-    );
+    try {
+      const response = await api.delete(
+        `/users/payment-methods/${paymentId}`
+      );
 
-  const savedMethods =
-  response?.data?.data?.paymentMethods ||
-  response?.data?.data?.user?.paymentMethods ||
-  response?.data?.paymentMethods ||
-  [];
+      const savedMethods =
+        response?.data?.data?.paymentMethods ||
+        response?.data?.data?.user?.paymentMethods ||
+        response?.data?.paymentMethods ||
+        [];
 
-    setPaymentMethods(savedMethods);
-    setPaymentMessage("Payment method removed successfully.");
-  } catch (error) {
-    setPaymentError(
-      error?.response?.data?.message ||
+      setPaymentMethods(savedMethods);
+      setPaymentMessage("Payment method removed successfully.");
+    } catch (error) {
+      setPaymentError(
+        error?.response?.data?.message ||
         "Could not remove payment method."
-    );
-  }
-};
-const handleSetDefaultPayment = async (paymentId) => {
-  setPaymentMessage("");
-  setPaymentError("");
+      );
+    }
+  };
+  const handleSetDefaultPayment = async (paymentId) => {
+    setPaymentMessage("");
+    setPaymentError("");
 
-  try {
-    await api.patch(
-      `/users/payment-methods/${paymentId}/default`
-    );
+    try {
+      await api.patch(
+        `/users/payment-methods/${paymentId}/default`
+      );
 
-    const profileResponse = await api.get("/users/profile");
+      const profileResponse = await api.get("/users/profile");
 
-    const user =
-      profileResponse?.data?.data?.user ||
-      profileResponse?.data?.data ||
-      {};
+      const user =
+        profileResponse?.data?.data?.user ||
+        profileResponse?.data?.data ||
+        {};
 
-    setPaymentMethods(user.paymentMethods || []);
-    setPaymentMessage("Default payment method updated.");
-  } catch (error) {
-    setPaymentError(
-      error?.response?.data?.message ||
+      setPaymentMethods(user.paymentMethods || []);
+      setPaymentMessage("Default payment method updated.");
+    } catch (error) {
+      setPaymentError(
+        error?.response?.data?.message ||
         "Could not update default payment."
-    );
-  }
-};
+      );
+    }
+  };
 
   return (
     <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-background-light text-text-main font-display">
@@ -351,169 +351,188 @@ const handleSetDefaultPayment = async (paymentId) => {
             </div>
 
             <div className="space-y-6 p-6">
-              {/* Notifications */}
-              <section className="space-y-4">
-                <h2 className="text-lg font-bold text-text-main">
-                  Notification Preferences
-                </h2>
 
-                <div className="rounded-xl bg-neutral-light p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-semibold text-text-main">
-                        Price Tier Alerts
-                      </p>
-                      <p className="text-sm text-text-muted">
-                        Get notified when products move to a better bulk pricing tier
-                      </p>
+              {/* ── Profile Tab ── */}
+              {activeTab === "profile" && (
+                <>
+                  <section className="rounded-2xl bg-neutral-light p-5">
+                    <div className="mb-4">
+                      <h3 className="font-bold text-text-main">Profile Details</h3>
+                      <p className="mt-1 text-sm text-text-muted">Update your account information and contact details</p>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => setPriceTierAlerts((prev) => !prev)}
-                      className={`h-6 w-11 rounded-full transition ${priceTierAlerts ? "bg-primary" : "bg-gray-300"
-                        }`}
-                    />
-                  </div>
-                </div>
-
-                <div className="rounded-xl bg-neutral-light p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-semibold text-text-main">
-                        Order Updates
-                      </p>
-                      <p className="text-sm text-text-muted">
-                        Status changes, shipping confirmations, and delivery alerts
-                      </p>
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <div>
+                        <label className="mb-2 block text-sm font-semibold text-text-main">Full Name</label>
+                        <input type="text" name="fullName" value={profileForm.fullName} onChange={handleProfileInputChange}
+                          className="w-full rounded-xl border border-neutral-light bg-white px-4 py-3" />
+                        {profileErrors.fullName && <p className="mt-1 text-xs text-red-600">{profileErrors.fullName}</p>}
+                      </div>
+                      <div>
+                        <label className="mb-2 block text-sm font-semibold text-text-main">Email Address</label>
+                        <input type="email" name="email" value={profileForm.email} onChange={handleProfileInputChange}
+                          className="w-full rounded-xl border border-neutral-light bg-white px-4 py-3" />
+                        {profileErrors.email && <p className="mt-1 text-xs text-red-600">{profileErrors.email}</p>}
+                      </div>
+                      <div className="md:col-span-2">
+                        <label className="mb-2 block text-sm font-semibold text-text-main">Address Line</label>
+                        <input type="text" name="addressLine1" value={profileForm.addressLine1} onChange={handleProfileInputChange}
+                          className="w-full rounded-xl border border-neutral-light bg-white px-4 py-3" />
+                        {profileErrors.addressLine1 && <p className="mt-1 text-xs text-red-600">{profileErrors.addressLine1}</p>}
+                      </div>
+                      <div>
+                        <label className="mb-2 block text-sm font-semibold text-text-main">City</label>
+                        <input type="text" name="city" value={profileForm.city} onChange={handleProfileInputChange}
+                          className="w-full rounded-xl border border-neutral-light bg-white px-4 py-3" />
+                        {profileErrors.city && <p className="mt-1 text-xs text-red-600">{profileErrors.city}</p>}
+                      </div>
+                      <div>
+                        <label className="mb-2 block text-sm font-semibold text-text-main">Postal Code</label>
+                        <input type="text" name="postalCode" value={profileForm.postalCode} onChange={handleProfileInputChange}
+                          className="w-full rounded-xl border border-neutral-light bg-white px-4 py-3" />
+                        {profileErrors.postalCode && <p className="mt-1 text-xs text-red-600">{profileErrors.postalCode}</p>}
+                      </div>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => setOrderUpdates((prev) => !prev)}
-                      className={`h-6 w-11 rounded-full transition ${orderUpdates ? "bg-primary" : "bg-gray-300"
-                        }`}
-                    />
+                  </section>
+
+                  {saveMessage && (
+                    <div className="rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm font-semibold text-green-700">
+                      ✅ {saveMessage}
+                    </div>
+                  )}
+                  {saveError && (
+                    <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
+                      ❌ {saveError}
+                    </div>
+                  )}
+
+                  <div className="flex justify-end gap-3">
+                    <button type="button" onClick={() => { setProfileForm(prev => ({ ...prev, email: originalEmail })); setProfileErrors({}); setSaveMessage(""); setSaveError(""); }}
+                      className="rounded-xl border border-primary/20 bg-primary/10 px-5 py-2.5 text-sm font-semibold text-text-main transition-all duration-200 hover:-translate-y-0.5 hover:bg-primary/20 hover:shadow-sm">
+                      Discard
+                    </button>
+                    <button type="button" onClick={handleProfileSave} disabled={isSaving}
+                      className="rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-text-main transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-md hover:brightness-95">
+                      {isSaving ? "Saving..." : "Save Changes"}
+                    </button>
                   </div>
-                </div>
-              </section>
+                </>
+              )}
 
-              {/* Profile form */}
-              <section className="rounded-2xl bg-neutral-light p-5">
-                <div className="mb-4">
-                  <h3 className="font-bold text-text-main">
-                    Profile Details
-                  </h3>
-                  <p className="mt-1 text-sm text-text-muted">
-                    Update your account information and contact details
-                  </p>
-                </div>
-
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div>
-                    <label className="mb-2 block text-sm font-semibold text-text-main">
-                      Full Name
-                    </label>
-                    <input
-                      type="text"
-                      name="fullName"
-                      value={profileForm.fullName}
-                      onChange={handleProfileInputChange}
-                      className="w-full rounded-xl border border-neutral-light bg-white px-4 py-3"
-                    />
+              {/* ── Payment Tab ── */}
+              {activeTab === "payment" && (
+                <>
+                  <div className="mb-4">
+                    <h3 className="text-lg font-bold text-text-main">Add Payment Method</h3>
+                    <p className="text-sm text-text-muted">Securely add a new payment method for future purchases</p>
                   </div>
-
-                  <div>
-                    <label className="mb-2 block text-sm font-semibold text-text-main">
-                      Email Address
-                    </label>
-                    <input
-                      type="email"
-                      name="email"
-                      value={profileForm.email}
-                      onChange={handleProfileInputChange}
-                      className="w-full rounded-xl border border-neutral-light bg-white px-4 py-3"
-                    />
-                  </div>
-
-                  <div className="md:col-span-2">
-                    <label className="mb-2 block text-sm font-semibold text-text-main">
-                      Address Line
-                    </label>
-                    <input
-                      type="text"
-                      name="addressLine1"
-                      value={profileForm.addressLine1}
-                      onChange={handleProfileInputChange}
-                      className="w-full rounded-xl border border-neutral-light bg-white px-4 py-3"
-                    />
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div>
+                      <label className="mb-2 block text-sm font-semibold">Cardholder Name</label>
+                      <input type="text" name="cardholderName" value={paymentForm.cardholderName} onChange={handlePaymentInputChange}
+                        className="w-full rounded-xl border border-neutral-light bg-white px-4 py-3" />
+                    </div>
+                    <div>
+                      <label className="mb-2 block text-sm font-semibold">Card Number</label>
+                      <input type="text" name="cardNumber" value={paymentForm.cardNumber} onChange={handlePaymentInputChange}
+                        className="w-full rounded-xl border border-neutral-light bg-white px-4 py-3" />
+                    </div>
+                    <div>
+                      <label className="mb-2 block text-sm font-semibold">Expiry Date</label>
+                      <input type="text" name="expiryDate" placeholder="MM/YY" value={paymentForm.expiryDate} onChange={handlePaymentInputChange}
+                        className="w-full rounded-xl border border-neutral-light bg-white px-4 py-3" />
+                    </div>
+                    <div>
+                      <label className="mb-2 block text-sm font-semibold">CVV</label>
+                      <input type="password" name="cvv" value={paymentForm.cvv} onChange={handlePaymentInputChange}
+                        className="w-full rounded-xl border border-neutral-light bg-white px-4 py-3" />
+                    </div>
                   </div>
 
-                  <div>
-                    <label className="mb-2 block text-sm font-semibold text-text-main">
-                      City
-                    </label>
-                    <input
-                      type="text"
-                      name="city"
-                      value={profileForm.city}
-                      onChange={handleProfileInputChange}
-                      className="w-full rounded-xl border border-neutral-light bg-white px-4 py-3"
-                    />
+                  {paymentMessage && (
+                    <div className="mt-4 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm font-semibold text-green-700">
+                      ✅ {paymentMessage}
+                    </div>
+                  )}
+                  {paymentError && (
+                    <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
+                      ❌ {paymentError}
+                    </div>
+                  )}
+
+                  <div className="mt-4 flex justify-end">
+                    <button type="button" onClick={handlePaymentSave}
+                      className="rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-text-main transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-md hover:brightness-95">
+                      Add Payment Method
+                    </button>
                   </div>
 
-                  <div>
-                    <label className="mb-2 block text-sm font-semibold text-text-main">
-                      Postal Code
-                    </label>
-                    <input
-                      type="text"
-                      name="postalCode"
-                      value={profileForm.postalCode}
-                      onChange={handleProfileInputChange}
-                      className="w-full rounded-xl border border-neutral-light bg-white px-4 py-3"
-                    />
-                  </div>
-                </div>
-              </section>
+                  {paymentMethods.length > 0 && (
+                    <div className="mt-6">
+                      <h3 className="mb-4 text-lg font-bold text-text-main">Saved Payment Methods</h3>
+                      <div className="space-y-4">
+                        {paymentMethods.map((card) => (
+                          <div key={card.tokenRef} className="flex flex-col gap-3 rounded-xl border border-neutral-light p-4 md:flex-row md:items-center md:justify-between">
+                            <div>
+                              <p className="font-semibold text-text-main">**** **** **** {card.last4}</p>
+                              <p className="text-sm text-text-muted">{card.provider?.toUpperCase() || "CARD"} • Expires {card.expiry}</p>
+                              {card.isDefault && (
+                                <span className="mt-2 inline-block rounded-full bg-primary/10 px-3 py-1 text-xs font-bold text-text-main">Default</span>
+                              )}
+                            </div>
+                            <div className="flex gap-3">
+                              {!card.isDefault && (
+                                <button type="button" onClick={() => handleSetDefaultPayment(card.tokenRef)}
+                                  className="rounded-xl border border-primary/20 bg-primary/10 px-4 py-2 text-sm font-semibold text-text-main transition-all duration-200 hover:-translate-y-0.5 hover:bg-primary/20">
+                                  Set Default
+                                </button>
+                              )}
+                              <button type="button" onClick={() => handleRemovePayment(card.tokenRef)}
+                                className="rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-700 transition-all duration-200 hover:-translate-y-0.5 hover:bg-red-100">
+                                Remove
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
 
-              {saveMessage && (
-                <div className="rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm font-semibold text-green-700">
-                  {saveMessage}
+              {/* ── Notifications Tab ── */}
+              {activeTab === "notifications" && (
+                <section className="space-y-4">
+                  <h2 className="text-lg font-bold text-text-main">Notification Preferences</h2>
+                  <div className="rounded-xl bg-neutral-light p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-semibold text-text-main">Price Tier Alerts</p>
+                        <p className="text-sm text-text-muted">Get notified when products move to a better bulk pricing tier</p>
+                      </div>
+                      <button type="button" onClick={() => setPriceTierAlerts(prev => !prev)}
+                        className={`h-6 w-11 rounded-full transition ${priceTierAlerts ? "bg-primary" : "bg-gray-300"}`} />
+                    </div>
+                  </div>
+                  <div className="rounded-xl bg-neutral-light p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-semibold text-text-main">Order Updates</p>
+                        <p className="text-sm text-text-muted">Status changes, shipping confirmations, and delivery alerts</p>
+                      </div>
+                      <button type="button" onClick={() => setOrderUpdates(prev => !prev)}
+                        className={`h-6 w-11 rounded-full transition ${orderUpdates ? "bg-primary" : "bg-gray-300"}`} />
+                    </div>
+                  </div>
+                </section>
+              )}
+
+              {/* ── Security Tab ── */}
+              {activeTab === "security" && (
+                <div className="py-10 text-center text-text-muted">
+                  Security settings coming soon.
                 </div>
               )}
 
-              {saveError && (
-                <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
-                  {saveError}
-                </div>
-              )}
-
-              <div className="flex justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setProfileForm((prev) => ({
-                      ...prev,
-                      email: originalEmail,
-                    }));
-
-                    setProfileErrors({});
-                    setSaveMessage("");
-                    setSaveError("");
-                  }}
-                  className="rounded-xl border border-primary/20 bg-primary/10 px-5 py-2.5 text-sm font-semibold text-text-main transition-all duration-200 hover:-translate-y-0.5 hover:bg-primary/20 hover:shadow-sm"
-                >
-                  Discard
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handleProfileSave}
-                  disabled={isSaving}
-                  className="rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-text-main transition-transform transition-colors duration-200 hover:-translate-y-0.5 hover:shadow-md hover:brightness-95"
-                >
-                  {isSaving ? "Saving..." : "Save Changes"}
-                </button>
-              </div>
             </div>
           </section>
 

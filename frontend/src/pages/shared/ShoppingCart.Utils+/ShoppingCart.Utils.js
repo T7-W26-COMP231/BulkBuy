@@ -10,7 +10,9 @@
  * Keep this file easy to mock in unit tests.
  */
 
-const DEFAULT_API_BASE = "http://localhost:5000/api/opcs";
+//const DEFAULT_API_BASE = "http://localhost:5000/api/opcs  ";
+const DEFAULT_API_BASE = `${import.meta.env.VITE_API_URL}/api/ordrs`;
+
 export const BASE_API = DEFAULT_API_BASE || process.env.REACT_APP_API_BASE;
 const DEFAULT_TIMEOUT_MS = 10_000;
 
@@ -106,7 +108,7 @@ export async function apiFetch(path, { method = "GET", body = null, headers = {}
  */
 export async function getDraftOrder({ userId }) {
   if (!userId) throw new Error("getDraftOrder requires userId");
-  return apiFetch(`/orders/draft?userId=${encodeURIComponent(userId)}`, { method: "GET" });
+  return apiFetch(`/draft?userId=${encodeURIComponent(userId)}`, { method: "GET" });
 }
 
 /**
@@ -117,7 +119,7 @@ export async function getDraftOrder({ userId }) {
  */
 export async function updateDraftOrder({ orderId, patch }) {
   if (!orderId) throw new Error("updateDraftOrder requires orderId");
-  return apiFetch(`/orders/${encodeURIComponent(orderId)}/draft`, {
+  return apiFetch(`/${encodeURIComponent(orderId)}/draft`, {
     method: "PATCH",
     body: patch,
   });
@@ -131,7 +133,7 @@ export async function updateDraftOrder({ orderId, patch }) {
  */
 export async function addItemToDraft({ orderId, item }) {
   if (!orderId || !item) throw new Error("addItemToDraft requires orderId and item");
-  return apiFetch(`/orders/${encodeURIComponent(orderId)}/items`, {
+  return apiFetch(`/${encodeURIComponent(orderId)}/items`, {
     method: "POST",
     body: item,
   });
@@ -145,7 +147,7 @@ export async function addItemToDraft({ orderId, item }) {
  */
 export async function removeItemFromDraft({ orderId, itemId }) {
   if (!orderId || !itemId) throw new Error("removeItemFromDraft requires orderId and itemId");
-  return apiFetch(`/orders/${encodeURIComponent(orderId)}/items/${encodeURIComponent(itemId)}`, {
+  return apiFetch(`/${encodeURIComponent(orderId)}/items/${encodeURIComponent(itemId)}`, {
     method: "DELETE",
   });
 }
@@ -158,7 +160,7 @@ export async function removeItemFromDraft({ orderId, itemId }) {
  */
 export async function toggleSaveForLater({ orderId, itemId, saveForLater }) {
   if (!orderId || !itemId) throw new Error("toggleSaveForLater requires orderId and itemId");
-  return apiFetch(`/orders/${encodeURIComponent(orderId)}/items/${encodeURIComponent(itemId)}`, {
+  return apiFetch(`/${encodeURIComponent(orderId)}/items/${encodeURIComponent(itemId)}`, {
     method: "PATCH",
     body: { saveForLater: !!saveForLater },
   });
@@ -172,7 +174,7 @@ export async function toggleSaveForLater({ orderId, itemId, saveForLater }) {
  */
 export async function submitOrder({ orderId, paymentPayload = {} }) {
   if (!orderId) throw new Error("submitOrder requires orderId");
-  return apiFetch(`/orders/${encodeURIComponent(orderId)}/submit`, {
+  return apiFetch(`/${encodeURIComponent(orderId)}/submit`, {
     method: "POST",
     body: paymentPayload,
   });
@@ -186,7 +188,7 @@ export async function submitOrder({ orderId, paymentPayload = {} }) {
  */
 export async function refreshPricing({ orderId }) {
   if (!orderId) throw new Error("refreshPricing requires orderId");
-  return apiFetch(`/orders/${encodeURIComponent(orderId)}/pricing/refresh`, {
+  return apiFetch(`/${encodeURIComponent(orderId)}/pricing/refresh`, {
     method: "POST",
   });
 }
@@ -219,8 +221,19 @@ export function formatCurrency(value = 0, currency = "CAD", locale = "en-CA") {
  * @param {{pricingSnapshot?: {atInstantPrice: number}, quantity?: number}} item
  * @returns {number}
  */
-export function calcLineTotal(item) {
+
+/*export function calcLineTotal(item) {
   const price = Number(item?.pricingSnapshot?.atInstantPrice ?? 0);
+  const qty = Number(item?.quantity ?? 0);
+  return Number((price * qty).toFixed(2));
+}*/
+
+export function calcLineTotal(item) {
+  // ✅ handle both array and object pricingSnapshot
+  const snap = Array.isArray(item?.pricingSnapshot)
+    ? item.pricingSnapshot[0]
+    : item?.pricingSnapshot;
+  const price = Number(snap?.atInstantPrice ?? 0);
   const qty = Number(item?.quantity ?? 0);
   return Number((price * qty).toFixed(2));
 }

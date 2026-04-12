@@ -1,0 +1,325 @@
+/* src/components/ShoppingCart.css
+ *
+ * Polished global styles for the Shopping Cart container and layout.
+ * - Two-column responsive layout with a folder-style tab header
+ * - Matches the teal accent / deep-slate color scheme used across components
+ * - Integrates with ToastProvider HVC cards and the rest of the cart components
+ * - All class names used in components (ShoppingCart.jsx, CartSummary, CartItemRow, etc.)
+ */
+
+/* Palette */
+:root {
+  --color-bg: #f8fbfb;
+  --color-surface: #ffffff;
+  --color-muted: #6b7280;
+  --color-text: #0f1724;
+  --color-accent: #0fb3a6;
+  --color-accent-600: #0aa79a;
+  --color-border: #e6eef0;
+  --color-shadow: rgba(15, 23, 36, 0.06);
+  --color-ghost: #f1f6f6;
+  --danger: #e74c3c;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --gap: 16px;
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  --transition-fast: 160ms ease;
+}
+
+/* Page container */
+.shopping-cart {
+  font-family: var(--font-sans);
+  color: var(--color-text);
+  background: linear-gradient(180deg, var(--color-bg) 0%, #f6fbfb 100%);
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* Header */
+.cart-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.cart-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--color-text);
+}
+
+.cart-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Ops region badge */
+.ops-region {
+  background: linear-gradient(180deg, rgba(15,179,166,0.06), rgba(15,179,166,0.03));
+  border: 1px solid rgba(10,167,154,0.08);
+  color: var(--color-accent-600);
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+/* Tab folder visuals */
+.cart-tabs {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.tab-btn {
+  background: var(--color-ghost);
+  border: 1px solid var(--color-border);
+  padding: 8px 14px;
+  border-radius: 8px 8px 0 0;
+  cursor: pointer;
+  font-weight: 700;
+  color: var(--color-muted);
+  transition: background var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
+}
+.tab-btn.active {
+  background: linear-gradient(180deg, var(--color-surface), #fbffff);
+  color: var(--color-text);
+  box-shadow: 0 8px 20px var(--color-shadow);
+  transform: translateY(-2px);
+}
+.tab-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 6px rgba(15, 179, 166, 0.08);
+}
+
+/* Body layout: main + side */
+.cart-body {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 20px;
+  align-items: start;
+}
+
+/* Main column */
+.cart-main {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Controls row */
+.cart-controls {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.search-filter {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex: 1 1 auto;
+}
+
+.search-input {
+  flex: 1 1 420px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  font-size: 14px;
+  outline: none;
+}
+.search-input:focus {
+  box-shadow: 0 0 0 6px rgba(15, 179, 166, 0.06);
+  border-color: var(--color-accent-600);
+}
+
+.brand-filter {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  font-size: 14px;
+}
+
+/* Cart actions */
+.cart-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.btn-ghost {
+  background: transparent;
+  border: 1px solid var(--color-border);
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.btn-ghost:hover { background: var(--color-ghost); }
+
+/* Table head */
+.cart-table {
+  background: transparent;
+  display: block;
+}
+
+.table-head {
+  display: grid;
+  grid-template-columns: 72px 1fr 120px 160px 120px 160px;
+  gap: 16px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-muted);
+  font-weight: 700;
+  font-size: 13px;
+}
+
+/* Sections */
+.table-section {
+  margin-top: 12px;
+}
+
+.section-title {
+  margin: 8px 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+/* Empty row */
+.empty-row {
+  padding: 18px;
+  border-radius: 10px;
+  background: var(--color-surface);
+  border: 1px dashed var(--color-border);
+  color: var(--color-muted);
+  font-size: 14px;
+}
+
+/* Summary panel (for narrow screens it stacks) */
+.summary-panel {
+  display: none; /* hidden in main column; right column shows CartSummary */
+}
+
+/* Right column */
+.cart-side {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Checkout review layout */
+.checkout-review {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  box-shadow: 0 6px 18px var(--color-shadow);
+}
+.checkout-title {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  font-weight: 800;
+}
+.checkout-items {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 12px;
+}
+.checkout-item {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  background: var(--color-ghost);
+}
+.ci-thumb {
+  width: 64px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+.ci-title { font-weight: 700; color: var(--color-text); }
+.ci-meta { color: var(--color-muted); font-size: 13px; }
+
+/* Side ops small info */
+.side-ops {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--color-muted);
+}
+
+/* Responsive rules */
+@media (max-width: 1100px) {
+  .cart-body {
+    grid-template-columns: 1fr 320px;
+  }
+}
+
+@media (max-width: 920px) {
+  .cart-body {
+    grid-template-columns: 1fr;
+  }
+
+  .cart-side {
+    order: 2;
+  }
+
+  .summary-panel {
+    display: block;
+    margin-top: 12px;
+  }
+
+  .table-head {
+    display: none; /* hide header on small screens; rows show labels */
+  }
+
+  .cart-item-row {
+    grid-template-columns: 72px 1fr;
+    grid-template-rows: auto auto auto;
+  }
+}
+
+/* Small polish: focus outlines for keyboard users */
+.shopping-cart :focus {
+  outline: none;
+  box-shadow: 0 0 0 6px rgba(15, 179, 166, 0.06);
+  border-radius: 8px;
+}
+
+/* Utility classes */
+.muted { color: var(--color-muted); font-size: 13px; }
+.center { display: flex; align-items: center; justify-content: center; }
+
+/* Integration hint: ensure toast HVC cards overlay correctly */
+.utoast-hvc-layer .utoast-card {
+  max-width: 980px;
+  width: calc(100% - 40px);
+  margin: 0 auto;
+  border-radius: var(--radius-md);
+}
+
+.no-scrollbar {
+    /* Hide scrollbar for Chrome, Safari and Opera */
+    &::-webkit-scrollbar {
+        display: none;
+    }
+    /* Hide scrollbar for IE, Edge and Firefox */
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+
+
+/* End of ShoppingCart.css */

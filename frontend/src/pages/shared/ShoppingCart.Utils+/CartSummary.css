@@ -1,0 +1,258 @@
+/* src/components/CartSummary.css
+ *
+ * Polished, production-ready styles for CartSummary.jsx
+ * - Grocery-receipt visual language for the order summary
+ * - Teal accent, deep-slate text, soft neutrals
+ * - Responsive: sidebar card on wide screens, stacked on small screens
+ * - Accessible focus states, reduced-motion support, print-friendly tweaks
+ */
+
+/* Design tokens */
+:root{
+  --color-bg: #ffffff;
+  --color-surface: #f7fafb;
+  --color-muted: #6b7280;
+  --color-text: #0f1724;
+  --color-accent: #0fb3a6;
+  --color-accent-600: #0aa79a;
+  --color-success: #2bb673;
+  --color-danger: #e74c3c;
+  --color-border: #e6eef0;
+  --color-shadow: rgba(15,23,36,0.06);
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --gap: 12px;
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  --transition-fast: 160ms ease;
+  --max-width: 420px;
+}
+
+/* Container card */
+.cart-summary{
+  background: linear-gradient(180deg,var(--color-bg) 0%, #fbfeff 100%);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 18px;
+  width: 100%;
+  max-width: var(--max-width);
+  box-shadow: 0 6px 18px var(--color-shadow);
+  box-sizing: border-box;
+  font-family: var(--font-sans);
+  color: var(--color-text);
+}
+
+/* Title */
+.summary-title{
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-text);
+  line-height: 1.2;
+}
+
+/* Receipt area (grocery style) */
+.receipt{
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Receipt lines */
+.receipt-items{
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 320px;
+  overflow: auto;
+  padding-right: 4px;
+}
+.receipt-line{
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 6px 0;
+  border-bottom: 1px dashed rgba(0,0,0,0.04);
+}
+.rl-left{
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.rl-title{
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.rl-meta{
+  font-size: 12px;
+  color: var(--color-muted);
+}
+.rl-right{
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+.rl-total{
+  font-weight: 700;
+  color: var(--color-text);
+  font-size: 14px;
+  text-align: right;
+  min-width: 80px;
+}
+
+/* Totals block (subtotal, tax, shipping, total) */
+.receipt-totals{
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 6px;
+}
+.summary-row,
+.promo-row{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+.summary-row .label,
+.promo-row .label{
+  color: var(--color-muted);
+  font-size: 13px;
+}
+.summary-row .value,
+.promo-row .value{
+  font-weight: 600;
+  color: var(--color-text);
+  font-size: 14px;
+}
+
+/* Promo input / applied */
+.promo-input-row{
+  display: flex;
+  gap: 8px;
+  margin: 6px 0;
+  align-items: center;
+}
+.promo-input{
+  flex: 1 1 auto;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  background: #fff;
+  font-size: 13px;
+  color: var(--color-text);
+  outline: none;
+  transition: box-shadow var(--transition-fast), border-color var(--transition-fast);
+}
+.promo-input::placeholder{ color: #9aa3ab; }
+.promo-input:focus{
+  box-shadow: 0 0 0 4px rgba(15,179,166,0.08);
+  border-color: var(--color-accent-600);
+}
+.promo-code{ color: var(--color-accent); font-weight: 700; font-size: 12px; }
+
+/* Total emphasis */
+.summary-total{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 10px;
+  margin-top: 6px;
+  border-top: 1px solid var(--color-border);
+}
+.total-label{ font-size: 14px; color: var(--color-muted); }
+.total-value{ font-size: 20px; font-weight: 800; color: var(--color-text); }
+
+/* Actions area */
+.summary-actions{
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 12px;
+}
+.btn{
+  font-family: var(--font-sans);
+  font-size: 14px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+/* Primary */
+.btn-checkout{
+  background: linear-gradient(180deg,var(--color-accent) 0%, var(--color-accent-600) 100%);
+  color: #fff;
+  border: 1px solid rgba(0,0,0,0.04);
+  font-weight: 700;
+  box-shadow: 0 6px 14px rgba(15,179,166,0.12);
+}
+.btn-checkout:hover:not(:disabled){ transform: translateY(-2px); box-shadow: 0 10px 24px rgba(15,179,166,0.14); }
+.btn-checkout:disabled{ opacity: 0.6; cursor: not-allowed; }
+
+/* Secondary / ghost */
+.btn-continue{
+  background: transparent;
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  padding: 10px 12px;
+}
+.btn-continue:hover:not(:disabled){ background: var(--color-surface); }
+
+/* Small / secondary styles */
+.btn.btn-secondary{
+  background: var(--color-accent);
+  color: #fff;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-weight: 600;
+}
+.btn.btn-link.small{
+  background: transparent;
+  color: var(--color-accent);
+  font-size: 13px;
+  padding: 6px 8px;
+  border: none;
+}
+
+/* Footnote */
+.summary-footnote{ margin-top: 10px; font-size: 12px; color: var(--color-muted); }
+
+/* Disabled / loading states */
+[aria-disabled="true"], button:disabled{ opacity: 0.6; cursor: not-allowed; }
+
+/* Accessibility: focus ring for interactive elements */
+.btn:focus, .promo-input:focus, .receipt-items:focus{ outline: none; box-shadow: 0 0 0 4px rgba(15,179,166,0.08); }
+
+/* Responsive: compact layout on narrow screens */
+@media (max-width: 920px){
+  .cart-summary{ padding: 14px; border-radius: 10px; max-width: 100%; }
+  .summary-actions{ flex-direction: column; }
+  .promo-input-row{ flex-direction: column; align-items: stretch; }
+  .promo-input{ width: 100%; }
+  .receipt-items{ max-height: 220px; }
+  .rl-total{ min-width: 64px; text-align: right; }
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce){
+  .btn, .promo-input{ transition: none !important; transform: none !important; animation: none !important; }
+}
+
+/* Print-friendly adjustments */
+@media print{
+  .cart-summary{ box-shadow: none; border: 1px solid #ddd; background: #fff; }
+  .btn, .promo-input{ display: none; }
+  .receipt-items{ max-height: none; overflow: visible; }
+}
+
+/* Utility */
+.small{ font-size: 12px; color: var(--color-muted); }
+.muted{ color: var(--color-muted); }

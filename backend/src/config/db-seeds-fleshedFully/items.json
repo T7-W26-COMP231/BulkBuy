@@ -1,0 +1,2159 @@
+[
+  {
+    "_id": "6800000000000000000000i01",
+    "sku": "ITEM-1000",
+    "title": "Reusable Canvas Tote Bag 20L",
+    "slug": "reusable-canvas-tote-bag-20l",
+    "description": "Durable heavy-duty cotton canvas tote with reinforced handles and boxed bottom. Machine-washable, reinforced stitching, suitable for groceries, retail and promotional branding.",
+    "shortDescription": "20L heavy-duty cotton canvas tote with reinforced handles.",
+    "brand": { "id": "6500000000000000000000b2", "name": "GreenGoods" },
+    "categories": ["610000000000000000000001"],
+    "tags": ["bag", "reusable", "canvas", "eco"],
+    "images": [
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/8075772691777775.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/2783062054648613.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/8953532832373919.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/0174569077814421.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/1763406755155434.jpg"
+    ],
+    "media": [
+      { "type": "image", "s3": "https://cfg-j.s3.amazonaws.com/db-bb/media/4476211489374508.mp4" }
+    ],
+    "price": [
+      { "list": 6.50, "sale": 5.50, "currency": "CAD", "effectiveFrom": 1680300100000, "effectiveTo": null }
+    ],
+    "pricingTiers": [
+      { "minQty": 50, "price": 5.00, "currency": "CAD" },
+      { "minQty": 200, "price": 4.50, "currency": "CAD" }
+    ],
+    "inventory": {
+      "stock": 1200,
+      "reserved": 50,
+      "backorder": false,
+      "warehouses": [
+        { "id": "6500000000000000000000w1", "qty": 800 },
+        { "id": "6500000000000000000000w2", "qty": 400 }
+      ]
+    },
+    "variants": [
+      {
+        "sku": "ITEM-1000-NAT",
+        "attributes": { "color": "natural", "size": "standard" },
+        "price": [{ "list": 6.50, "sale": 5.50, "currency": "CAD" }],
+        "inventory": { "stock": 700, "reserved": 20, "backorder": false, "warehouses": [{ "id": "6500000000000000000000w1", "qty": 500 }] }
+      },
+      {
+        "sku": "ITEM-1000-BLK",
+        "attributes": { "color": "black", "size": "standard" },
+        "price": [{ "list": 7.00, "sale": 5.90, "currency": "CAD" }],
+        "inventory": { "stock": 500, "reserved": 30, "backorder": false, "warehouses": [{ "id": "6500000000000000000000w2", "qty": 400 }] }
+      }
+    ],
+    "weight": { "value": 0.22, "unit": "kg" },
+    "dimensions": { "length": 40, "width": 10, "height": 35, "unit": "cm" },
+    "shipping": { "class": "light", "freightClass": "", "shipsFrom": "TOR-FC-01" },
+    "taxClass": "standard",
+    "ratings": { "avg": 4.6, "count": 124 },
+    "reviews": ["690000000000000000000001"],
+    "relatedProducts": ["ITEM-1001", "ITEM-1006"],
+    "seller": { "id": "660000000000000000000005", "name": "BulkBuy Co." },
+    "metadata": { "material": "cotton", "colorOptions": ["natural", "black"], "washable": true },
+    "status": "active",
+    "ops_region": "north-america:ca-on",
+    "published": true,
+    "createdAt": 1680301000000,
+    "updatedAt": 1680301000000
+  },
+  {
+    "_id": "6800000000000000000000i02",
+    "sku": "ITEM-1001",
+    "title": "Compostable Mailer Bags 12x15 100-pack",
+    "slug": "compostable-mailer-bags-12x15-100-pack",
+    "description": "Plant-based compostable mailer bags with peel-and-seal closure. Tear-resistant and water-resistant for e-commerce shipments. Certified industrial compostable materials.",
+    "shortDescription": "100-pack compostable mailer bags 12x15.",
+    "brand": { "id": "6500000000000000000000b2", "name": "GreenGoods" },
+    "categories": ["610000000000000000000002"],
+    "tags": ["mailer", "compostable", "eco", "shipping"],
+    "images": [
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/6879073654256509.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/1454161803105902.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/8822046046422888.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/6289242543124386.jpg"
+    ],
+    "media": [
+      { "type": "image", "s3": "https://cfg-j.s3.amazonaws.com/db-bb/media/2082063729239208.mp4" }
+    ],
+    "price": [
+      { "list": 24.00, "sale": 19.99, "currency": "CAD", "effectiveFrom": 1680301100000, "effectiveTo": null }
+    ],
+    "pricingTiers": [
+      { "minQty": 200, "price": 18.00, "currency": "CAD" },
+      { "minQty": 1000, "price": 16.50, "currency": "CAD" }
+    ],
+    "inventory": {
+      "stock": 5000,
+      "reserved": 200,
+      "backorder": false,
+      "warehouses": [{ "id": "6500000000000000000000w2", "qty": 5000 }]
+    },
+    "variants": [
+      {
+        "sku": "ITEM-1001-100",
+        "attributes": { "pack": "100" },
+        "price": [{ "list": 24.00, "sale": 19.99, "currency": "CAD" }],
+        "inventory": { "stock": 3000, "reserved": 100, "backorder": false, "warehouses": [{ "id": "6500000000000000000000w2", "qty": 3000 }] }
+      },
+      {
+        "sku": "ITEM-1001-500",
+        "attributes": { "pack": "500" },
+        "price": [{ "list": 110.00, "sale": 99.00, "currency": "CAD" }],
+        "inventory": { "stock": 2000, "reserved": 100, "backorder": false, "warehouses": [{ "id": "6500000000000000000000w2", "qty": 2000 }] }
+      }
+    ],
+    "weight": { "value": 0.52, "unit": "kg" },
+    "dimensions": { "length": 30, "width": 20, "height": 5, "unit": "cm" },
+    "shipping": { "class": "parcel", "freightClass": "", "shipsFrom": "MTL-CD-01" },
+    "taxClass": "standard",
+    "ratings": { "avg": 4.4, "count": 89 },
+    "reviews": ["690000000000000000000002"],
+    "relatedProducts": ["ITEM-1000", "ITEM-1008"],
+    "seller": { "id": "660000000000000000000003", "name": "GreenGoods" },
+    "metadata": { "compostable": true, "certifications": ["OK Compost"], "material": "PLA-blend" },
+    "status": "active",
+    "ops_region": "north-america:ca-qc",
+    "published": true,
+    "createdAt": 1680301100000,
+    "updatedAt": 1680301100000
+  },
+  {
+    "_id": "6800000000000000000000i03",
+    "sku": "ITEM-1002",
+    "title": "50cm Kraft Paper Roll 200m",
+    "slug": "50cm-kraft-paper-roll-200m",
+    "description": "Heavy-duty kraft paper roll for wrapping, void-fill and protective packaging. Recyclable and made from high-strength virgin/recycled fibers.",
+    "shortDescription": "50cm x 200m kraft paper roll for packaging.",
+    "brand": { "id": "6500000000000000000000b1", "name": "BulkBuy Co." },
+    "categories": ["610000000000000000000002"],
+    "tags": ["paper", "kraft", "packaging"],
+    "images": [
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/4132675151077782.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/1784860105714149.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/6382062100064243.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/5673038326850508.jpg"
+    ],
+    "media": [
+      { "type": "image", "s3": "https://cfg-j.s3.amazonaws.com/db-bb/media/4476211489374508.mp4" }
+    ],
+    "price": [
+      { "list": 45.00, "sale": 39.00, "currency": "CAD", "effectiveFrom": 1680301200000, "effectiveTo": null }
+    ],
+    "pricingTiers": [
+      { "minQty": 10, "price": 38.00, "currency": "CAD" },
+      { "minQty": 50, "price": 35.00, "currency": "CAD" }
+    ],
+    "inventory": {
+      "stock": 800,
+      "reserved": 20,
+      "backorder": false,
+      "warehouses": [{ "id": "6500000000000000000000w1", "qty": 800 }]
+    },
+    "variants": [
+      {
+        "sku": "ITEM-1002-200M",
+        "attributes": { "length_m": "200" },
+        "price": [{ "list": 45.00, "sale": 39.00, "currency": "CAD" }],
+        "inventory": { "stock": 500, "reserved": 10, "backorder": false, "warehouses": [{ "id": "6500000000000000000000w1", "qty": 500 }] }
+      },
+      {
+        "sku": "ITEM-1002-100M",
+        "attributes": { "length_m": "100" },
+        "price": [{ "list": 25.00, "sale": 22.00, "currency": "CAD" }],
+        "inventory": { "stock": 300, "reserved": 10, "backorder": false, "warehouses": [{ "id": "6500000000000000000000w1", "qty": 300 }] }
+      }
+    ],
+    "weight": { "value": 6.00, "unit": "kg" },
+    "dimensions": { "length": 50, "width": 50, "height": 50, "unit": "cm" },
+    "shipping": { "class": "freight", "freightClass": "LTL", "shipsFrom": "TOR-FC-01" },
+    "taxClass": "standard",
+    "ratings": { "avg": 4.2, "count": 34 },
+    "reviews": ["690000000000000000000003"],
+    "relatedProducts": ["ITEM-1005"],
+    "seller": { "id": "660000000000000000000005", "name": "BulkBuy Co." },
+    "metadata": { "material": "kraft", "rollLengthM": 200, "recyclable": true },
+    "status": "active",
+    "ops_region": "north-america:ca-on",
+    "published": true,
+    "createdAt": 1680301200000,
+    "updatedAt": 1680301200000
+  },
+  {
+    "_id": "6800000000000000000000i04",
+    "sku": "ITEM-1003",
+    "title": "Biodegradable Cutlery Set 1000pcs",
+    "slug": "biodegradable-cutlery-set-1000pcs",
+    "description": "Bulk pack of biodegradable cutlery made from cornstarch. Suitable for events, catering and food service. Heat-resistant for hot foods.",
+    "shortDescription": "1000-piece biodegradable cutlery set (forks, knives, spoons).",
+    "brand": { "id": "6500000000000000000000b2", "name": "GreenGoods" },
+    "categories": ["610000000000000000000003"],
+    "tags": ["cutlery", "biodegradable", "foodservice"],
+    "images": [
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/4830423366752644.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/7550402534787709.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/2008698722241333.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/6520915020475966.jpg"
+    ],
+    "media": [
+      { "type": "image", "s3": "https://cfg-j.s3.amazonaws.com/db-bb/media/2082063729239208.mp4" }
+    ],
+    "price": [
+      { "list": 120.00, "sale": 99.00, "currency": "CAD", "effectiveFrom": 1680301300000, "effectiveTo": null }
+    ],
+    "pricingTiers": [
+      { "minQty": 2, "price": 95.00, "currency": "CAD" },
+      { "minQty": 10, "price": 85.00, "currency": "CAD" }
+    ],
+    "inventory": {
+      "stock": 200,
+      "reserved": 0,
+      "backorder": true,
+      "warehouses": [{ "id": "6500000000000000000000w2", "qty": 200 }]
+    },
+    "variants": [
+      {
+        "sku": "ITEM-1003-1000",
+        "attributes": { "pack": "1000" },
+        "price": [{ "list": 120.00, "sale": 99.00, "currency": "CAD" }],
+        "inventory": { "stock": 200, "reserved": 0, "backorder": true, "warehouses": [{ "id": "6500000000000000000000w2", "qty": 200 }] }
+      }
+    ],
+    "weight": { "value": 12.00, "unit": "kg" },
+    "dimensions": { "length": 60, "width": 40, "height": 30, "unit": "cm" },
+    "shipping": { "class": "freight", "freightClass": "LTL", "shipsFrom": "MTL-CD-01" },
+    "taxClass": "foodservice",
+    "ratings": { "avg": 4.7, "count": 58 },
+    "reviews": ["690000000000000000000007"],
+    "relatedProducts": ["ITEM-1008"],
+    "seller": { "id": "660000000000000000000003", "name": "GreenGoods" },
+    "metadata": { "compostable": true, "material": "cornstarch", "certifications": ["OK Compost"] },
+    "status": "active",
+    "ops_region": "north-america:ca-qc",
+    "published": true,
+    "createdAt": 1680301300000,
+    "updatedAt": 1680301300000
+  },
+  {
+    "_id": "6800000000000000000000i05",
+    "sku": "ITEM-1004",
+    "title": "Industrial Stretch Wrap 500mm x 300m",
+    "slug": "industrial-stretch-wrap-500mm-300m",
+    "description": "High-tack stretch wrap for pallet stabilization. Clear film with excellent cling and puncture resistance. Suitable for warehouse and shipping operations.",
+    "shortDescription": "500mm x 300m industrial stretch wrap, clear.",
+    "brand": { "id": "6500000000000000000000b1", "name": "BulkBuy Co." },
+    "categories": ["610000000000000000000002"],
+    "tags": ["wrap", "pallet", "industrial"],
+    "images": [
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/1248792470461874.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/1699567368918689.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/6724951588824789.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/8472276414180575.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/7810056996337686.jpg"
+    ],
+    "media": [
+      { "type": "image", "s3": "https://cfg-j.s3.amazonaws.com/db-bb/media/4476211489374508.mp4" }
+    ],
+    "price": [
+      { "list": 28.00, "sale": 24.00, "currency": "CAD", "effectiveFrom": 1680301400000, "effectiveTo": null }
+    ],
+    "pricingTiers": [
+      { "minQty": 12, "price": 22.00, "currency": "CAD" },
+      { "minQty": 24, "price": 20.00, "currency": "CAD" }
+    ],
+    "inventory": {
+      "stock": 1500,
+      "reserved": 100,
+      "backorder": false,
+      "warehouses": [{ "id": "6500000000000000000000w1", "qty": 1500 }]
+    },
+    "variants": [
+      {
+        "sku": "ITEM-1004-23MIC",
+        "attributes": { "gauge_micron": "23" },
+        "price": [{ "list": 28.00, "sale": 24.00, "currency": "CAD" }],
+        "inventory": { "stock": 900, "reserved": 50, "backorder": false, "warehouses": [{ "id": "6500000000000000000000w1", "qty": 900 }] }
+      },
+      {
+        "sku": "ITEM-1004-17MIC",
+        "attributes": { "gauge_micron": "17" },
+        "price": [{ "list": 24.00, "sale": 20.00, "currency": "CAD" }],
+        "inventory": { "stock": 600, "reserved": 50, "backorder": false, "warehouses": [{ "id": "6500000000000000000000w1", "qty": 600 }] }
+      }
+    ],
+    "weight": { "value": 4.00, "unit": "kg" },
+    "dimensions": { "length": 50, "width": 50, "height": 50, "unit": "cm" },
+    "shipping": { "class": "parcel", "freightClass": "", "shipsFrom": "TOR-FC-01" },
+    "taxClass": "standard",
+    "ratings": { "avg": 4.1, "count": 22 },
+    "reviews": [],
+    "relatedProducts": ["ITEM-1009"],
+    "seller": { "id": "660000000000000000000005", "name": "BulkBuy Co." },
+    "metadata": { "gaugeMicron": 23, "color": "clear" },
+    "status": "active",
+    "ops_region": "north-america:ca-on",
+    "published": true,
+    "createdAt": 1680301400000,
+    "updatedAt": 1680301400000
+  },
+  {
+    "_id": "6800000000000000000000i06",
+    "sku": "ITEM-1005",
+    "title": "Recycled Cardboard Boxes 12x12x12 (50)",
+    "slug": "recycled-cardboard-boxes-12x12x12-50",
+    "description": "Bulk pack of single-wall recycled cardboard boxes. Strong, crush-resistant and eco-friendly for shipping small to medium items.",
+    "shortDescription": "50-pack recycled cardboard boxes 12x12x12.",
+    "brand": { "id": "6500000000000000000000b1", "name": "BulkBuy Co." },
+    "categories": ["610000000000000000000002"],
+    "tags": ["box", "cardboard", "recycled"],
+    "images": [
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/7047721300303209.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/7302883014260721.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/5640283151917107.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/1784860105714149.jpg"
+    ],
+    "media": [
+      { "type": "image", "s3": "https://cfg-j.s3.amazonaws.com/db-bb/media/2082063729239208.mp4" }
+    ],
+    "price": [
+      { "list": 55.00, "sale": 49.00, "currency": "CAD", "effectiveFrom": 1680301500000, "effectiveTo": null }
+    ],
+    "pricingTiers": [
+      { "minQty": 5, "price": 48.00, "currency": "CAD" },
+      { "minQty": 10, "price": 45.00, "currency": "CAD" }
+    ],
+    "inventory": {
+      "stock": 2000,
+      "reserved": 150,
+      "backorder": false,
+      "warehouses": [
+        { "id": "6500000000000000000000w1", "qty": 1200 },
+        { "id": "6500000000000000000000w2", "qty": 800 }
+      ]
+    },
+    "variants": [
+      {
+        "sku": "ITEM-1005-50",
+        "attributes": { "pack": "50" },
+        "price": [{ "list": 55.00, "sale": 49.00, "currency": "CAD" }],
+        "inventory": { "stock": 2000, "reserved": 150, "backorder": false, "warehouses": [{ "id": "6500000000000000000000w1", "qty": 1200 }] }
+      }
+    ],
+    "weight": { "value": 18.00, "unit": "kg" },
+    "dimensions": { "length": 30, "width": 30, "height": 30, "unit": "cm" },
+    "shipping": { "class": "freight", "freightClass": "LTL", "shipsFrom": "TOR-FC-01" },
+    "taxClass": "standard",
+    "ratings": { "avg": 4.3, "count": 76 },
+    "reviews": ["690000000000000000000004"],
+    "relatedProducts": ["ITEM-1002"],
+    "seller": { "id": "660000000000000000000005", "name": "BulkBuy Co." },
+    "metadata": { "recycledContentPercent": 85, "singleWall": true },
+    "status": "active",
+    "ops_region": "north-america:ca-on",
+    "published": true,
+    "createdAt": 1680301500000,
+    "updatedAt": 1680301500000
+  },
+  {
+    "_id": "6800000000000000000000i07",
+    "sku": "ITEM-1006",
+    "title": "Stainless Steel Insulated Water Bottle 1L",
+    "slug": "stainless-steel-insulated-water-bottle-1l",
+    "description": "Double-wall insulated stainless steel bottle keeps liquids cold for 24 hours and hot for 12 hours. BPA-free lid and powder-coated finish.",
+    "shortDescription": "1L insulated stainless steel water bottle, double-wall.",
+    "brand": { "id": "6500000000000000000000b2", "name": "GreenGoods" },
+    "categories": ["610000000000000000000004"],
+    "tags": ["bottle", "insulated", "stainless", "reusable"],
+    "images": [
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/6724951588824789.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/8472276414180575.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/7810056996337686.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/7047721300303209.jpg"
+    ],
+    "media": [
+      { "type": "image", "s3": "https://cfg-j.s3.amazonaws.com/db-bb/media/4476211489374508.mp4" },
+      { "type": "image", "s3": "https://cfg-j.s3.amazonaws.com/db-bb/media/2082063729239208.mp4" }
+    ],
+    "price": [
+      { "list": 22.00, "sale": 18.00, "currency": "CAD", "effectiveFrom": 1680301600000, "effectiveTo": null }
+    ],
+    "pricingTiers": [
+      { "minQty": 50, "price": 17.00, "currency": "CAD" },
+      { "minQty": 200, "price": 15.00, "currency": "CAD" }
+    ],
+    "inventory": {
+      "stock": 900,
+      "reserved": 30,
+      "backorder": false,
+      "warehouses": [{ "id": "6500000000000000000000w1", "qty": 900 }]
+    },
+    "variants": [
+      {
+        "sku": "ITEM-1006-BLK",
+        "attributes": { "color": "black", "finish": "powder" },
+        "price": [{ "list": 22.00, "sale": 18.00, "currency": "CAD" }],
+        "inventory": { "stock": 400, "reserved": 10, "backorder": false, "warehouses": [{ "id": "6500000000000000000000w1", "qty": 400 }] }
+      },
+      {
+        "sku": "ITEM-1006-SLV",
+        "attributes": { "color": "silver", "finish": "brushed" },
+        "price": [{ "list": 22.00, "sale": 18.00, "currency": "CAD" }],
+        "inventory": { "stock": 500, "reserved": 20, "backorder": false, "warehouses": [{ "id": "6500000000000000000000w1", "qty": 500 }] }
+      }
+    ],
+    "weight": { "value": 0.45, "unit": "kg" },
+    "dimensions": { "length": 8, "width": 8, "height": 28, "unit": "cm" },
+    "shipping": { "class": "parcel", "freightClass": "", "shipsFrom": "TOR-FC-01" },
+    "taxClass": "standard",
+    "ratings": { "avg": 4.8, "count": 210 },
+    "reviews": ["690000000000000000000007"],
+    "relatedProducts": ["ITEM-1000", "ITEM-1009"],
+    "seller": { "id": "660000000000000000000003", "name": "GreenGoods" },
+    "metadata": { "material": "stainless_steel", "insulation": "double-wall", "lidType": "bpa-free" },
+    "status": "active",
+    "ops_region": "north-america:ca-on",
+    "published": true,
+    "createdAt": 1680301600000,
+    "updatedAt": 1680301600000
+  },
+  {
+    "_id": "6800000000000000000000i08",
+    "sku": "ITEM-1007",
+    "title": "Bulk Paper Towels 12-roll",
+    "slug": "bulk-paper-towels-12-roll",
+    "description": "High-absorbency paper towels in a bulk pack for commercial kitchens, janitorial and warehouse use. Strong, two-ply sheets.",
+    "shortDescription": "12-roll bulk paper towels, high-absorbency.",
+    "brand": { "id": "6500000000000000000000b1", "name": "BulkBuy Co." },
+    "categories": ["610000000000000000000005"],
+    "tags": ["paper", "cleaning", "bulk"],
+    "images": [
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/2783062054648613.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/8953532832373919.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/0174569077814421.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/1763406755155434.jpg"
+    ],
+    "media": [
+      { "type": "image", "s3": "https://cfg-j.s3.amazonaws.com/db-bb/media/2082063729239208.mp4" }
+    ],
+    "price": [
+      { "list": 34.00, "sale": 29.00, "currency": "CAD", "effectiveFrom": 1680301700000, "effectiveTo": null }
+    ],
+    "pricingTiers": [
+      { "minQty": 10, "price": 27.00, "currency": "CAD" },
+      { "minQty": 20, "price": 25.00, "currency": "CAD" }
+    ],
+    "inventory": {
+      "stock": 600,
+      "reserved": 40,
+      "backorder": false,
+      "warehouses": [{ "id": "6500000000000000000000w1", "qty": 600 }]
+    },
+    "variants": [
+      {
+        "sku": "ITEM-1007-12",
+        "attributes": { "rolls": "12", "ply": "2" },
+        "price": [{ "list": 34.00, "sale": 29.00, "currency": "CAD" }],
+        "inventory": { "stock": 600, "reserved": 40, "backorder": false, "warehouses": [{ "id": "6500000000000000000000w1", "qty": 600 }] }
+      }
+    ],
+    "weight": { "value": 8.00, "unit": "kg" },
+    "dimensions": { "length": 40, "width": 30, "height": 30, "unit": "cm" },
+    "shipping": { "class": "parcel", "freightClass": "", "shipsFrom": "TOR-FC-01" },
+    "taxClass": "standard",
+    "ratings": { "avg": 4.0, "count": 18 },
+    "reviews": [],
+    "relatedProducts": ["ITEM-1005"],
+    "seller": { "id": "660000000000000000000005", "name": "BulkBuy Co." },
+    "metadata": { "ply": 2, "rollLengthM": 50, "scented": false },
+    "status": "active",
+    "ops_region": "north-america:ca-on",
+    "published": true,
+    "createdAt": 1680301700000,
+    "updatedAt": 1680301700000
+  },
+  {
+    "_id": "6800000000000000000000i09",
+    "sku": "ITEM-1008",
+    "title": "Eco Bubble Mailers 6x9 200-pack",
+    "slug": "eco-bubble-mailers-6x9-200-pack",
+    "description": "Padded mailers with recycled content and recyclable liner. Lightweight protection for small items with tear-resistant outer layer.",
+    "shortDescription": "200-pack eco bubble mailers 6x9, recycled content.",
+    "brand": { "id": "6500000000000000000000b2", "name": "GreenGoods" },
+    "categories": ["610000000000000000000002"],
+    "tags": ["mailer", "padded", "eco"],
+    "images": [
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/6520915020475966.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/1248792470461874.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/1699567368918689.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/6724951588824789.jpg"
+    ],
+    "media": [
+      { "type": "image", "s3": "https://cfg-j.s3.amazonaws.com/db-bb/media/4476211489374508.mp4" }
+    ],
+    "price": [
+      { "list": 48.00, "sale": 42.00, "currency": "CAD", "effectiveFrom": 1680301800000, "effectiveTo": null }
+    ],
+    "pricingTiers": [
+      { "minQty": 500, "price": 38.00, "currency": "CAD" },
+      { "minQty": 1000, "price": 35.00, "currency": "CAD" }
+    ],
+    "inventory": {
+      "stock": 3000,
+      "reserved": 100,
+      "backorder": false,
+      "warehouses": [{ "id": "6500000000000000000000w2", "qty": 3000 }]
+    },
+    "variants": [
+      {
+        "sku": "ITEM-1008-200",
+        "attributes": { "pack": "200", "size": "6x9" },
+        "price": [{ "list": 48.00, "sale": 42.00, "currency": "CAD" }],
+        "inventory": { "stock": 3000, "reserved": 100, "backorder": false, "warehouses": [{ "id": "6500000000000000000000w2", "qty": 3000 }] }
+      }
+    ],
+    "weight": { "value": 6.00, "unit": "kg" },
+    "dimensions": { "length": 25, "width": 18, "height": 10, "unit": "cm" },
+    "shipping": { "class": "parcel", "freightClass": "", "shipsFrom": "MTL-CD-01" },
+    "taxClass": "standard",
+    "ratings": { "avg": 4.5, "count": 64 },
+    "reviews": ["690000000000000000000008"],
+    "relatedProducts": ["ITEM-1001"],
+    "seller": { "id": "660000000000000000000003", "name": "GreenGoods" },
+    "metadata": { "recycledContentPercent": 60, "linerRecyclable": true },
+    "status": "active",
+    "ops_region": "north-america:ca-qc",
+    "published": true,
+    "createdAt": 1680301800000,
+    "updatedAt": 1680301800000
+  },
+  {
+    "_id": "6800000000000000000000i10",
+    "sku": "ITEM-1009",
+    "title": "Heavy-Duty Shipping Tape 48mm x 66m (36)",
+    "slug": "heavy-duty-shipping-tape-48mm-66m-36",
+    "description": "Strong acrylic shipping tape with excellent adhesion for corrugated boxes and packaging. Bulk case of 36 rolls for warehouse use.",
+    "shortDescription": "36-roll case of 48mm x 66m heavy-duty shipping tape.",
+    "brand": { "id": "6500000000000000000000b1", "name": "BulkBuy Co." },
+    "categories": ["610000000000000000000002"],
+    "tags": ["tape", "shipping", "adhesive", "bulk"],
+    "images": [
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/8472276414180575.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/7810056996337686.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/7047721300303209.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/7302883014260721.jpg"
+    ],
+    "media": [
+      { "type": "image", "s3": "https://cfg-j.s3.amazonaws.com/db-bb/media/2082063729239208.mp4" }
+    ],
+    "price": [
+      { "list": 3.50, "sale": 2.90, "currency": "CAD", "effectiveFrom": 1680301900000, "effectiveTo": null }
+    ],
+    "pricingTiers": [
+      { "minQty": 12, "price": 2.70, "currency": "CAD" },
+      { "minQty": 36, "price": 2.50, "currency": "CAD" }
+    ],
+    "inventory": {
+      "stock": 10000,
+      "reserved": 500,
+      "backorder": false,
+      "warehouses": [{ "id": "6500000000000000000000w1", "qty": 10000 }]
+    },
+    "variants": [
+      {
+        "sku": "ITEM-1009-36",
+        "attributes": { "rolls": "36", "width_mm": "48" },
+        "price": [{ "list": 3.50, "sale": 2.90, "currency": "CAD" }],
+        "inventory": { "stock": 10000, "reserved": 500, "backorder": false, "warehouses": [{ "id": "6500000000000000000000w1", "qty": 10000 }] }
+      }
+    ],
+    "weight": { "value": 0.15, "unit": "kg" },
+    "dimensions": { "length": 5, "width": 5, "height": 5, "unit": "cm" },
+    "shipping": { "class": "parcel", "freightClass": "", "shipsFrom": "TOR-FC-01" },
+    "taxClass": "standard",
+    "ratings": { "avg": 4.0, "count": 12 },
+    "reviews": [],
+    "relatedProducts": ["ITEM-1006", "ITEM-1005"],
+    "seller": { "id": "660000000000000000000005", "name": "BulkBuy Co." },
+    "metadata": { "adhesiveType": "acrylic", "coreMm": 76, "caseQty": 36 },
+    "status": "active",
+    "ops_region": "north-america:ca-on",
+    "published": true,
+    "createdAt": 1680301900000,
+    "updatedAt": 1680301900000
+  },
+  {
+    "_id": "6800000000000000000000i11",
+    "sku": "ITEM-1010",
+    "title": "Corrugated Mailer Box 9x6x2 (100)",
+    "slug": "corrugated-mailer-box-9x6x2-100",
+    "description": "Small corrugated mailer boxes, single-wall, ideal for small e-commerce items. Recycled content and crush-resistant design.",
+    "shortDescription": "100-pack corrugated mailer boxes 9x6x2.",
+    "brand": { "id": "6500000000000000000000b1", "name": "BulkBuy Co." },
+    "categories": ["610000000000000000000002"],
+    "tags": ["box", "mailer", "corrugated"],
+    "images": [
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/8075772691777775.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/2783062054648613.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/8953532832373919.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/0174569077814421.jpg"
+    ],
+    "media": [
+      "https://cfg-j.s3.amazonaws.com/db-bb/media/4476211489374508.mp4",
+      "https://cfg-j.s3.amazonaws.com/db-bb/media/2082063729239208.mp4"
+    ],
+    "price": [{ "list": 32.0, "sale": 28.0, "currency": "CAD", "effectiveFrom": 1680302000000 }],
+    "pricingTiers": [{ "minQty": 10, "price": 26.0, "currency": "CAD" }],
+    "inventory": { "stock": 2400, "reserved": 120, "backorder": false, "warehouses": [{ "id": "6500000000000000000000w1", "qty": 1600 }, { "id": "6500000000000000000000w2", "qty": 800 }] },
+    "variants": [{ "sku": "ITEM-1010-100", "attributes": { "pack": "100" }, "price": [{ "list": 32.0, "sale": 28.0, "currency": "CAD" }], "inventory": { "stock": 2400, "reserved": 120, "warehouses": [{ "id": "6500000000000000000000w1", "qty": 1600 }] } }],
+    "weight": { "value": 12.0, "unit": "kg" },
+    "dimensions": { "length": 23, "width": 15, "height": 6, "unit": "cm" },
+    "shipping": { "class": "parcel", "shipsFrom": "TOR-FC-01" },
+    "taxClass": "standard",
+    "ratings": { "avg": 4.2, "count": 41 },
+    "reviews": ["690000000000000000000009"],
+    "relatedProducts": ["ITEM-1005", "ITEM-1011"],
+    "seller": { "id": "660000000000000000000005", "name": "BulkBuy Co." },
+    "metadata": { "recycledContentPercent": 70 },
+    "status": "active",
+    "ops_region": "north-america:ca-on",
+    "published": true,
+    "createdAt": 1680302000000,
+    "updatedAt": 1680302000000
+  },
+  {
+    "_id": "6800000000000000000000i12",
+    "sku": "ITEM-1011",
+    "title": "Self-Seal Poly Mailers 10x13 250-pack",
+    "slug": "self-seal-poly-mailers-10x13-250-pack",
+    "description": "Lightweight polyethylene mailers with self-seal strip. Tear-resistant and water-resistant for general e-commerce use.",
+    "shortDescription": "250-pack self-seal poly mailers 10x13.",
+    "brand": { "id": "6500000000000000000000b1", "name": "BulkBuy Co." },
+    "categories": ["610000000000000000000002"],
+    "tags": ["mailer", "poly", "shipping"],
+    "images": [
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/1763406755155434.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/6879073654256509.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/1454161803105902.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/8822046046422888.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/6289242543124386.jpg"
+    ],
+    "media": [
+      "https://cfg-j.s3.amazonaws.com/db-bb/media/2082063729239208.mp4"
+    ],
+    "price": [{ "list": 38.0, "sale": 33.5, "currency": "CAD", "effectiveFrom": 1680302100000 }],
+    "pricingTiers": [{ "minQty": 500, "price": 30.0, "currency": "CAD" }],
+    "inventory": { "stock": 4200, "reserved": 200, "backorder": false, "warehouses": [{ "id": "6500000000000000000000w2", "qty": 4200 }] },
+    "variants": [{ "sku": "ITEM-1011-250", "attributes": { "pack": "250" }, "price": [{ "list": 38.0, "sale": 33.5, "currency": "CAD" }], "inventory": { "stock": 4200, "reserved": 200, "warehouses": [{ "id": "6500000000000000000000w2", "qty": 4200 }] } }],
+    "weight": { "value": 7.5, "unit": "kg" },
+    "dimensions": { "length": 35, "width": 25, "height": 10, "unit": "cm" },
+    "shipping": { "class": "parcel", "shipsFrom": "MTL-CD-01" },
+    "taxClass": "standard",
+    "ratings": { "avg": 4.3, "count": 58 },
+    "reviews": ["69000000000000000000000a"],
+    "relatedProducts": ["ITEM-1010", "ITEM-1008"],
+    "seller": { "id": "660000000000000000000005", "name": "BulkBuy Co." },
+    "metadata": { "material": "polyethylene", "tearResistant": true },
+    "status": "active",
+    "ops_region": "north-america:ca-on",
+    "published": true,
+    "createdAt": 1680302100000,
+    "updatedAt": 1680302100000
+  },
+  {
+    "_id": "6800000000000000000000i13",
+    "sku": "ITEM-1012",
+    "title": "Eco Kraft Tape 48mm x 50m (36)",
+    "slug": "eco-kraft-tape-48mm-50m-36",
+    "description": "Paper-based kraft tape with natural adhesive. Recyclable with cardboard and ideal for eco-conscious packaging.",
+    "shortDescription": "36-roll case of eco kraft tape 48mm x 50m.",
+    "brand": { "id": "6500000000000000000000b2", "name": "GreenGoods" },
+    "categories": ["610000000000000000000002"],
+    "tags": ["tape", "kraft", "eco"],
+    "images": [
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/8675043113830643.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/4132675151077782.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/1784860105714149.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/6382062100064243.jpg"
+    ],
+    "media": [
+      "https://cfg-j.s3.amazonaws.com/db-bb/media/4476211489374508.mp4"
+    ],
+    "price": [{ "list": 4.0, "sale": 3.5, "currency": "CAD", "effectiveFrom": 1680302200000 }],
+    "pricingTiers": [{ "minQty": 12, "price": 3.2, "currency": "CAD" }],
+    "inventory": { "stock": 4800, "reserved": 300, "backorder": false, "warehouses": [{ "id": "6500000000000000000000w1", "qty": 4800 }] },
+    "variants": [{ "sku": "ITEM-1012-36", "attributes": { "rolls": "36" }, "price": [{ "list": 4.0, "sale": 3.5, "currency": "CAD" }], "inventory": { "stock": 4800, "reserved": 300, "warehouses": [{ "id": "6500000000000000000000w1", "qty": 4800 }] } }],
+    "weight": { "value": 0.12, "unit": "kg" },
+    "dimensions": { "length": 6, "width": 6, "height": 6, "unit": "cm" },
+    "shipping": { "class": "parcel", "shipsFrom": "TOR-FC-01" },
+    "taxClass": "standard",
+    "ratings": { "avg": 4.1, "count": 19 },
+    "reviews": ["69000000000000000000000b"],
+    "relatedProducts": ["ITEM-1009"],
+    "seller": { "id": "660000000000000000000003", "name": "GreenGoods" },
+    "metadata": { "recyclableWithCardboard": true },
+    "status": "active",
+    "ops_region": "north-america:ca-on",
+    "published": true,
+    "createdAt": 1680302200000,
+    "updatedAt": 1680302200000
+  },
+  {
+    "_id": "6800000000000000000000i14",
+    "sku": "ITEM-1013",
+    "title": "Heavy-Duty Pallet Straps 2\" x 6m (50)",
+    "slug": "heavy-duty-pallet-straps-2x6m-50",
+    "description": "Polypropylene pallet straps with high tensile strength for securing pallet loads. Includes buckles and tensioning compatibility.",
+    "shortDescription": "50-pack heavy-duty pallet straps 2\" x 6m.",
+    "brand": { "id": "6500000000000000000000b1", "name": "BulkBuy Co." },
+    "categories": ["610000000000000000000006"],
+    "tags": ["straps", "pallet", "industrial"],
+    "images": [
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/5673038326850508.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/4830423366752644.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/7550402534787709.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/2008698722241333.jpg"
+    ],
+    "media": [
+      "https://cfg-j.s3.amazonaws.com/db-bb/media/2082063729239208.mp4"
+    ],
+    "price": [{ "list": 95.0, "sale": 85.0, "currency": "CAD", "effectiveFrom": 1680302300000 }],
+    "pricingTiers": [{ "minQty": 10, "price": 80.0, "currency": "CAD" }],
+    "inventory": { "stock": 600, "reserved": 40, "backorder": false, "warehouses": [{ "id": "6500000000000000000000w1", "qty": 600 }] },
+    "variants": [{ "sku": "ITEM-1013-50", "attributes": { "pack": "50" }, "price": [{ "list": 95.0, "sale": 85.0, "currency": "CAD" }], "inventory": { "stock": 600, "reserved": 40, "warehouses": [{ "id": "6500000000000000000000w1", "qty": 600 }] } }],
+    "weight": { "value": 22.0, "unit": "kg" },
+    "dimensions": { "length": 60, "width": 40, "height": 20, "unit": "cm" },
+    "shipping": { "class": "freight", "freightClass": "LTL", "shipsFrom": "TOR-FC-01" },
+    "taxClass": "industrial",
+    "ratings": { "avg": 4.5, "count": 27 },
+    "reviews": ["69000000000000000000000c"],
+    "relatedProducts": ["ITEM-1004"],
+    "seller": { "id": "660000000000000000000005", "name": "BulkBuy Co." },
+    "metadata": { "material": "polypropylene", "buckleIncluded": true },
+    "status": "active",
+    "ops_region": "north-america:ca-on",
+    "published": true,
+    "createdAt": 1680302300000,
+    "updatedAt": 1680302300000
+  },
+  {
+    "_id": "6800000000000000000000i15",
+    "sku": "ITEM-1014",
+    "title": "Reusable Produce Bags 10-pack",
+    "slug": "reusable-produce-bags-10-pack",
+    "description": "Lightweight mesh produce bags for fruits and vegetables. Machine-washable and breathable to extend produce freshness.",
+    "shortDescription": "10-pack reusable mesh produce bags.",
+    "brand": { "id": "6500000000000000000000b2", "name": "GreenGoods" },
+    "categories": ["610000000000000000000007"],
+    "tags": ["produce", "mesh", "reusable"],
+    "images": [
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/6520915020475966.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/1248792470461874.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/1699567368918689.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/6724951588824789.jpg"
+    ],
+    "media": [
+      "https://cfg-j.s3.amazonaws.com/db-bb/media/4476211489374508.mp4"
+    ],
+    "price": [{ "list": 14.0, "sale": 11.5, "currency": "CAD", "effectiveFrom": 1680302400000 }],
+    "pricingTiers": [{ "minQty": 20, "price": 10.0, "currency": "CAD" }],
+    "inventory": { "stock": 1800, "reserved": 60, "backorder": false, "warehouses": [{ "id": "6500000000000000000000w2", "qty": 1800 }] },
+    "variants": [{ "sku": "ITEM-1014-10", "attributes": { "pack": "10" }, "price": [{ "list": 14.0, "sale": 11.5, "currency": "CAD" }], "inventory": { "stock": 1800, "reserved": 60, "warehouses": [{ "id": "6500000000000000000000w2", "qty": 1800 }] } }],
+    "weight": { "value": 0.18, "unit": "kg" },
+    "dimensions": { "length": 30, "width": 25, "height": 2, "unit": "cm" },
+    "shipping": { "class": "parcel", "shipsFrom": "MTL-CD-01" },
+    "taxClass": "standard",
+    "ratings": { "avg": 4.6, "count": 92 },
+    "reviews": ["69000000000000000000000d"],
+    "relatedProducts": ["ITEM-1000"],
+    "seller": { "id": "660000000000000000000003", "name": "GreenGoods" },
+    "metadata": { "material": "nylon-mesh", "washable": true },
+    "status": "active",
+    "ops_region": "north-america:ca-qc",
+    "published": true,
+    "createdAt": 1680302400000,
+    "updatedAt": 1680302400000
+  },
+  {
+    "_id": "6800000000000000000000i16",
+    "sku": "ITEM-1015",
+    "title": "Insulated Food Delivery Bags 40L",
+    "slug": "insulated-food-delivery-bags-40l",
+    "description": "Thermal insulated delivery bags for hot and cold food transport. Heavy-duty zipper, waterproof lining and reinforced handles.",
+    "shortDescription": "40L insulated food delivery bag with waterproof lining.",
+    "brand": { "id": "6500000000000000000000b1", "name": "BulkBuy Co." },
+    "categories": ["610000000000000000000008"],
+    "tags": ["insulated", "food", "delivery"],
+    "images": [
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/8472276414180575.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/7810056996337686.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/7047721300303209.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/7302883014260721.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/5640283151917107.jpg"
+    ],
+    "media": [
+      "https://cfg-j.s3.amazonaws.com/db-bb/media/2082063729239208.mp4",
+      "https://cfg-j.s3.amazonaws.com/db-bb/media/4476211489374508.mp4"
+    ],
+    "price": [{ "list": 72.0, "sale": 64.0, "currency": "CAD", "effectiveFrom": 1680302500000 }],
+    "pricingTiers": [{ "minQty": 5, "price": 60.0, "currency": "CAD" }],
+    "inventory": { "stock": 320, "reserved": 20, "backorder": false, "warehouses": [{ "id": "6500000000000000000000w1", "qty": 320 }] },
+    "variants": [{ "sku": "ITEM-1015-40L", "attributes": { "capacity": "40L" }, "price": [{ "list": 72.0, "sale": 64.0, "currency": "CAD" }], "inventory": { "stock": 320, "reserved": 20, "warehouses": [{ "id": "6500000000000000000000w1", "qty": 320 }] } }],
+    "weight": { "value": 2.8, "unit": "kg" },
+    "dimensions": { "length": 45, "width": 35, "height": 30, "unit": "cm" },
+    "shipping": { "class": "parcel", "shipsFrom": "TOR-FC-01" },
+    "taxClass": "foodservice",
+    "ratings": { "avg": 4.4, "count": 33 },
+    "reviews": ["69000000000000000000000e"],
+    "relatedProducts": ["ITEM-1006"],
+    "seller": { "id": "660000000000000000000005", "name": "BulkBuy Co." },
+    "metadata": { "waterproofLining": true, "zipperType": "heavy-duty" },
+    "status": "active",
+    "ops_region": "north-america:ca-on",
+    "published": true,
+    "createdAt": 1680302500000,
+    "updatedAt": 1680302500000
+  },
+  {
+    "_id": "6800000000000000000000i17",
+    "sku": "ITEM-1016",
+    "title": "Biodegradable Produce Trays 200-pack",
+    "slug": "biodegradable-produce-trays-200-pack",
+    "description": "Molded fiber produce trays made from recycled pulp. Compostable and sturdy for retail produce presentation.",
+    "shortDescription": "200-pack biodegradable produce trays.",
+    "brand": { "id": "6500000000000000000000b2", "name": "GreenGoods" },
+    "categories": ["610000000000000000000007"],
+    "tags": ["produce", "tray", "biodegradable"],
+    "images": [
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/1784860105714149.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/6382062100064243.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/5673038326850508.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/4830423366752644.jpg"
+    ],
+    "media": [
+      "https://cfg-j.s3.amazonaws.com/db-bb/media/4476211489374508.mp4"
+    ],
+    "price": [{ "list": 42.0, "sale": 36.0, "currency": "CAD", "effectiveFrom": 1680302600000 }],
+    "pricingTiers": [{ "minQty": 5, "price": 34.0, "currency": "CAD" }],
+    "inventory": { "stock": 1500, "reserved": 80, "backorder": false, "warehouses": [{ "id": "6500000000000000000000w2", "qty": 1500 }] },
+    "variants": [{ "sku": "ITEM-1016-200", "attributes": { "pack": "200" }, "price": [{ "list": 42.0, "sale": 36.0, "currency": "CAD" }], "inventory": { "stock": 1500, "reserved": 80, "warehouses": [{ "id": "6500000000000000000000w2", "qty": 1500 }] } }],
+    "weight": { "value": 9.0, "unit": "kg" },
+    "dimensions": { "length": 40, "width": 30, "height": 20, "unit": "cm" },
+    "shipping": { "class": "parcel", "shipsFrom": "MTL-CD-01" },
+    "taxClass": "standard",
+    "ratings": { "avg": 4.3, "count": 21 },
+    "reviews": ["69000000000000000000000f"],
+    "relatedProducts": ["ITEM-1014"],
+    "seller": { "id": "660000000000000000000003", "name": "GreenGoods" },
+    "metadata": { "compostable": true, "material": "molded-fiber" },
+    "status": "active",
+    "ops_region": "north-america:ca-qc",
+    "published": true,
+    "createdAt": 1680302600000,
+    "updatedAt": 1680302600000
+  },
+  {
+    "_id": "6800000000000000000000i18",
+    "sku": "ITEM-1017",
+    "title": "Cold Chain Gel Packs 500g (100)",
+    "slug": "cold-chain-gel-packs-500g-100",
+    "description": "Reusable gel packs for cold chain shipments. Non-toxic gel, freeze-stable and ideal for perishable goods.",
+    "shortDescription": "100-pack 500g reusable cold chain gel packs.",
+    "brand": { "id": "6500000000000000000000b1", "name": "BulkBuy Co." },
+    "categories": ["610000000000000000000008"],
+    "tags": ["cold-chain", "gel", "perishable"],
+    "images": [
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/2008698722241333.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/6520915020475966.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/1248792470461874.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/1699567368918689.jpg"
+    ],
+    "media": [
+      "https://cfg-j.s3.amazonaws.com/db-bb/media/2082063729239208.mp4"
+    ],
+    "price": [{ "list": 210.0, "sale": 185.0, "currency": "CAD", "effectiveFrom": 1680302700000 }],
+    "pricingTiers": [{ "minQty": 5, "price": 175.0, "currency": "CAD" }],
+    "inventory": { "stock": 420, "reserved": 10, "backorder": false, "warehouses": [{ "id": "6500000000000000000000w1", "qty": 420 }] },
+    "variants": [{ "sku": "ITEM-1017-100", "attributes": { "pack": "100" }, "price": [{ "list": 210.0, "sale": 185.0, "currency": "CAD" }], "inventory": { "stock": 420, "reserved": 10, "warehouses": [{ "id": "6500000000000000000000w1", "qty": 420 }] } }],
+    "weight": { "value": 60.0, "unit": "kg" },
+    "dimensions": { "length": 60, "width": 40, "height": 40, "unit": "cm" },
+    "shipping": { "class": "freight", "freightClass": "LTL", "shipsFrom": "TOR-FC-01" },
+    "taxClass": "medical",
+    "ratings": { "avg": 4.7, "count": 14 },
+    "reviews": ["690000000000000000000010"],
+    "relatedProducts": ["ITEM-1015"],
+    "seller": { "id": "660000000000000000000005", "name": "BulkBuy Co." },
+    "metadata": { "reusable": true, "nonToxic": true },
+    "status": "active",
+    "ops_region": "north-america:ca-on",
+    "published": true,
+    "createdAt": 1680302700000,
+    "updatedAt": 1680302700000
+  },
+  {
+    "_id": "6800000000000000000000i19",
+    "sku": "ITEM-1018",
+    "title": "Retail Shelf Dividers 50-pack",
+    "slug": "retail-shelf-dividers-50-pack",
+    "description": "Clear acrylic shelf dividers for retail shelving. Easy to install and adjustable to common shelf widths.",
+    "shortDescription": "50-pack clear acrylic shelf dividers.",
+    "brand": { "id": "6500000000000000000000b1", "name": "BulkBuy Co." },
+    "categories": ["610000000000000000000009"],
+    "tags": ["retail", "shelf", "divider"],
+    "images": [
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/6724951588824789.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/8472276414180575.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/7810056996337686.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/7047721300303209.jpg"
+    ],
+    "media": [
+      "https://cfg-j.s3.amazonaws.com/db-bb/media/4476211489374508.mp4"
+    ],
+    "price": [{ "list": 48.0, "sale": 42.0, "currency": "CAD", "effectiveFrom": 1680302800000 }],
+    "pricingTiers": [{ "minQty": 10, "price": 40.0, "currency": "CAD" }],
+    "inventory": { "stock": 900, "reserved": 30, "backorder": false, "warehouses": [{ "id": "6500000000000000000000w1", "qty": 900 }] },
+    "variants": [{ "sku": "ITEM-1018-50", "attributes": { "pack": "50" }, "price": [{ "list": 48.0, "sale": 42.0, "currency": "CAD" }], "inventory": { "stock": 900, "reserved": 30, "warehouses": [{ "id": "6500000000000000000000w1", "qty": 900 }] } }],
+    "weight": { "value": 10.0, "unit": "kg" },
+    "dimensions": { "length": 60, "width": 40, "height": 20, "unit": "cm" },
+    "shipping": { "class": "parcel", "shipsFrom": "TOR-FC-01" },
+    "taxClass": "retail",
+    "ratings": { "avg": 4.2, "count": 11 },
+    "reviews": ["690000000000000000000011"],
+    "relatedProducts": ["ITEM-1013"],
+    "seller": { "id": "660000000000000000000005", "name": "BulkBuy Co." },
+    "metadata": { "material": "acrylic", "adjustable": true },
+    "status": "active",
+    "ops_region": "north-america:ca-on",
+    "published": true,
+    "createdAt": 1680302800000,
+    "updatedAt": 1680302800000
+  },
+  {
+    "_id": "6800000000000000000000i20",
+    "sku": "ITEM-1019",
+    "title": "Reusable Coffee Cups 12oz 24-pack",
+    "slug": "reusable-coffee-cups-12oz-24-pack",
+    "description": "Double-wall reusable coffee cups with silicone lid. Dishwasher-safe and BPA-free, ideal for cafes and corporate gifting.",
+    "shortDescription": "24-pack 12oz reusable coffee cups with lids.",
+    "brand": { "id": "6500000000000000000000b2", "name": "GreenGoods" },
+    "categories": ["610000000000000000000004"],
+    "tags": ["cup", "reusable", "coffee"],
+    "images": [
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/2783062054648613.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/8953532832373919.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/0174569077814421.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/1763406755155434.jpg"
+    ],
+    "media": [
+      "https://cfg-j.s3.amazonaws.com/db-bb/media/2082063729239208.mp4"
+    ],
+    "price": [{ "list": 96.0, "sale": 84.0, "currency": "CAD", "effectiveFrom": 1680302900000 }],
+    "pricingTiers": [{ "minQty": 5, "price": 80.0, "currency": "CAD" }],
+    "inventory": { "stock": 480, "reserved": 20, "backorder": false, "warehouses": [{ "id": "6500000000000000000000w2", "qty": 480 }] },
+    "variants": [{ "sku": "ITEM-1019-24", "attributes": { "pack": "24", "size": "12oz" }, "price": [{ "list": 96.0, "sale": 84.0, "currency": "CAD" }], "inventory": { "stock": 480, "reserved": 20, "warehouses": [{ "id": "6500000000000000000000w2", "qty": 480 }] } }],
+    "weight": { "value": 6.0, "unit": "kg" },
+    "dimensions": { "length": 40, "width": 30, "height": 20, "unit": "cm" },
+    "shipping": { "class": "parcel", "shipsFrom": "MTL-CD-01" },
+    "taxClass": "standard",
+    "ratings": { "avg": 4.6, "count": 73 },
+    "reviews": ["690000000000000000000012"],
+    "relatedProducts": ["ITEM-1006"],
+    "seller": { "id": "660000000000000000000003", "name": "GreenGoods" },
+    "metadata": { "material": "stainless_steel", "lidType": "silicone" },
+    "status": "active",
+    "ops_region": "north-america:ca-qc",
+    "published": true,
+    "createdAt": 1680302900000,
+    "updatedAt": 1680302900000
+  },
+  {
+    "_id": "6800000000000000000000i21",
+    "sku": "ITEM-1020",
+    "title": "Retail Price Gun Labels 1x2 5000",
+    "slug": "retail-price-gun-labels-1x2-5000",
+    "description": "Thermal price gun labels compatible with common retail pricing guns. High-contrast print and easy-peel backing.",
+    "shortDescription": "5,000 thermal price gun labels 1x2.",
+    "brand": { "id": "6500000000000000000000b1", "name": "BulkBuy Co." },
+    "categories": ["610000000000000000000009"],
+    "tags": ["label", "retail", "price"],
+    "images": [
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/7302883014260721.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/5640283151917107.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/8075772691777775.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/2783062054648613.jpg"
+    ],
+    "media": [
+      "https://cfg-j.s3.amazonaws.com/db-bb/media/4476211489374508.mp4"
+    ],
+    "price": [{ "list": 18.0, "sale": 15.0, "currency": "CAD", "effectiveFrom": 1680303000000 }],
+    "pricingTiers": [{ "minQty": 10, "price": 14.0, "currency": "CAD" }],
+    "inventory": { "stock": 12000, "reserved": 600, "backorder": false, "warehouses": [{ "id": "6500000000000000000000w1", "qty": 12000 }] },
+    "variants": [{ "sku": "ITEM-1020-5000", "attributes": { "qty": "5000" }, "price": [{ "list": 18.0, "sale": 15.0, "currency": "CAD" }], "inventory": { "stock": 12000, "reserved": 600, "warehouses": [{ "id": "6500000000000000000000w1", "qty": 12000 }] } }],
+    "weight": { "value": 3.5, "unit": "kg" },
+    "dimensions": { "length": 30, "width": 20, "height": 10, "unit": "cm" },
+    "shipping": { "class": "parcel", "shipsFrom": "TOR-FC-01" },
+    "taxClass": "retail",
+    "ratings": { "avg": 4.0, "count": 9 },
+    "reviews": ["690000000000000000000013"],
+    "relatedProducts": ["ITEM-1018"],
+    "seller": { "id": "660000000000000000000005", "name": "BulkBuy Co." },
+    "metadata": { "compatibleGuns": ["Avery 1-line", "Sato 2-line"] },
+    "status": "active",
+    "ops_region": "north-america:ca-on",
+    "published": true,
+    "createdAt": 1680303000000,
+    "updatedAt": 1680303000000
+  },
+  {
+    "_id": "6800000000000000000000i22",
+    "sku": "ITEM-1021",
+    "title": "Eco-Friendly Shipping Void Fill 10kg",
+    "slug": "eco-friendly-shipping-void-fill-10kg",
+    "description": "Paper-based void fill for protective packaging. Recyclable and compostable alternative to plastic peanuts.",
+    "shortDescription": "10kg bag of paper void fill for packaging.",
+    "brand": { "id": "6500000000000000000000b2", "name": "GreenGoods" },
+    "categories": ["610000000000000000000002"],
+    "tags": ["void-fill", "paper", "eco"],
+    "images": [
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/1784860105714149.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/6382062100064243.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/5673038326850508.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/4830423366752644.jpg"
+    ],
+    "media": [
+      "https://cfg-j.s3.amazonaws.com/db-bb/media/2082063729239208.mp4"
+    ],
+    "price": [{ "list": 28.0, "sale": 24.0, "currency": "CAD", "effectiveFrom": 1680303100000 }],
+    "pricingTiers": [{ "minQty": 10, "price": 22.0, "currency": "CAD" }],
+    "inventory": { "stock": 1400, "reserved": 60, "backorder": false, "warehouses": [{ "id": "6500000000000000000000w2", "qty": 1400 }] },
+    "variants": [{ "sku": "ITEM-1021-10KG", "attributes": { "weight": "10kg" }, "price": [{ "list": 28.0, "sale": 24.0, "currency": "CAD" }], "inventory": { "stock": 1400, "reserved": 60, "warehouses": [{ "id": "6500000000000000000000w2", "qty": 1400 }] } }],
+    "weight": { "value": 10.0, "unit": "kg" },
+    "dimensions": { "length": 50, "width": 40, "height": 20, "unit": "cm" },
+    "shipping": { "class": "parcel", "shipsFrom": "MTL-CD-01" },
+    "taxClass": "standard",
+    "ratings": { "avg": 4.4, "count": 26 },
+    "reviews": ["690000000000000000000014"],
+    "relatedProducts": ["ITEM-0102"],
+    "seller": { "id": "660000000000000000000003", "name": "GreenGoods" },
+    "metadata": { "compostable": true, "material": "recycled-paper" },
+    "status": "active",
+    "ops_region": "north-america:ca-qc",
+    "published": true,
+    "createdAt": 1680303100000,
+    "updatedAt": 1680303100000
+  },
+  {
+    "_id": "6800000000000000000000i23",
+    "sku": "ITEM-1022",
+    "title": "Retail Display Hooks 100-pack",
+    "slug": "retail-display-hooks-100-pack",
+    "description": "Metal pegboard hooks for retail displays. Zinc-plated finish for corrosion resistance and long life.",
+    "shortDescription": "100-pack metal retail display hooks.",
+    "brand": { "id": "6500000000000000000000b1", "name": "BulkBuy Co." },
+    "categories": ["610000000000000000000009"],
+    "tags": ["retail", "display", "hooks"],
+    "images": [
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/7047721300303209.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/7302883014260721.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/5640283151917107.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/8075772691777775.jpg"
+    ],
+    "media": [
+      "https://cfg-j.s3.amazonaws.com/db-bb/media/4476211489374508.mp4"
+    ],
+    "price": [{ "list": 26.0, "sale": 22.0, "currency": "CAD", "effectiveFrom": 1680303200000 }],
+    "pricingTiers": [{ "minQty": 10, "price": 20.0, "currency": "CAD" }],
+    "inventory": { "stock": 3600, "reserved": 180, "backorder": false, "warehouses": [{ "id": "6500000000000000000000w1", "qty": 3600 }] },
+    "variants": [{ "sku": "ITEM-1022-100", "attributes": { "pack": "100" }, "price": [{ "list": 26.0, "sale": 22.0, "currency": "CAD" }], "inventory": { "stock": 3600, "reserved": 180, "warehouses": [{ "id": "6500000000000000000000w1", "qty": 3600 }] } }],
+    "weight": { "value": 12.0, "unit": "kg" },
+    "dimensions": { "length": 50, "width": 30, "height": 20, "unit": "cm" },
+    "shipping": { "class": "parcel", "shipsFrom": "TOR-FC-01" },
+    "taxClass": "retail",
+    "ratings": { "avg": 4.0, "count": 8 },
+    "reviews": ["690000000000000000000015"],
+    "relatedProducts": ["ITEM-1018"],
+    "seller": { "id": "660000000000000000000005", "name": "BulkBuy Co." },
+    "metadata": { "finish": "zinc-plated", "hookLengthsMm": [50, 75, 100] },
+    "status": "active",
+    "ops_region": "north-america:ca-on",
+    "published": true,
+    "createdAt": 1680303200000,
+    "updatedAt": 1680303200000
+  },
+  {
+    "_id": "6800000000000000000000i24",
+    "sku": "ITEM-1023",
+    "title": "Compostable Food Trays 500-pack",
+    "slug": "compostable-food-trays-500-pack",
+    "description": "Disposable food trays made from compostable fiber. Suitable for catering and events where single-use compostable serviceware is required.",
+    "shortDescription": "500-pack compostable food trays.",
+    "brand": { "id": "6500000000000000000000b2", "name": "GreenGoods" },
+    "categories": ["610000000000000000000003"],
+    "tags": ["foodservice", "compostable", "tray"],
+    "images": [
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/1784860105714149.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/6382062100064243.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/5673038326850508.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/4830423366752644.jpg"
+    ],
+    "media": [
+      "https://cfg-j.s3.amazonaws.com/db-bb/media/2082063729239208.mp4"
+    ],
+    "price": [{ "list": 160.0, "sale": 140.0, "currency": "CAD", "effectiveFrom": 1680303300000 }],
+    "pricingTiers": [{ "minQty": 2, "price": 135.0, "currency": "CAD" }],
+    "inventory": { "stock": 600, "reserved": 20, "backorder": false, "warehouses": [{ "id": "6500000000000000000000w2", "qty": 600 }] },
+    "variants": [{ "sku": "ITEM-1023-500", "attributes": { "pack": "500" }, "price": [{ "list": 160.0, "sale": 140.0, "currency": "CAD" }], "inventory": { "stock": 600, "reserved": 20, "warehouses": [{ "id": "6500000000000000000000w2", "qty": 600 }] } }],
+    "weight": { "value": 25.0, "unit": "kg" },
+    "dimensions": { "length": 60, "width": 40, "height": 30, "unit": "cm" },
+    "shipping": { "class": "freight", "freightClass": "LTL", "shipsFrom": "MTL-CD-01" },
+    "taxClass": "foodservice",
+    "ratings": { "avg": 4.5, "count": 17 },
+    "reviews": ["690000000000000000000016"],
+    "relatedProducts": ["ITEM-1003"],
+    "seller": { "id": "660000000000000000000003", "name": "GreenGoods" },
+    "metadata": { "compostable": true, "material": "molded-fiber" },
+    "status": "active",
+    "ops_region": "north-america:ca-qc",
+    "published": true,
+    "createdAt": 1680303300000,
+    "updatedAt": 1680303300000
+  },
+  {
+    "_id": "6800000000000000000000i25",
+    "sku": "ITEM-1024",
+    "title": "Anti-Static Bubble Wrap 12\" x 100ft",
+    "slug": "anti-static-bubble-wrap-12x100ft",
+    "description": "Anti-static bubble wrap for electronics and sensitive components. Provides cushioning and ESD protection.",
+    "shortDescription": "12\" x 100ft anti-static bubble wrap roll.",
+    "brand": { "id": "6500000000000000000000b1", "name": "BulkBuy Co." },
+    "categories": ["610000000000000000000002"],
+    "tags": ["bubble-wrap", "anti-static", "electronics"],
+    "images": [
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/6724951588824789.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/8472276414180575.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/7810056996337686.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/7047721300303209.jpg"
+    ],
+    "media": [
+      "https://cfg-j.s3.amazonaws.com/db-bb/media/4476211489374508.mp4"
+    ],
+    "price": [{ "list": 28.0, "sale": 24.0, "currency": "CAD", "effectiveFrom": 1680303400000 }],
+    "pricingTiers": [{ "minQty": 10, "price": 22.0, "currency": "CAD" }],
+    "inventory": { "stock": 1100, "reserved": 40, "backorder": false, "warehouses": [{ "id": "6500000000000000000000w1", "qty": 1100 }] },
+    "variants": [{ "sku": "ITEM-1024-100FT", "attributes": { "length_ft": "100" }, "price": [{ "list": 28.0, "sale": 24.0, "currency": "CAD" }], "inventory": { "stock": 1100, "reserved": 40, "warehouses": [{ "id": "6500000000000000000000w1", "qty": 1100 }] } }],
+    "weight": { "value": 3.2, "unit": "kg" },
+    "dimensions": { "length": 30, "width": 30, "height": 30, "unit": "cm" },
+    "shipping": { "class": "parcel", "shipsFrom": "TOR-FC-01" },
+    "taxClass": "standard",
+    "ratings": { "avg": 4.4, "count": 29 },
+    "reviews": ["690000000000000000000017"],
+    "relatedProducts": ["ITEM-0104"],
+    "seller": { "id": "660000000000000000000005", "name": "BulkBuy Co." },
+    "metadata": { "esdSafe": true, "bubbleSizeMm": 6 },
+    "status": "active",
+    "ops_region": "north-america:ca-on",
+    "published": true,
+    "createdAt": 1680303400000,
+    "updatedAt": 1680303400000
+  },
+  {
+    "_id": "6800000000000000000000i26",
+    "sku": "ITEM-1025",
+    "title": "Retail Shelf Labels 2x3 2000",
+    "slug": "retail-shelf-labels-2x3-2000",
+    "description": "Pre-cut shelf labels for retail pricing and promotions. High-contrast thermal printable stock.",
+    "shortDescription": "2,000 pre-cut retail shelf labels 2x3.",
+    "brand": { "id": "6500000000000000000000b1", "name": "BulkBuy Co." },
+    "categories": ["610000000000000000000009"],
+    "tags": ["label", "shelf", "retail"],
+    "images": [
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/7302883014260721.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/5640283151917107.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/8075772691777775.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/2783062054648613.jpg"
+    ],
+    "media": [
+      "https://cfg-j.s3.amazonaws.com/db-bb/media/2082063729239208.mp4"
+    ],
+    "price": [{ "list": 42.0, "sale": 36.0, "currency": "CAD", "effectiveFrom": 1680303500000 }],
+    "pricingTiers": [{ "minQty": 5, "price": 34.0, "currency": "CAD" }],
+    "inventory": { "stock": 8000, "reserved": 400, "backorder": false, "warehouses": [{ "id": "6500000000000000000000w1", "qty": 8000 }] },
+    "variants": [{ "sku": "ITEM-1025-2000", "attributes": { "qty": "2000" }, "price": [{ "list": 42.0, "sale": 36.0, "currency": "CAD" }], "inventory": { "stock": 8000, "reserved": 400, "warehouses": [{ "id": "6500000000000000000000w1", "qty": 8000 }] } }],
+    "weight": { "value": 4.0, "unit": "kg" },
+    "dimensions": { "length": 40, "width": 30, "height": 10, "unit": "cm" },
+    "shipping": { "class": "parcel", "shipsFrom": "TOR-FC-01" },
+    "taxClass": "retail",
+    "ratings": { "avg": 4.1, "count": 13 },
+    "reviews": ["690000000000000000000018"],
+    "relatedProducts": ["ITEM-1020"],
+    "seller": { "id": "660000000000000000000005", "name": "BulkBuy Co." },
+    "metadata": { "printable": true, "material": "thermal" },
+    "status": "active",
+    "ops_region": "north-america:ca-on",
+    "published": true,
+    "createdAt": 1680303500000,
+    "updatedAt": 1680303500000
+  },
+  {
+    "_id": "6800000000000000000000i27",
+    "sku": "ITEM-1026",
+    "title": "Reusable Insulated Lunch Bag 8L",
+    "slug": "reusable-insulated-lunch-bag-8l",
+    "description": "Compact insulated lunch bag with zip closure and internal thermal lining. Easy to clean and suitable for daily use.",
+    "shortDescription": "8L insulated lunch bag with thermal lining.",
+    "brand": { "id": "6500000000000000000000b2", "name": "GreenGoods" },
+    "categories": ["610000000000000000000004"],
+    "tags": ["lunch", "insulated", "reusable"],
+    "images": [
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/6724951588824789.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/8472276414180575.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/7810056996337686.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/7047721300303209.jpg"
+    ],
+    "media": [
+      "https://cfg-j.s3.amazonaws.com/db-bb/media/4476211489374508.mp4"
+    ],
+    "price": [{ "list": 26.0, "sale": 21.0, "currency": "CAD", "effectiveFrom": 1680303600000 }],
+    "pricingTiers": [{ "minQty": 20, "price": 19.0, "currency": "CAD" }],
+    "inventory": { "stock": 1400, "reserved": 60, "backorder": false, "warehouses": [{ "id": "6500000000000000000000w2", "qty": 1400 }] },
+    "variants": [{ "sku": "ITEM-1026-8L", "attributes": { "capacity": "8L" }, "price": [{ "list": 26.0, "sale": 21.0, "currency": "CAD" }], "inventory": { "stock": 1400, "reserved": 60, "warehouses": [{ "id": "6500000000000000000000w2", "qty": 1400 }] } }],
+    "weight": { "value": 0.6, "unit": "kg" },
+    "dimensions": { "length": 28, "width": 18, "height": 22, "unit": "cm" },
+    "shipping": { "class": "parcel", "shipsFrom": "MTL-CD-01" },
+    "taxClass": "standard",
+    "ratings": { "avg": 4.5, "count": 47 },
+    "reviews": ["690000000000000000000019"],
+    "relatedProducts": ["ITEM-1019"],
+    "seller": { "id": "660000000000000000000003", "name": "GreenGoods" },
+    "metadata": { "insulation": "thermal-foam", "washable": true },
+    "status": "active",
+    "ops_region": "north-america:ca-qc",
+    "published": true,
+    "createdAt": 1680303600000,
+    "updatedAt": 1680303600000
+  },
+  {
+    "_id": "6800000000000000000000i28",
+    "sku": "ITEM-1027",
+    "title": "Bulk Hand Sanitizer 5L",
+    "slug": "bulk-hand-sanitizer-5l",
+    "description": "5L bulk hand sanitizer with 70% alcohol content. Refill-ready for dispensers in commercial settings.",
+    "shortDescription": "5L bulk hand sanitizer, 70% alcohol.",
+    "brand": { "id": "6500000000000000000000b1", "name": "BulkBuy Co." },
+    "categories": ["61000000000000000000000a"],
+    "tags": ["sanitizer", "bulk", "hygiene"],
+    "images": [
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/7302883014260721.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/5640283151917107.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/8075772691777775.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/2783062054648613.jpg"
+    ],
+    "media": [
+      "https://cfg-j.s3.amazonaws.com/db-bb/media/2082063729239208.mp4"
+    ],
+    "price": [{ "list": 48.0, "sale": 42.0, "currency": "CAD", "effectiveFrom": 1680303700000 }],
+    "pricingTiers": [{ "minQty": 10, "price": 40.0, "currency": "CAD" }],
+    "inventory": { "stock": 900, "reserved": 30, "backorder": false, "warehouses": [{ "id": "6500000000000000000000w1", "qty": 900 }] },
+    "variants": [{ "sku": "ITEM-1027-5L", "attributes": { "size": "5L" }, "price": [{ "list": 48.0, "sale": 42.0, "currency": "CAD" }], "inventory": { "stock": 900, "reserved": 30, "warehouses": [{ "id": "6500000000000000000000w1", "qty": 900 }] } }],
+    "weight": { "value": 5.2, "unit": "kg" },
+    "dimensions": { "length": 20, "width": 20, "height": 30, "unit": "cm" },
+    "shipping": { "class": "parcel", "shipsFrom": "TOR-FC-01" },
+    "taxClass": "medical",
+    "ratings": { "avg": 4.6, "count": 39 },
+    "reviews": ["69000000000000000000001a"],
+    "relatedProducts": ["ITEM-1017"],
+    "seller": { "id": "660000000000000000000005", "name": "BulkBuy Co." },
+    "metadata": { "alcoholPercent": 70, "refillable": true },
+    "status": "active",
+    "ops_region": "north-america:ca-on",
+    "published": true,
+    "createdAt": 1680303700000,
+    "updatedAt": 1680303700000
+  },
+  {
+    "_id": "6800000000000000000000i29",
+    "sku": "ITEM-1028",
+    "title": "Corrugated Pallet Pads 48x40 (25)",
+    "slug": "corrugated-pallet-pads-48x40-25",
+    "description": "Corrugated pallet pads to protect pallet loads and provide slip-sheet separation. Recyclable and lightweight.",
+    "shortDescription": "25-pack corrugated pallet pads 48x40.",
+    "brand": { "id": "6500000000000000000000b1", "name": "BulkBuy Co." },
+    "categories": ["610000000000000000000002"],
+    "tags": ["pallet", "pad", "corrugated"],
+    "images": [
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/5640283151917107.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/7047721300303209.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/7302883014260721.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/8075772691777775.jpg"
+    ],
+    "media": [
+      "https://cfg-j.s3.amazonaws.com/db-bb/media/4476211489374508.mp4"
+    ],
+    "price": [{ "list": 120.0, "sale": 105.0, "currency": "CAD", "effectiveFrom": 1680303800000 }],
+    "pricingTiers": [{ "minQty": 5, "price": 100.0, "currency": "CAD" }],
+    "inventory": { "stock": 600, "reserved": 20, "backorder": false, "warehouses": [{ "id": "6500000000000000000000w1", "qty": 600 }] },
+    "variants": [{ "sku": "ITEM-1028-25", "attributes": { "pack": "25" }, "price": [{ "list": 120.0, "sale": 105.0, "currency": "CAD" }], "inventory": { "stock": 600, "reserved": 20, "warehouses": [{ "id": "6500000000000000000000w1", "qty": 600 }] } }],
+    "weight": { "value": 40.0, "unit": "kg" },
+    "dimensions": { "length": 122, "width": 102, "height": 10, "unit": "cm" },
+    "shipping": { "class": "freight", "freightClass": "LTL", "shipsFrom": "TOR-FC-01" },
+    "taxClass": "standard",
+    "ratings": { "avg": 4.2, "count": 12 },
+    "reviews": ["69000000000000000000001b"],
+    "relatedProducts": ["ITEM-1013"],
+    "seller": { "id": "660000000000000000000005", "name": "BulkBuy Co." },
+    "metadata": { "recyclable": true, "sheetSizeInches": [48, 40] },
+    "status": "active",
+    "ops_region": "north-america:ca-on",
+    "published": true,
+    "createdAt": 1680303800000,
+    "updatedAt": 1680303800000
+  },
+  {
+    "_id": "6800000000000000000000i30",
+    "sku": "ITEM-1029",
+    "title": "Retail POS Card Holders 200-pack",
+    "slug": "retail-pos-card-holders-200-pack",
+    "description": "Clear PVC POS card holders for shelf-edge promotions and signage. Durable and easy to mount.",
+    "shortDescription": "200-pack clear POS card holders.",
+    "brand": { "id": "6500000000000000000000b1", "name": "BulkBuy Co." },
+    "categories": ["610000000000000000000009"],
+    "tags": ["pos", "card", "holder"],
+    "images": [
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/1784860105714149.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/6382062100064243.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/5673038326850508.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/4830423366752644.jpg"
+    ],
+    "media": [
+      "https://cfg-j.s3.amazonaws.com/db-bb/media/2082063729239208.mp4"
+    ],
+    "price": [{ "list": 34.0, "sale": 29.0, "currency": "CAD", "effectiveFrom": 1680303900000 }],
+    "pricingTiers": [{ "minQty": 5, "price": 27.0, "currency": "CAD" }],
+    "inventory": { "stock": 2400, "reserved": 120, "backorder": false, "warehouses": [{ "id": "6500000000000000000000w1", "qty": 2400 }] },
+    "variants": [{ "sku": "ITEM-1029-200", "attributes": { "pack": "200" }, "price": [{ "list": 34.0, "sale": 29.0, "currency": "CAD" }], "inventory": { "stock": 2400, "reserved": 120, "warehouses": [{ "id": "6500000000000000000000w1", "qty": 2400 }] } }],
+    "weight": { "value": 6.0, "unit": "kg" },
+    "dimensions": { "length": 40, "width": 30, "height": 10, "unit": "cm" },
+    "shipping": { "class": "parcel", "shipsFrom": "TOR-FC-01" },
+    "taxClass": "retail",
+    "ratings": { "avg": 4.0, "count": 7 },
+    "reviews": ["69000000000000000000001c"],
+    "relatedProducts": ["ITEM-1022"],
+    "seller": { "id": "660000000000000000000005", "name": "BulkBuy Co." },
+    "metadata": { "material": "PVC", "mountType": "shelf-edge" },
+    "status": "active",
+    "ops_region": "north-america:ca-on",
+    "published": true,
+    "createdAt": 1680303900000,
+    "updatedAt": 1680303900000
+  },
+  {
+    "_id": "6800000000000000000000i31",
+    "sku": "ITEM-1030",
+    "title": "Eco Kraft Mailing Tubes 3\" x 24\" (50)",
+    "slug": "eco-kraft-mailing-tubes-3x24-50",
+    "description": "Durable kraft mailing tubes for posters and rolled goods. Recyclable, crush-resistant, with end caps included.",
+    "shortDescription": "50-pack kraft mailing tubes 3\" x 24\" with caps.",
+    "brand": { "id": "6500000000000000000000b1", "name": "BulkBuy Co." },
+    "categories": ["610000000000000000000002"],
+    "tags": ["tube", "mailing", "kraft"],
+    "images": [
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/8075772691777775.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/2783062054648613.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/8953532832373919.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/0174569077814421.jpg"
+    ],
+    "media": [
+      { "type": "video", "s3": "https://cfg-j.s3.amazonaws.com/db-bb/media/4476211489374508.mp4" }
+    ],
+    "price": [{ "list": 68.0, "sale": 59.0, "currency": "CAD", "effectiveFrom": 1680304000000 }],
+    "pricingTiers": [{ "minQty": 5, "price": 55.0, "currency": "CAD" }],
+    "inventory": { "stock": 1200, "reserved": 40, "backorder": false, "warehouses": [{ "id": "6500000000000000000000w1", "qty": 1200 }] },
+    "variants": [
+      { "sku": "ITEM-1030-50", "attributes": { "pack": "50", "length_in": "24" }, "price": [{ "list": 68.0, "sale": 59.0, "currency": "CAD" }], "inventory": { "stock": 1200, "reserved": 40, "warehouses": [{ "id": "6500000000000000000000w1", "qty": 1200 }] } },
+      { "sku": "ITEM-1030-25", "attributes": { "pack": "25", "length_in": "24" }, "price": [{ "list": 38.0, "sale": 34.0, "currency": "CAD" }], "inventory": { "stock": 600, "reserved": 10, "warehouses": [{ "id": "6500000000000000000000w1", "qty": 600 }] } }
+    ],
+    "weight": { "value": 22.0, "unit": "kg" },
+    "dimensions": { "length": 62, "width": 22, "height": 22, "unit": "cm" },
+    "shipping": { "class": "freight", "freightClass": "LTL", "shipsFrom": "TOR-FC-01" },
+    "taxClass": "standard",
+    "ratings": { "avg": 4.3, "count": 14 },
+    "reviews": ["690000000000000000000019"],
+    "relatedProducts": ["ITEM-1002", "ITEM-1028"],
+    "seller": { "id": "660000000000000000000005", "name": "BulkBuy Co." },
+    "metadata": { "material": "kraft", "capsIncluded": true },
+    "status": "active",
+    "ops_region": "north-america:ca-on",
+    "published": true,
+    "createdAt": 1680304000000,
+    "updatedAt": 1680304000000
+  },
+  {
+    "_id": "6800000000000000000000i32",
+    "sku": "ITEM-1031",
+    "title": "Biodegradable Produce Netting 50m",
+    "slug": "biodegradable-produce-netting-50m",
+    "description": "Breathable biodegradable netting for produce packaging. Reduces plastic use and maintains airflow for fresh produce.",
+    "shortDescription": "50m roll biodegradable produce netting.",
+    "brand": { "id": "6500000000000000000000b2", "name": "GreenGoods" },
+    "categories": ["610000000000000000000007"],
+    "tags": ["produce", "netting", "biodegradable"],
+    "images": [
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/6879073654256509.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/1454161803105902.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/8822046046422888.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/6289242543124386.jpg"
+    ],
+    "media": [
+      { "type": "video", "s3": "https://cfg-j.s3.amazonaws.com/db-bb/media/2082063729239208.mp4" }
+    ],
+    "price": [{ "list": 32.0, "sale": 27.0, "currency": "CAD", "effectiveFrom": 1680304100000 }],
+    "pricingTiers": [{ "minQty": 10, "price": 25.0, "currency": "CAD" }],
+    "inventory": { "stock": 2200, "reserved": 80, "backorder": false, "warehouses": [{ "id": "6500000000000000000000w2", "qty": 2200 }] },
+    "variants": [
+      { "sku": "ITEM-1031-50M", "attributes": { "length_m": "50" }, "price": [{ "list": 32.0, "sale": 27.0, "currency": "CAD" }], "inventory": { "stock": 2200, "reserved": 80, "warehouses": [{ "id": "6500000000000000000000w2", "qty": 2200 }] } }
+    ],
+    "weight": { "value": 3.0, "unit": "kg" },
+    "dimensions": { "length": 50, "width": 20, "height": 20, "unit": "cm" },
+    "shipping": { "class": "parcel", "shipsFrom": "MTL-CD-01" },
+    "taxClass": "standard",
+    "ratings": { "avg": 4.5, "count": 26 },
+    "reviews": ["690000000000000000000016"],
+    "relatedProducts": ["ITEM-1014"],
+    "seller": { "id": "660000000000000000000003", "name": "GreenGoods" },
+    "metadata": { "compostable": true, "material": "plant-fiber" },
+    "status": "active",
+    "ops_region": "north-america:ca-qc",
+    "published": true,
+    "createdAt": 1680304100000,
+    "updatedAt": 1680304100000
+  },
+  {
+    "_id": "6800000000000000000000i33",
+    "sku": "ITEM-1032",
+    "title": "Bulk Kraft Paper Tape 48mm x 50m (36)",
+    "slug": "bulk-kraft-paper-tape-48mm-50m-36",
+    "description": "Paper-based kraft tape with strong natural adhesive. Recyclable with cardboard and ideal for eco-friendly fulfillment.",
+    "shortDescription": "36-roll case kraft paper tape 48mm x 50m.",
+    "brand": { "id": "6500000000000000000000b2", "name": "GreenGoods" },
+    "categories": ["610000000000000000000002"],
+    "tags": ["tape", "kraft", "eco"],
+    "images": [
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/8675043113830643.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/4132675151077782.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/1784860105714149.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/6382062100064243.jpg"
+    ],
+    "media": [
+      { "type": "video", "s3": "https://cfg-j.s3.amazonaws.com/db-bb/media/4476211489374508.mp4" }
+    ],
+    "price": [{ "list": 78.0, "sale": 69.0, "currency": "CAD", "effectiveFrom": 1680304200000 }],
+    "pricingTiers": [{ "minQty": 6, "price": 65.0, "currency": "CAD" }],
+    "inventory": { "stock": 3600, "reserved": 200, "backorder": false, "warehouses": [{ "id": "6500000000000000000000w1", "qty": 3600 }] },
+    "variants": [
+      { "sku": "ITEM-1032-36", "attributes": { "rolls": "36" }, "price": [{ "list": 78.0, "sale": 69.0, "currency": "CAD" }], "inventory": { "stock": 3600, "reserved": 200, "warehouses": [{ "id": "6500000000000000000000w1", "qty": 3600 }] } }
+    ],
+    "weight": { "value": 4.5, "unit": "kg" },
+    "dimensions": { "length": 6, "width": 6, "height": 6, "unit": "cm" },
+    "shipping": { "class": "parcel", "shipsFrom": "TOR-FC-01" },
+    "taxClass": "standard",
+    "ratings": { "avg": 4.2, "count": 21 },
+    "reviews": ["69000000000000000000000b"],
+    "relatedProducts": ["ITEM-1012", "ITEM-1009"],
+    "seller": { "id": "660000000000000000000003", "name": "GreenGoods" },
+    "metadata": { "recyclableWithCardboard": true },
+    "status": "active",
+    "ops_region": "north-america:ca-on",
+    "published": true,
+    "createdAt": 1680304200000,
+    "updatedAt": 1680304200000
+  },
+  {
+    "_id": "6800000000000000000000i34",
+    "sku": "ITEM-1033",
+    "title": "Reusable Produce Crates 10-pack",
+    "slug": "reusable-produce-crates-10-pack",
+    "description": "Stackable reusable produce crates for retail and distribution. Durable polypropylene with ventilation slots.",
+    "shortDescription": "10-pack stackable produce crates, ventilated.",
+    "brand": { "id": "6500000000000000000000b1", "name": "BulkBuy Co." },
+    "categories": ["610000000000000000000007"],
+    "tags": ["crate", "produce", "reusable"],
+    "images": [
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/5673038326850508.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/4830423366752644.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/7550402534787709.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/2008698722241333.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/6520915020475966.jpg"
+    ],
+    "media": [
+      { "type": "video", "s3": "https://cfg-j.s3.amazonaws.com/db-bb/media/2082063729239208.mp4" }
+    ],
+    "price": [{ "list": 220.0, "sale": 199.0, "currency": "CAD", "effectiveFrom": 1680304300000 }],
+    "pricingTiers": [{ "minQty": 2, "price": 190.0, "currency": "CAD" }],
+    "inventory": { "stock": 420, "reserved": 10, "backorder": false, "warehouses": [{ "id": "6500000000000000000000w1", "qty": 420 }] },
+    "variants": [
+      { "sku": "ITEM-1033-10", "attributes": { "pack": "10" }, "price": [{ "list": 220.0, "sale": 199.0, "currency": "CAD" }], "inventory": { "stock": 420, "reserved": 10, "warehouses": [{ "id": "6500000000000000000000w1", "qty": 420 }] } }
+    ],
+    "weight": { "value": 36.0, "unit": "kg" },
+    "dimensions": { "length": 60, "width": 40, "height": 30, "unit": "cm" },
+    "shipping": { "class": "freight", "freightClass": "LTL", "shipsFrom": "TOR-FC-01" },
+    "taxClass": "standard",
+    "ratings": { "avg": 4.6, "count": 12 },
+    "reviews": ["69000000000000000000001b"],
+    "relatedProducts": ["ITEM-1016"],
+    "seller": { "id": "660000000000000000000005", "name": "BulkBuy Co." },
+    "metadata": { "material": "pp", "stackable": true },
+    "status": "active",
+    "ops_region": "north-america:ca-on",
+    "published": true,
+    "createdAt": 1680304300000,
+    "updatedAt": 1680304300000
+  },
+  {
+    "_id": "6800000000000000000000i35",
+    "sku": "ITEM-1034",
+    "title": "Thermal Insulated Pallet Cover 48x40",
+    "slug": "thermal-insulated-pallet-cover-48x40",
+    "description": "Insulated pallet cover for temperature-sensitive shipments. Reflective inner layer and durable outer shell.",
+    "shortDescription": "Insulated pallet cover for 48x40 pallets.",
+    "brand": { "id": "6500000000000000000000b1", "name": "BulkBuy Co." },
+    "categories": ["610000000000000000000008"],
+    "tags": ["insulated", "pallet", "cold-chain"],
+    "images": [
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/1248792470461874.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/1699567368918689.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/6724951588824789.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/8472276414180575.jpg"
+    ],
+    "media": [
+      { "type": "video", "s3": "https://cfg-j.s3.amazonaws.com/db-bb/media/4476211489374508.mp4" }
+    ],
+    "price": [{ "list": 180.0, "sale": 159.0, "currency": "CAD", "effectiveFrom": 1680304400000 }],
+    "pricingTiers": [{ "minQty": 5, "price": 150.0, "currency": "CAD" }],
+    "inventory": { "stock": 260, "reserved": 8, "backorder": false, "warehouses": [{ "id": "6500000000000000000000w1", "qty": 260 }] },
+    "variants": [
+      { "sku": "ITEM-1034-STD", "attributes": { "size": "48x40" }, "price": [{ "list": 180.0, "sale": 159.0, "currency": "CAD" }], "inventory": { "stock": 260, "reserved": 8, "warehouses": [{ "id": "6500000000000000000000w1", "qty": 260 }] } }
+    ],
+    "weight": { "value": 12.0, "unit": "kg" },
+    "dimensions": { "length": 122, "width": 102, "height": 10, "unit": "cm" },
+    "shipping": { "class": "freight", "freightClass": "LTL", "shipsFrom": "TOR-FC-01" },
+    "taxClass": "medical",
+    "ratings": { "avg": 4.7, "count": 9 },
+    "reviews": ["690000000000000000000010"],
+    "relatedProducts": ["ITEM-1017"],
+    "seller": { "id": "660000000000000000000005", "name": "BulkBuy Co." },
+    "metadata": { "insulationRValue": 3.2, "reflective": true },
+    "status": "active",
+    "ops_region": "north-america:ca-on",
+    "published": true,
+    "createdAt": 1680304400000,
+    "updatedAt": 1680304400000
+  },
+  {
+    "_id": "6800000000000000000000i36",
+    "sku": "ITEM-1035",
+    "title": "Compostable Cutlery Starter Kit 250",
+    "slug": "compostable-cutlery-starter-kit-250",
+    "description": "Starter kit of compostable forks, knives and spoons for small catering operations. Certified compostable and heat-resistant.",
+    "shortDescription": "250-piece compostable cutlery starter kit.",
+    "brand": { "id": "6500000000000000000000b2", "name": "GreenGoods" },
+    "categories": ["610000000000000000000003"],
+    "tags": ["cutlery", "compostable", "kit"],
+    "images": [
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/4830423366752644.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/7550402534787709.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/2008698722241333.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/6520915020475966.jpg"
+    ],
+    "media": [
+      { "type": "video", "s3": "https://cfg-j.s3.amazonaws.com/db-bb/media/2082063729239208.mp4" }
+    ],
+    "price": [{ "list": 38.0, "sale": 33.0, "currency": "CAD", "effectiveFrom": 1680304500000 }],
+    "pricingTiers": [{ "minQty": 5, "price": 30.0, "currency": "CAD" }],
+    "inventory": { "stock": 1400, "reserved": 60, "backorder": false, "warehouses": [{ "id": "6500000000000000000000w2", "qty": 1400 }] },
+    "variants": [
+      { "sku": "ITEM-1035-250", "attributes": { "pack": "250" }, "price": [{ "list": 38.0, "sale": 33.0, "currency": "CAD" }], "inventory": { "stock": 1400, "reserved": 60, "warehouses": [{ "id": "6500000000000000000000w2", "qty": 1400 }] } }
+    ],
+    "weight": { "value": 6.0, "unit": "kg" },
+    "dimensions": { "length": 40, "width": 30, "height": 20, "unit": "cm" },
+    "shipping": { "class": "parcel", "shipsFrom": "MTL-CD-01" },
+    "taxClass": "foodservice",
+    "ratings": { "avg": 4.4, "count": 18 },
+    "reviews": ["69000000000000000000000f"],
+    "relatedProducts": ["ITEM-1003"],
+    "seller": { "id": "660000000000000000000003", "name": "GreenGoods" },
+    "metadata": { "compostable": true, "material": "cornstarch" },
+    "status": "active",
+    "ops_region": "north-america:ca-qc",
+    "published": true,
+    "createdAt": 1680304500000,
+    "updatedAt": 1680304500000
+  },
+  {
+    "_id": "6800000000000000000000i37",
+    "sku": "ITEM-1036",
+    "title": "Retail Shelf Talkers 100-pack",
+    "slug": "retail-shelf-talkers-100-pack",
+    "description": "Durable shelf talkers for in-store promotions. Clear plastic with printable insert slot and adhesive backing.",
+    "shortDescription": "100-pack retail shelf talkers with adhesive backing.",
+    "brand": { "id": "6500000000000000000000b1", "name": "BulkBuy Co." },
+    "categories": ["610000000000000000000009"],
+    "tags": ["retail", "shelf", "promotions"],
+    "images": [
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/6724951588824789.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/8472276414180575.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/7810056996337686.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/7047721300303209.jpg"
+    ],
+    "media": [
+      { "type": "video", "s3": "https://cfg-j.s3.amazonaws.com/db-bb/media/4476211489374508.mp4" }
+    ],
+    "price": [{ "list": 28.0, "sale": 24.0, "currency": "CAD", "effectiveFrom": 1680304600000 }],
+    "pricingTiers": [{ "minQty": 5, "price": 22.0, "currency": "CAD" }],
+    "inventory": { "stock": 3200, "reserved": 160, "backorder": false, "warehouses": [{ "id": "6500000000000000000000w1", "qty": 3200 }] },
+    "variants": [
+      { "sku": "ITEM-1036-100", "attributes": { "pack": "100" }, "price": [{ "list": 28.0, "sale": 24.0, "currency": "CAD" }], "inventory": { "stock": 3200, "reserved": 160, "warehouses": [{ "id": "6500000000000000000000w1", "qty": 3200 }] } }
+    ],
+    "weight": { "value": 6.0, "unit": "kg" },
+    "dimensions": { "length": 40, "width": 30, "height": 10, "unit": "cm" },
+    "shipping": { "class": "parcel", "shipsFrom": "TOR-FC-01" },
+    "taxClass": "retail",
+    "ratings": { "avg": 4.1, "count": 7 },
+    "reviews": ["69000000000000000000001c"],
+    "relatedProducts": ["ITEM-1022", "ITEM-1029"],
+    "seller": { "id": "660000000000000000000005", "name": "BulkBuy Co." },
+    "metadata": { "material": "acrylic", "adhesiveIncluded": true },
+    "status": "active",
+    "ops_region": "north-america:ca-on",
+    "published": true,
+    "createdAt": 1680304600000,
+    "updatedAt": 1680304600000
+  },
+  {
+    "_id": "6800000000000000000000i38",
+    "sku": "ITEM-1037",
+    "title": "Reusable Insulated Delivery Box 60L",
+    "slug": "reusable-insulated-delivery-box-60l",
+    "description": "Large insulated delivery box for meal delivery and catering. Rigid walls, waterproof lining and secure latches.",
+    "shortDescription": "60L rigid insulated delivery box with latches.",
+    "brand": { "id": "6500000000000000000000b1", "name": "BulkBuy Co." },
+    "categories": ["610000000000000000000008"],
+    "tags": ["delivery", "insulated", "box"],
+    "images": [
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/7302883014260721.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/5640283151917107.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/8075772691777775.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/2783062054648613.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/8953532832373919.jpg"
+    ],
+    "media": [
+      { "type": "video", "s3": "https://cfg-j.s3.amazonaws.com/db-bb/media/2082063729239208.mp4" },
+      { "type": "video", "s3": "https://cfg-j.s3.amazonaws.com/db-bb/media/4476211489374508.mp4" }
+    ],
+    "price": [{ "list": 240.0, "sale": 215.0, "currency": "CAD", "effectiveFrom": 1680304700000 }],
+    "pricingTiers": [{ "minQty": 2, "price": 205.0, "currency": "CAD" }],
+    "inventory": { "stock": 120, "reserved": 6, "backorder": false, "warehouses": [{ "id": "6500000000000000000000w1", "qty": 120 }] },
+    "variants": [
+      { "sku": "ITEM-1037-60L", "attributes": { "capacity": "60L" }, "price": [{ "list": 240.0, "sale": 215.0, "currency": "CAD" }], "inventory": { "stock": 120, "reserved": 6, "warehouses": [{ "id": "6500000000000000000000w1", "qty": 120 }] } }
+    ],
+    "weight": { "value": 8.5, "unit": "kg" },
+    "dimensions": { "length": 60, "width": 40, "height": 40, "unit": "cm" },
+    "shipping": { "class": "freight", "freightClass": "LTL", "shipsFrom": "TOR-FC-01" },
+    "taxClass": "foodservice",
+    "ratings": { "avg": 4.6, "count": 31 },
+    "reviews": ["69000000000000000000001d"],
+    "relatedProducts": ["ITEM-1015", "ITEM-1017"],
+    "seller": { "id": "660000000000000000000005", "name": "BulkBuy Co." },
+    "metadata": { "waterproofLining": true, "latchType": "metal" },
+    "status": "active",
+    "ops_region": "north-america:ca-on",
+    "published": true,
+    "createdAt": 1680304700000,
+    "updatedAt": 1680304700000
+  },
+  {
+    "_id": "6800000000000000000000i39",
+    "sku": "ITEM-1038",
+    "title": "Recycled Packing Paper 10kg",
+    "slug": "recycled-packing-paper-10kg",
+    "description": "Loose recycled packing paper for void fill and wrapping. Soft, tear-resistant and recyclable.",
+    "shortDescription": "10kg bag recycled packing paper for packaging.",
+    "brand": { "id": "6500000000000000000000b1", "name": "BulkBuy Co." },
+    "categories": ["610000000000000000000002"],
+    "tags": ["paper", "void-fill", "recycled"],
+    "images": [
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/4132675151077782.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/1784860105714149.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/6382062100064243.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/5673038326850508.jpg"
+    ],
+    "media": [
+      { "type": "video", "s3": "https://cfg-j.s3.amazonaws.com/db-bb/media/4476211489374508.mp4" }
+    ],
+    "price": [{ "list": 26.0, "sale": 22.0, "currency": "CAD", "effectiveFrom": 1680304800000 }],
+    "pricingTiers": [{ "minQty": 10, "price": 20.0, "currency": "CAD" }],
+    "inventory": { "stock": 1800, "reserved": 70, "backorder": false, "warehouses": [{ "id": "6500000000000000000000w1", "qty": 1800 }] },
+    "variants": [
+      { "sku": "ITEM-1038-10KG", "attributes": { "weight": "10kg" }, "price": [{ "list": 26.0, "sale": 22.0, "currency": "CAD" }], "inventory": { "stock": 1800, "reserved": 70, "warehouses": [{ "id": "6500000000000000000000w1", "qty": 1800 }] } }
+    ],
+    "weight": { "value": 10.0, "unit": "kg" },
+    "dimensions": { "length": 50, "width": 40, "height": 20, "unit": "cm" },
+    "shipping": { "class": "parcel", "shipsFrom": "TOR-FC-01" },
+    "taxClass": "standard",
+    "ratings": { "avg": 4.3, "count": 20 },
+    "reviews": ["690000000000000000000018"],
+    "relatedProducts": ["ITEM-1021", "ITEM-1002"],
+    "seller": { "id": "660000000000000000000005", "name": "BulkBuy Co." },
+    "metadata": { "recycledContentPercent": 90 },
+    "status": "active",
+    "ops_region": "north-america:ca-on",
+    "published": true,
+    "createdAt": 1680304800000,
+    "updatedAt": 1680304800000
+  },
+  {
+    "_id": "6800000000000000000000i40",
+    "sku": "ITEM-1039",
+    "title": "Reusable Produce Mesh Bags 50-pack",
+    "slug": "reusable-produce-mesh-bags-50-pack",
+    "description": "Durable mesh produce bags in assorted sizes. Breathable and machine-washable to reduce single-use plastic.",
+    "shortDescription": "50-pack reusable mesh produce bags assorted sizes.",
+    "brand": { "id": "6500000000000000000000b2", "name": "GreenGoods" },
+    "categories": ["610000000000000000000007"],
+    "tags": ["produce", "mesh", "reusable"],
+    "images": [
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/6520915020475966.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/1248792470461874.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/1699567368918689.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/6724951588824789.jpg"
+    ],
+    "media": [
+      { "type": "video", "s3": "https://cfg-j.s3.amazonaws.com/db-bb/media/2082063729239208.mp4" }
+    ],
+    "price": [{ "list": 34.0, "sale": 29.0, "currency": "CAD", "effectiveFrom": 1680304900000 }],
+    "pricingTiers": [{ "minQty": 10, "price": 26.0, "currency": "CAD" }],
+    "inventory": { "stock": 2600, "reserved": 90, "backorder": false, "warehouses": [{ "id": "6500000000000000000000w2", "qty": 2600 }] },
+    "variants": [
+      { "sku": "ITEM-1039-50", "attributes": { "pack": "50" }, "price": [{ "list": 34.0, "sale": 29.0, "currency": "CAD" }], "inventory": { "stock": 2600, "reserved": 90, "warehouses": [{ "id": "6500000000000000000000w2", "qty": 2600 }] } }
+    ],
+    "weight": { "value": 1.2, "unit": "kg" },
+    "dimensions": { "length": 35, "width": 25, "height": 10, "unit": "cm" },
+    "shipping": { "class": "parcel", "shipsFrom": "MTL-CD-01" },
+    "taxClass": "standard",
+    "ratings": { "avg": 4.6, "count": 48 },
+    "reviews": ["69000000000000000000000d"],
+    "relatedProducts": ["ITEM-1014", "ITEM-1031"],
+    "seller": { "id": "660000000000000000000003", "name": "GreenGoods" },
+    "metadata": { "washable": true, "sizesIncluded": ["small","medium","large"] },
+    "status": "active",
+    "ops_region": "north-america:ca-qc",
+    "published": true,
+    "createdAt": 1680304900000,
+    "updatedAt": 1680304900000
+  },
+  {
+    "_id": "6800000000000000000000i41",
+    "sku": "ITEM-1040",
+    "title": "Bulk Compostable Trash Liners 30L (200)",
+    "slug": "bulk-compostable-trash-liners-30l-200",
+    "description": "Compostable trash liners for food waste and organic collection. Strong, tear-resistant and certified for industrial composting.",
+    "shortDescription": "200-pack 30L compostable trash liners.",
+    "brand": { "id": "6500000000000000000000b2", "name": "GreenGoods" },
+    "categories": ["610000000000000000000003"],
+    "tags": ["liner", "compostable", "waste"],
+    "images": [
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/4830423366752644.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/7550402534787709.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/2008698722241333.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/6520915020475966.jpg"
+    ],
+    "media": [
+      { "type": "video", "s3": "https://cfg-j.s3.amazonaws.com/db-bb/media/2082063729239208.mp4" }
+    ],
+    "price": [{ "list": 48.0, "sale": 42.0, "currency": "CAD", "effectiveFrom": 1680305000000 }],
+    "pricingTiers": [{ "minQty": 5, "price": 40.0, "currency": "CAD" }],
+    "inventory": { "stock": 3200, "reserved": 120, "backorder": false, "warehouses": [{ "id": "6500000000000000000000w2", "qty": 3200 }] },
+    "variants": [
+      { "sku": "ITEM-1040-200", "attributes": { "pack": "200", "size_l": "30" }, "price": [{ "list": 48.0, "sale": 42.0, "currency": "CAD" }], "inventory": { "stock": 3200, "reserved": 120, "warehouses": [{ "id": "6500000000000000000000w2", "qty": 3200 }] } }
+    ],
+    "weight": { "value": 12.0, "unit": "kg" },
+    "dimensions": { "length": 50, "width": 40, "height": 20, "unit": "cm" },
+    "shipping": { "class": "parcel", "shipsFrom": "MTL-CD-01" },
+    "taxClass": "standard",
+    "ratings": { "avg": 4.4, "count": 29 },
+    "reviews": ["690000000000000000000007"],
+    "relatedProducts": ["ITEM-1035"],
+    "seller": { "id": "660000000000000000000003", "name": "GreenGoods" },
+    "metadata": { "certifiedCompostable": true, "material": "PLA-blend" },
+    "status": "active",
+    "ops_region": "north-america:ca-qc",
+    "published": true,
+    "createdAt": 1680305000000,
+    "updatedAt": 1680305000000
+  },
+  {
+    "_id": "6800000000000000000000i42",
+    "sku": "ITEM-1041",
+    "title": "Heavy-Duty Corrugated Pads 48x40 (100)",
+    "slug": "heavy-duty-corrugated-pads-48x40-100",
+    "description": "High-strength corrugated pads for pallet separation and protection. Ideal for heavy loads and export packaging.",
+    "shortDescription": "100-pack heavy-duty corrugated pads 48x40.",
+    "brand": { "id": "6500000000000000000000b1", "name": "BulkBuy Co." },
+    "categories": ["610000000000000000000002"],
+    "tags": ["pad", "corrugated", "pallet"],
+    "images": [
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/7047721300303209.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/7302883014260721.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/5640283151917107.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/1784860105714149.jpg"
+    ],
+    "media": [
+      { "type": "video", "s3": "https://cfg-j.s3.amazonaws.com/db-bb/media/4476211489374508.mp4" }
+    ],
+    "price": [{ "list": 420.0, "sale": 389.0, "currency": "CAD", "effectiveFrom": 1680305100000 }],
+    "pricingTiers": [{ "minQty": 2, "price": 370.0, "currency": "CAD" }],
+    "inventory": { "stock": 320, "reserved": 12, "backorder": false, "warehouses": [{ "id": "6500000000000000000000w1", "qty": 320 }] },
+    "variants": [
+      { "sku": "ITEM-1041-100", "attributes": { "pack": "100" }, "price": [{ "list": 420.0, "sale": 389.0, "currency": "CAD" }], "inventory": { "stock": 320, "reserved": 12, "warehouses": [{ "id": "6500000000000000000000w1", "qty": 320 }] } }
+    ],
+    "weight": { "value": 120.0, "unit": "kg" },
+    "dimensions": { "length": 122, "width": 102, "height": 30, "unit": "cm" },
+    "shipping": { "class": "freight", "freightClass": "LTL", "shipsFrom": "TOR-FC-01" },
+    "taxClass": "standard",
+    "ratings": { "avg": 4.3, "count": 10 },
+    "reviews": ["69000000000000000000001b"],
+    "relatedProducts": ["ITEM-1028"],
+    "seller": { "id": "660000000000000000000005", "name": "BulkBuy Co." },
+    "metadata": { "heavyDuty": true, "recyclable": true },
+    "status": "active",
+    "ops_region": "north-america:ca-on",
+    "published": true,
+    "createdAt": 1680305100000,
+    "updatedAt": 1680305100000
+  },
+  {
+    "_id": "6800000000000000000000i43",
+    "sku": "ITEM-1042",
+    "title": "Retail Price Gun Ink Rolls 6-pack",
+    "slug": "retail-price-gun-ink-rolls-6-pack",
+    "description": "Replacement ink rolls for common retail price guns. High-contrast black ink and long life.",
+    "shortDescription": "6-pack replacement ink rolls for price guns.",
+    "brand": { "id": "6500000000000000000000b1", "name": "BulkBuy Co." },
+    "categories": ["610000000000000000000009"],
+    "tags": ["ink", "retail", "price-gun"],
+    "images": [
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/7302883014260721.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/5640283151917107.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/8075772691777775.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/2783062054648613.jpg"
+    ],
+    "media": [
+      { "type": "video", "s3": "https://cfg-j.s3.amazonaws.com/db-bb/media/2082063729239208.mp4" }
+    ],
+    "price": [{ "list": 12.0, "sale": 10.0, "currency": "CAD", "effectiveFrom": 1680305200000 }],
+    "pricingTiers": [{ "minQty": 10, "price": 9.0, "currency": "CAD" }],
+    "inventory": { "stock": 15000, "reserved": 600, "backorder": false, "warehouses": [{ "id": "6500000000000000000000w1", "qty": 15000 }] },
+    "variants": [
+      { "sku": "ITEM-1042-6", "attributes": { "qty": "6" }, "price": [{ "list": 12.0, "sale": 10.0, "currency": "CAD" }], "inventory": { "stock": 15000, "reserved": 600, "warehouses": [{ "id": "6500000000000000000000w1", "qty": 15000 }] } }
+    ],
+    "weight": { "value": 1.2, "unit": "kg" },
+    "dimensions": { "length": 20, "width": 10, "height": 5, "unit": "cm" },
+    "shipping": { "class": "parcel", "shipsFrom": "TOR-FC-01" },
+    "taxClass": "retail",
+    "ratings": { "avg": 4.0, "count": 6 },
+    "reviews": ["690000000000000000000013"],
+    "relatedProducts": ["ITEM-1020"],
+    "seller": { "id": "660000000000000000000005", "name": "BulkBuy Co." },
+    "metadata": { "compatibleGuns": ["Avery 1-line"] },
+    "status": "active",
+    "ops_region": "north-america:ca-on",
+    "published": true,
+    "createdAt": 1680305200000,
+    "updatedAt": 1680305200000
+  },
+  {
+    "_id": "6800000000000000000000i44",
+    "sku": "ITEM-1043",
+    "title": "Eco-Friendly Packing Peanuts 20L",
+    "slug": "eco-friendly-packing-peanuts-20l",
+    "description": "Starch-based packing peanuts that dissolve in water and are compostable. Lightweight protection for fragile items.",
+    "shortDescription": "20L bag eco-friendly packing peanuts (starch-based).",
+    "brand": { "id": "6500000000000000000000b2", "name": "GreenGoods" },
+    "categories": ["610000000000000000000002"],
+    "tags": ["packing", "peanuts", "eco"],
+    "images": [
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/1784860105714149.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/6382062100064243.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/5673038326850508.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/4830423366752644.jpg"
+    ],
+    "media": [
+      { "type": "video", "s3": "https://cfg-j.s3.amazonaws.com/db-bb/media/2082063729239208.mp4" }
+    ],
+    "price": [{ "list": 18.0, "sale": 15.0, "currency": "CAD", "effectiveFrom": 1680305300000 }],
+    "pricingTiers": [{ "minQty": 10, "price": 13.5, "currency": "CAD" }],
+    "inventory": { "stock": 2600, "reserved": 100, "backorder": false, "warehouses": [{ "id": "6500000000000000000000w2", "qty": 2600 }] },
+    "variants": [
+      { "sku": "ITEM-1043-20L", "attributes": { "volume_l": "20" }, "price": [{ "list": 18.0, "sale": 15.0, "currency": "CAD" }], "inventory": { "stock": 2600, "reserved": 100, "warehouses": [{ "id": "6500000000000000000000w2", "qty": 2600 }] } }
+    ],
+    "weight": { "value": 2.0, "unit": "kg" },
+    "dimensions": { "length": 40, "width": 30, "height": 20, "unit": "cm" },
+    "shipping": { "class": "parcel", "shipsFrom": "MTL-CD-01" },
+    "taxClass": "standard",
+    "ratings": { "avg": 4.4, "count": 15 },
+    "reviews": ["690000000000000000000018"],
+    "relatedProducts": ["ITEM-1038", "ITEM-1021"],
+    "seller": { "id": "660000000000000000000003", "name": "GreenGoods" },
+    "metadata": { "dissolvable": true, "material": "starch" },
+    "status": "active",
+    "ops_region": "north-america:ca-qc",
+    "published": true,
+    "createdAt": 1680305300000,
+    "updatedAt": 1680305300000
+  },
+  {
+    "_id": "6800000000000000000000i45",
+    "sku": "ITEM-1044",
+    "title": "Reusable Insulated Cooler Bag 24L",
+    "slug": "reusable-insulated-cooler-bag-24l",
+    "description": "Compact insulated cooler bag for deliveries and picnics. Durable outer shell and thermal lining with zip closure.",
+    "shortDescription": "24L insulated cooler bag with zip closure.",
+    "brand": { "id": "6500000000000000000000b2", "name": "GreenGoods" },
+    "categories": ["610000000000000000000004"],
+    "tags": ["cooler", "insulated", "reusable"],
+    "images": [
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/6724951588824789.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/8472276414180575.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/7810056996337686.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/7047721300303209.jpg"
+    ],
+    "media": [
+      { "type": "video", "s3": "https://cfg-j.s3.amazonaws.com/db-bb/media/4476211489374508.mp4" }
+    ],
+    "price": [{ "list": 48.0, "sale": 42.0, "currency": "CAD", "effectiveFrom": 1680305400000 }],
+    "pricingTiers": [{ "minQty": 10, "price": 39.0, "currency": "CAD" }],
+    "inventory": { "stock": 900, "reserved": 30, "backorder": false, "warehouses": [{ "id": "6500000000000000000000w2", "qty": 900 }] },
+    "variants": [
+      { "sku": "ITEM-1044-24L", "attributes": { "capacity": "24L" }, "price": [{ "list": 48.0, "sale": 42.0, "currency": "CAD" }], "inventory": { "stock": 900, "reserved": 30, "warehouses": [{ "id": "6500000000000000000000w2", "qty": 900 }] } }
+    ],
+    "weight": { "value": 1.1, "unit": "kg" },
+    "dimensions": { "length": 40, "width": 28, "height": 28, "unit": "cm" },
+    "shipping": { "class": "parcel", "shipsFrom": "MTL-CD-01" },
+    "taxClass": "standard",
+    "ratings": { "avg": 4.5, "count": 22 },
+    "reviews": ["69000000000000000000000f"],
+    "relatedProducts": ["ITEM-1037", "ITEM-1015"],
+    "seller": { "id": "660000000000000000000003", "name": "GreenGoods" },
+    "metadata": { "washable": true, "waterproofLining": true },
+    "status": "active",
+    "ops_region": "north-america:ca-qc",
+    "published": true,
+    "createdAt": 1680305400000,
+    "updatedAt": 1680305400000
+  },
+  {
+    "_id": "6800000000000000000000i46",
+    "sku": "ITEM-1045",
+    "title": "Bulk Retail Price Labels 1x2 10,000",
+    "slug": "bulk-retail-price-labels-1x2-10000",
+    "description": "High-volume thermal price labels for retail operations. Compatible with major price guns and label printers.",
+    "shortDescription": "10,000 thermal price labels 1x2 for retail.",
+    "brand": { "id": "6500000000000000000000b1", "name": "BulkBuy Co." },
+    "categories": ["610000000000000000000009"],
+    "tags": ["label", "retail", "bulk"],
+    "images": [
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/7302883014260721.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/5640283151917107.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/8075772691777775.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/2783062054648613.jpg"
+    ],
+    "media": [
+      { "type": "video", "s3": "https://cfg-j.s3.amazonaws.com/db-bb/media/2082063729239208.mp4" }
+    ],
+    "price": [{ "list": 120.0, "sale": 105.0, "currency": "CAD", "effectiveFrom": 1680305500000 }],
+    "pricingTiers": [{ "minQty": 5, "price": 99.0, "currency": "CAD" }],
+    "inventory": { "stock": 20000, "reserved": 800, "backorder": false, "warehouses": [{ "id": "6500000000000000000000w1", "qty": 20000 }] },
+    "variants": [
+      { "sku": "ITEM-1045-10000", "attributes": { "qty": "10000" }, "price": [{ "list": 120.0, "sale": 105.0, "currency": "CAD" }], "inventory": { "stock": 20000, "reserved": 800, "warehouses": [{ "id": "6500000000000000000000w1", "qty": 20000 }] } }
+    ],
+    "weight": { "value": 7.0, "unit": "kg" },
+    "dimensions": { "length": 50, "width": 40, "height": 10, "unit": "cm" },
+    "shipping": { "class": "parcel", "shipsFrom": "TOR-FC-01" },
+    "taxClass": "retail",
+    "ratings": { "avg": 4.1, "count": 11 },
+    "reviews": ["690000000000000000000018"],
+    "relatedProducts": ["ITEM-1020", "ITEM-1025"],
+    "seller": { "id": "660000000000000000000005", "name": "BulkBuy Co." },
+    "metadata": { "thermal": true, "compatibleGuns": ["Avery 1-line","Sato 2-line"] },
+    "status": "active",
+    "ops_region": "north-america:ca-on",
+    "published": true,
+    "createdAt": 1680305500000,
+    "updatedAt": 1680305500000
+  },
+  {
+    "_id": "6800000000000000000000i47",
+    "sku": "ITEM-1046",
+    "title": "Reusable Insulated Food Box 30L",
+    "slug": "reusable-insulated-food-box-30l",
+    "description": "Rigid insulated food box for hot/cold deliveries. Stackable design and reinforced handles for courier use.",
+    "shortDescription": "30L rigid insulated food box, stackable.",
+    "brand": { "id": "6500000000000000000000b1", "name": "BulkBuy Co." },
+    "categories": ["610000000000000000000008"],
+    "tags": ["food", "insulated", "box"],
+    "images": [
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/7047721300303209.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/7302883014260721.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/5640283151917107.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/1784860105714149.jpg"
+    ],
+    "media": [
+      { "type": "video", "s3": "https://cfg-j.s3.amazonaws.com/db-bb/media/4476211489374508.mp4" }
+    ],
+    "price": [{ "list": 160.0, "sale": 145.0, "currency": "CAD", "effectiveFrom": 1680305600000 }],
+    "pricingTiers": [{ "minQty": 3, "price": 138.0, "currency": "CAD" }],
+    "inventory": { "stock": 220, "reserved": 10, "backorder": false, "warehouses": [{ "id": "6500000000000000000000w1", "qty": 220 }] },
+    "variants": [
+      { "sku": "ITEM-1046-30L", "attributes": { "capacity": "30L" }, "price": [{ "list": 160.0, "sale": 145.0, "currency": "CAD" }], "inventory": { "stock": 220, "reserved": 10, "warehouses": [{ "id": "6500000000000000000000w1", "qty": 220 }] } }
+    ],
+    "weight": { "value": 6.0, "unit": "kg" },
+    "dimensions": { "length": 50, "width": 35, "height": 30, "unit": "cm" },
+    "shipping": { "class": "freight", "freightClass": "LTL", "shipsFrom": "TOR-FC-01" },
+    "taxClass": "foodservice",
+    "ratings": { "avg": 4.5, "count": 16 },
+    "reviews": ["69000000000000000000001d"],
+    "relatedProducts": ["ITEM-1037", "ITEM-1015"],
+    "seller": { "id": "660000000000000000000005", "name": "BulkBuy Co." },
+    "metadata": { "stackable": true, "latchType": "plastic" },
+    "status": "active",
+    "ops_region": "north-america:ca-on",
+    "published": true,
+    "createdAt": 1680305600000,
+    "updatedAt": 1680305600000
+  },
+  {
+    "_id": "6800000000000000000000i48",
+    "sku": "ITEM-1047",
+    "title": "Compostable Food Service Gloves 1000",
+    "slug": "compostable-food-service-gloves-1000",
+    "description": "Compostable single-use gloves for food handling. Powder-free and certified compostable for industrial facilities.",
+    "shortDescription": "1,000 compostable food service gloves, powder-free.",
+    "brand": { "id": "6500000000000000000000b2", "name": "GreenGoods" },
+    "categories": ["610000000000000000000003"],
+    "tags": ["gloves", "compostable", "foodservice"],
+    "images": [
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/4830423366752644.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/7550402534787709.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/2008698722241333.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/6520915020475966.jpg"
+    ],
+    "media": [
+      { "type": "video", "s3": "https://cfg-j.s3.amazonaws.com/db-bb/media/2082063729239208.mp4" }
+    ],
+    "price": [{ "list": 95.0, "sale": 85.0, "currency": "CAD", "effectiveFrom": 1680305700000 }],
+    "pricingTiers": [{ "minQty": 5, "price": 80.0, "currency": "CAD" }],
+    "inventory": { "stock": 1800, "reserved": 60, "backorder": false, "warehouses": [{ "id": "6500000000000000000000w2", "qty": 1800 }] },
+    "variants": [
+      { "sku": "ITEM-1047-1000", "attributes": { "qty": "1000", "size": "universal" }, "price": [{ "list": 95.0, "sale": 85.0, "currency": "CAD" }], "inventory": { "stock": 1800, "reserved": 60, "warehouses": [{ "id": "6500000000000000000000w2", "qty": 1800 }] } }
+    ],
+    "weight": { "value": 9.0, "unit": "kg" },
+    "dimensions": { "length": 50, "width": 40, "height": 20, "unit": "cm" },
+    "shipping": { "class": "parcel", "shipsFrom": "MTL-CD-01" },
+    "taxClass": "medical",
+    "ratings": { "avg": 4.2, "count": 12 },
+    "reviews": ["69000000000000000000000e"],
+    "relatedProducts": ["ITEM-1035"],
+    "seller": { "id": "660000000000000000000003", "name": "GreenGoods" },
+    "metadata": { "certifiedCompostable": true, "powderFree": true },
+    "status": "active",
+    "ops_region": "north-america:ca-qc",
+    "published": true,
+    "createdAt": 1680305700000,
+    "updatedAt": 1680305700000
+  },
+  {
+    "_id": "6800000000000000000000i49",
+    "sku": "ITEM-1048",
+    "title": "Bulk Corrugated Dividers 12x12 (200)",
+    "slug": "bulk-corrugated-dividers-12x12-200",
+    "description": "Corrugated dividers for multi-pack shipping and product separation. Recyclable and easy to assemble.",
+    "shortDescription": "200-pack corrugated dividers 12x12 for multi-pack shipping.",
+    "brand": { "id": "6500000000000000000000b1", "name": "BulkBuy Co." },
+    "categories": ["610000000000000000000002"],
+    "tags": ["divider", "corrugated", "packaging"],
+    "images": [
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/7047721300303209.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/7302883014260721.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/5640283151917107.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/1784860105714149.jpg"
+    ],
+    "media": [
+      { "type": "video", "s3": "https://cfg-j.s3.amazonaws.com/db-bb/media/4476211489374508.mp4" }
+    ],
+    "price": [{ "list": 95.0, "sale": 85.0, "currency": "CAD", "effectiveFrom": 1680305800000 }],
+    "pricingTiers": [{ "minQty": 5, "price": 80.0, "currency": "CAD" }],
+    "inventory": { "stock": 2400, "reserved": 80, "backorder": false, "warehouses": [{ "id": "6500000000000000000000w1", "qty": 2400 }] },
+    "variants": [
+      { "sku": "ITEM-1048-200", "attributes": { "pack": "200" }, "price": [{ "list": 95.0, "sale": 85.0, "currency": "CAD" }], "inventory": { "stock": 2400, "reserved": 80, "warehouses": [{ "id": "6500000000000000000000w1", "qty": 2400 }] } }
+    ],
+    "weight": { "value": 28.0, "unit": "kg" },
+    "dimensions": { "length": 30, "width": 30, "height": 30, "unit": "cm" },
+    "shipping": { "class": "freight", "freightClass": "LTL", "shipsFrom": "TOR-FC-01" },
+    "taxClass": "standard",
+    "ratings": { "avg": 4.2, "count": 8 },
+    "reviews": ["69000000000000000000001b"],
+    "relatedProducts": ["ITEM-1005", "ITEM-1028"],
+    "seller": { "id": "660000000000000000000005", "name": "BulkBuy Co." },
+    "metadata": { "recyclable": true, "singleWall": true },
+    "status": "active",
+    "ops_region": "north-america:ca-on",
+    "published": true,
+    "createdAt": 1680305800000,
+    "updatedAt": 1680305800000
+  },
+  {
+    "_id": "6800000000000000000000i50",
+    "sku": "ITEM-1049",
+    "title": "Eco Shipping Labels 4x6 2,500",
+    "slug": "eco-shipping-labels-4x6-2500",
+    "description": "4x6 shipping labels on recycled paper stock. High-contrast thermal printable and optimized for common label printers.",
+    "shortDescription": "2,500 recycled 4x6 thermal shipping labels.",
+    "brand": { "id": "6500000000000000000000b1", "name": "BulkBuy Co." },
+    "categories": ["610000000000000000000002"],
+    "tags": ["label", "shipping", "eco"],
+    "images": [
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/8075772691777775.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/2783062054648613.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/8953532832373919.jpg",
+      "https://cfg-j.s3.amazonaws.com/db-bb/images/0174569077814421.jpg"
+    ],
+    "media": [
+      { "type": "video", "s3": "https://cfg-j.s3.amazonaws.com/db-bb/media/2082063729239208.mp4" }
+    ],
+    "price": [{ "list": 95.0, "sale": 85.0, "currency": "CAD", "effectiveFrom": 1680305900000 }],
+    "pricingTiers": [{ "minQty": 5, "price": 80.0, "currency": "CAD" }],
+    "inventory": { "stock": 12000, "reserved": 400, "backorder": false, "warehouses": [{ "id": "6500000000000000000000w1", "qty": 12000 }] },
+    "variants": [
+      { "sku": "ITEM-1049-2500", "attributes": { "qty": "2500", "size_in": "4x6" }, "price": [{ "list": 95.0, "sale": 85.0, "currency": "CAD" }], "inventory": { "stock": 12000, "reserved": 400, "warehouses": [{ "id": "6500000000000000000000w1", "qty": 12000 }] } }
+    ],
+    "weight": { "value": 6.5, "unit": "kg" },
+    "dimensions": { "length": 40, "width": 30, "height": 10, "unit": "cm" },
+    "shipping": { "class": "parcel", "shipsFrom": "TOR-FC-01" },
+    "taxClass": "standard",
+    "ratings": { "avg": 4.1, "count": 10 },
+    "reviews": ["690000000000000000000018"],
+    "relatedProducts": ["ITEM-1021", "ITEM-1045"],
+    "seller": { "id": "660000000000000000000005", "name": "BulkBuy Co." },
+    "metadata": { "recycledContentPercent": 80, "thermal": true },
+    "status": "active",
+    "ops_region": "north-america:ca-on",
+    "published": true,
+    "createdAt": 1680305900000,
+    "updatedAt": 1680305900000
+  }
+]

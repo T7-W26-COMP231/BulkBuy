@@ -1,0 +1,22 @@
+[
+  {
+    "_id": "6500000000000000000000b1" ,
+    "name": "BulkBuy Co.",
+    "slug": "bulkbuy-co",
+    "description": "Wholesale supplier of packaging and reusable goods.",
+    "logoRef": "64a1f00000000000000000002",
+    "metadata": { "website": "https://bulkbuy.example", "origin": "CA" },
+    "createdAt": 1680300100000,
+    "updatedAt": 1680300100000
+  },
+  {
+    "_id": "6500000000000000000000b2",
+    "name": "GreenGoods",
+    "slug": "greengoods",
+    "description": "Eco-friendly consumer goods and packaging.",
+    "logoRef": "64a1f00000000000000000001",
+    "metadata": { "website": "https://greengoods.example", "sustainability": true },
+    "createdAt": 1680300200000,
+    "updatedAt": 1680300200000
+  }
+]

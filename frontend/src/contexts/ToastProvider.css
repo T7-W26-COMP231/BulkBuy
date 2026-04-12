@@ -1,0 +1,395 @@
+/* src/contexts/ToastProvider.css
+   Polished stylesheet for utoast provider
+   - Carousel and hamburger are adjacent and flush: [carousel track]|[hamburger]
+   - Thumbnails have 2px dashed black border and centered labels/images
+   - Pinned tab spring/tuck animation with 1s linger
+   - Backdrop blur when html.utoast-blur is present
+   - Tweak variables at the top to customize sizes/behavior
+*/
+
+:root{
+  --utoast-bg: rgba(255,255,255,0.98);
+  --utoast-accent: #16a34a;
+  /* --utoast-accent: #2563eb; */
+  --utoast-shadow: 0 8px 24px rgba(16,24,40,0.12);
+  --utoast-glow: 0 0 18px rgba(37,99,235,0.12);
+  --utoast-radius: 10px;
+  --utoast-z-base: 10000;
+  --utoast-carousel-height: 72px;
+  --utoast-thumbnail-size: 56px;
+  --utoast-thumbnail-gap: 8px;
+  --utoast-tab-collapsed-offset: 6px; /* visible sliver when collapsed */
+  --utoast-tab-hover-width: calc(var(--utoast-thumbnail-size) + 8px);
+  --utoast-tab-spring-duration: 220ms; /* fast spring in */
+  --utoast-tab-tuck-duration: 600ms;   /* slow tuck away */
+  --utoast-tab-linger-delay: 1s;       /* linger before tuck */
+  --utoast-gap: 12px;
+  --utoast-font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+
+  /* Replace this value with the exact color you want (hex, rgb, or rgba).
+     Default is near-black at 75% opacity. */
+  --utoast-blur-color: rgba(0, 0, 0, 0.75);
+  --utoast-blur-backdrop: blur(6px); /* adjust blur strength */
+}
+
+
+/* Backdrop blur when provider toggles html.utoast-blur */
+html.utoast-blur::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  /* z-index: calc(var(--utoast-z-base) - 1); */
+  z-index: 100;
+  margin-top: 2em;
+  pointer-events: none;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  background: rgba(12, 12, 12, 0.741);
+}
+
+/* Root */
+html.utoast-theme { font-family: var(--utoast-font); }
+.utoast-root {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: var(--utoast-z-base);
+  font-family: var(--utoast-font);
+}
+
+/* Corner containers */
+.utoast-corner {
+  position: fixed;
+  display: flex;
+  flex-direction: column;
+  gap: var(--utoast-gap);
+  padding: 12px;
+  pointer-events: none;
+}
+.utoast-corner[aria-live] { pointer-events: auto; }
+.utoast-corner.tr { top: 12px; right: 12px; align-items: flex-end; }
+.utoast-corner.tl { top: 12px; left: 12px; align-items: flex-start; }
+.utoast-corner.br { bottom: 12px; right: 12px; align-items: flex-end; }
+.utoast-corner.bl { bottom: 12px; left: 12px; align-items: flex-start; }
+
+/* Toast item */
+.utoast-item {
+  pointer-events: auto;
+  background: var(--utoast-bg);
+  border-radius: var(--utoast-radius);
+  box-shadow: var(--utoast-shadow);
+  border: 1px solid rgba(0,0,0,0.04);
+  padding: 8px;
+  display: inline-block;
+  position: relative;
+  transition: transform 260ms cubic-bezier(.2,.9,.2,1), opacity 220ms ease;
+  will-change: transform, opacity;
+  outline: none;
+}
+.utoast-item.glow { box-shadow: var(--utoast-shadow), var(--utoast-glow); }
+
+/* HVC layer and cards */
+.utoast-hvc-layer {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  max-width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+.utoast-hvc-stack {
+  position: relative;
+  width: 100%;
+  max-width: 920px;
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  
+}
+.utoast-card {
+  width: 420px;
+  max-width: calc(100% - 48px);
+  /* background: var(--utoast-bg); */
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: var(--utoast-shadow);
+  transform-origin: center;
+  cursor: default;
+  background-color: #0adbc6;
+}
+
+/* Carousel viewport (top center) */
+.utoast-carousel-viewport {
+  position: fixed;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  max-width: 920px;
+  height: var(--utoast-carousel-height);
+  display: flex !important;
+  align-items: flex-end;
+  justify-content: flex-end;
+  align-content: flex-end;
+  pointer-events: auto;
+  z-index: calc(var(--utoast-z-base) + 50);
+}
+
+/* Carousel container: track (flex:1) and hamburger (fixed width) sit side-by-side */
+.utoast-carousel {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0; /* ensure no extra gap between track and hamburger */
+  pointer-events: auto;
+}
+
+/* Scrollable track (left side) */
+.utoast-carousel-scroll {
+  flex: 1 1 auto;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.utoast-carousel-scroll::-webkit-scrollbar { display: none; }
+
+/* Track holds thumbnails */
+.utoast-carousel-track {
+  display: inline-flex;
+  gap: var(--utoast-thumbnail-gap);
+  align-items: center;
+  padding-right: 0; /* removed breathing room so track sits flush with hamburger */
+  will-change: transform;
+}
+
+/* Thumbnails: centered text and image; dashed 2px black border */
+.utoast-thumb {
+  width: var(--utoast-thumbnail-size);
+  height: var(--utoast-thumbnail-size);
+  border-radius: 8px;
+  background: linear-gradient(180deg,#f3f4f6,#fff);
+  display: flex;                 /* center content */
+  align-items: center;           /* vertical center */
+  justify-content: center;       /* horizontal center */
+  text-align: center;
+  font-size: 12px;
+  color: #111827;
+  cursor: pointer;
+  border: 0.5px dashed #000;       /* dashed 2px black border as requested */
+  box-shadow: 0 4px 10px rgba(2,6,23,0.06);
+  flex: 0 0 auto;
+  user-select: none;
+  padding: 4px;
+  box-sizing: border-box;
+  line-height: 1;
+  overflow: hidden;
+  white-space: normal;
+  word-break: break-word;
+}
+.utoast-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 6px;
+  display: block;
+}
+.utoast-thumb > span {
+  display: inline-block;
+  max-width: 100%;
+  padding: 0 2px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap; /* single-line label; remove if you want multi-line */
+}
+
+/* Hamburger: placed to the right of the carousel track (adjacent) */
+/* Removed margin-left so the hamburger sits flush against the track */
+.utoast-hamburger {
+  flex: 0 0 auto;
+  width: var(--utoast-thumbnail-size);
+  height: var(--utoast-thumbnail-size);
+  border-radius: 8px;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: calc(var(--utoast-z-base) + 100);
+  border: 2px solid var(--utoast-accent);
+  box-shadow: 0 6px 18px rgba(37,99,235,0.12);
+  cursor: pointer;
+  margin-left: 0; /* ensure no gap */
+  position: relative;
+}
+/* subtle vertical separator moved inside hamburger to avoid external gap */
+.utoast-hamburger::before {
+  content: "";
+  position: absolute;
+  left: -6px; /* small overlap so separator visually touches track */
+  top: 12%;
+  bottom: 12%;
+  width: 1px;
+  background: rgba(0,0,0,0.06);
+  border-radius: 1px;
+  pointer-events: none;
+}
+.utoast-hamburger:focus { outline: 2px solid rgba(37,99,235,0.18); }
+.utoast-hamburger .line { width: 18px; height: 2px; background: var(--utoast-accent); border-radius: 2px; }
+.utoast-hamburger .line + .line { margin-top: 6px; }
+
+/* Pinned tab spring/tuck animation */
+/* Keyframes: spring in (overshoot then settle) */
+@keyframes utoast-tab-spring-in {
+  0% { transform: translateX(calc(100% - var(--utoast-tab-collapsed-offset))); }
+  60% { transform: translateX(-8px); } /* slight overshoot */
+  100% { transform: translateX(0); }
+}
+
+/* Pinned tab base (collapsed) */
+.utoast-pinned-tab {
+  position: fixed;
+  top: 5em;
+  right: 0;
+  transform-origin: left center;
+  background: var(--utoast-accent);
+  color: white;
+  height: auto;
+  max-height: calc(var(--utoast-thumbnail-size) + 5em);
+  padding: 6px 10px;
+  border-radius: 6px 0 0 6px;
+  cursor: pointer;
+  z-index: calc(var(--utoast-z-base) + 200);
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  font-weight: 700;
+  letter-spacing: 1px;
+  box-shadow: 0 6px 18px rgba(37,99,235,0.12);
+  white-space: nowrap;
+  box-sizing: border-box;
+  overflow: hidden;
+
+  /* collapsed: push the tab off-screen except for a small visible sliver */
+  transform: translateX(calc(100% - var(--utoast-tab-collapsed-offset)));
+
+  /* slow tuck-away with linger delay */
+  transition-property: transform, width, right;
+  transition-duration: var(--utoast-tab-tuck-duration);
+  transition-timing-function: cubic-bezier(.2,.8,.2,1);
+  transition-delay: var(--utoast-tab-linger-delay);
+  width: auto;
+}
+.utoast-pinned-tab > span { display: inline-block; transform: rotate(0deg); line-height: 1; font-size: 12px; padding: 2px 0; }
+
+/* Hover/focus: reveal immediately with spring animation; cancel tuck delay */
+.utoast-pinned-tab:hover,
+.utoast-pinned-tab:focus {
+  animation: utoast-tab-spring-in var(--utoast-tab-spring-duration) cubic-bezier(.2,1.2,.2,1) both;
+  transition-delay: 0s;
+  transform: translateX(0);
+  width: var(--utoast-tab-hover-width);
+  right: 8px;
+}
+
+/* Animations mapping (other toasts) */
+.utoast-anim-fl { transform: translateX(-20px); opacity: 0; }
+.utoast-anim-fr { transform: translateX(20px); opacity: 0; }
+.utoast-anim-ft { transform: translateY(-20px); opacity: 0; }
+.utoast-anim-fb { transform: translateY(20px); opacity: 0; }
+.utoast-anim-enter { transform: translateX(0) translateY(0) scale(1); opacity: 1; }
+
+/* fade out helper */
+.utoast-exit { opacity: 0; transform: scale(0.98); transition: opacity 180ms ease, transform 180ms ease; }
+
+/* small utilities */
+.utoast-controls { display:flex; gap:8px; margin-top:8px; justify-content:flex-end; }
+
+/* Focus and accessibility helpers */
+.utoast-thumb:focus { outline: 2px solid rgba(37,99,235,0.18); border-color: rgba(37,99,235,0.18); }
+.utoast-pinned-tab:focus { outline: 2px solid rgba(255,255,255,0.18); }
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .utoast-carousel-viewport { width: calc(100% - 24px); left: 50%; transform: translateX(-50%); }
+  .utoast-carousel { gap: 6px; }
+  .utoast-hamburger { width: 48px; height: 48px; }
+  .utoast-thumb { width: 48px; height: 48px; }
+}
+
+
+
+/* --- */
+
+
+/* Ensure toast container and cards remain interactive above the blur */
+.utoast-root,
+.utoast-card,
+.utoast-item {
+  position: relative;
+  z-index: 900;                 /* above the blur overlay */
+  pointer-events: auto;
+}
+
+
+/* fallback if header variable not set */
+:root { --header-height: 64px; }
+
+/* top offset used by the toast system: header height + 5px gap */
+:root { --utoast-top-offset: calc(var(--header-height) + 5px); }
+
+/* push the toast root down so nothing overlaps the header */
+.utoast-root {
+  /* preserve existing rules, add padding-top driven by header height + 5px */
+  padding-top: var(--utoast-top-offset);
+  box-sizing: border-box;
+}
+
+/* ensure top-centered carousel sits below header */
+.utoast-carousel-viewport {
+  top: var(--utoast-top-offset) !important;
+  transform: translateX(-50%); /* keep horizontally centered */
+}
+
+/* top corner containers align with the offset */
+.utoast-corner.tr,
+.utoast-corner.tl {
+  top: var(--utoast-top-offset) !important;
+}
+
+/* optional: nudge HVC layer slightly down so centered modals don't overlap header on small screens */
+.utoast-hvc-layer {
+  /* keep centered but nudge down by half the offset to avoid overlap */
+  top: calc(50% + (var(--utoast-top-offset) / 2));
+  transform: translate(-50%, -50%);
+}
+
+/* keep carousel inert when there are no visible stack items (existing aria-hidden usage) */
+.utoast-carousel-viewport[aria-hidden="true"],
+.utoast-carousel-viewport[aria-hidden="true"] .utoast-carousel,
+.utoast-carousel-viewport[aria-hidden="true"] .utoast-carousel-track {
+  pointer-events: none;
+  visibility: hidden; /* optional: hide completely when aria-hidden true */
+}
+
+/* when visible, ensure it is visible and interactive */
+.utoast-carousel-viewport[aria-hidden="false"] {
+  pointer-events: auto;
+  visibility: visible;
+}
+
+
+/* --- */

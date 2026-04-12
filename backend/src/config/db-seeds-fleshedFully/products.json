@@ -1,0 +1,1199 @@
+[
+  {
+    "_id": "770000000000000000000001",
+    "name": "Reusable Grocery Tote Pack (Set of 5)",
+    "descriptions": [
+      {
+        "locale": "en",
+        "title": "Durable Reusable Grocery Totes",
+        "body": "Set of 5 heavy-duty reusable grocery totes with reinforced handles and water-resistant lining. Designed for bulk orders and retail displays. Machine-washable and foldable for easy storage."
+      }
+    ],
+    "items": [
+      {
+        "itemId": "6800000000000000000000i01",
+        "salesPrices": [
+          {
+            "price": 12.5,
+            "currency": "CAD",
+            "from": 1680303600000,
+            "to": 1711849600000
+          }
+        ]
+      }
+    ],
+    "discountScheme": {
+      "type": "tiered",
+      "tiers": [
+        { "minQty": 10, "discountPct": 5 },
+        { "minQty": 50, "discountPct": 12 },
+        { "minQty": 200, "discountPct": 20 }
+      ]
+    },
+    "salesWindow": { "fromEpoch": 1680303600000, "toEpoch": 1711849600000 },
+    "ops_region": "north-america:ca-on",
+    "metadata": { "category": "reusable-bags", "brand": "EcoCarry" },
+    "status": "active",
+    "reviews": ["690000000000000000000001", "690000000000000000000016"],
+    "deleted": false,
+    "deletedAt": null,
+    "deletedBy": null,
+    "createdAt": 1680303600000,
+    "updatedAt": 1680303600000
+  },
+  {
+    "_id": "770000000000000000000002",
+    "name": "Stackable Pallet Wrap Kit",
+    "descriptions": [
+      {
+        "locale": "en",
+        "title": "Industrial Pallet Wrap Kit",
+        "body": "High-strength stretch wrap and corner protectors for palletized shipments. Improves stacking stability and reduces damage during transit. Includes 6 rolls and 200 corner protectors."
+      }
+    ],
+    "items": [
+      {
+        "itemId": "6800000000000000000000i02",
+        "salesPrices": [
+          {
+            "price": 89.99,
+            "currency": "CAD",
+            "from": 1680303600000,
+            "to": 1711849600000
+          }
+        ]
+      }
+    ],
+    "discountScheme": { "type": "volume", "rules": [{ "minQty": 5, "discountPct": 7 }, { "minQty": 20, "discountPct": 15 }] },
+    "salesWindow": { "fromEpoch": 1680303600000, "toEpoch": 1711849600000 },
+    "ops_region": "north-america:ca-qc",
+    "metadata": { "supplyType": "packaging", "leadTimeDays": 3 },
+    "status": "active",
+    "reviews": ["690000000000000000000002"],
+    "deleted": false,
+    "deletedAt": null,
+    "deletedBy": null,
+    "createdAt": 1680303700000,
+    "updatedAt": 1680303700000
+  },
+  {
+    "_id": "770000000000000000000003",
+    "name": "Warehouse Barcode Label Roll (5000)",
+    "descriptions": [
+      {
+        "locale": "en",
+        "title": "High-Contrast Barcode Labels",
+        "body": "Thermal barcode label rolls optimized for warehouse scanners. 5000 labels per roll, strong adhesive, and resistant to smudging. Ideal for inventory and receiving."
+      }
+    ],
+    "items": [
+      {
+        "itemId": "6800000000000000000000i03",
+        "salesPrices": [
+          {
+            "price": 34.0,
+            "currency": "CAD",
+            "from": 1680303600000,
+            "to": 1711849600000
+          }
+        ]
+      }
+    ],
+    "discountScheme": { "type": "flat", "bulkDiscount": { "minQty": 10, "price": 30.0 } },
+    "salesWindow": { "fromEpoch": 1680303600000, "toEpoch": 1711849600000 },
+    "ops_region": "north-america:ca-on",
+    "metadata": { "warehouseFriendly": true, "barcodeType": "Code128" },
+    "status": "active",
+    "reviews": ["690000000000000000000004", "690000000000000000000018"],
+    "deleted": false,
+    "deletedAt": null,
+    "deletedBy": null,
+    "createdAt": 1680303800000,
+    "updatedAt": 1680303800000
+  },
+  {
+    "_id": "770000000000000000000004",
+    "name": "Bulk Membership Coffee Beans 10kg",
+    "descriptions": [
+      {
+        "locale": "en",
+        "title": "Premium Roasted Coffee Beans",
+        "body": "Single-origin medium roast coffee beans sold in 10kg bulk bags. Roasted to order for freshness. Member pricing available for subscription and bulk buyers."
+      }
+    ],
+    "items": [
+      {
+        "itemId": "6800000000000000000000i04",
+        "salesPrices": [
+          {
+            "price": 220.0,
+            "currency": "CAD",
+            "from": 1680303600000,
+            "to": 1711849600000
+          }
+        ]
+      }
+    ],
+    "discountScheme": { "type": "membership", "memberDiscountPct": 10 },
+    "salesWindow": { "fromEpoch": 1680303600000, "toEpoch": 1711849600000 },
+    "ops_region": "north-america:ca-on",
+    "metadata": { "bulkOrder": true, "roastDateWindowDays": 7 },
+    "status": "active",
+    "reviews": ["690000000000000000000005", "690000000000000000000019"],
+    "deleted": false,
+    "deletedAt": null,
+    "deletedBy": null,
+    "createdAt": 1680303900000,
+    "updatedAt": 1680303900000
+  },
+  {
+    "_id": "770000000000000000000005",
+    "name": "Eco-Friendly Shipping Boxes (50 pack)",
+    "descriptions": [
+      {
+        "locale": "en",
+        "title": "Recyclable Corrugated Boxes",
+        "body": "Set of 50 recyclable corrugated shipping boxes with reinforced seams. Designed for e-commerce and B2B shipments. Sizes optimized for common SKUs to reduce wasted space."
+      }
+    ],
+    "items": [
+      {
+        "itemId": "6800000000000000000000i05",
+        "salesPrices": [
+          {
+            "price": 74.5,
+            "currency": "CAD",
+            "from": 1680303900000,
+            "to": 1711849600000
+          }
+        ]
+      }
+    ],
+    "discountScheme": { "type": "tiered", "tiers": [{ "minQty": 5, "discountPct": 6 }, { "minQty": 25, "discountPct": 14 }] },
+    "salesWindow": { "fromEpoch": 1680303900000, "toEpoch": 1711849600000 },
+    "ops_region": "north-america:ca-on",
+    "metadata": { "ecoPackaging": true, "material": "100% recycled" },
+    "status": "active",
+    "reviews": ["690000000000000000000006"],
+    "deleted": false,
+    "deletedAt": null,
+    "deletedBy": null,
+    "createdAt": 1680304000000,
+    "updatedAt": 1680304000000
+  },
+  {
+    "_id": "770000000000000000000006",
+    "name": "Premium Shipping Tape (36 rolls)",
+    "descriptions": [
+      {
+        "locale": "en",
+        "title": "Heavy-Duty Shipping Tape",
+        "body": "36-roll case of heavy-duty shipping tape with strong adhesive and UV resistance. Works on corrugated cardboard and plastic-wrapped pallets. Dispenser-friendly core size."
+      }
+    ],
+    "items": [
+      {
+        "itemId": "6800000000000000000000i06",
+        "salesPrices": [
+          {
+            "price": 59.99,
+            "currency": "CAD",
+            "from": 1680304000000,
+            "to": 1711849600000
+          }
+        ]
+      }
+    ],
+    "discountScheme": { "type": "volume", "rules": [{ "minQty": 3, "discountPct": 8 }] },
+    "salesWindow": { "fromEpoch": 1680304000000, "toEpoch": 1711849600000 },
+    "ops_region": "north-america:ca-on",
+    "metadata": { "tapeWidthMm": 48, "coreDiameterMm": 76 },
+    "status": "active",
+    "reviews": ["690000000000000000000007"],
+    "deleted": false,
+    "deletedAt": null,
+    "deletedBy": null,
+    "createdAt": 1680304100000,
+    "updatedAt": 1680304100000
+  },
+  {
+    "_id": "770000000000000000000007",
+    "name": "Bulk Hand Sanitizer 5L (Case of 4)",
+    "descriptions": [
+      {
+        "locale": "en",
+        "title": "Industrial Hand Sanitizer",
+        "body": "Case of four 5L refill containers of 70% alcohol hand sanitizer. Designed for dispensers in warehouses and retail locations. Meets health and safety guidelines."
+      }
+    ],
+    "items": [
+      {
+        "itemId": "6800000000000000000000i07",
+        "salesPrices": [
+          {
+            "price": 149.0,
+            "currency": "CAD",
+            "from": 1680304100000,
+            "to": 1711849600000
+          }
+        ]
+      }
+    ],
+    "discountScheme": { "type": "safety-bulk", "rules": [{ "minQty": 10, "discountPct": 10 }] },
+    "salesWindow": { "fromEpoch": 1680304100000, "toEpoch": 1711849600000 },
+    "ops_region": "north-america:ca-on",
+    "metadata": { "hazmat": false, "shelfLifeMonths": 24 },
+    "status": "active",
+    "reviews": ["690000000000000000000008", "69000000000000000000001c"],
+    "deleted": false,
+    "deletedAt": null,
+    "deletedBy": null,
+    "createdAt": 1680304200000,
+    "updatedAt": 1680304200000
+  },
+  {
+    "_id": "770000000000000000000008",
+    "name": "Retail Display Hooks (Pack of 100)",
+    "descriptions": [
+      {
+        "locale": "en",
+        "title": "Metal Retail Display Hooks",
+        "body": "Pack of 100 metal display hooks for pegboard and slatwall fixtures. Zinc-coated finish prevents rust; ideal for retail merchandising of small packaged goods."
+      }
+    ],
+    "items": [
+      {
+        "itemId": "6800000000000000000000i08",
+        "salesPrices": [
+          {
+            "price": 39.5,
+            "currency": "CAD",
+            "from": 1680304200000,
+            "to": 1711849600000
+          }
+        ]
+      }
+    ],
+    "discountScheme": { "type": "bundle", "bundles": [{ "qty": 5, "price": 180.0 }] },
+    "salesWindow": { "fromEpoch": 1680304200000, "toEpoch": 1711849600000 },
+    "ops_region": "north-america:ca-on",
+    "metadata": { "retailUse": true, "material": "zinc-plated steel" },
+    "status": "active",
+    "reviews": ["690000000000000000000009", "69000000000000000000001d"],
+    "deleted": false,
+    "deletedAt": null,
+    "deletedBy": null,
+    "createdAt": 1680304300000,
+    "updatedAt": 1680304300000
+  },
+  {
+    "_id": "770000000000000000000009",
+    "name": "Eco Kraft Paper Rolls (10kg)",
+    "descriptions": [
+      {
+        "locale": "en",
+        "title": "Kraft Paper for Packaging",
+        "body": "10kg roll of eco-friendly kraft paper for void fill and wrapping. Biodegradable and recyclable, suitable for protective packaging and gift wrapping."
+      }
+    ],
+    "items": [
+      {
+        "itemId": "6800000000000000000000i09",
+        "salesPrices": [
+          {
+            "price": 48.0,
+            "currency": "CAD",
+            "from": 1680304300000,
+            "to": 1711849600000
+          }
+        ]
+      }
+    ],
+    "discountScheme": { "type": "volume", "rules": [{ "minQty": 10, "discountPct": 10 }] },
+    "salesWindow": { "fromEpoch": 1680304300000, "toEpoch": 1711849600000 },
+    "ops_region": "north-america:ca-on",
+    "metadata": { "recyclable": true, "gsm": 80 },
+    "status": "active",
+    "reviews": ["69000000000000000000000a"],
+    "deleted": false,
+    "deletedAt": null,
+    "deletedBy": null,
+    "createdAt": 1680304400000,
+    "updatedAt": 1680304400000
+  },
+  {
+    "_id": "77000000000000000000000a",
+    "name": "Eco-Friendly Product Labels (Waterproof)",
+    "descriptions": [
+      {
+        "locale": "en",
+        "title": "Waterproof Product Labels",
+        "body": "Durable waterproof product labels for indoor/outdoor use. High-contrast printing and adhesive suitable for plastic, glass, and metal surfaces. Sold in packs of 1000."
+      }
+    ],
+    "items": [
+      {
+        "itemId": "6800000000000000000000i10",
+        "salesPrices": [
+          {
+            "price": 129.0,
+            "currency": "CAD",
+            "from": 1680304400000,
+            "to": 1711849600000
+          }
+        ]
+      }
+    ],
+    "discountScheme": { "type": "custom", "notes": "Contact sales for custom printing and bulk pricing" },
+    "salesWindow": { "fromEpoch": 1680304400000, "toEpoch": 1711849600000 },
+    "ops_region": "north-america:ca-on",
+    "metadata": { "waterproof": true, "printable": true, "material": "polypropylene" },
+    "status": "active",
+    "reviews": ["69000000000000000000000b"],
+    "deleted": false,
+    "deletedAt": null,
+    "deletedBy": null,
+    "createdAt": 1680304500000,
+    "updatedAt": 1680304500000
+  },
+  {
+    "_id": "77000000000000000000000b",
+    "name": "Cold Chain Insulated Liner Sheets (Pack of 25)",
+    "descriptions": [
+      {
+        "locale": "en",
+        "title": "Insulated Liner Sheets for Cold Shipments",
+        "body": "Reflective insulated liner sheets designed to maintain temperature inside boxes and crates. Pack of 25 sheets, tear-resistant and reusable for multiple shipments."
+      }
+    ],
+    "items": [
+      {
+        "itemId": "6800000000000000000000i11",
+        "salesPrices": [
+          { "price": 95.0, "currency": "CAD", "from": 1680306000000, "to": 1711952000000 }
+        ]
+      }
+    ],
+    "discountScheme": { "type": "tiered", "tiers": [{ "minQty": 5, "discountPct": 5 }, { "minQty": 20, "discountPct": 12 }] },
+    "salesWindow": { "fromEpoch": 1680306000000, "toEpoch": 1711952000000 },
+    "ops_region": "north-america:ca-on",
+    "metadata": { "insulationRValue": 2.8, "reusable": true },
+    "status": "active",
+    "reviews": ["69000000000000000000000c"],
+    "deleted": false,
+    "createdAt": 1680306000000,
+    "updatedAt": 1680306000000
+  },
+  {
+    "_id": "77000000000000000000000c",
+    "name": "Reusable Produce Crate Lid (Set of 10)",
+    "descriptions": [
+      {
+        "locale": "en",
+        "title": "Stackable Crate Lids",
+        "body": "Durable lids for stackable produce crates. Sold in sets of 10. Improve hygiene and protect produce during transport and storage."
+      }
+    ],
+    "items": [
+      {
+        "itemId": "6800000000000000000000i12",
+        "salesPrices": [
+          { "price": 74.0, "currency": "CAD", "from": 1680306100000, "to": 1711952000000 }
+        ]
+      }
+    ],
+    "discountScheme": { "type": "bundle", "bundles": [{ "qty": 5, "price": 350.0 }] },
+    "salesWindow": { "fromEpoch": 1680306100000, "toEpoch": 1711952000000 },
+    "ops_region": "north-america:ca-on",
+    "metadata": { "material": "pp", "color": "natural" },
+    "status": "active",
+    "reviews": ["69000000000000000000000c"],
+    "deleted": false,
+    "createdAt": 1680306100000,
+    "updatedAt": 1680306100000
+  },
+  {
+    "_id": "77000000000000000000000d",
+    "name": "Bulk Recycled Bubble Wrap 100m",
+    "descriptions": [
+      {
+        "locale": "en",
+        "title": "Recycled Bubble Wrap Roll",
+        "body": "100m roll of recycled bubble wrap for fragile items. High cushioning performance with reduced environmental impact."
+      }
+    ],
+    "items": [
+      {
+        "itemId": "6800000000000000000000i13",
+        "salesPrices": [
+          { "price": 48.5, "currency": "CAD", "from": 1680306200000, "to": 1711952000000 }
+        ]
+      }
+    ],
+    "discountScheme": { "type": "volume", "rules": [{ "minQty": 10, "discountPct": 10 }] },
+    "salesWindow": { "fromEpoch": 1680306200000, "toEpoch": 1711952000000 },
+    "ops_region": "north-america:ca-on",
+    "metadata": { "recycledContentPercent": 85, "bubbleSizeMm": 10 },
+    "status": "active",
+    "reviews": ["69000000000000000000000e"],
+    "deleted": false,
+    "createdAt": 1680306200000,
+    "updatedAt": 1680306200000
+  },
+  {
+    "_id": "77000000000000000000000e",
+    "name": "Retail Shelf Edge Strips (200)",
+    "descriptions": [
+      {
+        "locale": "en",
+        "title": "Shelf Edge Price Strips",
+        "body": "200-pack of clear shelf edge strips with adhesive backing for price tags and promotional inserts. Easy to cut and install."
+      }
+    ],
+    "items": [
+      {
+        "itemId": "6800000000000000000000i14",
+        "salesPrices": [
+          { "price": 29.0, "currency": "CAD", "from": 1680306300000, "to": 1711952000000 }
+        ]
+      }
+    ],
+    "discountScheme": { "type": "flat", "bulkDiscount": { "minQty": 5, "price": 25.0 } },
+    "salesWindow": { "fromEpoch": 1680306300000, "toEpoch": 1711952000000 },
+    "ops_region": "north-america:ca-on",
+    "metadata": { "retailUse": true, "lengthMm": 1000 },
+    "status": "active",
+    "reviews": ["69000000000000000000000f"],
+    "deleted": false,
+    "createdAt": 1680306300000,
+    "updatedAt": 1680306300000
+  },
+  {
+    "_id": "77000000000000000000000f",
+    "name": "Compostable Food Trays (Pack of 250)",
+    "descriptions": [
+      {
+        "locale": "en",
+        "title": "Compostable Food Service Trays",
+        "body": "250-pack of compostable food trays suitable for hot and cold foods. Certified industrial compostable and grease-resistant."
+      }
+    ],
+    "items": [
+      {
+        "itemId": "6800000000000000000000i15",
+        "salesPrices": [
+          { "price": 129.0, "currency": "CAD", "from": 1680306400000, "to": 1711952000000 }
+        ]
+      }
+    ],
+    "discountScheme": { "type": "membership", "memberDiscountPct": 8 },
+    "salesWindow": { "fromEpoch": 1680306400000, "toEpoch": 1711952000000 },
+    "ops_region": "north-america:ca-on",
+    "metadata": { "compostable": true, "material": "bagasse" },
+    "status": "active",
+    "reviews": ["690000000000000000000010"],
+    "deleted": false,
+    "createdAt": 1680306400000,
+    "updatedAt": 1680306400000
+  },
+  {
+    "_id": "770000000000000000000010",
+    "name": "Heavy-Duty Pallet Bands (Set of 12)",
+    "descriptions": [
+      {
+        "locale": "en",
+        "title": "Pallet Restraint Bands",
+        "body": "Set of 12 heavy-duty pallet bands for securing odd-shaped loads. Elasticized and UV-stabilized for outdoor storage."
+      }
+    ],
+    "items": [
+      {
+        "itemId": "6800000000000000000000i16",
+        "salesPrices": [
+          { "price": 64.0, "currency": "CAD", "from": 1680306500000, "to": 1711952000000 }
+        ]
+      }
+    ],
+    "discountScheme": { "type": "volume", "rules": [{ "minQty": 4, "discountPct": 7 }] },
+    "salesWindow": { "fromEpoch": 1680306500000, "toEpoch": 1711952000000 },
+    "ops_region": "north-america:ca-on",
+    "metadata": { "uvResistant": true, "stretchPct": 200 },
+    "status": "active",
+    "reviews": ["690000000000000000000011"],
+    "deleted": false,
+    "createdAt": 1680306500000,
+    "updatedAt": 1680306500000
+  },
+  {
+    "_id": "770000000000000000000011",
+    "name": "Retail Shelf Sign Holders (Pack of 50)",
+    "descriptions": [
+      {
+        "locale": "en",
+        "title": "Clear Sign Holders for Shelving",
+        "body": "50-pack of clear acrylic sign holders for shelf-edge promotions and product information. Fits standard shelf widths and accepts printed inserts."
+      }
+    ],
+    "items": [
+      {
+        "itemId": "6800000000000000000000i17",
+        "salesPrices": [
+          { "price": 49.0, "currency": "CAD", "from": 1680306600000, "to": 1711952000000 }
+        ]
+      }
+    ],
+    "discountScheme": { "type": "bundle", "bundles": [{ "qty": 3, "price": 135.0 }] },
+    "salesWindow": { "fromEpoch": 1680306600000, "toEpoch": 1711952000000 },
+    "ops_region": "north-america:ca-on",
+    "metadata": { "material": "acrylic", "orientation": "landscape" },
+    "status": "active",
+    "reviews": ["690000000000000000000012"],
+    "deleted": false,
+    "createdAt": 1680306600000,
+    "updatedAt": 1680306600000
+  },
+  {
+    "_id": "770000000000000000000012",
+    "name": "Eco Pallet Corner Protectors (200)",
+    "descriptions": [
+      {
+        "locale": "en",
+        "title": "Recycled Cardboard Corner Protectors",
+        "body": "200-pack of recycled cardboard corner protectors to prevent palletized load damage. Easy to apply and fully recyclable."
+      }
+    ],
+    "items": [
+      {
+        "itemId": "6800000000000000000000i18",
+        "salesPrices": [
+          { "price": 89.0, "currency": "CAD", "from": 1680306700000, "to": 1711952000000 }
+        ]
+      }
+    ],
+    "discountScheme": { "type": "tiered", "tiers": [{ "minQty": 10, "discountPct": 8 }] },
+    "salesWindow": { "fromEpoch": 1680306700000, "toEpoch": 1711952000000 },
+    "ops_region": "north-america:ca-on",
+    "metadata": { "recyclable": true, "thicknessMm": 6 },
+    "status": "active",
+    "reviews": ["690000000000000000000013"],
+    "deleted": false,
+    "createdAt": 1680306700000,
+    "updatedAt": 1680306700000
+  },
+  {
+    "_id": "770000000000000000000013",
+    "name": "Thermal Insulated Mailer Bags (Pack of 100)",
+    "descriptions": [
+      {
+        "locale": "en",
+        "title": "Insulated Mailer Bags for Perishables",
+        "body": "100-pack of thermal insulated mailer bags with foil lining. Designed for last-mile delivery of temperature-sensitive goods."
+      }
+    ],
+    "items": [
+      {
+        "itemId": "6800000000000000000000i19",
+        "salesPrices": [
+          { "price": 199.0, "currency": "CAD", "from": 1680306800000, "to": 1711952000000 }
+        ]
+      }
+    ],
+    "discountScheme": { "type": "volume", "rules": [{ "minQty": 5, "discountPct": 10 }] },
+    "salesWindow": { "fromEpoch": 1680306800000, "toEpoch": 1711952000000 },
+    "ops_region": "north-america:ca-on",
+    "metadata": { "insulationType": "foil", "suitableFor": ["meals","pharma"] },
+    "status": "active",
+    "reviews": ["690000000000000000000014"],
+    "deleted": false,
+    "createdAt": 1680306800000,
+    "updatedAt": 1680306800000
+  },
+  {
+    "_id": "770000000000000000000014",
+    "name": "Bulk Compostable Food Containers (500)",
+    "descriptions": [
+      {
+        "locale": "en",
+        "title": "Compostable Food Containers",
+        "body": "500-pack of compostable food containers with secure lids. Ideal for catering and foodservice operations seeking sustainable disposables."
+      }
+    ],
+    "items": [
+      {
+        "itemId": "6800000000000000000000i20",
+        "salesPrices": [
+          { "price": 399.0, "currency": "CAD", "from": 1680306900000, "to": 1711952000000 }
+        ]
+      }
+    ],
+    "discountScheme": { "type": "membership", "memberDiscountPct": 12 },
+    "salesWindow": { "fromEpoch": 1680306900000, "toEpoch": 1711952000000 },
+    "ops_region": "north-america:ca-on",
+    "metadata": { "compostable": true, "lidIncluded": true },
+    "status": "active",
+    "reviews": ["690000000000000000000015"],
+    "deleted": false,
+    "createdAt": 1680306900000,
+    "updatedAt": 1680306900000
+  },
+  {
+    "_id": "770000000000000000000015",
+    "name": "Retail Promo Banner Kit (Indoor)",
+    "descriptions": [
+      {
+        "locale": "en",
+        "title": "Indoor Promo Banner Kit",
+        "body": "Complete indoor promotional banner kit including stand, banner, and carry case. Lightweight and quick to assemble for pop-up promotions."
+      }
+    ],
+    "items": [
+      {
+        "itemId": "6800000000000000000000i01",
+        "salesPrices": [
+          { "price": 129.0, "currency": "CAD", "from": 1680307000000, "to": 1711952000000 }
+        ]
+      }
+    ],
+    "discountScheme": { "type": "flat", "bulkDiscount": { "minQty": 3, "price": 119.0 } },
+    "salesWindow": { "fromEpoch": 1680307000000, "toEpoch": 1711952000000 },
+    "ops_region": "north-america:ca-on",
+    "metadata": { "includesStand": true, "carryCase": true },
+    "status": "active",
+    "reviews": ["690000000000000000000016"],
+    "deleted": false,
+    "createdAt": 1680307000000,
+    "updatedAt": 1680307000000
+  },
+  {
+    "_id": "770000000000000000000016",
+    "name": "Bulk Label Printer Ribbons (6-pack)",
+    "descriptions": [
+      {
+        "locale": "en",
+        "title": "Thermal Transfer Printer Ribbons",
+        "body": "6-pack of thermal transfer ribbons compatible with major label printers. High-yield ribbons for continuous warehouse printing."
+      }
+    ],
+    "items": [
+      {
+        "itemId": "6800000000000000000000i02",
+        "salesPrices": [
+          { "price": 54.0, "currency": "CAD", "from": 1680307100000, "to": 1711952000000 }
+        ]
+      }
+    ],
+    "discountScheme": { "type": "volume", "rules": [{ "minQty": 10, "discountPct": 12 }] },
+    "salesWindow": { "fromEpoch": 1680307100000, "toEpoch": 1711952000000 },
+    "ops_region": "north-america:ca-qc",
+    "metadata": { "compatiblePrinters": ["Zebra","Sato"], "yieldMeters": 300 },
+    "status": "active",
+    "reviews": ["690000000000000000000017"],
+    "deleted": false,
+    "createdAt": 1680307100000,
+    "updatedAt": 1680307100000
+  },
+  {
+    "_id": "770000000000000000000017",
+    "name": "Reusable Produce Display Trays (Set of 20)",
+    "descriptions": [
+      {
+        "locale": "en",
+        "title": "Display Trays for Produce",
+        "body": "Set of 20 reusable display trays for retail produce presentation. Ventilated design keeps produce fresh and attractive on shelf."
+      }
+    ],
+    "items": [
+      {
+        "itemId": "6800000000000000000000i03",
+        "salesPrices": [
+          { "price": 149.0, "currency": "CAD", "from": 1680307200000, "to": 1711952000000 }
+        ]
+      }
+    ],
+    "discountScheme": { "type": "tiered", "tiers": [{ "minQty": 5, "discountPct": 6 }, { "minQty": 20, "discountPct": 15 }] },
+    "salesWindow": { "fromEpoch": 1680307200000, "toEpoch": 1711952000000 },
+    "ops_region": "north-america:ca-on",
+    "metadata": { "material": "pp", "ventilation": true },
+    "status": "active",
+    "reviews": ["690000000000000000000018"],
+    "deleted": false,
+    "createdAt": 1680307200000,
+    "updatedAt": 1680307200000
+  },
+  {
+    "_id": "770000000000000000000018",
+    "name": "Bulk Eco Packing Paper Rolls (5 rolls)",
+    "descriptions": [
+      {
+        "locale": "en",
+        "title": "Eco Packing Paper Multi-Roll Pack",
+        "body": "Five 10kg rolls of recycled packing paper for void fill and wrapping. Soft, tear-resistant and compostable."
+      }
+    ],
+    "items": [
+      {
+        "itemId": "6800000000000000000000i04",
+        "salesPrices": [
+          { "price": 220.0, "currency": "CAD", "from": 1680307300000, "to": 1711952000000 }
+        ]
+      }
+    ],
+    "discountScheme": { "type": "volume", "rules": [{ "minQty": 3, "discountPct": 8 }] },
+    "salesWindow": { "fromEpoch": 1680307300000, "toEpoch": 1711952000000 },
+    "ops_region": "north-america:ca-on",
+    "metadata": { "recycledContentPercent": 92 },
+    "status": "active",
+    "reviews": ["690000000000000000000019"],
+    "deleted": false,
+    "createdAt": 1680307300000,
+    "updatedAt": 1680307300000
+  },
+  {
+    "_id": "770000000000000000000019",
+    "name": "Retail Price Gun Starter Kit",
+    "descriptions": [
+      {
+        "locale": "en",
+        "title": "Price Gun with Labels and Ink",
+        "body": "Starter kit including 1-line price gun, 6 ink rolls and 10,000 labels. Ready for immediate retail deployment."
+      }
+    ],
+    "items": [
+      {
+        "itemId": "6800000000000000000000i05",
+        "salesPrices": [
+          { "price": 79.0, "currency": "CAD", "from": 1680307400000, "to": 1711952000000 }
+        ]
+      }
+    ],
+    "discountScheme": { "type": "bundle", "bundles": [{ "qty": 2, "price": 149.0 }] },
+    "salesWindow": { "fromEpoch": 1680307400000, "toEpoch": 1711952000000 },
+    "ops_region": "north-america:ca-on",
+    "metadata": { "includesLabels": true, "includesInk": true },
+    "status": "active",
+    "reviews": ["69000000000000000000001b"],
+    "deleted": false,
+    "createdAt": 1680307400000,
+    "updatedAt": 1680307400000
+  },
+  {
+    "_id": "77000000000000000000001a",
+    "name": "Bulk Reusable Delivery Bags 40L (Set of 10)",
+    "descriptions": [
+      {
+        "locale": "en",
+        "title": "Large Reusable Delivery Bags",
+        "body": "Set of 10 heavy-duty reusable delivery bags with insulated lining and reinforced handles. Designed for meal delivery and catering."
+      }
+    ],
+    "items": [
+      {
+        "itemId": "6800000000000000000000i06",
+        "salesPrices": [
+          { "price": 499.0, "currency": "CAD", "from": 1680307500000, "to": 1711952000000 }
+        ]
+      }
+    ],
+    "discountScheme": { "type": "tiered", "tiers": [{ "minQty": 2, "discountPct": 5 }, { "minQty": 5, "discountPct": 12 }] },
+    "salesWindow": { "fromEpoch": 1680307500000, "toEpoch": 1711952000000 },
+    "ops_region": "north-america:ca-on",
+    "metadata": { "capacityL": 40, "waterproofLining": true },
+    "status": "active",
+    "reviews": ["69000000000000000000001c"],
+    "deleted": false,
+    "createdAt": 1680307500000,
+    "updatedAt": 1680307500000
+  },
+  {
+    "_id": "77000000000000000000001b",
+    "name": "Eco-Friendly Tape Dispenser (Heavy Duty)",
+    "descriptions": [
+      {
+        "locale": "en",
+        "title": "Heavy Duty Tape Dispenser",
+        "body": "Heavy-duty tape dispenser compatible with 48mm tape rolls. Weighted base and ergonomic handle for high-volume packing stations."
+      }
+    ],
+    "items": [
+      {
+        "itemId": "6800000000000000000000i07",
+        "salesPrices": [
+          { "price": 39.99, "currency": "CAD", "from": 1680307600000, "to": 1711952000000 }
+        ]
+      }
+    ],
+    "discountScheme": { "type": "flat", "bulkDiscount": { "minQty": 10, "price": 35.0 } },
+    "salesWindow": { "fromEpoch": 1680307600000, "toEpoch": 1711952000000 },
+    "ops_region": "north-america:ca-on",
+    "metadata": { "material": "steel", "weightKg": 2.2 },
+    "status": "active",
+    "reviews": ["69000000000000000000001d"],
+    "deleted": false,
+    "createdAt": 1680307600000,
+    "updatedAt": 1680307600000
+  },
+  {
+    "_id": "77000000000000000000001c",
+    "name": "Compostable Food Service Napkins (10,000)",
+    "descriptions": [
+      {
+        "locale": "en",
+        "title": "Bulk Compostable Napkins",
+        "body": "10,000 compostable napkins for foodservice operations. Soft, absorbent, and certified for industrial composting."
+      }
+    ],
+    "items": [
+      {
+        "itemId": "6800000000000000000000i08",
+        "salesPrices": [
+          { "price": 129.0, "currency": "CAD", "from": 1680307700000, "to": 1711952000000 }
+        ]
+      }
+    ],
+    "discountScheme": { "type": "membership", "memberDiscountPct": 10 },
+    "salesWindow": { "fromEpoch": 1680307700000, "toEpoch": 1711952000000 },
+    "ops_region": "north-america:ca-on",
+    "metadata": { "material": "recycled-fiber", "certifiedCompostable": true },
+    "status": "active",
+    "reviews": ["69000000000000000000001b"],
+    "deleted": false,
+    "createdAt": 1680307700000,
+    "updatedAt": 1680307700000
+  },
+  {
+    "_id": "77000000000000000000001d",
+    "name": "Retail Shelf Lighting Kit (LED)",
+    "descriptions": [
+      {
+        "locale": "en",
+        "title": "LED Shelf Lighting Kit",
+        "body": "LED lighting kit for retail shelving to improve product visibility. Includes power supply and mounting clips. Low power consumption and long life."
+      }
+    ],
+    "items": [
+      {
+        "itemId": "6800000000000000000000i09",
+        "salesPrices": [
+          { "price": 199.0, "currency": "CAD", "from": 1680307800000, "to": 1711952000000 }
+        ]
+      }
+    ],
+    "discountScheme": { "type": "bundle", "bundles": [{ "qty": 2, "price": 379.0 }] },
+    "salesWindow": { "fromEpoch": 1680307800000, "toEpoch": 1711952000000 },
+    "ops_region": "north-america:ca-on",
+    "metadata": { "wattageW": 6, "colorTempK": 4000 },
+    "status": "active",
+    "reviews": ["69000000000000000000000a"],
+    "deleted": false,
+    "createdAt": 1680307800000,
+    "updatedAt": 1680307800000
+  },
+  {
+    "_id": "77000000000000000000001e",
+    "name": "Eco Shipping Pallet Sleeves (Pack of 50)",
+    "descriptions": [
+      {
+        "locale": "en",
+        "title": "Pallet Sleeves for Protection",
+        "body": "Pack of 50 recyclable pallet sleeves to protect goods from dust and moisture during storage and transit. Easy to apply and remove."
+      }
+    ],
+    "items": [
+      {
+        "itemId": "6800000000000000000000i10",
+        "salesPrices": [
+          { "price": 299.0, "currency": "CAD", "from": 1680307900000, "to": 1711952000000 }
+        ]
+      }
+    ],
+    "discountScheme": { "type": "volume", "rules": [{ "minQty": 4, "discountPct": 10 }] },
+    "salesWindow": { "fromEpoch": 1680307900000, "toEpoch": 1711952000000 },
+    "ops_region": "north-america:ca-on",
+    "metadata": { "recyclable": true, "material": "corrugated-sleeve" },
+    "status": "active",
+    "reviews": ["69000000000000000000000b"],
+    "deleted": false,
+    "createdAt": 1680307900000,
+    "updatedAt": 1680307900000
+  },
+  {
+    "_id": "77000000000000000000001f",
+    "name": "Insulated Gel Ice Packs (Pack of 50)",
+    "descriptions": [
+      {
+        "locale": "en",
+        "title": "Reusable Gel Ice Packs",
+        "body": "Pack of 50 reusable gel ice packs for cold-chain shipments and last-mile deliveries. Non-toxic gel, flexible when frozen, and available in multiple sizes to fit insulated boxes and coolers."
+      }
+    ],
+    "items": [
+      {
+        "itemId": "6800000000000000000000i11",
+        "salesPrices": [
+          { "price": 79.0, "currency": "CAD", "from": 1680308000000, "to": 1711952000000 }
+        ]
+      }
+    ],
+    "discountScheme": { "type": "volume", "rules": [{ "minQty": 5, "discountPct": 8 }] },
+    "salesWindow": { "fromEpoch": 1680308000000, "toEpoch": 1711952000000 },
+    "ops_region": "north-america:ca-on",
+    "metadata": { "sizes": ["small","medium","large"], "nonToxic": true },
+    "status": "active",
+    "reviews": ["69000000000000000000000c"],
+    "deleted": false,
+    "createdAt": 1680308000000,
+    "updatedAt": 1680308000000
+  },
+  {
+    "_id": "770000000000000000000020",
+    "name": "Heavy-Duty Stretch Film 500mm x 1500m",
+    "descriptions": [
+      {
+        "locale": "en",
+        "title": "Industrial Stretch Film Roll",
+        "body": "High-performance stretch film for pallet wrapping. 500mm width, 1500m length, excellent cling and puncture resistance for heavy loads."
+      }
+    ],
+    "items": [
+      {
+        "itemId": "6800000000000000000000i12",
+        "salesPrices": [
+          { "price": 129.0, "currency": "CAD", "from": 1680308100000, "to": 1711952000000 }
+        ]
+      }
+    ],
+    "discountScheme": { "type": "tiered", "tiers": [{ "minQty": 3, "discountPct": 6 }, { "minQty": 10, "discountPct": 14 }] },
+    "salesWindow": { "fromEpoch": 1680308100000, "toEpoch": 1711952000000 },
+    "ops_region": "north-america:ca-on",
+    "metadata": { "gaugeMicron": 23, "coreMm": 76 },
+    "status": "active",
+    "reviews": ["69000000000000000000000c"],
+    "deleted": false,
+    "createdAt": 1680308100000,
+    "updatedAt": 1680308100000
+  },
+  {
+    "_id": "770000000000000000000021",
+    "name": "Eco-Friendly Mailer Bags (Pack of 250)",
+    "descriptions": [
+      {
+        "locale": "en",
+        "title": "Recycled Poly Mailer Bags",
+        "body": "250-pack of recycled poly mailer bags with tamper-evident seal. Lightweight, tear-resistant, and made from post-consumer recycled content."
+      }
+    ],
+    "items": [
+      {
+        "itemId": "6800000000000000000000i13",
+        "salesPrices": [
+          { "price": 129.0, "currency": "CAD", "from": 1680308200000, "to": 1711952000000 }
+        ]
+      }
+    ],
+    "discountScheme": { "type": "volume", "rules": [{ "minQty": 5, "discountPct": 10 }] },
+    "salesWindow": { "fromEpoch": 1680308200000, "toEpoch": 1711952000000 },
+    "ops_region": "north-america:ca-on",
+    "metadata": { "recycledContentPercent": 85, "tamperEvident": true },
+    "status": "active",
+    "reviews": ["69000000000000000000000e"],
+    "deleted": false,
+    "createdAt": 1680308200000,
+    "updatedAt": 1680308200000
+  },
+  {
+    "_id": "770000000000000000000022",
+    "name": "Retail Price Label Printer (Desktop)",
+    "descriptions": [
+      {
+        "locale": "en",
+        "title": "Compact Thermal Label Printer",
+        "body": "Desktop thermal label printer optimized for retail price labels and small shipping labels. USB and network connectivity, compatible with common label formats."
+      }
+    ],
+    "items": [
+      {
+        "itemId": "6800000000000000000000i14",
+        "salesPrices": [
+          { "price": 249.0, "currency": "CAD", "from": 1680308300000, "to": 1711952000000 }
+        ]
+      }
+    ],
+    "discountScheme": { "type": "bundle", "bundles": [{ "qty": 2, "price": 469.0 }] },
+    "salesWindow": { "fromEpoch": 1680308300000, "toEpoch": 1711952000000 },
+    "ops_region": "north-america:ca-on",
+    "metadata": { "connectivity": ["USB","Ethernet"], "maxLabelWidthMm": 104 },
+    "status": "active",
+    "reviews": ["69000000000000000000000f"],
+    "deleted": false,
+    "createdAt": 1680308300000,
+    "updatedAt": 1680308300000
+  },
+  {
+    "_id": "770000000000000000000023",
+    "name": "Compostable Foodservice Cutlery Bulk (5,000)",
+    "descriptions": [
+      {
+        "locale": "en",
+        "title": "Bulk Compostable Cutlery",
+        "body": "5,000-piece bulk pack of compostable forks, knives and spoons. Certified industrial compostable and suitable for high-volume foodservice operations."
+      }
+    ],
+    "items": [
+      {
+        "itemId": "6800000000000000000000i15",
+        "salesPrices": [
+          { "price": 499.0, "currency": "CAD", "from": 1680308400000, "to": 1711952000000 }
+        ]
+      }
+    ],
+    "discountScheme": { "type": "membership", "memberDiscountPct": 10 },
+    "salesWindow": { "fromEpoch": 1680308400000, "toEpoch": 1711952000000 },
+    "ops_region": "north-america:ca-on",
+    "metadata": { "material": "PLA-blend", "certifiedCompostable": true },
+    "status": "active",
+    "reviews": ["690000000000000000000010"],
+    "deleted": false,
+    "createdAt": 1680308400000,
+    "updatedAt": 1680308400000
+  },
+  {
+    "_id": "770000000000000000000024",
+    "name": "Heavy-Duty Pallet Wrap Dispenser (Manual)",
+    "descriptions": [
+      {
+        "locale": "en",
+        "title": "Manual Pallet Wrap Dispenser",
+        "body": "Ergonomic manual dispenser for large stretch film rolls. Adjustable tension and heavy-duty wheels for easy movement around the warehouse."
+      }
+    ],
+    "items": [
+      {
+        "itemId": "6800000000000000000000i16",
+        "salesPrices": [
+          { "price": 189.0, "currency": "CAD", "from": 1680308500000, "to": 1711952000000 }
+        ]
+      }
+    ],
+    "discountScheme": { "type": "flat", "bulkDiscount": { "minQty": 5, "price": 179.0 } },
+    "salesWindow": { "fromEpoch": 1680308500000, "toEpoch": 1711952000000 },
+    "ops_region": "north-america:ca-on",
+    "metadata": { "wheels": true, "adjustableTension": true },
+    "status": "active",
+    "reviews": ["690000000000000000000011"],
+    "deleted": false,
+    "createdAt": 1680308500000,
+    "updatedAt": 1680308500000
+  },
+  {
+    "_id": "770000000000000000000025",
+    "name": "Retail Shelf Edge LED Price Strips (Pack of 20)",
+    "descriptions": [
+      {
+        "locale": "en",
+        "title": "LED Price Strips for Shelving",
+        "body": "Pack of 20 LED shelf-edge price strips with adhesive mounting. Low-profile lighting to enhance product visibility and improve in-store merchandising."
+      }
+    ],
+    "items": [
+      {
+        "itemId": "6800000000000000000000i17",
+        "salesPrices": [
+          { "price": 179.0, "currency": "CAD", "from": 1680308600000, "to": 1711952000000 }
+        ]
+      }
+    ],
+    "discountScheme": { "type": "bundle", "bundles": [{ "qty": 2, "price": 339.0 }] },
+    "salesWindow": { "fromEpoch": 1680308600000, "toEpoch": 1711952000000 },
+    "ops_region": "north-america:ca-on",
+    "metadata": { "wattagePerStripW": 4, "colorTempK": 3500 },
+    "status": "active",
+    "reviews": ["690000000000000000000012"],
+    "deleted": false,
+    "createdAt": 1680308600000,
+    "updatedAt": 1680308600000
+  },
+  {
+    "_id": "770000000000000000000026",
+    "name": "Recycled Cardboard Pallet Pads (Pack of 50)",
+    "descriptions": [
+      {
+        "locale": "en",
+        "title": "Cardboard Pallet Pads",
+        "body": "50-pack of recycled cardboard pallet pads for load separation and protection. Lightweight and fully recyclable for sustainable packaging operations."
+      }
+    ],
+    "items": [
+      {
+        "itemId": "6800000000000000000000i18",
+        "salesPrices": [
+          { "price": 129.0, "currency": "CAD", "from": 1680308700000, "to": 1711952000000 }
+        ]
+      }
+    ],
+    "discountScheme": { "type": "volume", "rules": [{ "minQty": 4, "discountPct": 10 }] },
+    "salesWindow": { "fromEpoch": 1680308700000, "toEpoch": 1711952000000 },
+    "ops_region": "north-america:ca-on",
+    "metadata": { "recyclable": true, "singleWall": true },
+    "status": "active",
+    "reviews": ["690000000000000000000013"],
+    "deleted": false,
+    "createdAt": 1680308700000,
+    "updatedAt": 1680308700000
+  },
+  {
+    "_id": "770000000000000000000027",
+    "name": "Thermal Insulated Box Inserts (Set of 10)",
+    "descriptions": [
+      {
+        "locale": "en",
+        "title": "Insulated Inserts for Shipping Boxes",
+        "body": "Set of 10 insulated inserts that fit common box sizes to improve temperature retention for perishable shipments. Reusable and easy to clean."
+      }
+    ],
+    "items": [
+      {
+        "itemId": "6800000000000000000000i19",
+        "salesPrices": [
+          { "price": 139.0, "currency": "CAD", "from": 1680308800000, "to": 1711952000000 }
+        ]
+      }
+    ],
+    "discountScheme": { "type": "tiered", "tiers": [{ "minQty": 3, "discountPct": 7 }] },
+    "salesWindow": { "fromEpoch": 1680308800000, "toEpoch": 1711952000000 },
+    "ops_region": "north-america:ca-on",
+    "metadata": { "cleanable": true, "rValue": 2.4 },
+    "status": "active",
+    "reviews": ["690000000000000000000014"],
+    "deleted": false,
+    "createdAt": 1680308800000,
+    "updatedAt": 1680308800000
+  },
+  {
+    "_id": "770000000000000000000028",
+    "name": "Compostable Foodservice Bulk Starter Pack",
+    "descriptions": [
+      {
+        "locale": "en",
+        "title": "Starter Pack of Compostable Foodservice Items",
+        "body": "Curated starter pack including compostable trays, cutlery, napkins and liners for small foodservice operations. Pack designed to cover initial stocking needs with sustainable disposables."
+      }
+    ],
+    "items": [
+      {
+        "itemId": "6800000000000000000000i20",
+        "salesPrices": [
+          { "price": 249.0, "currency": "CAD", "from": 1680308900000, "to": 1711952000000 }
+        ]
+      }
+    ],
+    "discountScheme": { "type": "membership", "memberDiscountPct": 10 },
+    "salesWindow": { "fromEpoch": 1680308900000, "toEpoch": 1711952000000 },
+    "ops_region": "north-america:ca-on",
+    "metadata": { "contents": ["trays","cutlery","napkins","liners"], "suitableFor": ["cafes","caterers"] },
+    "status": "active",
+    "reviews": ["690000000000000000000015"],
+    "deleted": false,
+    "createdAt": 1680308900000,
+    "updatedAt": 1680308900000
+  }
+]

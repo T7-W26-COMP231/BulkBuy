@@ -8,17 +8,35 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-    try {
-        // AuthContext stores { accessToken, refreshToken, user } as JSON
-        const raw = localStorage.getItem(SESSION_KEY);
-        const session = raw ? JSON.parse(raw) : null;
-        const token = session?.accessToken || null;
-        console.log("🔑 token from storage:", token ? token.substring(0, 20) + "..." : "NULL"); // 👈 add this
-        if (token) config.headers.Authorization = `Bearer ${token}`;
-    } catch (e) {
-        // malformed storage — just skip the header
+  try {
+    const raw = localStorage.getItem(SESSION_KEY);
+
+    if (!raw) {
+      return config;
     }
-    return config;
+
+    const session = JSON.parse(raw);
+
+    const token =
+      session?.accessToken ||
+      session?.token ||
+      session?.authToken ||
+      null;
+
+    console.log(
+      "🔑 token from storage:",
+      token ? `${token.substring(0, 20)}...` : "NULL"
+    );
+
+    if (token) {
+      config.headers = config.headers || {};
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+  } catch (error) {
+    console.warn("⚠ Failed to restore auth token:", error);
+  }
+
+  return config;
 });
 
 export default api;

@@ -85,6 +85,13 @@ router.patch(
   asyncHandler(UserController.updateCustomerProfile)
 );
 
+/* Customer notification preferences update */
+router.patch(
+  '/notifications',
+  requireAuth,
+  asyncHandler(UserController.updateNotificationPreferences)
+);
+
 /* Get user by human-friendly userId */
 router.get(
   '/by-userid/:userId',

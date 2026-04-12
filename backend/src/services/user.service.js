@@ -588,6 +588,35 @@ class UserService {
     return this.updateUserById(userId, safePayload, opts);
   }
 
+  /**
+ * Update customer notification preferences only
+ */
+async updateNotificationPreferences(userId, payload = {}, opts = {}) {
+  if (!userId) {
+    throw createError(401, "Unauthorized");
+  }
+
+  const existingUser = await this.getUserById(userId);
+
+  const existingPreferences =
+    existingUser?.notificationPreferences || {};
+
+  const safePayload = {
+    notificationPreferences: {
+      priceTierAlerts:
+        payload.priceTierAlerts ??
+        existingPreferences.priceTierAlerts ??
+        true,
+      orderUpdates:
+        payload.orderUpdates ??
+        existingPreferences.orderUpdates ??
+        true,
+    },
+  };
+
+  return this.updateUserById(userId, safePayload, opts);
+}
+
 
   /**
    * Add customer payment method

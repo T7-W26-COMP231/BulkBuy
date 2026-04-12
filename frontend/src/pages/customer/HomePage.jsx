@@ -66,7 +66,7 @@ export default function HomePage() {
     products,
     productsMeta,
     setOps_region,
-    setSocket,
+    socket: opscSocket, setSocket,
     fetchAndSetUiProducts,
     fetchAndSetEnrichedOrders,
     clearState: clearOpsState,
@@ -96,28 +96,57 @@ export default function HomePage() {
     const controller = new AbortController();
     const region = "north-america:ca-on" || productsMeta?.region || detectedCity || "Toronto";
     try {
-      const socket = initSocket(null , { region, url: backendUrl});
-      setSocket(socket)
-      fetchAndSetUiProducts({
-        region,
-        page: 1,
-        limit: 24,
-        signal: controller.signal,
-      }).then((e) => {
-        // eslint-disable-next-line no-console
-        console.log("01 | products ->", products /* JSON.stringify(products)*/); //----------------------
-      }).catch((err) => {
-        if (err && err.name === "AbortError") return;
-      });
+      if(!opscSocket){
+        const socket = opscSocket ?? initSocket(null , { region, url: backendUrl});
+        setSocket(socket);
+      };
 
+      if(!products){
+        fetchAndSetUiProducts({
+          region,
+          page: 1,
+          limit: 24,
+          signal: controller.signal,
+        }).then((e) => {
+          // eslint-disable-next-line no-console
+          console.log("01 | products ->", products /* JSON.stringify(products)*/);
+        }).catch((err) => {
+          if (err && err.name === "AbortError") return;
+        });
+      };
+      
       setTimeout(() => {
         return () => controller.abort();
       }, 2000);
     } catch (error) {
       console.log("home page - products+socket : this is the error ", error);
     }
-    
-  }, [wsuproducts, productsMeta?.region, products, detectedCity, fetchAndSetUiProducts]);
+    // CORRECT Cleanup: Return the function directly
+  
+  }, [wsuproducts, productsMeta?.region, detectedCity, fetchAndSetUiProducts]);
+
+  useEffect(() => {
+
+    if (!products || !opscSocket) return;
+    const controller = new AbortController();
+    console.log("Products updated, syncing with socket...", products);
+
+    // Example: Tell the socket we have new products
+    // opscSocket.emit('products_synced', products.map(p => p._id));
+    const region = "north-america:ca-on" || productsMeta?.region || detectedCity || "Toronto";
+    fetchAndSetUiProducts({
+      region,
+      page: 1,
+      limit: 24,
+      signal: controller.signal,
+    }).then((e) => {
+      // eslint-disable-next-line no-console
+      console.log("01 | products ->", products /* JSON.stringify(products)*/);
+    }).catch((err) => {
+      if (err && err.name === "AbortError") return;
+    });
+
+  }, [products, opscSocket]); // This only runs when these specific values change
 
 //-------------------------------------------------------------------------------------------------------
 
@@ -139,18 +168,21 @@ export default function HomePage() {
         if (!mounted || controller.signal.aborted) return;
         
         const region = "north-america:ca-on" || productsMeta?.region || detectedCity || "Toronto";
-        await fetchAndSetEnrichedOrders({
-          userId: user.userId, //user._id, --- careful this : endpoint expects the users public ID
-          region,
-          page: 1,
-          limit: 25,
-          requireAuth: true,
-          signal: controller.signal,
-          jwtAccessToken : accessToken
-        }).then(() => {
-          // eslint-disable-next-line no-console
-          console.log("02 | orders ->", orders /* JSON.stringify(orders) */); //------------------------
-        });
+        if(!orders){
+          await fetchAndSetEnrichedOrders({
+            userId: user.userId, //user._id, --- careful this : endpoint expects the users public ID
+            region,
+            page: 1,
+            limit: 25,
+            requireAuth: true,
+            signal: controller.signal,
+            jwtAccessToken : accessToken
+          }).then(() => {
+            // eslint-disable-next-line no-console
+            console.log("02 | orders ->", orders /* JSON.stringify(orders) */);
+          });
+        }
+      
 
       } catch (err) {
         if (err && err.name === "AbortError") return;

@@ -28,7 +28,7 @@ const router = express.Router();
 
 const MessageController = require('../controllers/message.controller');
 const messageValidators = require('../validators/message.validators');
-const { requireAuth } = require('../middleware/auth.middleware');
+const { requireAuth, optionalAuth } = require('../middleware/auth.middleware');
 
 /* Async wrapper to forward errors to express error handler */
 const asyncHandler = (fn) => (req, res, next) => {
@@ -58,28 +58,28 @@ const requireBodyField = (field) => (req, res, next) => {
 
 /* Public / authenticated routes */
 router.post(
-  '/',
+  '/msg/',
   requireAuth,
   messageValidators.create,
   asyncHandler(MessageController.createMessage)
 );
-
+// list messages paginated
 router.get(
-  '/',
-  requireAuth,
+  '/msg/',
+  optionalAuth,
   messageValidators.query,
   asyncHandler(MessageController.listMessages)
 );
 
 router.get(
-  '/:id',
+  '/msg/:id',
   requireAuth,
   validateIdParam,
   asyncHandler(MessageController.getById)
 );
 
 router.patch(
-  '/:id',
+  '/msg/:id',
   requireAuth,
   validateIdParam,
   messageValidators.update,
@@ -88,7 +88,7 @@ router.patch(
 
 /* Soft delete (logical) */
 router.post(
-  '/:id/soft-delete',
+  '/msg/:id/soft-delete',
   requireAuth,
   validateIdParam,
   asyncHandler(MessageController.softDelete)
@@ -96,7 +96,7 @@ router.post(
 
 /* Hard delete (admin only) */
 router.delete(
-  '/:id/hard',
+  '/msg/:id/hard',
   requireAuth,
   validateIdParam,
   messageValidators.adminOnly,
@@ -105,7 +105,7 @@ router.delete(
 
 /* Attachments */
 router.post(
-  '/:id/add-attachment',
+  '/msg/:id/add-attachment',
   requireAuth,
   validateIdParam,
   requireBodyField('fileId'),
@@ -113,7 +113,7 @@ router.post(
 );
 
 router.post(
-  '/:id/remove-attachment',
+  '/msg/:id/remove-attachment',
   requireAuth,
   validateIdParam,
   requireBodyField('fileId'),
@@ -122,7 +122,7 @@ router.post(
 
 /* Recipients */
 router.post(
-  '/:id/add-recipient',
+  '/msg/:id/add-recipient',
   requireAuth,
   validateIdParam,
   requireBodyField('userId'),
@@ -130,7 +130,7 @@ router.post(
 );
 
 router.post(
-  '/:id/remove-recipient',
+  '/msg/:id/remove-recipient',
   requireAuth,
   validateIdParam,
   requireBodyField('userId'),
@@ -139,14 +139,14 @@ router.post(
 
 /* Read / unread */
 router.post(
-  '/:id/mark-read',
+  '/msg/:id/mark-read',
   requireAuth,
   validateIdParam,
   asyncHandler(MessageController.markRead)
 );
 
 router.post(
-  '/:id/mark-unread',
+  '/msg/:id/mark-unread',
   requireAuth,
   validateIdParam,
   asyncHandler(MessageController.markUnread)
@@ -154,14 +154,14 @@ router.post(
 
 /* Send and reply */
 router.post(
-  '/:id/send',
+  '/msg/:id/send',
   requireAuth,
   validateIdParam,
   asyncHandler(MessageController.sendMessage)
 );
 
 router.post(
-  '/:id/reply',
+  '/msg/:id/reply',
   requireAuth,
   validateIdParam,
   messageValidators.reply,

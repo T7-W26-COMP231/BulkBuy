@@ -304,7 +304,7 @@ export default function AuthTabs(props) {
           // setSocket(initSocket(res.accessToken || null, { user: res.user, region: ops_region, url : backendUrl, getAuth: () => useAuth()}));
             
           console.log("Socket Initialization s-up---> | ", res.user.userId, backendUrl); //--------------------------
-          identifyUserAfterLogin({token : res.accessToken, userId : res.user._id}, { user: user, region: ops_region, url : backendUrl, getAuth: () => useAuth()});
+          identifyUserAfterLogin({token : res.accessToken, userId : res.user._id}, { user: user, ops_region: ops_region, url : backendUrl, getAuth: () => useAuth()});
         } catch (error) {
           console.log("Socket Initializtion error ---> | ", error);
         }

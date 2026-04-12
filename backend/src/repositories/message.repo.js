@@ -65,7 +65,6 @@ class MessageRepo {
     const page = parseInt(opts.page || 1, 10) || 1;
     const limit = parseInt(opts.limit || 25, 10) || 25;
     const skip = (page - 1) * limit;
-
     const baseFilter = { ...filter };
     if (!o.includeDeleted) baseFilter.deleted = false;
 

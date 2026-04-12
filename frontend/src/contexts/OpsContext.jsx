@@ -45,6 +45,8 @@ import React, {
   useState
 } from 'react';
 
+import { useSocketEvent } from '../comms-js/socketRelay';
+
 
 const DEFAULT_API_BASE = 'http://localhost:5000/api/opcs';
 const DEFAULT_ENDPOINTS = {
@@ -103,6 +105,8 @@ export function OpsContextProvider({
   const [error, setError] = useState(null);
 
   /* Canonical state */
+  const jwtExpiryTracker = useRef(null);
+
   const [products, setProducts] = useState(null); // expected server shape (e.g., { products: [], meta: {} } )
   const [productsMeta, setProductsMeta] = useState({ region: null, page: 1, limit: 25, fetchedAt: null });
   const [wsuproducts, setWsuproducts] = useState(0);
@@ -115,12 +119,29 @@ export function OpsContextProvider({
   const [backendUrl, setBackendUrl] = useState("http://localhost:5000");
   const [socket, setSocket] = useState(null);
 
+  const [msgCenter, setMsgCenter] = useState({notifs:[], otherMsgs:[]})
+
   const [cart, setCart] = useState({});
 
   /* In-memory caches */
   const productsCacheRef = useRef(new Map());
   const ordersCacheRef = useRef(new Map());
 
+  //---------------------------------------------------
+  const ioMsg = useSocketEvent('welcome');
+  
+  useEffect(() => {
+    if (ioMsg) {
+      console.log("Got a new message via socket:", ioMsg);
+      // Logic to add to a list or show a notification
+      const notifAdd = [...msgCenter.notifs, ioMsg];
+      setMsgCenter({...msgCenter, notifs: notifAdd});
+      console.log('this the ioMsg ---> |', ioMsg); //--------------------------------
+    }
+  }, [ioMsg]);
+  
+  //---------------------------------------------------
+  
   /* Abort controllers */
   // initialize once
   const abortControllersRef = useRef(new Set());
@@ -580,6 +601,7 @@ export function OpsContextProvider({
       loadingProducts,
       loadingOrders,
       error,
+      jwtExpiryTracker,
       products,
       productsMeta,
       wsuproducts, setWsuproducts,
@@ -590,6 +612,7 @@ export function OpsContextProvider({
       backendUrl, setBackendUrl,
       socket, setSocket,
       cart, setCart,
+      msgCenter, setMsgCenter,
       /* fetch + state setters */
       fetchAndSetUiProducts,
       refreshUiProducts,
@@ -614,6 +637,7 @@ export function OpsContextProvider({
       loadingProducts,
       loadingOrders,
       error,
+      jwtExpiryTracker,
       products,
       productsMeta,
       wsuproducts, setWsuproducts,
@@ -624,6 +648,7 @@ export function OpsContextProvider({
       backendUrl, setBackendUrl,
       socket, setSocket,
       cart, setCart,
+      msgCenter, setMsgCenter,
       fetchAndSetUiProducts,
       refreshUiProducts,
       appendUiProducts,

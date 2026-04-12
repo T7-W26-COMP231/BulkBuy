@@ -55,6 +55,57 @@ async function listMessages(req, res) {
     const result = await messageService.listMessages(filter, { page, limit, correlationId, actor });
     return res.status(200).json({ success: true, ...result });
   } catch (err) {
+    console.log('msglist fetch error',err); //--------------------------------------------------------------------------
+    await auditService.logEvent({
+      eventType: 'message.list.failed',
+      actor,
+      target: { type: 'Message', id: null },
+      outcome: 'failure',
+      severity: 'error',
+      correlationId,
+      details: { message: err.message }
+    });
+    return res.status(500).json({ success: false, message: err.message });
+  }
+}
+
+/* GET /messages */
+async function listMessages2(req, res) {
+  const correlationId = req.correlationId || null;
+  const actor = actorFromReq(req);
+  
+  try {
+    const { page, limit } = req.query;
+    // 1. Parse the incoming filter
+    let filter = req.query.filter ? JSON.parse(req.query.filter) : {};
+
+    // 2. Security Check: Is the user signed in?
+    const isAuthorized = !!(req.user?._id || req.user?.userId);
+
+    if (!isAuthorized) {
+      // 3. Calculate the date 14 days ago
+      const fourteenDaysAgo = new Date();
+      fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
+
+      // 4. Force strict filters for anonymous users
+      filter = {
+        ...filter,
+        type: 'system',
+        createdAt: { $gte: fourteenDaysAgo },
+        deleted: false // Ensure they don't see soft-deleted system messages
+      };
+    }
+
+    // 5. Execute the service call with the enforced filter
+    const result = await messageService.listMessages(filter, { 
+      page, 
+      limit, 
+      correlationId, 
+      actor 
+    });
+
+    return res.status(200).json({ success: true, ...result });
+  } catch (err) {
     await auditService.logEvent({
       eventType: 'message.list.failed',
       actor,

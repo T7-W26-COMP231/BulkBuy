@@ -9,6 +9,7 @@ import ProductListPage from "./pages/customer/ProductListPage";
 import CartPage from "./pages/shared/ShoppingCart";
 import Shop from "./pages/customer/Marketplace";
 import Item from "./pages/customer/Itemsdetails";
+import UserMessageCenter from './pages/shared/UserMessageCenter'
 
 
 function PlaceholderPage({ title }) {
@@ -46,7 +47,7 @@ export default function App() {
       <Route path="/safety" element={<PlaceholderPage title="Safety" />} />
       <Route path="/privacy-policy" element={<PlaceholderPage title="Privacy Policy" />} />
       <Route path="/terms-of-service" element={<PlaceholderPage title="Terms of Service" />} />
-      <Route path="/notifications" element={<PlaceholderPage title="Notifications" />} />
+      <Route path="/notifications" element={ <UserMessageCenter /> } />
       <Route path="/profile" element={<PlaceholderPage title="Profile" />} />
       <Route path="/login" element={<PlaceholderPage title="Login" />} />
       <Route path="/community" element={<PlaceholderPage title="Community" />} />

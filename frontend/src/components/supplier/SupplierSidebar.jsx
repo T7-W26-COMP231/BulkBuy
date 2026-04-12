@@ -7,7 +7,7 @@ const sidebarItems = [
   { label: "Approved Items", icon: "verified", to: "/supplier/approved-items" },
   { label: "Quotes", icon: "description", to: "/supplier/quotes" },
   { label: "Order Requests", icon: "shopping_cart", to: "/supplier/order-requests" },
-  { label: "Demand Status", icon: "bar_chart", to: "/supplier/demand-status" },
+  { label: "Tier Progess", icon: "bar_chart", to: "/supplier/tier-progress" },
   { label: "Reports", icon: "download", to: "/supplier/reports" },
 ];
 

@@ -150,6 +150,7 @@ export default function App() {
           path="/supplier/order-requests/:id/fulfillment"
           element={<SupplierFulfillmentPage />}
         />
+        <Route path="/supplier/tier-progress" element={<SupplierDemandStatusPage />} />
 
         {/* Admin routes */}
         <Route

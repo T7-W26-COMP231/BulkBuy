@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import api from "../../api/api";
 import Navbar from "../../components/Navbar";
 import Sidebar from "../../components/Sidebar";
@@ -56,6 +56,44 @@ export default function ProfilePage() {
   const [paymentMessage, setPaymentMessage] = useState("");
   const [paymentError, setPaymentError] = useState("");
   const [paymentMethods, setPaymentMethods] = useState([]);
+
+  useEffect(() => {
+  const loadCustomerProfile = async () => {
+    try {
+      const response = await api.get("/users/profile");
+
+      const user =
+        response?.data?.data?.user ||
+        response?.data?.data ||
+        {};
+
+      setPaymentMethods(user.paymentMethods || []);
+
+      const primaryEmail =
+        user.emails?.find((email) => email.primary)?.address ||
+        "";
+
+      const primaryAddress = user.addresses?.[0] || {};
+
+      setProfileForm({
+        fullName: `${user.firstName || ""} ${user.lastName || ""}`.trim(),
+        email: primaryEmail,
+        addressLine1:
+          primaryAddress.line1 ||
+          primaryAddress.addressLine1 ||
+          "",
+        city: primaryAddress.city || "",
+        postalCode: primaryAddress.postalCode || "",
+      });
+
+      setOriginalEmail(primaryEmail);
+    } catch (error) {
+      console.error("Failed to load profile", error);
+    }
+  };
+
+  loadCustomerProfile();
+}, []);
 
   const handleProfileInputChange = (event) => {
     const { name, value } = event.target;
@@ -156,8 +194,7 @@ export default function ProfilePage() {
       setIsSaving(false);
     }
   };
-
-  const handlePaymentSave = () => {
+const handlePaymentSave = async () => {
   setPaymentMessage("");
   setPaymentError("");
 
@@ -171,51 +208,87 @@ export default function ProfilePage() {
     return;
   }
 
-  setPaymentMethods((prev) => [
-    ...prev,
-    {
-      id: Date.now(),
-      cardholderName: paymentForm.cardholderName.trim(),
-      last4: paymentForm.cardNumber.slice(-4),
-      expiryDate: paymentForm.expiryDate.trim(),
-      isDefault: prev.length === 0,
-    },
-  ]);
+  try {
+    const response = await api.patch("/users/payment-methods", {
+      cardNumber: paymentForm.cardNumber,
+      expiryDate: paymentForm.expiryDate,
+      provider: "visa",
+      tokenRef: `pm_${Date.now()}`,
+    });
 
-  setPaymentMessage("Payment method added successfully.");
+   const savedMethods =
+  response?.data?.data?.paymentMethods ||
+  response?.data?.data?.user?.paymentMethods ||
+  response?.data?.paymentMethods ||
+  [];
+
+    setPaymentMethods(savedMethods);
+    setPaymentMessage("Payment method added successfully.");
+
+    setPaymentForm({
+      cardholderName: "",
+      cardNumber: "",
+      expiryDate: "",
+      cvv: "",
+    });
+  } catch (error) {
+    setPaymentError(
+      error?.response?.data?.message ||
+        "Could not save payment method."
+    );
+  }
+};
+
+const handleRemovePayment = async (paymentId) => {
+  setPaymentMessage("");
   setPaymentError("");
 
-  setPaymentForm({
-    cardholderName: "",
-    cardNumber: "",
-    expiryDate: "",
-    cvv: "",
-  });
+  try {
+    const response = await api.delete(
+      `/users/payment-methods/${paymentId}`
+    );
+
+  const savedMethods =
+  response?.data?.data?.paymentMethods ||
+  response?.data?.data?.user?.paymentMethods ||
+  response?.data?.paymentMethods ||
+  [];
+
+    setPaymentMethods(savedMethods);
+    setPaymentMessage("Payment method removed successfully.");
+  } catch (error) {
+    setPaymentError(
+      error?.response?.data?.message ||
+        "Could not remove payment method."
+    );
+  }
+};
+const handleSetDefaultPayment = async (paymentId) => {
+  setPaymentMessage("");
+  setPaymentError("");
+
+  try {
+    await api.patch(
+      `/users/payment-methods/${paymentId}/default`
+    );
+
+    const profileResponse = await api.get("/users/profile");
+
+    const user =
+      profileResponse?.data?.data?.user ||
+      profileResponse?.data?.data ||
+      {};
+
+    setPaymentMethods(user.paymentMethods || []);
+    setPaymentMessage("Default payment method updated.");
+  } catch (error) {
+    setPaymentError(
+      error?.response?.data?.message ||
+        "Could not update default payment."
+    );
+  }
 };
 
- const handleRemovePayment = (id) => {
-  setPaymentMethods((prev) => {
-    const updated = prev.filter((card) => card.id !== id);
-
-    if (updated.length > 0 && !updated.some((card) => card.isDefault)) {
-      updated[0] = {
-        ...updated[0],
-        isDefault: true,
-      };
-    }
-
-    return updated;
-  });
-};
-
-const handleSetDefaultPayment = (id) => {
-  setPaymentMethods((prev) =>
-    prev.map((card) => ({
-      ...card,
-      isDefault: card.id === id,
-    }))
-  );
-};
   return (
     <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-background-light text-text-main font-display">
       <Navbar />
@@ -534,57 +607,57 @@ const handleSetDefaultPayment = (id) => {
           </section>
 
           {/* Saved payment methods */}
-{paymentMethods.length > 0 && (
-  <section className="rounded-2xl border border-neutral-light bg-white p-6 shadow-sm">
-    <h3 className="mb-4 text-lg font-bold text-text-main">
-      Saved Payment Methods
-    </h3>
+          {paymentMethods.length > 0 && (
+            <section className="rounded-2xl border border-neutral-light bg-white p-6 shadow-sm">
+              <h3 className="mb-4 text-lg font-bold text-text-main">
+                Saved Payment Methods
+              </h3>
 
-    <div className="space-y-4">
-      {paymentMethods.map((card) => (
-        <div
-          key={card.id}
-          className="flex flex-col gap-3 rounded-xl border border-neutral-light p-4 md:flex-row md:items-center md:justify-between"
-        >
-          <div>
-            <p className="font-semibold text-text-main">
-              **** **** **** {card.last4}
-            </p>
-            <p className="text-sm text-text-muted">
-              {card.cardholderName} • Expires {card.expiryDate}
-            </p>
+              <div className="space-y-4">
+                {paymentMethods.map((card) => (
+                  <div
+                    key={card.tokenRef}
+                    className="flex flex-col gap-3 rounded-xl border border-neutral-light p-4 md:flex-row md:items-center md:justify-between"
+                  >
+                    <div>
+                      <p className="font-semibold text-text-main">
+                        **** **** **** {card.last4}
+                      </p>
+                      <p className="text-sm text-text-muted">
+                        {card.provider?.toUpperCase() || "CARD"} • Expires {card.expiry}
+                      </p>
 
-            {card.isDefault && (
-              <span className="mt-2 inline-block rounded-full bg-primary/10 px-3 py-1 text-xs font-bold text-text-main">
-                Default
-              </span>
-            )}
-          </div>
+                      {card.isDefault && (
+                        <span className="mt-2 inline-block rounded-full bg-primary/10 px-3 py-1 text-xs font-bold text-text-main">
+                          Default
+                        </span>
+                      )}
+                    </div>
 
-          <div className="flex gap-3">
-            {!card.isDefault && (
-              <button
-                type="button"
-                onClick={() => handleSetDefaultPayment(card.id)}
-                className="rounded-xl border border-primary/20 bg-primary/10 px-4 py-2 text-sm font-semibold text-text-main transition-all duration-200 hover:-translate-y-0.5 hover:bg-primary/20"
-              >
-                Set Default
-              </button>
-            )}
+                    <div className="flex gap-3">
+                      {!card.isDefault && (
+                        <button
+                          type="button"
+                          onClick={() => handleSetDefaultPayment(card.tokenRef)}
+                          className="rounded-xl border border-primary/20 bg-primary/10 px-4 py-2 text-sm font-semibold text-text-main transition-all duration-200 hover:-translate-y-0.5 hover:bg-primary/20"
+                        >
+                          Set Default
+                        </button>
+                      )}
 
-            <button
-              type="button"
-              onClick={() => handleRemovePayment(card.id)}
-              className="rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-700 transition-all duration-200 hover:-translate-y-0.5 hover:bg-red-100"
-            >
-              Remove
-            </button>
-          </div>
-        </div>
-      ))}
-    </div>
-  </section>
-)}
+                      <button
+                        type="button"
+                        onClick={() => handleRemovePayment(card.tokenRef)}
+                        className="rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-700 transition-all duration-200 hover:-translate-y-0.5 hover:bg-red-100"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
 
           {/* Quick actions */}
           <section className="grid gap-4 md:grid-cols-3">

@@ -19,7 +19,7 @@ const UserController = {
   async createUser(req, res, next) {
     try {
       const payload = req.body || {};
-      const created = await UserService.createUser(payload, {user: req.user});
+      const created = await UserService.createUser(payload, { user: req.user });
       return send(res, 201, { success: true, data: created });
     } catch (err) {
       return next(err);
@@ -192,10 +192,32 @@ const UserController = {
     }
   },
 
-    /**
-   * PATCH /users/profile
-   * Customer updates own profile
-   */
+  /**
+ * GET /users/profile
+ * Customer gets own profile
+ */
+  async getCustomerProfile(req, res, next) {
+    try {
+      const userId = req.user?._id;
+      if (!userId) throw createError(401, "Unauthorized");
+
+      const user = await UserService.getUserById(userId);
+
+      return send(res, 200, {
+        success: true,
+        data: {
+          user,
+        },
+      });
+    } catch (err) {
+      return next(err);
+    }
+  },
+
+  /**
+ * PATCH /users/profile
+ * Customer updates own profile
+ */
   async updateCustomerProfile(req, res, next) {
     try {
       const userId = req.user?._id;
@@ -212,6 +234,86 @@ const UserController = {
         success: true,
         message: 'Profile updated successfully',
         data: updated
+      });
+    } catch (err) {
+      return next(err);
+    }
+  },
+
+  /**
+ * PATCH /users/payment-methods
+ * Customer adds payment method
+ */
+  async addPaymentMethod(req, res, next) {
+    try {
+      const userId = req.user?._id;
+      if (!userId) throw createError(401, "Unauthorized");
+
+      const payload = req.body || {};
+
+      const updated = await UserService.addPaymentMethod(
+        userId,
+        payload
+      );
+
+      return send(res, 200, {
+        success: true,
+        message: "Payment method added successfully",
+        data: updated,
+      });
+    } catch (err) {
+      return next(err);
+    }
+  },
+
+  /**
+   * PATCH /users/payment-methods/:paymentId/default
+   * Set default payment method
+   */
+  async setDefaultPaymentMethod(req, res, next) {
+    try {
+      const userId = req.user?._id;
+      const { paymentId } = req.params;
+
+      if (!userId) throw createError(401, "Unauthorized");
+      if (!paymentId) throw createError(400, "paymentId is required");
+
+      const updated = await UserService.setDefaultPaymentMethod(
+        userId,
+        paymentId
+      );
+
+      return send(res, 200, {
+        success: true,
+        message: "Default payment method updated",
+        data: updated,
+      });
+    } catch (err) {
+      return next(err);
+    }
+  },
+
+  /**
+   * DELETE /users/payment-methods/:paymentId
+   * Remove customer payment method
+   */
+  async removePaymentMethod(req, res, next) {
+    try {
+      const userId = req.user?._id;
+      const { paymentId } = req.params;
+
+      if (!userId) throw createError(401, "Unauthorized");
+      if (!paymentId) throw createError(400, "paymentId is required");
+
+      const updated = await UserService.removePaymentMethod(
+        userId,
+        paymentId
+      );
+
+      return send(res, 200, {
+        success: true,
+        message: "Payment method removed successfully",
+        data: updated,
       });
     } catch (err) {
       return next(err);

@@ -71,6 +71,13 @@ router.get(
   asyncHandler(UserController.listUsers)
 );
 
+/* Customer gets own profile */
+router.get(
+  '/profile',
+  requireAuth,
+  asyncHandler(UserController.getCustomerProfile)
+);
+
 /* Customer self profile update */
 router.patch(
   '/profile',
@@ -90,6 +97,27 @@ router.get(
 router.get(
   '/by-email',
   asyncHandler(UserController.getUserByEmail)
+);
+
+/* Add customer payment method */
+router.patch(
+  '/payment-methods',
+  requireAuth,
+  asyncHandler(UserController.addPaymentMethod)
+);
+
+/* Set default customer payment method */
+router.patch(
+  '/payment-methods/:paymentId/default',
+  requireAuth,
+  asyncHandler(UserController.setDefaultPaymentMethod)
+);
+
+/* Remove customer payment method */
+router.delete(
+  '/payment-methods/:paymentId',
+  requireAuth,
+  asyncHandler(UserController.removePaymentMethod)
 );
 
 /* Get user by Mongo _id */

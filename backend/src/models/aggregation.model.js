@@ -36,9 +36,13 @@ const PricingSnapshotSchema = new Schema({
 }, { _id: false });
 
 const ItemDtoSchema = new Schema({
-  itemId: { type: Schema.Types.ObjectId, ref: 'Item', required: true },
+  //itemId: { type: Schema.Types.ObjectId, ref: 'Item', required: true },
+  itemId: { type: String, ref: 'Item', required: true },        // was ObjectId
+
   pricingSnapshot: { type: PricingSnapshotSchema, default: () => ({}) },// the last from the saleswindow
-  supplierId: { type: Schema.Types.ObjectId, ref: 'User', default: null },
+  //supplierId: { type: Schema.Types.ObjectId, ref: 'User', default: null },
+  supplierId: { type: String, ref: 'User', default: null },     // was ObjectId
+
   salesWindow: { type: [SalesWindowSchema], default: [] }
 }, { _id: false });
 
@@ -50,7 +54,8 @@ const AggregationSchema = new Schema({
   _id: { type: String, required: true, trim: true }, // only for testing
   itemDtos: { type: [ItemDtoSchema], default: [] },
 
-  orders: { type: [Schema.Types.ObjectId], ref: 'Order', default: [] },
+  //orders: { type: [Schema.Types.ObjectId], ref: 'Order', default: [] },
+  orders: { type: [String], ref: 'Order', default: [] },          // was ObjectId
 
   ops_region: { type: String, trim: true, default: null },
 

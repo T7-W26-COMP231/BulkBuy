@@ -2,6 +2,7 @@
 const express = require('express');
 const AggregationController = require('../controllers/aggregation.controller');
 const aggregationValidators = require('../validators/aggregation.validators');
+const { requireAuth } = require('../middleware/auth.middleware');
 
 const router = express.Router();
 
@@ -40,6 +41,16 @@ router.post(
   '/bulk',
   aggregationValidators && aggregationValidators.bulkCreate,
   asyncHandler(AggregationController.bulkCreate)
+);
+
+/* GET /aggregations/supplier/demand-status
+ * Returns aggregated demand and tier progress for the logged-in supplier
+ * Requires: supplier auth token
+ */
+router.get(
+  '/supplier/demand-status',
+  requireAuth,
+  asyncHandler(AggregationController.getSupplierDemandStatus)
 );
 
 /* List aggregations (supports ?page=&limit=&filter= JSON) */

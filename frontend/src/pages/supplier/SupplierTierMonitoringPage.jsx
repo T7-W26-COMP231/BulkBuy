@@ -102,7 +102,25 @@ function TierProgress({ progress, tierLabel, nextTier }) {
   );
 }
 
-export default function SupplierDemandStatusPage() {
+export default function SupplierTierMonitoringPage() {
+  const { accessToken } = useAuth();
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await fetchSupplierDemandStatus();
+        setItems(res.data || []);
+      } catch (err) {
+        console.error("Failed to load demand status:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    if (accessToken) load();
+  }, [accessToken]);
+
   return (
     <SupplierLayout>
       <div className="mx-auto flex max-w-[1180px] flex-col gap-6 px-1">
@@ -167,75 +185,65 @@ export default function SupplierDemandStatusPage() {
               </thead>
 
               <tbody>
-                {mockItems.map((item) => (
-                  <tr
-                    key={item.id}
-                    className="border-b border-[#EDF2F7] last:border-b-0"
-                  >
-                    <td className="px-5 py-5">
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-[14px] bg-[#F4F8FB]">
-                          <span className="material-symbols-outlined text-[19px] text-[#8A94A6]">
-                            {item.icon}
-                          </span>
-                        </div>
-
-                        <div>
-                          <p className="max-w-[170px] text-[15px] font-semibold leading-5 text-[#1E293B]">
-                            {item.name}
-                          </p>
-                          <p className="mt-1 text-xs text-[#94A3B8]">
-                            {item.category}
-                          </p>
-                        </div>
-                      </div>
-                    </td>
-
-                    <td className="px-5 py-5">
-                      <p className="text-sm font-semibold leading-5 text-[#334155]">
-                        {item.city},
-                        <br />
-                        {item.state}
-                      </p>
-                      <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.05em] text-[#B0BAC8]">
-                        Region:
-                        <span className="ml-1">{item.region}</span>
-                      </p>
-                    </td>
-
-                    <td className="px-5 py-5">
-                      <p className="text-[31px] font-bold leading-none text-[#1E293B]">
-                        {item.demand.toLocaleString()}
-                      </p>
-                      <p className="mt-2 text-[11px] italic text-[#A0AEC0]">
-                        Units
-                      </p>
-                    </td>
-
-                    <td className="px-5 py-5">
-                      <TierProgress
-                        progress={item.progress}
-                        tierLabel={item.tierLabel}
-                        nextTier={item.nextTier}
-                      />
-                    </td>
-
-                    <td className="px-5 py-5">
-                      <StatusBadge status={item.status} />
-                    </td>
-
-                    <td className="px-5 py-5 text-center">
-                      <button
-                        type="button"
-                        className="text-sm font-semibold leading-5 text-[#63DFC4] transition hover:opacity-80"
-                      >
-                        View
-                        <br />
-                        Details
-                      </button>
+                {loading ? (
+                  <tr>
+                    <td colSpan={6} className="px-5 py-12 text-center text-sm text-[#94A3B8]">
+                      Loading demand data...
                     </td>
                   </tr>
-                ))}
+                ) : items.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="px-5 py-12 text-center text-sm text-[#94A3B8]">
+                      No demand data found.
+                    </td>
+                  </tr>) : (
+                  items.map((item) => (
+                    <tr key={item.itemId} className="border-b border-[#EDF2F7] last:border-b-0">
+                      <td className="px-5 py-5">
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-[14px] bg-[#F4F8FB] overflow-hidden">
+                            {item.images?.[0] ? (
+                              <img src={item.images[0]} alt={item.title} className="h-10 w-10 object-cover" />
+                            ) : (
+                              <span className="material-symbols-outlined text-[19px] text-[#8A94A6]">inventory_2</span>
+                            )}
+                          </div>
+                          <div>
+                            <p className="max-w-[170px] text-[15px] font-semibold leading-5 text-[#1E293B]">{item.title}</p>
+                            <p className="mt-1 text-xs text-[#94A3B8]">{item.category}</p>
+                          </div>
+                        </div>
+                      </td>
+
+                      <td className="px-5 py-5">
+                        <p className="text-sm font-semibold leading-5 text-[#334155]">{item.ops_region || "—"}</p>
+                      </td>
+
+                      <td className="px-5 py-5">
+                        <p className="text-[31px] font-bold leading-none text-[#1E293B]">{item.currentDemand.toLocaleString()}</p>
+                        <p className="mt-2 text-[11px] italic text-[#A0AEC0]">Units</p>
+                      </td>
+
+                      <td className="px-5 py-5">
+                        <TierProgress
+                          progress={item.progressPercent}
+                          tierLabel={item.isMaxTier ? "MAX TIER REACHED" : `TIER ${item.currentTier?.tierIndex} ACTIVE`}
+                          nextTier={item.isMaxTier ? `TARGET: ${item.currentTier?.minQty}` : `NEXT: TIER ${item.nextTier?.tierIndex} (${item.nextTier?.minQty})`}
+                        />
+                      </td>
+
+                      <td className="px-5 py-5">
+                        <StatusBadge status={item.isMaxTier ? "Complete" : "Active"} />
+                      </td>
+
+                      <td className="px-5 py-5 text-center">
+                        <button type="button" className="text-sm font-semibold leading-5 text-[#63DFC4] transition hover:opacity-80">
+                          View<br />Details
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>

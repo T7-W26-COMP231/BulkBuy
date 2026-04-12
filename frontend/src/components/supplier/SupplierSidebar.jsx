@@ -14,7 +14,6 @@ const sidebarItems = [
 export default function SupplierSidebar() {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
-
   const handleSignOut = async () => {
     await signOut();
     navigate("/", { replace: true });

@@ -10,9 +10,10 @@ import SupplierProfilePage from "./pages/supplier/SupplierProfilePage";
 import SupplierApprovedItemsPage from "./pages/supplier/SupplierApprovedItemsPage";
 import SupplierQuotesPage from "./pages/supplier/SupplierQuotesPage";
 import SupplierOrdersPage from "./pages/supplier/SupplierOrdersPage";
-import SupplierDemandStatusPage from "./pages/supplier/SupplierDemandStatusPage";
+import SupplierTierMonitoringPage from "./pages/supplier/SupplierTierMonitoringPage";
 import SupplierReportsPage from "./pages/supplier/SupplierReportsPage";
 import SupplierFulfillmentPage from "./pages/supplier/SupplierFulfillmentPage";
+
 
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminProductCatalogPage from "./pages/admin/AdminProductCatalogPage";
@@ -144,13 +145,12 @@ export default function App() {
         <Route path="/supplier/approved-items" element={<SupplierApprovedItemsPage />} />
         <Route path="/supplier/quotes" element={<SupplierQuotesPage />} />
         <Route path="/supplier/order-requests" element={<SupplierOrdersPage />} />
-        <Route path="/supplier/demand-status" element={<SupplierDemandStatusPage />} />
         <Route path="/supplier/reports" element={<SupplierReportsPage />} />
         <Route
           path="/supplier/order-requests/:id/fulfillment"
           element={<SupplierFulfillmentPage />}
         />
-        <Route path="/supplier/tier-progress" element={<SupplierDemandStatusPage />} />
+        <Route path="/supplier/demand-status" element={<SupplierTierMonitoringPage />} />
 
         {/* Admin routes */}
         <Route

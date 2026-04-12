@@ -68,3 +68,8 @@ export const fetchApprovedItems = async () => {
   const response = await api.get("/items/approved");
   return response.data;
 };
+
+export const fetchSupplierDemandStatus = async () => {
+  const res = await axiosInstance.get('/aggregations/supplier/demand-status');
+  return res.data;
+};

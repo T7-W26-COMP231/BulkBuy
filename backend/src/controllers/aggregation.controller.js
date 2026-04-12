@@ -94,6 +94,21 @@ const AggregationController = {
   }),
 
   /**
+   * GET /aggregations/supplier/demand-status
+   * Returns aggregated demand + tier progress for the logged-in supplier
+   */
+  getSupplierDemandStatus: asyncHandler(async (req, res) => {
+    const supplierId = req.user?._id || req.user?.id;
+    console.log("🔍 supplierId from token:", supplierId); // ADD THIS
+
+    if (!supplierId) throw createError(401, 'Supplier authentication required');
+
+    const result = await AggregationService.getSupplierDemandStatus(supplierId);
+    return send(res, 200, { success: true, data: result });
+  }),
+
+
+  /**
    * PATCH /aggregations/:id
    */
   updateById: asyncHandler(async (req, res) => {

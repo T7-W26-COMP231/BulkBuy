@@ -44,6 +44,17 @@ export default function ProfilePage() {
   const [saveMessage, setSaveMessage] = useState("");
   const [saveError, setSaveError] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const [originalEmail, setOriginalEmail] = useState("");
+
+  const [paymentForm, setPaymentForm] = useState({
+    cardholderName: "",
+    cardNumber: "",
+    expiryDate: "",
+    cvv: "",
+  });
+
+  const [paymentMessage, setPaymentMessage] = useState("");
+  const [paymentError, setPaymentError] = useState("");
 
   const handleProfileInputChange = (event) => {
     const { name, value } = event.target;
@@ -56,6 +67,15 @@ export default function ProfilePage() {
     setProfileErrors((prev) => ({
       ...prev,
       [name]: "",
+    }));
+  };
+
+  const handlePaymentInputChange = (event) => {
+    const { name, value } = event.target;
+
+    setPaymentForm((prev) => ({
+      ...prev,
+      [name]: value,
     }));
   };
 
@@ -93,6 +113,20 @@ export default function ProfilePage() {
       return;
     }
 
+    const emailChanged =
+      profileForm.email.trim().toLowerCase() !==
+      originalEmail.trim().toLowerCase();
+
+    if (emailChanged) {
+      const confirmed = window.confirm(
+        "You changed your email address. Please make sure it is correct before saving."
+      );
+
+      if (!confirmed) {
+        return;
+      }
+    }
+
     try {
       setIsSaving(true);
 
@@ -111,6 +145,7 @@ export default function ProfilePage() {
       });
 
       setSaveMessage("Profile updated successfully.");
+      setOriginalEmail(profileForm.email.trim());
     } catch (error) {
       setSaveError(
         error?.response?.data?.message ||
@@ -121,254 +156,375 @@ export default function ProfilePage() {
     }
   };
 
+  const handlePaymentSave = () => {
+    setPaymentMessage("");
+    setPaymentError("");
+
+    if (
+      !paymentForm.cardholderName.trim() ||
+      !paymentForm.cardNumber.trim() ||
+      !paymentForm.expiryDate.trim() ||
+      !paymentForm.cvv.trim()
+    ) {
+      setPaymentError("All payment fields are required.");
+      return;
+    }
+
+    setPaymentMessage("Payment method added successfully.");
+    setPaymentError("");
+
+    setPaymentForm({
+      cardholderName: "",
+      cardNumber: "",
+      expiryDate: "",
+      cvv: "",
+    });
+  };
+
   return (
-  <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-background-light text-text-main font-display">
-    <Navbar />
+    <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-background-light text-text-main font-display">
+      <Navbar />
 
-    <main className="flex flex-1 flex-col gap-8 px-4 py-8 md:flex-row md:px-20 lg:px-40">
-      <Sidebar
-  totalSavings={Number(profileForm.totalSavings || 0)}
-  savingsLabel="Saved this month"
-/>
+      <main className="flex flex-1 flex-col gap-8 px-4 py-8 md:flex-row md:px-20 lg:px-40">
+        <Sidebar
+          totalSavings={Number(profileForm.totalSavings || 0)}
+          savingsLabel="Saved this month"
+        />
 
-      <section className="flex flex-1 flex-col gap-6">
-        {/* Hero */}
-        <section className="rounded-2xl border border-neutral-light bg-white p-6 shadow-sm">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-            <div className="flex h-24 w-24 items-center justify-center rounded-full border-4 border-primary/30 bg-neutral-light">
-              <span className="material-symbols-outlined text-5xl text-text-muted">
-                person
-              </span>
-            </div>
-
-            <div className="flex-1">
-              <h1 className="text-3xl font-bold text-text-main">
-                {profileForm.fullName || "Customer Profile"}
-              </h1>
-              <p className="mt-1 text-sm font-medium text-text-muted">
-                {profileForm.city || "Profile settings"}
-              </p>
-
-              <div className="mt-3 flex flex-wrap gap-2">
-                <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-bold text-text-main">
-                  CUSTOMER
-                </span>
-                <span className="rounded-full bg-neutral-light px-3 py-1 text-xs font-bold text-text-muted">
-                  BULKBUY USER
+        <section className="flex flex-1 flex-col gap-6">
+          {/* Hero */}
+          <section className="rounded-2xl border border-neutral-light bg-white p-6 shadow-sm">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+              <div className="flex h-24 w-24 items-center justify-center rounded-full border-4 border-primary/30 bg-neutral-light">
+                <span className="material-symbols-outlined text-5xl text-text-muted">
+                  person
                 </span>
               </div>
-            </div>
-          </div>
-        </section>
 
-        {/* Main content */}
-        <section className="rounded-2xl border border-neutral-light bg-white shadow-sm">
-          <div className="flex flex-wrap border-b border-neutral-light">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-5 py-4 text-sm font-semibold transition ${
-                  activeTab === tab.id
+              <div className="flex-1">
+                <h1 className="text-3xl font-bold text-text-main">
+                  {profileForm.fullName || "Customer Profile"}
+                </h1>
+                <p className="mt-1 text-sm font-medium text-text-muted">
+                  {profileForm.city || "Profile settings"}
+                </p>
+
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-bold text-text-main">
+                    CUSTOMER
+                  </span>
+                  <span className="rounded-full bg-neutral-light px-3 py-1 text-xs font-bold text-text-muted">
+                    BULKBUY USER
+                  </span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Main content */}
+          <section className="rounded-2xl border border-neutral-light bg-white shadow-sm">
+            <div className="flex flex-wrap border-b border-neutral-light">
+              {tabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex items-center gap-2 px-5 py-4 text-sm font-semibold transition ${activeTab === tab.id
                     ? "border-b-2 border-primary text-text-main"
                     : "text-text-muted hover:text-text-main"
-                }`}
+                    }`}
+                >
+                  <span className="material-symbols-outlined text-base">
+                    {tab.icon}
+                  </span>
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            <div className="space-y-6 p-6">
+              {/* Notifications */}
+              <section className="space-y-4">
+                <h2 className="text-lg font-bold text-text-main">
+                  Notification Preferences
+                </h2>
+
+                <div className="rounded-xl bg-neutral-light p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-semibold text-text-main">
+                        Price Tier Alerts
+                      </p>
+                      <p className="text-sm text-text-muted">
+                        Get notified when products move to a better bulk pricing tier
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setPriceTierAlerts((prev) => !prev)}
+                      className={`h-6 w-11 rounded-full transition ${priceTierAlerts ? "bg-primary" : "bg-gray-300"
+                        }`}
+                    />
+                  </div>
+                </div>
+
+                <div className="rounded-xl bg-neutral-light p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-semibold text-text-main">
+                        Order Updates
+                      </p>
+                      <p className="text-sm text-text-muted">
+                        Status changes, shipping confirmations, and delivery alerts
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setOrderUpdates((prev) => !prev)}
+                      className={`h-6 w-11 rounded-full transition ${orderUpdates ? "bg-primary" : "bg-gray-300"
+                        }`}
+                    />
+                  </div>
+                </div>
+              </section>
+
+              {/* Profile form */}
+              <section className="rounded-2xl bg-neutral-light p-5">
+                <div className="mb-4">
+                  <h3 className="font-bold text-text-main">
+                    Profile Details
+                  </h3>
+                  <p className="mt-1 text-sm text-text-muted">
+                    Update your account information and contact details
+                  </p>
+                </div>
+
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div>
+                    <label className="mb-2 block text-sm font-semibold text-text-main">
+                      Full Name
+                    </label>
+                    <input
+                      type="text"
+                      name="fullName"
+                      value={profileForm.fullName}
+                      onChange={handleProfileInputChange}
+                      className="w-full rounded-xl border border-neutral-light bg-white px-4 py-3"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-2 block text-sm font-semibold text-text-main">
+                      Email Address
+                    </label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={profileForm.email}
+                      onChange={handleProfileInputChange}
+                      className="w-full rounded-xl border border-neutral-light bg-white px-4 py-3"
+                    />
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <label className="mb-2 block text-sm font-semibold text-text-main">
+                      Address Line
+                    </label>
+                    <input
+                      type="text"
+                      name="addressLine1"
+                      value={profileForm.addressLine1}
+                      onChange={handleProfileInputChange}
+                      className="w-full rounded-xl border border-neutral-light bg-white px-4 py-3"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-2 block text-sm font-semibold text-text-main">
+                      City
+                    </label>
+                    <input
+                      type="text"
+                      name="city"
+                      value={profileForm.city}
+                      onChange={handleProfileInputChange}
+                      className="w-full rounded-xl border border-neutral-light bg-white px-4 py-3"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-2 block text-sm font-semibold text-text-main">
+                      Postal Code
+                    </label>
+                    <input
+                      type="text"
+                      name="postalCode"
+                      value={profileForm.postalCode}
+                      onChange={handleProfileInputChange}
+                      className="w-full rounded-xl border border-neutral-light bg-white px-4 py-3"
+                    />
+                  </div>
+                </div>
+              </section>
+
+              {saveMessage && (
+                <div className="rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm font-semibold text-green-700">
+                  {saveMessage}
+                </div>
+              )}
+
+              {saveError && (
+                <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
+                  {saveError}
+                </div>
+              )}
+
+              <div className="flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setProfileForm((prev) => ({
+                      ...prev,
+                      email: originalEmail,
+                    }));
+
+                    setProfileErrors({});
+                    setSaveMessage("");
+                    setSaveError("");
+                  }}
+                  className="rounded-xl border border-primary/20 bg-primary/10 px-5 py-2.5 text-sm font-semibold text-text-main transition-all duration-200 hover:-translate-y-0.5 hover:bg-primary/20 hover:shadow-sm"
+                >
+                  Discard
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleProfileSave}
+                  disabled={isSaving}
+                  className="rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-text-main transition-transform transition-colors duration-200 hover:-translate-y-0.5 hover:shadow-md hover:brightness-95"
+                >
+                  {isSaving ? "Saving..." : "Save Changes"}
+                </button>
+              </div>
+            </div>
+          </section>
+
+          {/* Add payment method */}
+          <section className="rounded-2xl border border-neutral-light bg-white p-6 shadow-sm">
+            <div className="mb-4">
+              <h3 className="text-lg font-bold text-text-main">
+                Add Payment Method
+              </h3>
+              <p className="text-sm text-text-muted">
+                Securely add a new payment method for future purchases
+              </p>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <div>
+                <label className="mb-2 block text-sm font-semibold">
+                  Cardholder Name
+                </label>
+                <input
+                  type="text"
+                  name="cardholderName"
+                  value={paymentForm.cardholderName}
+                  onChange={handlePaymentInputChange}
+                  className="w-full rounded-xl border border-neutral-light bg-white px-4 py-3"
+                />
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-semibold">
+                  Card Number
+                </label>
+                <input
+                  type="text"
+                  name="cardNumber"
+                  value={paymentForm.cardNumber}
+                  onChange={handlePaymentInputChange}
+                  className="w-full rounded-xl border border-neutral-light bg-white px-4 py-3"
+                />
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-semibold">
+                  Expiry Date
+                </label>
+                <input
+                  type="text"
+                  name="expiryDate"
+                  placeholder="MM/YY"
+                  value={paymentForm.expiryDate}
+                  onChange={handlePaymentInputChange}
+                  className="w-full rounded-xl border border-neutral-light bg-white px-4 py-3"
+                />
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-semibold">
+                  CVV
+                </label>
+                <input
+                  type="password"
+                  name="cvv"
+                  value={paymentForm.cvv}
+                  onChange={handlePaymentInputChange}
+                  className="w-full rounded-xl border border-neutral-light bg-white px-4 py-3"
+                />
+              </div>
+            </div>
+
+            {paymentMessage && (
+              <div className="mt-4 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm font-semibold text-green-700">
+                {paymentMessage}
+              </div>
+            )}
+
+            {paymentError && (
+              <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
+                {paymentError}
+              </div>
+            )}
+
+            <div className="mt-4 flex justify-end">
+              <button
+                type="button"
+                onClick={handlePaymentSave}
+                className="rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-text-main transition-transform transition-colors duration-200 hover:-translate-y-0.5 hover:shadow-md hover:brightness-95"
               >
-                <span className="material-symbols-outlined text-base">
-                  {tab.icon}
-                </span>
-                {tab.label}
+                Add Payment Method
               </button>
+            </div>
+          </section>
+
+          {/* Quick actions */}
+          <section className="grid gap-4 md:grid-cols-3">
+            {quickActions.map((action) => (
+              <div
+                key={action.title}
+                className="rounded-2xl border border-neutral-light bg-white p-5 shadow-sm"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="material-symbols-outlined text-primary">
+                    {action.icon}
+                  </span>
+                  <div>
+                    <p className="font-semibold text-text-main">
+                      {action.title}
+                    </p>
+                    <p className="text-sm text-text-muted">
+                      {action.subtitle}
+                    </p>
+                  </div>
+                </div>
+              </div>
             ))}
-          </div>
-
-          <div className="space-y-6 p-6">
-            {/* Notifications */}
-            <section className="space-y-4">
-              <h2 className="text-lg font-bold text-text-main">
-                Notification Preferences
-              </h2>
-
-              <div className="rounded-xl bg-neutral-light p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-semibold text-text-main">
-                      Price Tier Alerts
-                    </p>
-                    <p className="text-sm text-text-muted">
-                      Get notified when products move to a better bulk pricing tier
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setPriceTierAlerts((prev) => !prev)}
-                    className={`h-6 w-11 rounded-full transition ${
-                      priceTierAlerts ? "bg-primary" : "bg-gray-300"
-                    }`}
-                  />
-                </div>
-              </div>
-
-              <div className="rounded-xl bg-neutral-light p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-semibold text-text-main">
-                      Order Updates
-                    </p>
-                    <p className="text-sm text-text-muted">
-                      Status changes, shipping confirmations, and delivery alerts
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setOrderUpdates((prev) => !prev)}
-                    className={`h-6 w-11 rounded-full transition ${
-                      orderUpdates ? "bg-primary" : "bg-gray-300"
-                    }`}
-                  />
-                </div>
-              </div>
-            </section>
-
-            {/* Profile form */}
-            <section className="rounded-2xl bg-neutral-light p-5">
-              <div className="mb-4">
-                <h3 className="font-bold text-text-main">
-                  Profile Details
-                </h3>
-                <p className="mt-1 text-sm text-text-muted">
-                  Update your account information and contact details
-                </p>
-              </div>
-
-              <div className="grid gap-4 md:grid-cols-2">
-                <div>
-                  <label className="mb-2 block text-sm font-semibold text-text-main">
-                    Full Name
-                  </label>
-                  <input
-                    type="text"
-                    name="fullName"
-                    value={profileForm.fullName}
-                    onChange={handleProfileInputChange}
-                    className="w-full rounded-xl border border-neutral-light bg-white px-4 py-3"
-                  />
-                </div>
-
-                <div>
-                  <label className="mb-2 block text-sm font-semibold text-text-main">
-                    Email Address
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={profileForm.email}
-                    onChange={handleProfileInputChange}
-                    className="w-full rounded-xl border border-neutral-light bg-white px-4 py-3"
-                  />
-                </div>
-
-                <div className="md:col-span-2">
-                  <label className="mb-2 block text-sm font-semibold text-text-main">
-                    Address Line
-                  </label>
-                  <input
-                    type="text"
-                    name="addressLine1"
-                    value={profileForm.addressLine1}
-                    onChange={handleProfileInputChange}
-                    className="w-full rounded-xl border border-neutral-light bg-white px-4 py-3"
-                  />
-                </div>
-
-                <div>
-                  <label className="mb-2 block text-sm font-semibold text-text-main">
-                    City
-                  </label>
-                  <input
-                    type="text"
-                    name="city"
-                    value={profileForm.city}
-                    onChange={handleProfileInputChange}
-                    className="w-full rounded-xl border border-neutral-light bg-white px-4 py-3"
-                  />
-                </div>
-
-                <div>
-                  <label className="mb-2 block text-sm font-semibold text-text-main">
-                    Postal Code
-                  </label>
-                  <input
-                    type="text"
-                    name="postalCode"
-                    value={profileForm.postalCode}
-                    onChange={handleProfileInputChange}
-                    className="w-full rounded-xl border border-neutral-light bg-white px-4 py-3"
-                  />
-                </div>
-              </div>
-            </section>
-
-            {saveMessage && (
-              <div className="rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm font-semibold text-green-700">
-                {saveMessage}
-              </div>
-            )}
-
-            {saveError && (
-              <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
-                {saveError}
-              </div>
-            )}
-
-            <div className="flex justify-end gap-3">
-              <button
-                type="button"
-                className="rounded-xl border border-neutral-light px-5 py-2.5 text-sm font-semibold text-text-muted"
-              >
-                Discard
-              </button>
-
-              <button
-                type="button"
-                onClick={handleProfileSave}
-                disabled={isSaving}
-                className="rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-text-main"
-              >
-                {isSaving ? "Saving..." : "Save Changes"}
-              </button>
-            </div>
-          </div>
+          </section>
         </section>
+      </main>
 
-        {/* Quick actions */}
-        <section className="grid gap-4 md:grid-cols-3">
-          {quickActions.map((action) => (
-            <div
-              key={action.title}
-              className="rounded-2xl border border-neutral-light bg-white p-5 shadow-sm"
-            >
-              <div className="flex items-center gap-3">
-                <span className="material-symbols-outlined text-primary">
-                  {action.icon}
-                </span>
-                <div>
-                  <p className="font-semibold text-text-main">
-                    {action.title}
-                  </p>
-                  <p className="text-sm text-text-muted">
-                    {action.subtitle}
-                  </p>
-                </div>
-              </div>
-            </div>
-          ))}
-        </section>
-      </section>
-    </main>
-
-    <Footer />
-  </div>
-);
+      <Footer />
+    </div>
+  );
 }

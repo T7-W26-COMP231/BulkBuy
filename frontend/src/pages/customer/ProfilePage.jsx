@@ -55,6 +55,7 @@ export default function ProfilePage() {
 
   const [paymentMessage, setPaymentMessage] = useState("");
   const [paymentError, setPaymentError] = useState("");
+  const [paymentMethods, setPaymentMethods] = useState([]);
 
   const handleProfileInputChange = (event) => {
     const { name, value } = event.target;
@@ -157,30 +158,64 @@ export default function ProfilePage() {
   };
 
   const handlePaymentSave = () => {
-    setPaymentMessage("");
-    setPaymentError("");
+  setPaymentMessage("");
+  setPaymentError("");
 
-    if (
-      !paymentForm.cardholderName.trim() ||
-      !paymentForm.cardNumber.trim() ||
-      !paymentForm.expiryDate.trim() ||
-      !paymentForm.cvv.trim()
-    ) {
-      setPaymentError("All payment fields are required.");
-      return;
+  if (
+    !paymentForm.cardholderName.trim() ||
+    !paymentForm.cardNumber.trim() ||
+    !paymentForm.expiryDate.trim() ||
+    !paymentForm.cvv.trim()
+  ) {
+    setPaymentError("All payment fields are required.");
+    return;
+  }
+
+  setPaymentMethods((prev) => [
+    ...prev,
+    {
+      id: Date.now(),
+      cardholderName: paymentForm.cardholderName.trim(),
+      last4: paymentForm.cardNumber.slice(-4),
+      expiryDate: paymentForm.expiryDate.trim(),
+      isDefault: prev.length === 0,
+    },
+  ]);
+
+  setPaymentMessage("Payment method added successfully.");
+  setPaymentError("");
+
+  setPaymentForm({
+    cardholderName: "",
+    cardNumber: "",
+    expiryDate: "",
+    cvv: "",
+  });
+};
+
+ const handleRemovePayment = (id) => {
+  setPaymentMethods((prev) => {
+    const updated = prev.filter((card) => card.id !== id);
+
+    if (updated.length > 0 && !updated.some((card) => card.isDefault)) {
+      updated[0] = {
+        ...updated[0],
+        isDefault: true,
+      };
     }
 
-    setPaymentMessage("Payment method added successfully.");
-    setPaymentError("");
+    return updated;
+  });
+};
 
-    setPaymentForm({
-      cardholderName: "",
-      cardNumber: "",
-      expiryDate: "",
-      cvv: "",
-    });
-  };
-
+const handleSetDefaultPayment = (id) => {
+  setPaymentMethods((prev) =>
+    prev.map((card) => ({
+      ...card,
+      isDefault: card.id === id,
+    }))
+  );
+};
   return (
     <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-background-light text-text-main font-display">
       <Navbar />
@@ -497,6 +532,59 @@ export default function ProfilePage() {
               </button>
             </div>
           </section>
+
+          {/* Saved payment methods */}
+{paymentMethods.length > 0 && (
+  <section className="rounded-2xl border border-neutral-light bg-white p-6 shadow-sm">
+    <h3 className="mb-4 text-lg font-bold text-text-main">
+      Saved Payment Methods
+    </h3>
+
+    <div className="space-y-4">
+      {paymentMethods.map((card) => (
+        <div
+          key={card.id}
+          className="flex flex-col gap-3 rounded-xl border border-neutral-light p-4 md:flex-row md:items-center md:justify-between"
+        >
+          <div>
+            <p className="font-semibold text-text-main">
+              **** **** **** {card.last4}
+            </p>
+            <p className="text-sm text-text-muted">
+              {card.cardholderName} • Expires {card.expiryDate}
+            </p>
+
+            {card.isDefault && (
+              <span className="mt-2 inline-block rounded-full bg-primary/10 px-3 py-1 text-xs font-bold text-text-main">
+                Default
+              </span>
+            )}
+          </div>
+
+          <div className="flex gap-3">
+            {!card.isDefault && (
+              <button
+                type="button"
+                onClick={() => handleSetDefaultPayment(card.id)}
+                className="rounded-xl border border-primary/20 bg-primary/10 px-4 py-2 text-sm font-semibold text-text-main transition-all duration-200 hover:-translate-y-0.5 hover:bg-primary/20"
+              >
+                Set Default
+              </button>
+            )}
+
+            <button
+              type="button"
+              onClick={() => handleRemovePayment(card.id)}
+              className="rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-700 transition-all duration-200 hover:-translate-y-0.5 hover:bg-red-100"
+            >
+              Remove
+            </button>
+          </div>
+        </div>
+      ))}
+    </div>
+  </section>
+)}
 
           {/* Quick actions */}
           <section className="grid gap-4 md:grid-cols-3">

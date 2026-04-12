@@ -552,10 +552,16 @@ class UserService {
     }
 
     const safePayload = {
-      firstName: payload.firstName,
-      lastName: payload.lastName,
-      addresses: existingAddresses,
-    };
+  firstName: payload.firstName,
+  lastName: payload.lastName,
+  addresses: existingAddresses,
+  notificationPreferences: {
+    priceTierAlerts:
+      payload.notificationPreferences?.priceTierAlerts ?? true,
+    orderUpdates:
+      payload.notificationPreferences?.orderUpdates ?? true,
+  },
+};
 
     if (payload.email) {
       const existingEmails = Array.isArray(existingUser?.emails)
@@ -582,7 +588,7 @@ class UserService {
     return this.updateUserById(userId, safePayload, opts);
   }
 
-  
+
   /**
    * Add customer payment method
    */

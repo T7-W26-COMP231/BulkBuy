@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../../api/api";
 import Navbar from "../../components/Navbar";
 import Sidebar from "../../components/Sidebar";
@@ -30,6 +31,8 @@ const quickActions = [
 ];
 
 export default function ProfilePage() {
+  const navigate = useNavigate();
+
   const [activeTab, setActiveTab] = useState("profile");
   const [priceTierAlerts, setPriceTierAlerts] = useState(true);
   const [orderUpdates, setOrderUpdates] = useState(true);
@@ -52,7 +55,6 @@ export default function ProfilePage() {
     expiryDate: "",
     cvv: "",
   });
-
   const [paymentMessage, setPaymentMessage] = useState("");
   const [paymentError, setPaymentError] = useState("");
   const [paymentMethods, setPaymentMethods] = useState([]);
@@ -68,6 +70,13 @@ export default function ProfilePage() {
           {};
 
         setPaymentMethods(user.paymentMethods || []);
+
+        setPriceTierAlerts(
+          user.notificationPreferences?.priceTierAlerts ?? true
+        );
+        setOrderUpdates(
+          user.notificationPreferences?.orderUpdates ?? true
+        );
 
         const primaryEmail =
           user.emails?.find((email) => email.primary)?.address ||
@@ -181,6 +190,10 @@ export default function ProfilePage() {
         addressLine1: profileForm.addressLine1,
         city: profileForm.city,
         postalCode: profileForm.postalCode,
+        notificationPreferences: {
+          priceTierAlerts,
+          orderUpdates,
+        },
       });
 
       setSaveMessage("Profile updated successfully.");
@@ -396,7 +409,7 @@ export default function ProfilePage() {
 
                   {saveMessage && (
                     <div className="rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm font-semibold text-green-700">
-                      ✅ {saveMessage}
+                      ✅ Notification preferences updated successfully.
                     </div>
                   )}
                   {saveError && (
@@ -502,26 +515,78 @@ export default function ProfilePage() {
               {/* ── Notifications Tab ── */}
               {activeTab === "notifications" && (
                 <section className="space-y-4">
-                  <h2 className="text-lg font-bold text-text-main">Notification Preferences</h2>
+                  <h2 className="text-lg font-bold text-text-main">
+                    Notification Preferences
+                  </h2>
+
                   <div className="rounded-xl bg-neutral-light p-4">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="font-semibold text-text-main">Price Tier Alerts</p>
-                        <p className="text-sm text-text-muted">Get notified when products move to a better bulk pricing tier</p>
+                        <p className="font-semibold text-text-main">
+                          Price Tier Alerts
+                        </p>
+                        <p className="text-sm text-text-muted">
+                          Get notified when products move to a better bulk pricing tier
+                        </p>
                       </div>
-                      <button type="button" onClick={() => setPriceTierAlerts(prev => !prev)}
-                        className={`h-6 w-11 rounded-full transition ${priceTierAlerts ? "bg-primary" : "bg-gray-300"}`} />
+                      <button
+                        type="button"
+                        onClick={() => setPriceTierAlerts((prev) => !prev)}
+                        className={`relative h-7 w-14 rounded-full transition-all duration-300 ${priceTierAlerts ? "bg-primary" : "bg-gray-300"
+                          }`}
+                      >
+                        <span
+                          className={`absolute top-1 h-5 w-5 rounded-full bg-white shadow-md transition-all duration-300 ${priceTierAlerts ? "left-8" : "left-1"
+                            }`}
+                        />
+                      </button>
                     </div>
                   </div>
+
                   <div className="rounded-xl bg-neutral-light p-4">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="font-semibold text-text-main">Order Updates</p>
-                        <p className="text-sm text-text-muted">Status changes, shipping confirmations, and delivery alerts</p>
+                        <p className="font-semibold text-text-main">
+                          Order Updates
+                        </p>
+                        <p className="text-sm text-text-muted">
+                          Status changes, shipping confirmations, and delivery alerts
+                        </p>
                       </div>
-                      <button type="button" onClick={() => setOrderUpdates(prev => !prev)}
-                        className={`h-6 w-11 rounded-full transition ${orderUpdates ? "bg-primary" : "bg-gray-300"}`} />
+                      <button
+                        type="button"
+                        onClick={() => setOrderUpdates((prev) => !prev)}
+                        className={`relative h-7 w-14 rounded-full transition-all duration-300 ${orderUpdates ? "bg-primary" : "bg-gray-300"
+                          }`}
+                      >
+                        <span
+                          className={`absolute top-1 h-5 w-5 rounded-full bg-white shadow-md transition-all duration-300 ${orderUpdates ? "left-8" : "left-1"
+                            }`}
+                        />
+                      </button>
                     </div>
+                  </div>
+
+                  {saveMessage && (
+                    <div className="rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm font-semibold text-green-700">
+                      ✅ {saveMessage}
+                    </div>
+                  )}
+
+                  {saveError && (
+                    <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
+                      ❌ {saveError}
+                    </div>
+                  )}
+
+                  <div className="flex justify-end pt-4">
+                    <button
+                      type="button"
+                      onClick={handleProfileSave}
+                      className="rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-text-main transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-md hover:brightness-95"
+                    >
+                      Save Notification Preferences
+                    </button>
                   </div>
                 </section>
               )}
@@ -532,9 +597,9 @@ export default function ProfilePage() {
                   Security settings coming soon.
                 </div>
               )}
-
             </div>
           </section>
+
 
           {/* Add payment method */}
           <section className="rounded-2xl border border-neutral-light bg-white p-6 shadow-sm">
@@ -678,12 +743,18 @@ export default function ProfilePage() {
             </section>
           )}
 
-          {/* Quick actions */}
+            {/* Quick actions */}
           <section className="grid gap-4 md:grid-cols-3">
             {quickActions.map((action) => (
-              <div
+              <button
                 key={action.title}
-                className="rounded-2xl border border-neutral-light bg-white p-5 shadow-sm"
+                type="button"
+                onClick={() => {
+                  if (action.title === "Order History") {
+                    navigate("/orders");
+                  }
+                }}
+                className="rounded-2xl border border-neutral-light bg-white p-5 text-left shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
               >
                 <div className="flex items-center gap-3">
                   <span className="material-symbols-outlined text-primary">
@@ -698,7 +769,7 @@ export default function ProfilePage() {
                     </p>
                   </div>
                 </div>
-              </div>
+              </button>
             ))}
           </section>
         </section>

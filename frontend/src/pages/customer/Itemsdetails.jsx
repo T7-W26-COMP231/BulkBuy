@@ -11,10 +11,91 @@ import Footer from "../../components/Footer";
 const PRODUCTS_API = `${import.meta.env.VITE_API_URL}/api/prdts`;
 const ITEMS_API = `${import.meta.env.VITE_API_URL}/api/items`;
 
+function RatingInput({ itemId, token, onRated }) {
+    const [hovered, setHovered] = useState(0);
+    const [selected, setSelected] = useState(0);
+    const [submitting, setSubmitting] = useState(false);
+    const [submitted, setSubmitted] = useState(false);
+    const [error, setError] = useState("");
+
+    const handleSubmit = async () => {
+        console.log("🔑 token:", token);
+        console.log("📦 itemId:", itemId);
+        if (!selected || submitting || submitted) return;
+        setSubmitting(true);
+        setError("");
+        try {
+            const res = await fetch(
+                `${import.meta.env.VITE_API_URL}/api/items/${itemId}/apply-rating`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({ rating: selected }),
+                }
+            );
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || "Failed to submit rating");
+            setSubmitted(true);
+            onRated(data.data?.ratings);
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    if (submitted) {
+        return (
+            <p className="text-sm font-semibold text-green-600">
+                ✓ Thanks for your rating!
+            </p>
+        );
+    }
+
+    return (
+        <div className="flex flex-col gap-3">
+            <p className="text-sm text-text-muted">Rate this product</p>
+            <div className="flex gap-1">
+                {[1, 2, 3, 4, 5].map((i) => (
+                    <button
+                        key={i}
+                        onClick={() => setSelected(i)}
+                        onMouseEnter={() => setHovered(i)}
+                        onMouseLeave={() => setHovered(0)}
+                        aria-label={`${i} star${i > 1 ? "s" : ""}`}
+                        style={{
+                            fontSize: 32,
+                            background: "none",
+                            border: "none",
+                            cursor: "pointer",
+                            color: i <= (hovered || selected) ? "#E9A800" : "#CBD5E1",
+                            transition: "transform 0.1s",
+                        }}
+                    >
+                        {i <= (hovered || selected) ? "★" : "☆"}
+                    </button>
+                ))}
+            </div>
+            {error && <p className="text-xs text-red-500">{error}</p>}
+            <button
+                onClick={handleSubmit}
+                disabled={!selected || submitting}
+                className="w-fit rounded-xl border border-neutral-light bg-white px-5 py-2 text-sm font-semibold transition hover:bg-neutral-light disabled:opacity-40"
+            >
+                {submitting ? "Submitting..." : "Submit rating"}
+            </button>
+        </div>
+    );
+}
 export default function ItemDetail() {
     // add this with your other state
+
+
     const [addingToIntent, setAddingToIntent] = useState(false);
-    const { user } = useAuth(); // get user for userId
+    const { user, accessToken } = useAuth();
 
     const { id } = useParams();
     const navigate = useNavigate();
@@ -615,9 +696,57 @@ export default function ItemDetail() {
 
                         {/* ── Reviews tab — UNCHANGED ── */}
                         {activeTab === "reviews" && (
-                            <div className="flex flex-col items-center gap-3 py-10 text-center text-text-muted">
-                                <span className="material-symbols-outlined text-4xl">rate_review</span>
-                                <p className="text-sm">No reviews yet. Be the first to review this item.</p>
+                            <div className="flex flex-col gap-6 py-2">
+
+                                {/* Average score */}
+                                <div className="flex items-center gap-4">
+                                    <span className="text-5xl font-extrabold">
+                                        {item.ratings?.avg?.toFixed(1) ?? "—"}
+                                    </span>
+                                    <div className="flex flex-col gap-1">
+                                        <div className="flex gap-0.5">
+                                            {[1, 2, 3, 4, 5].map((i) => (
+                                                <span
+                                                    key={i}
+                                                    style={{
+                                                        fontSize: 18,
+                                                        color: i <= Math.round(item.ratings?.avg ?? 0) ? "#E9A800" : "#CBD5E1",
+                                                    }}
+                                                >
+                                                    {i <= Math.round(item.ratings?.avg ?? 0) ? "★" : "☆"}
+                                                </span>
+                                            ))}
+                                        </div>
+                                        <span className="text-sm text-text-muted">
+                                            {item.ratings?.count ?? 0} ratings
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <hr className="border-neutral-light" />
+
+                                {/* Rating input or sign-in prompt */}
+                                {user ? (
+                                    <RatingInput
+                                        itemId={item._id}
+                                        token={accessToken}
+                                        onRated={(newRatings) =>
+                                            setItem((prev) => ({ ...prev, ratings: newRatings }))
+                                        }
+                                    />
+                                ) : (
+                                    <p className="rounded-xl bg-neutral-light px-4 py-3 text-sm text-text-muted">
+                                        Sign in to rate this product.
+                                    </p>
+                                )}
+
+                                {/* Empty state */}
+                                {(item.reviews?.length ?? 0) === 0 && (
+                                    <div className="flex flex-col items-center gap-3 py-8 text-center text-text-muted">
+                                        <span className="material-symbols-outlined text-4xl">rate_review</span>
+                                        <p className="text-sm">No written reviews yet. Be the first!</p>
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>

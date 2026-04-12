@@ -12,7 +12,7 @@
  *
  * All methods accept opts = { actor, correlationId, session, ... } where appropriate.
  */
-
+const Item = require('../models/item.model');
 const createError = require('http-errors');
 const ItemRepo = require('../repositories/item.repo');
 const auditService = require('./audit.service');
@@ -497,7 +497,8 @@ class ItemService {
    * Apply rating to item (delegates to model instance method via repo update)
    * - This service expects the repo to return the updated document
    */
-  async applyRating(id, rating = 0, opts = {}) {
+
+  /*async applyRating(id, rating = 0, opts = {}) {
     const actor = actorFromOpts(opts);
     const correlationId = opts.correlationId || null;
     if (!id) throw createError(400, 'id is required');
@@ -549,7 +550,58 @@ class ItemService {
       });
       throw err;
     }
+  }*/
+
+  async applyRating(id, rating = 0, opts = {}) {
+    const actor = actorFromOpts(opts);
+    const correlationId = opts.correlationId || null;
+    if (!id) throw createError(400, 'id is required');
+    rating = Number(rating) || 0;
+    if (rating <= 0) throw createError(400, 'rating must be > 0');
+
+    try {
+      const itemDoc = await ItemRepo.findById(id, { session: opts.session });
+      if (!itemDoc) throw createError(404, 'Item not found');
+
+      const current = itemDoc.ratings || { avg: 0, count: 0 };
+      const total = (current.avg || 0) * (current.count || 0);
+      const newCount = (current.count || 0) + 1;
+      const newAvg = Number(((total + rating) / newCount).toFixed(2));
+
+      // ✅ Targeted update — skips validation of media/warehouses/relatedProducts
+      const updated = await Item.findByIdAndUpdate(
+        id,
+        { $set: { 'ratings.avg': newAvg, 'ratings.count': newCount } },
+        { new: true, runValidators: false }
+      ).lean();
+
+      if (!updated) throw createError(404, 'Item not found after update');
+
+      await auditService.logEvent({
+        eventType: 'item.rating.apply.success',
+        actor,
+        target: { type: 'Item', id },
+        outcome: 'success',
+        severity: 'info',
+        correlationId,
+        details: { rating }
+      });
+
+      return sanitize(updated);
+    } catch (err) {
+      await auditService.logEvent({
+        eventType: 'item.rating.apply.failed',
+        actor,
+        target: { type: 'Item', id },
+        outcome: 'failure',
+        severity: 'error',
+        correlationId,
+        details: { message: err.message, rating }
+      });
+      throw err;
+    }
   }
+
 
   /**
    * Soft delete item by id

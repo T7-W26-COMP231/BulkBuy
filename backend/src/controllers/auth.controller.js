@@ -146,7 +146,9 @@ async function login(req, res) {
       details: {}
     });
 
-    return res.status(200).json({ accessToken, user });
+    //return res.status(200).json({ accessToken, user });
+    return res.status(200).json({ accessToken, refreshToken, user });
+
   } catch (err) {
     await auditService.logEvent({
       eventType: 'auth.login.failed',

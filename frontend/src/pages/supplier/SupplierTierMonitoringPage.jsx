@@ -398,7 +398,7 @@ export default function SupplierTierMonitoringPage() {
                       <td className="px-5 py-5">
                         <TierProgress
                           progress={item.progressPercent}
-                          nearing={isNearingTier(item.progressPercent, item.isMaxTier)} // ← add
+                          nearing={isNearingTier(item.progressPercent, item.isMaxTier)}
                           tierLabel={
                             item.isMaxTier
                               ? "MAX TIER REACHED"
@@ -419,6 +419,20 @@ export default function SupplierTierMonitoringPage() {
                           thresholds={item.pricingTiers?.map((tier) => tier.minQty) || []}
                           maxThreshold={item.pricingTiers?.[item.pricingTiers.length - 1]?.minQty || 0}
                         />
+                        {/* Task #233 — Tier gap */}
+                        {!item.isMaxTier && item.nextTier && (
+                          <p className="mt-3 text-[11px] text-[#94A3B8]">
+                            <span className="font-semibold text-[#1E293B]">
+                              {Math.max(0, item.nextTier.minQty - item.currentDemand).toLocaleString()}
+                            </span>
+                            {" "}units to Tier {item.nextTier.tierIndex}
+                          </p>
+                        )}
+                        {item.isMaxTier && (
+                          <p className="mt-3 text-[11px] font-semibold text-[#49D6B2]">
+                            ✓ Max tier reached
+                          </p>
+                        )}
                       </td>
 
                       {/* Sales Window Countdown — Task #234 */}

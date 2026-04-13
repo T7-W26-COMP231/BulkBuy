@@ -44,6 +44,7 @@ export default function SupplierQuotesPage() {
 
         const result = await response.json();
         const supplies = result?.data || result?.items || result;
+        console.log(`[QuoteBuilder] Loaded ${supplies.length} supply records for supplier. Matching itemId: ${itemId}`);
 
         if (Array.isArray(supplies) && supplies.length > 0) {
           const supply =
@@ -425,6 +426,7 @@ export default function SupplierQuotesPage() {
                   Approved Item
                 </span>
               </div>
+
 
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div>

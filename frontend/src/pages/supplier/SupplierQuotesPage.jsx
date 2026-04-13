@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams, useLocation } from "react-router-dom";
 import SupplierLayout from "../../components/supplier/SupplierLayout";
 import { useNotifications } from "../../contexts/NotificationContext";
 
@@ -9,12 +10,25 @@ export default function SupplierQuotesPage() {
     { id: 3, minQty: "1000", unitPrice: "2.00" },
   ]);
 
+  const [searchParams] = useSearchParams();
+  const itemId = searchParams.get("itemId");
+
+  const location = useLocation();
+  const itemState = location.state;
+
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [baseUnitPrice, setBaseUnitPrice] = useState("");
+  const [totalCapacity, setTotalCapacity] = useState("");
+  const [productName, setProductName] = useState("");
+  const [skuId, setSkuId] = useState("");
+
   const [draftStatus, setDraftStatus] = useState("");
   const [submitStatus, setSubmitStatus] = useState("");
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   const [isReviewLocked, setIsReviewLocked] = useState(false);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [supplyId, setSupplyId] = useState("");
+  const { addNotification } = useNotifications();
 
   useEffect(() => {
     const fetchSupplies = async () => {
@@ -30,10 +44,45 @@ export default function SupplierQuotesPage() {
 
         const result = await response.json();
         const supplies = result?.data || result?.items || result;
+        console.log(`[QuoteBuilder] Loaded ${supplies.length} supply records for supplier. Matching itemId: ${itemId}`);
 
         if (Array.isArray(supplies) && supplies.length > 0) {
-          const supply = supplies[0];
+          const supply =
+            supplies.find((item) => String(item._id) === String(itemId)) ||
+            supplies[0];
+
+          setIsReviewLocked(false);
+
+          setSelectedItem(supply);
+          // ← only pre-fill from API if not already filled from navigation state
+          setProductName(prev => prev || supply?.productName || supply?.title || "");
+          setSkuId(prev => prev || supply?.skuId || supply?.sku || supply?.itemCode || "");
+
           setSupplyId(supply._id);
+
+          const restoredTiers =
+            Array.isArray(supply?.tiers) && supply.tiers.length > 0
+              ? supply.tiers.map((tier, index) => ({
+                id: index + 1,
+                minQty: String(tier.minQty || ""),
+                unitPrice: String(tier.unitPrice || ""),
+              }))
+              : null;
+
+          if (restoredTiers) {
+            setTiers(restoredTiers);
+          }
+
+          setBaseUnitPrice(
+            supply?.baseUnitPrice
+              ? String(supply.baseUnitPrice)
+              : restoredTiers?.[0]?.unitPrice || ""
+          );
+
+          setTotalCapacity(
+            supply?.totalCapacity ? String(supply.totalCapacity) : ""
+          );
+
 
           // Rehydrate lock state from server
           if (supply.status === "pending_review" || supply.status === "approved") {
@@ -46,7 +95,14 @@ export default function SupplierQuotesPage() {
     };
 
     fetchSupplies();
-  }, []);
+  }, [itemId]);
+
+  // ← ADD THIS NEW useEffect HERE:
+  useEffect(() => {
+    if (!itemState) return;
+    if (itemState.itemTitle) setProductName(itemState.itemTitle);
+    if (itemState.itemSku) setSkuId(itemState.itemSku);
+  }, [itemState]);
 
   const handleSaveDraft = async () => {
     try {
@@ -85,8 +141,10 @@ export default function SupplierQuotesPage() {
             Authorization: `Bearer ${JSON.parse(localStorage.getItem("app_auth_session_v1"))?.accessToken}`,
           },
           body: JSON.stringify({
-            productName: "Organic Avocados",
-            skuId: "AVO-ORG-4402-XL",
+            productName,
+            skuId,
+            baseUnitPrice: Number(baseUnitPrice || 0),
+            totalCapacity: Number(totalCapacity || 0),
             tiers: tiers.map((tier) => ({
               minQty: Number(tier.minQty),
               unitPrice: Number(tier.unitPrice),
@@ -158,8 +216,10 @@ export default function SupplierQuotesPage() {
             Authorization: `Bearer ${JSON.parse(localStorage.getItem("app_auth_session_v1"))?.accessToken}`,
           },
           body: JSON.stringify({          // ← ADD THIS
-            productName: "Organic Avocados",
-            skuId: "AVO-ORG-4402-XL",
+            productName: productName,
+            skuId: skuId,
+            baseUnitPrice: Number(baseUnitPrice || 0),
+            totalCapacity: Number(totalCapacity || 0),
           }),
         }
       );
@@ -180,7 +240,7 @@ export default function SupplierQuotesPage() {
       setIsReviewLocked(true);
       setIsConfirmOpen(false);
       addNotification(
-        "Your quote for Organic Avocados has been submitted for review.",
+        `Your quote for ${productName || "the selected item"} has been submitted for review.`,
         "success"
       );
     } catch (error) {
@@ -253,7 +313,7 @@ export default function SupplierQuotesPage() {
     (tier) => tier.minQty && Number(tier.minQty) > 0 && tier.unitPrice && Number(tier.unitPrice) > 0
   );
 
-  const basePrice = Number(tiers[0]?.unitPrice || 0);
+  const basePrice = Number(baseUnitPrice || tiers[0]?.unitPrice || 0);
 
   const bestDiscount = useMemo(() => {
     if (!completedTiers.length || basePrice <= 0) return 0;
@@ -367,6 +427,7 @@ export default function SupplierQuotesPage() {
                 </span>
               </div>
 
+
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div>
                   <label className="mb-2 block text-sm font-medium text-text-main">
@@ -374,9 +435,9 @@ export default function SupplierQuotesPage() {
                   </label>
                   <input
                     type="text"
-                    value="Organic Avocados (Hass)"
-                    readOnly
-                    className="w-full rounded-xl border border-neutral-light bg-neutral-light px-4 py-3"
+                    value={productName}
+                    onChange={(e) => setProductName(e.target.value)}
+                    className="w-full rounded-xl border border-neutral-light bg-white px-4 py-3"
                   />
                 </div>
 
@@ -386,9 +447,9 @@ export default function SupplierQuotesPage() {
                   </label>
                   <input
                     type="text"
-                    value="AVO-ORG-4402-XL"
-                    readOnly
-                    className="w-full rounded-xl border border-neutral-light bg-neutral-light px-4 py-3"
+                    value={skuId}
+                    onChange={(e) => setSkuId(e.target.value)}
+                    className="w-full rounded-xl border border-neutral-light bg-white px-4 py-3"
                   />
                 </div>
 
@@ -398,7 +459,8 @@ export default function SupplierQuotesPage() {
                   </label>
                   <input
                     type="number"
-                    placeholder="2.50"
+                    value={baseUnitPrice}
+                    onChange={(e) => setBaseUnitPrice(e.target.value)}
                     className="w-full rounded-xl border border-neutral-light px-4 py-3"
                   />
                   <p className="mt-2 text-xs text-text-muted">
@@ -412,7 +474,8 @@ export default function SupplierQuotesPage() {
                   </label>
                   <input
                     type="number"
-                    placeholder="5000"
+                    value={totalCapacity}
+                    onChange={(e) => setTotalCapacity(e.target.value)}
                     className="w-full rounded-xl border border-neutral-light px-4 py-3"
                   />
                   <p className="mt-2 text-xs text-text-muted">
@@ -563,23 +626,31 @@ export default function SupplierQuotesPage() {
             </div>
 
             <div className="mt-6 overflow-hidden rounded-2xl bg-neutral-light">
-              <div className="flex h-48 items-center justify-center text-text-muted">
-                Product Image
-              </div>
+              {selectedItem?.imageUrl || selectedItem?.image || itemState?.itemImage ? (
+                <img
+                  src={selectedItem?.imageUrl || selectedItem?.image || itemState?.itemImage}
+                  alt={productName || "Product"}
+                  className="h-48 w-full object-cover"
+                />
+              ) : (
+                <div className="flex h-48 items-center justify-center text-text-muted">
+                  No Product Image
+                </div>
+              )}
             </div>
 
             <div className="mt-6 space-y-4">
               <div className="flex justify-between text-sm">
                 <span className="text-text-muted">Product</span>
                 <span className="font-semibold text-text-main">
-                  Organic Avocados
+                  {productName || "—"}
                 </span>
               </div>
 
               <div className="flex justify-between text-sm">
                 <span className="text-text-muted">SKU</span>
                 <span className="font-semibold text-text-main">
-                  AVO-ORG-4402-XL
+                  {skuId || "—"}
                 </span>
               </div>
 

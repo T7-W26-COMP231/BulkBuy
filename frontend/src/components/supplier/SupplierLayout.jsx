@@ -7,11 +7,11 @@ export default function SupplierLayout({ children }) {
       <div className="flex min-h-screen">
         <SupplierSidebar />
 
-        <div className="flex min-h-screen flex-1 flex-col">
+        <div className="flex min-h-screen flex-1 flex-col overflow-hidden">
           <SupplierTopbar />
 
-          <main className="flex-1 px-6 pb-8 md:px-8">
-            <div className="mx-auto max-w-7xl">
+          <main className="flex-1 px-4 pb-6 md:px-6 xl:px-8">
+            <div className="w-full">
               {children}
             </div>
           </main>

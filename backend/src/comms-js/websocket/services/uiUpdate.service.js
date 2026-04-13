@@ -1,6 +1,6 @@
 // src/comms-js/services/uiUpdate.service.js
-const socketHandlers = require('../websocket/socketHandlers');
-const rooms = require('../websocket/rooms');
+const socketHandlers = require('../../websocket/socketHandlers');
+const rooms = require('../../websocket/rooms');
 const notificationMeta = require('../models/notification.metadata'); // optional audit
 const logger = require('pino')({ level: process.env.LOG_LEVEL || 'info' });
 

@@ -27,10 +27,10 @@ use("ops-db-bulkbuy+");
 // db.getCollection("s3storedfiles").insertMany(s3files);
 // db.getCollection("regionmaps").insertMany(regionmaps);
 
-// db.getCollection("messages").insertMany(messages);
+db.getCollection("messages").insertMany(messages);
 // db.getCollection("reviews").insertMany(reviews);
 // db.getCollection("configs").insertMany(configs);
-db.getCollection("items").insertMany(items);
+// db.getCollection("items").insertMany(items);
 
 // /* ------------------------------
 // *Hash users then insert once 

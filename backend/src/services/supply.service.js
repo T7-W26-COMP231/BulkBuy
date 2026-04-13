@@ -58,10 +58,17 @@ class SupplyService {
     if (!payload || typeof payload !== 'object') throw createError(400, 'Invalid payload');
     if (!Array.isArray(payload.items) || payload.items.length === 0) throw createError(422, 'items must be a non-empty array');
 
-    const safe = { ...payload };
-    delete safe._id;
-    delete safe.createdAt;
-    delete safe.updatedAt;
+    const safe = {
+  ...payload,
+  supplierId:
+    payload.supplierId ||
+    actor.userId ||
+    null,
+};
+
+delete safe._id;
+delete safe.createdAt;
+delete safe.updatedAt;
 
     try {
       const created = await SupplyRepo.create(safe, { session: opts.session });
@@ -94,23 +101,76 @@ class SupplyService {
    * @param {Object} filter
    * @param {Object} opts
    */
-
   async listSupplies(filter = {}, opts = {}) {
     const correlationId = opts.correlationId || null;
+
     try {
       const result = await SupplyRepo.paginate(filter, opts);
-      result.items = (result.items || []).map(sanitize);
-      return result;
+
+      const UserRepo = require("../repositories/user.repo");
+
+      const enrichedItems = await Promise.all(
+        (result.items || []).map(async (item) => {
+          const safeItem = sanitize(item);
+          console.log("DEBUG supply supplierId =>", safeItem?._id, safeItem?.supplierId);
+
+          const supplierId =
+            safeItem?.supplierId?._id ||
+            safeItem?.supplierId ||
+            null;
+
+          if (!supplierId) {
+            return {
+              ...safeItem,
+              supplier: null,
+            };
+          }
+
+          try {
+            const supplier = await UserRepo.findById(supplierId);
+
+            return {
+              ...safeItem,
+              supplier: supplier
+                ? {
+                  _id: supplier._id,
+                  firstName: supplier.firstName || "",
+                  lastName: supplier.lastName || "",
+                  companyName:
+                    supplier.companyName ||
+                    supplier.company ||
+                    "",
+                  email:
+                    supplier.email ||
+                    supplier?.emails?.[0]?.address ||
+                    "",
+                }
+                : null,
+            };
+          } catch (lookupErr) {
+            return {
+              ...safeItem,
+              supplier: null,
+            };
+          }
+        })
+      );
+
+      return {
+        ...result,
+        items: enrichedItems,
+      };
     } catch (err) {
       await auditService.logEvent({
-        eventType: 'supply.list.failed',
+        eventType: "supply.list.failed",
         actor: actorFromOpts(opts),
-        target: { type: 'Supply', id: null },
-        outcome: 'failure',
-        severity: 'error',
+        target: { type: "Supply", id: null },
+        outcome: "failure",
+        severity: "error",
         correlationId,
-        details: { message: err.message }
+        details: { message: err.message },
       });
+
       throw err;
     }
   }
@@ -483,12 +543,12 @@ class SupplyService {
     }
   }
 
-    /**
-   * Save quote draft
-   * @param {String} supplyId
-   * @param {Object} draftPayload
-   * @param {Object} opts
-   */
+  /**
+ * Save quote draft
+ * @param {String} supplyId
+ * @param {Object} draftPayload
+ * @param {Object} opts
+ */
   async saveDraft(supplyId, draftPayload = {}, opts = {}) {
     const actor = actorFromOpts(opts);
     const correlationId = opts.correlationId || null;
@@ -499,26 +559,26 @@ class SupplyService {
     }
 
     try {
- const existing = await SupplyRepo.findById(supplyId, opts);
+      const existing = await SupplyRepo.findById(supplyId, opts);
 
-const currentMetadata =
-  existing?.metadata?.toObject?.() ||
-  existing?.metadata ||
-  {};
+      const currentMetadata =
+        existing?.metadata?.toObject?.() ||
+        existing?.metadata ||
+        {};
 
-const updatePayload = {
-  metadata: {
-    ...currentMetadata,
-    quoteDraft: draftPayload,
-  },
-  status: 'draft',
-};
+      const updatePayload = {
+        metadata: {
+          ...currentMetadata,
+          quoteDraft: draftPayload,
+        },
+        status: 'draft',
+      };
 
-     const updated = await SupplyRepo.updateById(
-  supplyId,
-  updatePayload,
-  { ...opts, returnDocument: "after" }
-);
+      const updated = await SupplyRepo.updateById(
+        supplyId,
+        updatePayload,
+        { ...opts, returnDocument: "after" }
+      );
 
       if (!updated) throw createError(404, 'Supply not found');
 
@@ -548,11 +608,11 @@ const updatePayload = {
     }
   }
 
-   /**
-   * Submit finalized quote for admin review
-   * @param {String} supplyId
-   * @param {Object} opts
-   */
+  /**
+  * Submit finalized quote for admin review
+  * @param {String} supplyId
+  * @param {Object} opts
+  */
   async submitForReview(supplyId, opts = {}) {
     const actor = actorFromOpts(opts);
     const correlationId = opts.correlationId || null;
@@ -573,15 +633,15 @@ const updatePayload = {
         throw createError(409, 'Quote is already under review');
       }
 
-           const missingFields = [];
+      const missingFields = [];
 
-     const quoteDraft =
-  existing.metadata?.get?.("quoteDraft") ||
-  existing.metadata?.quoteDraft ||
-  {};
+      const quoteDraft =
+        existing.metadata?.get?.("quoteDraft") ||
+        existing.metadata?.quoteDraft ||
+        {};
 
-if (!quoteDraft.productName) missingFields.push('productName');
-if (!quoteDraft.skuId) missingFields.push('skuId');
+      if (!quoteDraft.productName) missingFields.push('productName');
+      if (!quoteDraft.skuId) missingFields.push('skuId');
 
       if (missingFields.length > 0) {
         const error = createError(422, 'Missing required fields');
@@ -623,7 +683,7 @@ if (!quoteDraft.skuId) missingFields.push('skuId');
 
       throw err;
     }
-    }
+  }
 
   /**
    * Update supply status
@@ -632,7 +692,7 @@ if (!quoteDraft.skuId) missingFields.push('skuId');
    * @param {Object} opts
    */
 
-  
+
 
   async updateStatus(supplyId, status, opts = {}) {
     const actor = actorFromOpts(opts);

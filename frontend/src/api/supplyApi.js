@@ -68,3 +68,11 @@ export const fetchApprovedItems = async () => {
   const response = await api.get("/items/approved");
   return response.data;
 };
+
+export const fetchSupplierDemandStatus = async () => {
+  const response = await api.get("/aggrs/supplier/demand-status");
+  return response;
+};
+
+export const fetchAggregationById = (aggregationId) =>
+  api.get(`/aggrs/${aggregationId}`);

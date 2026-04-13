@@ -10,8 +10,6 @@ const initialTiers = [
   { id: 3, minQty: "500", unitPrice: "40.00", qtyError: false, priceError: false },
 ];
 
-// Temporary hardcoded item id for quick testing
-const testItemId = "69c35324dec6d4f932a8063c";
 
 export default function PricingBracketsPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false); // ← ADD THIS
@@ -81,6 +79,32 @@ export default function PricingBracketsPage() {
       return prev.filter((tier) => tier.id !== id);
     });
   };
+
+  const handleDiscard = () => {
+    setTiers(initialTiers);
+  };
+
+  const hasAnyThresholdError = tiers.some(
+    (tier) => tier.qtyError || tier.priceError
+  );
+
+const handleSavePricing = async () => {
+  if (hasAnyThresholdError) return;
+
+  try {
+    const payload = tiers.map((tier) => ({
+      minQty: Number(tier.minQty),
+      unitPrice: Number(tier.unitPrice),
+    }));
+
+    await savePricingTiers(payload);
+
+    alert("✅ Pricing strategy saved successfully");
+  } catch (error) {
+    console.error("Save pricing failed:", error);
+    alert("❌ Failed to save pricing strategy");
+  }
+};
 
   return (
     <div className="min-h-screen bg-background-light text-text-main">
@@ -220,10 +244,11 @@ export default function PricingBracketsPage() {
                     </button>
                     <button
                       type="button"
+                      onClick={handleSavePricing}
                       disabled={hasAnyThresholdError}
                       className={`rounded-xl px-5 py-3 text-sm font-bold text-text-main transition ${hasAnyThresholdError
-                        ? "cursor-not-allowed bg-neutral-light text-text-muted opacity-60"
-                        : "bg-primary hover:opacity-90"
+                          ? "cursor-not-allowed bg-neutral-light text-text-muted opacity-60"
+                          : "bg-primary hover:opacity-90"
                         }`}
                     >
                       Save Pricing Strategy

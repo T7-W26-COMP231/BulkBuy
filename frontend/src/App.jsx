@@ -3,16 +3,19 @@ import { useEffect } from "react";
 import { useAuth } from "./contexts/AuthContext";
 import { useNotifications } from "./contexts/NotificationContext";
 import { io } from "socket.io-client";
+import { useOpsContext } from "./contexts/OpsContext";
 
 import HomePage from "./pages/customer/HomePage";
 import SupplierDashboard from "./pages/supplier/SupplierDashboard";
 import SupplierProfilePage from "./pages/supplier/SupplierProfilePage";
 import SupplierApprovedItemsPage from "./pages/supplier/SupplierApprovedItemsPage";
+import SupplierRequestItemPage from "./pages/supplier/SupplierRequestItemPage";
 import SupplierQuotesPage from "./pages/supplier/SupplierQuotesPage";
 import SupplierOrdersPage from "./pages/supplier/SupplierOrdersPage";
-import SupplierDemandStatusPage from "./pages/supplier/SupplierDemandStatusPage";
+import SupplierTierMonitoringPage from "./pages/supplier/SupplierTierMonitoringPage";
 import SupplierReportsPage from "./pages/supplier/SupplierReportsPage";
 import SupplierFulfillmentPage from "./pages/supplier/SupplierFulfillmentPage";
+
 
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminProductCatalogPage from "./pages/admin/AdminProductCatalogPage";
@@ -27,12 +30,13 @@ import ProductListPage from "./pages/customer/ProductListPage";
 import CartPage from "./pages/shared/ShoppingCart";
 import Shop from "./pages/customer/Marketplace";
 import Item from "./pages/customer/Itemsdetails";
-import ReviewModifyIntentPage from "./pages/customer/ReviewModifyIntentPage";
+
 import OrdersPage from "./pages/customer/OrdersPage";
+import ReviewModifyIntentPage from "./pages/customer/ReviewModifyIntentPage";
 import OrderDetailsPage from "./pages/customer/OrderDetails";
 import OrderTrackingPage from "./pages/customer/OrderTrackingPage";
 import ProfilePage from "./pages/customer/ProfilePage";
-
+import UserMessageCenter from './pages/shared/UserMessageCenter';
 
 function PlaceholderPage({ title }) {
   return (
@@ -89,10 +93,11 @@ function RoleRedirect() {
 export default function App() {
   const { addNotification } = useNotifications();
   const { user } = useAuth();
+  const { setSocket } = useOpsContext() ?? {};  // ← must be HERE inside App
 
   useEffect(() => {
     const socket = io(`${import.meta.env.VITE_API_URL}`);
-
+    setSocket?.(socket); // ← ADD THIS
     socket.on("connect", () => {
       console.log("🟢 Connected to server:", socket.id);
 
@@ -118,6 +123,7 @@ export default function App() {
 
     return () => {
       socket.disconnect();
+      setSocket?.(null); // ← ADD THIS
     };
   }, [user, addNotification]);
 
@@ -142,14 +148,19 @@ export default function App() {
         <Route path="/supplier/dashboard" element={<SupplierDashboard />} />
         <Route path="/supplier/profile" element={<SupplierProfilePage />} />
         <Route path="/supplier/approved-items" element={<SupplierApprovedItemsPage />} />
+        <Route
+          path="/supplier/approved-items/request"
+          element={<SupplierRequestItemPage />}
+        />
         <Route path="/supplier/quotes" element={<SupplierQuotesPage />} />
+        <Route path="/supplier/quotes/create" element={<SupplierQuotesPage />} />
         <Route path="/supplier/order-requests" element={<SupplierOrdersPage />} />
-        <Route path="/supplier/demand-status" element={<SupplierDemandStatusPage />} />
         <Route path="/supplier/reports" element={<SupplierReportsPage />} />
         <Route
           path="/supplier/order-requests/:id/fulfillment"
           element={<SupplierFulfillmentPage />}
         />
+        <Route path="/supplier/tier-progress" element={<SupplierTierMonitoringPage />} />
 
         {/* Admin routes */}
         <Route

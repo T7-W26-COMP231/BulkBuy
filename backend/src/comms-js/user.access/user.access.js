@@ -6,13 +6,28 @@
 // - Returns lean/safe user objects suitable for templates and recipient resolution
 
 const mongoose = require('mongoose');
-const LRU = require('lru-cache');
 
 const UserRepo = require('../../repositories/user.repo');
 const Config = require('../../models/config.model');
-const socketService = require('../socketService'); // must export registry helpers: mapSocketToUser, unmapSocket, getSocketIdsForUserIds, getConnectedUsers
+const socketService = require('../websocket/socketRegistry'); // must export registry helpers: mapSocketToUser, unmapSocket, getSocketIdsForUserIds, getConnectedUsers
 
-const shortCache = new LRU({ max: 500, ttl: 30 * 1000 }); // 30s cache for hot lookups
+// const LRU = require('lru-cache');
+// const shortCache = new LRU({ max: 500, ttl: 30 * 1000 }); // 30s cache for hot lookups
+
+// New way (v7+)
+const { LRUCache } = require('lru-cache');
+const shortCache = new LRUCache({ max: 500, ttl: 30 * 1000 }); // 30s cache for hot lookups
+
+// Old way (v6 and below) - CAUSES ERROR
+// const LRU = require('lru-cache'); 
+
+// New way (v7+)
+// const { LRUCache } = require('lru-cache');
+// const options = {
+//   max: 500, // The maximum number of items allowed in the cache
+//   ttl: 1000 * 60 * 5, // Items live for 5 minutes
+// };
+// const cache = new LRUCache(options);
 
 /* -------------------------
  * Basic lookups

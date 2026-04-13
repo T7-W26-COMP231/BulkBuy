@@ -8,10 +8,24 @@
 // - No business logic (templates/recipient resolution) here; intended to be composed by the higher-level email surface
 
 const nodemailer = require('nodemailer');
-const pino = require('pino');
 const crypto = require('crypto');
 
-const logger = pino({ level: process.env.LOG_LEVEL || 'info' });
+const pino = require('pino');
+
+const logger = pino({
+  level: process.env.LOG_LEVEL || 'info',
+  // Only use pretty printing if we are NOT in production
+  transport: process.env.NODE_ENV !== 'production' 
+    ? {
+        target: 'pino-pretty',
+        options: {
+          colorize: true,
+          messageFormat: '{hostname} - {msg}',
+          ignore: 'pid,time,level',
+        },
+      } 
+    : undefined,
+});
 
 const DEFAULTS = {
   provider: 'smtp', // 'smtp' | 'gmail'

@@ -9,6 +9,9 @@
 const createError = require('http-errors');
 const AggregationRepo = require('../repositories/aggregation.repo');
 const auditService = require('./audit.service');
+const Item = require('../models/item.model');
+const Aggregation = require('../models/aggregation.model');
+const { emitUiUpdate } = require('../comms-js/websocket/services/uiUpdate.service');
 
 function sanitizeForClient(doc) {
   if (!doc) return doc;
@@ -247,7 +250,22 @@ class AggregationService {
         correlationId,
         details: { orderId }
       });
-      return sanitizeForClient(updated);
+      // ── Task #236 — emit live demand update to connected suppliers ─────────────
+      try {
+        await emitUiUpdate('demand:updated', {
+          aggregationId: String(aggregationId),
+          currentDemand: updated?.orders?.length || 0,
+        }, {
+          scope: 'region',
+          region: updated?.ops_region || null,
+        });
+        console.log(`📡 [demand:updated] emitted for agg ${aggregationId} — demand: ${updated?.orders?.length}`);
+      } catch (e) {
+        console.warn('demand:updated emit failed (non-fatal):', e?.message);
+      }
+
+      return sanitizeForClient(updated); // existing return
+
     } catch (err) {
       await auditService.logEvent({
         eventType: 'aggregation.addOrder',
@@ -390,6 +408,87 @@ class AggregationService {
       });
       throw err;
     }
+  }
+
+  /**
+   * Get aggregated demand and tier progress for the logged-in supplier
+   * @param {String|ObjectId} supplierId
+   * @returns {Promise<Array>}
+   */
+  async getSupplierDemandStatus(supplierId) {
+    if (!supplierId) throw createError(401, 'Supplier authentication required');
+    const supplierIdStr = supplierId.toString(); // 👈 force string
+    // this getSupplierDemandStatus is using two collections aggregation and items
+
+
+    const aggregations = await Aggregation.find({
+      'itemDtos.supplierId': supplierIdStr, // 👈 match as string
+
+      'itemDtos.supplierId': supplierId,
+      status: { $nin: ['suspended', 'closed'] }
+    }).lean();
+    console.log("📦 aggregations found:", aggregations.length); // add this to verify
+
+
+    if (!aggregations.length) return [];
+
+    const results = [];
+
+    for (const agg of aggregations) {
+      const supplierDtos = agg.itemDtos.filter(
+        (dto) => String(dto.supplierId) === String(supplierId)
+      );
+
+      for (const dto of supplierDtos) {
+        const item = await Item.findById(dto.itemId).lean();
+        if (!item) continue;
+
+        const currentDemand = agg.orders?.length || 0;
+        const sortedTiers = [...(item.pricingTiers || [])].sort((a, b) => a.minQty - b.minQty);
+
+        let currentTierIndex = -1;
+        for (let i = 0; i < sortedTiers.length; i++) {
+          if (currentDemand >= sortedTiers[i].minQty) currentTierIndex = i;
+        }
+
+        const isMaxTier = currentTierIndex === sortedTiers.length - 1 && currentTierIndex >= 0;
+        const currentTier = currentTierIndex >= 0 ? sortedTiers[currentTierIndex] : null;
+        const nextTier = !isMaxTier && currentTierIndex + 1 < sortedTiers.length
+          ? sortedTiers[currentTierIndex + 1]
+          : null;
+
+        let progressPercent = 0;
+        if (isMaxTier) {
+          progressPercent = 100;
+        } else if (nextTier) {
+          const from = currentTier ? currentTier.minQty : 0;
+          progressPercent = Math.min(100, Math.round(
+            ((currentDemand - from) / (nextTier.minQty - from)) * 100
+          ));
+        }
+
+        results.push({
+          itemId: item._id,
+          title: item.title,
+          category: item.tags?.[0] || item.shipping?.class || 'General',
+          images: item.images || [],
+          ops_region: agg.ops_region,
+          currentDemand,
+          currentTier: currentTier
+            ? { tierIndex: currentTierIndex + 1, minQty: currentTier.minQty, price: currentTier.price }
+            : null,
+          nextTier: nextTier
+            ? { tierIndex: currentTierIndex + 2, minQty: nextTier.minQty, price: nextTier.price }
+            : null,
+          isMaxTier,
+          progressPercent,
+          aggregationId: agg._id,
+          aggregationStatus: agg.status,
+        });
+      }
+    }
+
+    return results;
   }
 
   /**

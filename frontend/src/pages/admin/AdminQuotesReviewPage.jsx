@@ -56,73 +56,83 @@ function mapSupplyToQuoteRows(supply) {
     null;
 
   if (quoteDraft) {
-    return [
-      {
-        id: `${supply._id || supply.id || "supply"}-draft`,
-        supplyId: supply._id || supply.id || "",
-        itemId: supply?.items?.[0]?.itemId?._id || supply?.items?.[0]?.itemId || "",
-        quoteId: "",
-        supplier:
-          supply?.supplierId?.name ||
-          supply?.supplierId?.companyName ||
-          supply?.supplierId?.businessName ||
-          "Unknown Supplier",
-        contactEmail: supply?.supplierId?.email || "No email provided",
-        contactPhone: supply?.supplierId?.phone || "No phone provided",
-        product: quoteDraft.productName || "Unnamed Product",
-        submittedOn: formatDate(supply?.submittedAt || supply?.updatedAt || supply?.createdAt),
-        tiers: Array.isArray(quoteDraft.tiers)
-          ? quoteDraft.tiers.map((tier) => ({
-            minQty: tier.minQty,
-            unitPrice: tier.unitPrice,
-            discountPercent: null,
-            description: "",
-          }))
-          : [],
-        status: mapBackendStatus(supply?.status),
-        rawSupply: supply,
-        rawItem: supply?.items?.[0] || null,
-        rawQuote: null,
-      },
-    ];
-  }
-
-  if (!Array.isArray(supply?.items)) return [];
-
-  return supply.items.map((item, index) => {
-    const firstQuote = item?.quotes?.[0] ?? null;
-
-    return {
-      id: `${supply._id || supply.id || "supply"}-${item._id || index}`,
-      supplyId: supply._id || supply.id || "",
-      itemId: item?.itemId?._id || item?.itemId || "",
-      quoteId: firstQuote?._id || "",
-      supplier:
-        supply?.supplierId?.name ||
-        supply?.supplierId?.companyName ||
-        supply?.supplierId?.businessName ||
-        "Unknown Supplier",
-      contactEmail: supply?.supplierId?.email || "No email provided",
-      contactPhone: supply?.supplierId?.phone || "No phone provided",
-      product:
-        item?.itemId?.name ||
-        item?.meta?.productName ||
-        `Item ${index + 1}`,
-      submittedOn: formatDate(firstQuote?.createdAt || supply?.createdAt),
-      tiers: (firstQuote?.discountingScheme || []).map((bracket) => ({
-        minQty: bracket.minQty,
-        unitPrice: firstQuote?.pricePerBulkUnit ?? null,
-        discountPercent: bracket.discountPercent ?? null,
-        description: bracket.description || "",
-      })),
-      status: mapBackendStatus(supply?.status),
-      rawSupply: supply,
-      rawItem: item,
-      rawQuote: firstQuote,
-    };
-  });
+return [
+  {
+    id: `${supply._id || supply.id || "supply"}-draft`,
+    supplyId: supply._id || supply.id || "",
+    itemId:
+      supply?.items?.[0]?.itemId?._id ||
+      supply?.items?.[0]?.itemId ||
+      "",
+    quoteId: "",
+    supplier:
+      supply?.supplier?.companyName ||
+      `${supply?.supplier?.firstName || ""} ${supply?.supplier?.lastName || ""}`.trim() ||
+      "Unknown Supplier",
+    contactEmail:
+      supply?.supplier?.email || "No email provided",
+    contactPhone:
+      supply?.supplier?.phone || "No phone provided",
+    product: quoteDraft.productName || "Unnamed Product",
+    submittedOn: formatDate(
+      supply?.submittedAt ||
+      supply?.updatedAt ||
+      supply?.createdAt
+    ),
+    tiers: Array.isArray(quoteDraft.tiers)
+      ? quoteDraft.tiers.map((tier) => ({
+          minQty: tier.minQty,
+          unitPrice: tier.unitPrice,
+          discountPercent: null,
+          description: "",
+        }))
+      : [],
+    status: mapBackendStatus(supply?.status),
+    rawSupply: supply,
+    rawItem: supply?.items?.[0] || null,
+    rawQuote: null,
+  },
+];
 }
 
+if (!Array.isArray(supply?.items)) return [];
+
+return supply.items.map((item, index) => {
+  const firstQuote = item?.quotes?.[0] ?? null;
+
+  return {
+    id: `${supply._id || supply.id || "supply"}-${item._id || index}`,
+    supplyId: supply._id || supply.id || "",
+    itemId: item?.itemId?._id || item?.itemId || "",
+    quoteId: firstQuote?._id || "",
+    supplier:
+      supply?.supplier?.companyName ||
+      `${supply?.supplier?.firstName || ""} ${supply?.supplier?.lastName || ""}`.trim() ||
+      "Unknown Supplier",
+    contactEmail:
+      supply?.supplier?.email || "No email provided",
+    contactPhone:
+      supply?.supplier?.phone || "No phone provided",
+    product:
+      item?.itemId?.name ||
+      item?.meta?.productName ||
+      `Item ${index + 1}`,
+    submittedOn: formatDate(
+      firstQuote?.createdAt || supply?.createdAt
+    ),
+    tiers: (firstQuote?.discountingScheme || []).map((bracket) => ({
+      minQty: bracket.minQty,
+      unitPrice: firstQuote?.pricePerBulkUnit ?? null,
+      discountPercent: bracket.discountPercent ?? null,
+      description: bracket.description || "",
+    })),
+    status: mapBackendStatus(supply?.status),
+    rawSupply: supply,
+    rawItem: item,
+    rawQuote: firstQuote,
+  };
+});
+}
 export default function AdminQuotesReviewPage() {
   const [activeFilter, setActiveFilter] = useState("Pending");
   const [selectedQuote, setSelectedQuote] = useState(null);

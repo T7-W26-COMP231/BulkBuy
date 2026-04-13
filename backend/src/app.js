@@ -17,6 +17,7 @@ const auditRoutes = require('./routes/audit.routes');
 const itemRoutes = require('./routes/item.routes');
 const messageRoutes = require('./routes/message.routes');
 const socketRoutes = require('./comms-js/websocket/routes/notifications.routes'); // canonical comms routes
+const emailingRoutes = require('./comms-js/emailing/email.routes'); // canonical comms routes
 const orderRoutes = require('./routes/order.routes');
 const productRoutes = require('./routes/product.routes');
 const regionMapRoutes = require('./routes/regionMap.routes');
@@ -86,8 +87,9 @@ const createApp = async () => {
   app.use('/api/auth', authRoutes);
   app.use('/api/audts', auditRoutes);
   app.use('/api/aggrs', aggregationRoutes);
-  app.use('/api/confg', configRoutes);
+  app.use('/api/configs', configRoutes);
   app.use('/api/comms', messageRoutes); // message REST endpoints
+  app.use('/api/comms', emailingRoutes); // emailing REST endpoints
   app.use('/api/comms', socketRoutes);  // comms websocket-related REST endpoints (missed/ack/create/broadcast)
   app.use('/api/ordrs', orderRoutes);   // legacy teammate route
   app.use('/api/orders', orderRoutes);  // admin dashboard + clean route

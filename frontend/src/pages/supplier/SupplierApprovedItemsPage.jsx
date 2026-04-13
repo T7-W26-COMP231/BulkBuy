@@ -147,7 +147,7 @@ export default function SupplierApprovedItemsPage() {
       <div className="mx-auto flex max-w-7xl flex-col gap-6">
 
         {/* Header */}
-        <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+        <div className="relative z-10 flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
           <div>
             <h1 className="text-3xl font-bold text-text-main">Approved Items</h1>
             <p className="mt-1 text-sm text-text-muted">
@@ -156,7 +156,8 @@ export default function SupplierApprovedItemsPage() {
           </div>
           <button
             type="button"
-            className="inline-flex items-center gap-2 rounded-2xl bg-primary px-5 py-3 text-sm font-bold text-text-main transition hover:opacity-90"
+            onClick={() => navigate("/supplier/approved-items/request")}
+            className="relative z-20 inline-flex cursor-pointer items-center gap-2 rounded-2xl bg-primary px-5 py-3 text-sm font-bold text-text-main transition hover:opacity-90"
           >
             <span className="material-symbols-outlined text-[18px]">add</span>
             Request New Item
@@ -264,8 +265,26 @@ export default function SupplierApprovedItemsPage() {
                       <td className="px-6 py-4 text-right">
                         <ActionButton
                           status={item.quoteStatus}
-                          onCreateQuote={() => navigate(`/supplier/quotes/create?itemId=${item._id}`)}
-                          onResumeQuote={() => navigate(`/supplier/quotes/create?itemId=${item._id}&resume=true`)}
+                          onCreateQuote={() => navigate(
+                            `/supplier/quotes/create?itemId=${item._id}`,
+                            {
+                              state: {
+                                itemTitle: item.title,
+                                itemSku: item.sku,
+                                itemImage: item.images?.[0] || null,
+                              }
+                            }
+                          )}
+                          onResumeQuote={() => navigate(
+                            `/supplier/quotes/create?itemId=${item._id}&resume=true`,
+                            {
+                              state: {
+                                itemTitle: item.title,
+                                itemSku: item.sku,
+                                itemImage: item.images?.[0] || null,
+                              }
+                            }
+                          )}
                           onViewDetails={() => navigate(`/supplier/quotes?itemId=${item._id}`)}
                         />
                       </td>

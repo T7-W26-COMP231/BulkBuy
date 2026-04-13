@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { useAuth } from "./contexts/AuthContext";
 import { useNotifications } from "./contexts/NotificationContext";
 import { io } from "socket.io-client";
+import { useOpsContext } from "./contexts/OpsContext";
 
 import HomePage from "./pages/customer/HomePage";
 import SupplierDashboard from "./pages/supplier/SupplierDashboard";
@@ -92,10 +93,11 @@ function RoleRedirect() {
 export default function App() {
   const { addNotification } = useNotifications();
   const { user } = useAuth();
+  const { setSocket } = useOpsContext() ?? {};  // ← must be HERE inside App
 
   useEffect(() => {
     const socket = io(`${import.meta.env.VITE_API_URL}`);
-
+    setSocket?.(socket); // ← ADD THIS
     socket.on("connect", () => {
       console.log("🟢 Connected to server:", socket.id);
 
@@ -121,6 +123,7 @@ export default function App() {
 
     return () => {
       socket.disconnect();
+      setSocket?.(null); // ← ADD THIS
     };
   }, [user, addNotification]);
 

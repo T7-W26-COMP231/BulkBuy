@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import SupplierLayout from "../../components/supplier/SupplierLayout";
 import { useAuth } from "../../contexts/AuthContext";
 import { fetchSupplierDemandStatus, fetchAggregationById } from "../../api/supplyApi";
+import { useOpsContext } from "../../contexts/OpsContext";
 
 const CANADIAN_REGIONS = [
   "north-america:ca-on",
@@ -28,6 +29,7 @@ const CANADIAN_REGIONS = [
 // ─── Sales Window Countdown ───────────────────────────────────────────────────
 function SalesWindowCountdown({ closesAt }) {
   const [state, setState] = useState({ ready: false, timeLeft: null });
+
 
   useEffect(() => {
     setState({ ready: false, timeLeft: null });
@@ -166,6 +168,7 @@ export default function SupplierTierMonitoringPage() {
   const [allItems, setAllItems] = useState([]);
   const [selectedCity, setSelectedCity] = useState("All Cities");
   const [selectedCategory, setSelectedCategory] = useState("All Categories");
+  const { socket } = useOpsContext() ?? {}; // ← ADD THIS
 
   // aggregationId -> closesAt (ms timestamp)
   const [aggCloseDates, setAggCloseDates] = useState({});
@@ -194,6 +197,42 @@ export default function SupplierTierMonitoringPage() {
     if (accessToken) load();
     else { setLoading(false); setItems([]); }
   }, [accessToken]);
+
+
+  // ── Task #236 — Live demand auto-refresh via WebSocket ────────────────────
+  // ── Task #236 — Live demand auto-refresh via WebSocket ────────────────────
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleUiUpdate = (msg) => {
+      if (msg?.action !== "demand:updated") return;
+      const { aggregationId, currentDemand } = msg.payload || {};
+      if (!aggregationId || currentDemand === undefined) return;
+
+      console.log("🔄 [TierMonitor] Live demand update:", { aggregationId, currentDemand });
+
+      const updateItems = (prev) =>
+        prev.map((item) => {
+          if (String(item.aggregationId) !== String(aggregationId)) return item;
+          const nextMinQty = item.nextTier?.minQty || 0;
+          const fromQty = item.currentTier?.minQty || 0;
+          const progressPercent = nextMinQty > fromQty
+            ? Math.min(100, Math.round(
+              ((currentDemand - fromQty) / (nextMinQty - fromQty)) * 100
+            ))
+            : item.progressPercent;
+          return { ...item, currentDemand, progressPercent };
+        });
+
+      setAllItems(updateItems);
+      setItems(updateItems);
+    };
+
+    socket.on("ui:update", handleUiUpdate);
+    console.log("📡 [TierMonitor] Listening for live demand updates");
+
+    return () => socket.off("ui:update", handleUiUpdate);
+  }, [socket]);
 
   // ── Fetch aggregation close dates once items are loaded ────────────────────
   useEffect(() => {

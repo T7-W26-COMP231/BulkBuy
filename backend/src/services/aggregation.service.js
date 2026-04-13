@@ -11,6 +11,7 @@ const AggregationRepo = require('../repositories/aggregation.repo');
 const auditService = require('./audit.service');
 const Item = require('../models/item.model');
 const Aggregation = require('../models/aggregation.model');
+const { emitUiUpdate } = require('../comms-js/websocket/services/uiUpdate.service');
 
 function sanitizeForClient(doc) {
   if (!doc) return doc;
@@ -249,7 +250,22 @@ class AggregationService {
         correlationId,
         details: { orderId }
       });
-      return sanitizeForClient(updated);
+      // ── Task #236 — emit live demand update to connected suppliers ─────────────
+      try {
+        await emitUiUpdate('demand:updated', {
+          aggregationId: String(aggregationId),
+          currentDemand: updated?.orders?.length || 0,
+        }, {
+          scope: 'region',
+          region: updated?.ops_region || null,
+        });
+        console.log(`📡 [demand:updated] emitted for agg ${aggregationId} — demand: ${updated?.orders?.length}`);
+      } catch (e) {
+        console.warn('demand:updated emit failed (non-fatal):', e?.message);
+      }
+
+      return sanitizeForClient(updated); // existing return
+
     } catch (err) {
       await auditService.logEvent({
         eventType: 'aggregation.addOrder',

@@ -122,7 +122,9 @@ const updateOne = [
  */
 const addOrder = [
   param('id').exists().isMongoId().withMessage('id must be a valid ObjectId'),
-  body('orderId').exists().withMessage('orderId is required').isMongoId().withMessage('orderId must be a valid ObjectId'),
+  //body('orderId').exists().withMessage('orderId is required').isMongoId().withMessage('orderId must be a valid ObjectId'),
+  body('orderId').exists().withMessage('orderId is required').isString().notEmpty().withMessage('orderId must be a non-empty string'),
+
   runValidation
 ];
 

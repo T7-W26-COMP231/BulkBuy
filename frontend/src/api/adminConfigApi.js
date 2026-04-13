@@ -1,4 +1,4 @@
-import api from './api';
+import api from "./api";
 
 /**
  * Save admin pricing tiers
@@ -6,13 +6,13 @@ import api from './api';
  */
 export const savePricingTiers = async (tiers) => {
   try {
-    const response = await api.post('/configs/pricing-tiers', {
-      tiers
+    const response = await api.post("/configs/pricing-tiers", {
+      tiers,
     });
 
     return response.data;
   } catch (error) {
-    console.error('Error saving pricing tiers:', error);
+    console.error("Error saving pricing tiers:", error);
     throw error;
   }
 };

@@ -1,19 +1,22 @@
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import NotificationBell from "../../pages/shared/NotificationBell";
+
 export default function SupplierTopbar() {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
 
-  const supplierName =
-    user?.companyName ||
-    user?.company ||
-    `${user?.firstName || ""} ${user?.lastName || ""}`.trim() ||
-    "Supplier Account";
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/", { replace: true });
+  };
 
-  const supplierInitial =
-    user?.emails?.[0]?.address?.charAt(0)?.toUpperCase() ||
-    supplierName?.charAt(0)?.toUpperCase() ||
-    "S";
-  //const avatarSrc = user?.avatar ?? null;
+  const supplierLocation =
+    user?.city ||
+    user?.location ||
+    user?.region ||
+    user?.ops_region ||
+    "Supplier Region";
 
   return (
     <header className="bg-background-light px-6 py-4 md:px-8">
@@ -29,7 +32,7 @@ export default function SupplierTopbar() {
           />
         </div>
 
-        <div className="flex items-center justify-end gap-3">
+        <div className="ml-auto flex items-center justify-end gap-4">
           <button
             type="button"
             className="inline-flex items-center gap-2 rounded-full border border-neutral-light bg-white px-4 py-2 text-sm font-semibold text-text-main transition hover:bg-neutral-light"
@@ -37,29 +40,23 @@ export default function SupplierTopbar() {
             <span className="material-symbols-outlined text-[18px] text-primary">
               location_on
             </span>
-            Seattle
+            {supplierLocation}
             <span className="material-symbols-outlined text-[18px] text-text-muted">
               expand_more
             </span>
           </button>
+
           <NotificationBell />
 
-          {/* 👇 updated avatar */}
           <button
             type="button"
-            className="overflow-hidden rounded-full border border-neutral-light bg-white"
+            onClick={handleSignOut}
+            title="Logout"
+            className="flex size-10 items-center justify-center rounded-full border border-neutral-light bg-white text-[#EF4444] transition hover:bg-red-50"
           >
-            {/* avatarSrc ? (
-    <img
-      src={avatarSrc}
-      alt={supplierName}
-      className="size-10 object-cover"
-    />
-  ) : ( */}
-            <div className="flex size-10 items-center justify-center bg-orange-100 text-sm font-bold text-orange-600">
-              {supplierInitial}
-            </div>
-            {/* ) */}
+            <span className="material-symbols-outlined text-[18px]">
+              logout
+            </span>
           </button>
         </div>
       </div>

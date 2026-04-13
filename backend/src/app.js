@@ -86,7 +86,7 @@ const createApp = async () => {
   app.use('/api/auth', authRoutes);
   app.use('/api/audts', auditRoutes);
   app.use('/api/aggrs', aggregationRoutes);
-  app.use('/api/confg', configRoutes);
+  app.use('/api/configs', configRoutes);
   app.use('/api/comms', messageRoutes); // message REST endpoints
   app.use('/api/comms', socketRoutes);  // comms websocket-related REST endpoints (missed/ack/create/broadcast)
   app.use('/api/ordrs', orderRoutes);   // legacy teammate route

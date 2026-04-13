@@ -147,7 +147,7 @@ export default function SupplierApprovedItemsPage() {
       <div className="mx-auto flex max-w-7xl flex-col gap-6">
 
         {/* Header */}
-        <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+        <div className="relative z-10 flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
           <div>
             <h1 className="text-3xl font-bold text-text-main">Approved Items</h1>
             <p className="mt-1 text-sm text-text-muted">
@@ -155,12 +155,13 @@ export default function SupplierApprovedItemsPage() {
             </p>
           </div>
           <button
-            type="button"
-            className="inline-flex items-center gap-2 rounded-2xl bg-primary px-5 py-3 text-sm font-bold text-text-main transition hover:opacity-90"
-          >
-            <span className="material-symbols-outlined text-[18px]">add</span>
-            Request New Item
-          </button>
+  type="button"
+  onClick={() => navigate("/supplier/approved-items/request")}
+  className="relative z-20 inline-flex cursor-pointer items-center gap-2 rounded-2xl bg-primary px-5 py-3 text-sm font-bold text-text-main transition hover:opacity-90"
+>
+  <span className="material-symbols-outlined text-[18px]">add</span>
+  Request New Item
+</button>
         </div>
 
         {/* Filters + Search */}

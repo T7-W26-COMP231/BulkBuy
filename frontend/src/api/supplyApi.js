@@ -70,6 +70,6 @@ export const fetchApprovedItems = async () => {
 };
 
 export const fetchSupplierDemandStatus = async () => {
-  const res = await axiosInstance.get('/aggregations/supplier/demand-status');
-  return res.data;
+  const response = await api.get("/aggrs/supplier/demand-status");
+  return response;
 };

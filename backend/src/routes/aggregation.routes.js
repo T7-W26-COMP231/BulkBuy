@@ -51,6 +51,7 @@ router.get(
   '/supplier/demand-status',
   requireAuth,
   asyncHandler(AggregationController.getSupplierDemandStatus)
+  // this getSupplierDemandStatus is using two collections aggregation and items
 );
 
 /* List aggregations (supports ?page=&limit=&filter= JSON) */

@@ -402,6 +402,7 @@ class AggregationService {
   async getSupplierDemandStatus(supplierId) {
     if (!supplierId) throw createError(401, 'Supplier authentication required');
     const supplierIdStr = supplierId.toString(); // 👈 force string
+    // this getSupplierDemandStatus is using two collections aggregation and items
 
 
     const aggregations = await Aggregation.find({

@@ -88,6 +88,11 @@ function SalesWindowCountdown({ closesAt }) {
     </div>
   );
 }
+//Helper function--->
+const isNearingTier = (progressPercent, isMaxTier) =>
+  !isMaxTier && progressPercent >= 70;
+
+
 // ─── Status Badge ─────────────────────────────────────────────────────────────
 function StatusBadge({ status }) {
   const isComplete = status === "Complete";
@@ -102,7 +107,7 @@ function StatusBadge({ status }) {
 }
 
 // ─── Tier Progress ────────────────────────────────────────────────────────────
-function TierProgress({ progress, tierLabel, nextTier, thresholds = [], maxThreshold = 0 }) {
+function TierProgress({ progress, nearing, tierLabel, nextTier, thresholds = [], maxThreshold = 0 }) {
   const nodes =
     thresholds.length > 0 && maxThreshold > 0
       ? thresholds.map((qty) => Math.min((qty / maxThreshold) * 100, 100))
@@ -112,7 +117,15 @@ function TierProgress({ progress, tierLabel, nextTier, thresholds = [], maxThres
     <div className="min-w-[230px]">
       <div className="mb-2 flex items-center justify-between gap-3 text-[10px] font-semibold tracking-[0.04em]">
         <span className="text-[#49D6B2]">{tierLabel}</span>
-        <span className="text-[#A0AEC0]">{nextTier}</span>
+        <div className="flex items-center gap-2">
+          {nearing && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-700">
+              <span className="material-symbols-outlined text-[11px]">trending_up</span>
+              Nearing tier
+            </span>
+          )}
+          <span className="text-[#A0AEC0]">{nextTier}</span>
+        </div>
       </div>
       <div className="relative h-10 w-full">
         <div className="absolute left-0 right-0 top-1/2 h-[4px] -translate-y-1/2 rounded-full bg-[#D9E2EC]" />
@@ -309,7 +322,8 @@ export default function SupplierTierMonitoringPage() {
                   items.map((item) => (
                     <tr
                       key={`${item.itemId}-${item.aggregationId}-${item.currentDemand}`}
-                      className="border-b border-[#EDF2F7] last:border-b-0"
+                      className={`border-b border-[#EDF2F7] last:border-b-0 transition-colors ${isNearingTier(item.progressPercent, item.isMaxTier) ? "bg-amber-50" : ""
+                        }`}
                     >
                       {/* Item Details */}
                       <td className="px-5 py-5">
@@ -345,6 +359,7 @@ export default function SupplierTierMonitoringPage() {
                       <td className="px-5 py-5">
                         <TierProgress
                           progress={item.progressPercent}
+                          nearing={isNearingTier(item.progressPercent, item.isMaxTier)} // ← add
                           tierLabel={
                             item.isMaxTier
                               ? "MAX TIER REACHED"

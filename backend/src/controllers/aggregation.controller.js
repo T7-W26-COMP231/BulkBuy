@@ -95,7 +95,7 @@ const AggregationController = {
 
   /**
    * GET /aggregations/supplier/demand-status
-   * Returns aggregated demand + tier progress for the logged-in supplier
+   * Returns aggregated demand + tier progress for the logged-in supplier, this getSupplierDemandStatus is using two collections aggregation and items
    */
   getSupplierDemandStatus: asyncHandler(async (req, res) => {
     const supplierId = req.user?._id || req.user?.id;

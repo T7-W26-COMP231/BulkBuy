@@ -21,7 +21,7 @@ async function maybeInitEmailService(emailConfig = {}) {
   if (!emailConfig) return null;
   try {
     // require lazily so comms can run without email module present
-    if (!emailServiceModule) emailServiceModule = require('../emailing/emailService');
+    if (!emailServiceModule) emailServiceModule = require('./emailing/emailService');
     // emailServiceModule exports init(...) which returns the module.exports (per your design)
     const svc = await emailServiceModule.init(emailConfig);
     return svc;
@@ -82,12 +82,12 @@ async function initComms(opts = {}) {
     let api = result && result.api;
 
     // debug log about what we received
-    logger.info('initComms: socketService returned', {
+    logger.info('\n---///--- initComms: socketService returned ...  ^_^\n'); 
+    logger.info({
       hasResult: !!result,
       hasIo: !!io,
       ioPath: io && typeof io.path === 'function' ? io.path() : null,
-      ioHttpServerEqualsProvided: !!(io && io.httpServer === server)
-    });
+      ioHttpServerEqualsProvided: !!(io && io.httpServer === server) });
 
     // If socketService created an io attached to a different HTTP server,
     // re-create/reattach Socket.IO to the provided server on the expected path.
@@ -119,22 +119,26 @@ async function initComms(opts = {}) {
     }
 
     // --- NEW: initialize email service if config provided ---
-    let emailServiceInstance = null;
-    if (emailServiceConfig) {
-      emailServiceInstance = await maybeInitEmailService(emailServiceConfig);
+    
+    try {
+      logger.info('\n---///--- initializing email service ...  ^_^ \n');
+      const emailServiceInstance = emailServiceConfig ? await maybeInitEmailService(emailServiceConfig) : await maybeInitEmailService();
       if (emailServiceInstance) {
-        // ensure api object exists and attach emailService
+      // ensure api object exists and attach emailService
         api = api || {};
         api.emailService = emailServiceInstance;
-        logger.info('initComms: emailService initialized and attached to runtime.api.emailService');
+        logger.info('[ initComms: ... ] emailService initialized and attached to runtime.api.emailService', api.emailService);
       }
+    } catch (error) {
+      logger.info(' [ Initializing ... ] email service error ---> | ', error);
     }
+    
 
     runtime.initialized = true;
     runtime.io = io;
     runtime.api = api;
 
-    logger.info('comms subsystem initialized');
+    logger.info('\n---///--- comms subsystem initialized ...  ^_^\n');
     return { io, api };
   } catch (err) {
     logger.error({ err: err && err.message }, 'Failed to initialize comms subsystem');

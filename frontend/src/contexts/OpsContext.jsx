@@ -45,6 +45,7 @@ import React, {
   useState
 } from 'react';
 
+import { useSocketEvent } from '../comms-js/socketRelay';
 
 const DEFAULT_API_BASE = 'http://localhost:5000/api/opscs';
 const DEFAULT_ENDPOINTS = {
@@ -120,10 +121,26 @@ export function OpsContextProvider({
   const [socket, setSocket] = useState(null);
 
   const [cart, setCart] = useState({});
-
+  const jwtExpiryTracker = useRef(null);
+  const [msgCenter, setMsgCenter] = useState({ notifs: [], otherMsgs: [] })
   /* In-memory caches */
   const productsCacheRef = useRef(new Map());
   const ordersCacheRef = useRef(new Map());
+
+  //---------------------------------------------------
+  const ioMsg = useSocketEvent('welcome');
+
+  useEffect(() => {
+    if (ioMsg) {
+      console.log("Got a new message via socket:", ioMsg);
+      // Logic to add to a list or show a notification
+      const notifAdd = [...msgCenter.notifs, ioMsg];
+      setMsgCenter({ ...msgCenter, notifs: notifAdd });
+      console.log('this the ioMsg ---> |', ioMsg); //--------------------------------
+    }
+  }, [ioMsg]);
+
+  //---------------------------------------------------
 
   /* Abort controllers */
   // initialize once
@@ -617,6 +634,7 @@ export function OpsContextProvider({
       loadingProducts,
       loadingOrders,
       error,
+      jwtExpiryTracker,
       products,
       productsMeta,
       wsuproducts, setWsuproducts,
@@ -627,10 +645,11 @@ export function OpsContextProvider({
 
       regions, setRegions,            // <-- add
       loadingRegions,                 // <-- add
-
+      jwtExpiryTracker,
       backendUrl, setBackendUrl,
       socket, setSocket,
       cart, setCart,
+      msgCenter, setMsgCenter,
       /* fetch + state setters */
       fetchAndSetUiProducts,
       refreshUiProducts,
@@ -669,6 +688,7 @@ export function OpsContextProvider({
       ops_region, setOps_region,
       backendUrl, setBackendUrl,
       socket, setSocket,
+      msgCenter, setMsgCenter,
       cart, setCart,
       fetchAndSetUiProducts,
       refreshUiProducts,

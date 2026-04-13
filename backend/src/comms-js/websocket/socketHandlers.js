@@ -87,7 +87,7 @@ async function onConnect(socket, opts={}) {
   try {
     const userId = user && (user._id || user.userId) ? (user._id || user.userId) : 'anonymous';
     // server console output for quick visibility
-    console.log(`[socket] connected -> socketId=[ ${socket.id} ], user=[ ${userId} ]`);
+    console.log(`[ socket 🟢 ] connected -> socketId=[ ${socket.id} ], user=[ ${userId} ]`);
   } catch (e) {
     logger.debug({ err: e && e.message }, 'console.log on connect failed (non-fatal)');
   }
@@ -237,6 +237,18 @@ function setupCommonListeners(socket, opts={}) {
         console.log('\nsocket identifyUser error | ', error, "\n");
       }
 
+
+      //join region room
+      const region = payload && payload.ops_region;
+      if(region){
+        if (typeof rooms.joinRegionRoom === 'function') {
+          await rooms.joinRegionRoom(socket, region);
+        } else {
+          socket.join(rooms.regionRoom ? rooms.regionRoom(region) : `region:${region}`);
+        }
+      };
+     
+
       // Resolve user: prefer token validation
       let resolvedUser = null;
       if (token && typeof socketAuthValidateToken === 'function') {
@@ -269,7 +281,7 @@ function setupCommonListeners(socket, opts={}) {
       socket.user = resolvedUser;
       // === New: console log when a socket is upgraded/identified ===
       try {
-        console.log(`\n[ socket 🟢 ] identified -> socketId=[ ${socket.id} ] user=[ ${String(resolvedUser._id)} ]\n`);
+        console.log(`\n[ socket 🟢 ] identified -> socketId = [ ${socket.id} ] user = [ ${String(resolvedUser._id)} ]\n`);
       } catch (e) {
         logger.debug({ err: e && e.message }, 'console.log on identifyUser failed (non-fatal)');
       }

@@ -1,96 +1,213 @@
 // client/src/comms-js/socket.js
-// Central Socket.IO client wrapper for comms (notifications + ui:update).
-// - initSocket(token, opts) -> connects and returns socket
-// - identifyUserAfterLogin({ token, userId }) -> upgrade anonymous socket to authenticated
-// - disconnectSocket(), getSocket(), ackViaRest(seq)
-// - opts: { url, path, region, onNotification, onConnected, onWelcome, getAuth, getOpsContext, reconnectionAttempts }
-// Notes:
-// - Do NOT call React hooks from this module. Pass `getAuth` and `getOpsContext` functions via opts
-//   that return the latest auth/ops state when invoked (e.g., () => authContext).
-// - Keep payload handling lightweight and idempotent.
+/**
+ * Central Socket.IO client wrapper for comms (notifications + ui:update).
+ *
+ * Guarantees:
+ * - Keeps a persistent connection for the lifetime of the client (infinite reconnect attempts).
+ * - On sign-in (identifyUserAfterLogin) the connection is upgraded/identified.
+ * - On any reconnect (including transport/polling that yields a new socket id) the client
+ *   re-attaches the latest token and re-identifies the user automatically.
+ * - Token is read from currentOpts.getAuth() when available, otherwise from localStorage key "app_auth_session_v1".
+ * - Uses clear log markers: [ socket 🟢 ], [ socket 🔴 ], [ socket 🔁 ], etc.
+ *
+ * Usage:
+ *   initSocket(null, { url, path, getAuth, onNotification, onConnected, onWelcome, region })
+ *   identifyUserAfterLogin({ token, userId })
+ *   disconnectSocket()
+ *   getSocket()
+ *   ackViaRest(seq)
+ *
+ * Notes:
+ * - Do NOT call React hooks from this module. Provide getAuth/getOpsContext functions via opts.
+ * - This file is defensive and idempotent: emits are best-effort and handlers swallow non-fatal errors.
+ */
 
 import { io } from "socket.io-client";
+import { jwtDecode } from "jwt-decode";
+
+const STORAGE_KEY = "app_auth_session_v1";
 
 let socket = null;
 let currentToken = null;
 let currentOpts = {};
 
+/* -------------------------
+ * Token helpers
+ * ------------------------- */
+
+function _tokenFromStorage() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    try {
+      const parsed = JSON.parse(raw);
+      if (typeof parsed === "string") return parsed;
+      return parsed.token || parsed.accessToken || parsed.authToken || parsed.access_token || parsed.auth_token || null;
+    } catch (_) {
+      return raw;
+    }
+  } catch (_) {
+    return null;
+  }
+}
+
+function _isJwtExpired(token) {
+  if (!token || typeof token !== "string") return { expired: null, exp: null };
+  try {
+    const payload = jwtDecode(token);
+    if (!payload || typeof payload !== "object") return { expired: null, exp: null };
+    const exp = payload.exp ? Number(payload.exp) : null; // seconds
+    if (!exp) return { expired: null, exp: null };
+    const nowSec = Math.floor(Date.now() / 1000);
+    return { expired: nowSec >= exp, exp };
+  } catch (_) {
+    return { expired: null, exp: null };
+  }
+}
+
+function _latestAuthFromOpts() {
+  try {
+    if (typeof currentOpts.getAuth === "function") {
+      return currentOpts.getAuth() || null;
+    }
+  } catch (_) {
+    // swallow
+  }
+  return null;
+}
+
+function _resolveLatestToken() {
+  const latest = _latestAuthFromOpts();
+  if (latest && (latest.accessToken || latest.token)) return latest.accessToken || latest.token;
+  return currentToken || _tokenFromStorage();
+}
+
+function _isTokenValid(token) {
+  if (!token) return false;
+  const check = _isJwtExpired(token);
+  if (check.expired === true) return false;
+  return true;
+}
+
+/* -------------------------
+ * Internal: identify logic
+ * ------------------------- */
+
+function _maybeIdentifyOnConnect({ token, userId } = {}) {
+  if (!socket) return;
+  const t = token || _resolveLatestToken();
+  const uid = userId || (typeof currentOpts.getAuth === "function" ? (currentOpts.getAuth()?.user?.userId || currentOpts.getAuth()?.user?._id) : null);
+
+  // If no token and no userId, nothing to do
+  if (!t && !uid) return;
+
+  // If socket already has an authenticated user, skip re-identify
+  if (socket.user && (socket.user.userId || socket.user._id)) return;
+
+  try {
+    // update auth for future reconnects
+    if (t) socket.auth = { token: t };
+
+    // emit identifyUser to upgrade session on server
+    socket.emit("identifyUser", { token: t, userId: uid }, (resp) => {
+      try {
+        console.debug("[ socket 🟢 ] identifyUser ack", resp);
+        if (resp && resp.ok && (resp.userId || resp._id)) {
+          socket.user = { _id: resp.userId || resp._id };
+          console.log(`[ socket 🟢 ] identifyUser (ack) -> socketId=[ ${socket.id} ] user=[ ${socket.user._id} ]`);
+        } else if (resp && resp.ok && resp.user) {
+          socket.user = resp.user;
+          console.log(`[ socket 🟢 ] identifyUser (ack) -> socketId=[ ${socket.id} ] user=[ ${JSON.stringify(resp.user)} ]`);
+        } else {
+          console.debug("[ socket 🔁 ] identifyUser ack without user payload", resp);
+        }
+      } catch (e) {
+        console.debug("[ socket 🔴 ] identifyUser ack handler error", e && e.message);
+      }
+    });
+  } catch (e) {
+    console.debug("[ socket 🔴 ] identifyUser emit failed", e && e.message);
+  }
+}
+
+/* -------------------------
+ * Public: initSocket
+ * ------------------------- */
+
 /**
  * initSocket(accessToken, opts)
- * - accessToken: optional string (JWT or token expected by server socketAuth)
+ * - accessToken: optional token to use for initial handshake
  * - opts:
- *    url: string (default from env or http://localhost:5000)
- *    path: string (socket path, default /socket.io)
- *    region: string (optional region to identify)
- *    onNotification: fn(msg)
- *    onConnected: fn(payload)
- *    onWelcome: fn(payload)
- *    getAuth: fn() -> { user, accessToken }   // optional getter to access latest auth state
- *    getOpsContext: fn() -> { ... }           // optional getter
- *    reconnectionAttempts: number
+ *    url, path, region, onNotification, onConnected, onWelcome, getAuth, getOpsContext, reconnectionDelay, reconnectionDelayMax
  */
 export function initSocket(accessToken = null, opts = {}) {
   // If socket exists and connected, return it (no-op)
   if (socket && socket.connected) return socket;
 
-  // Save opts for later use (identifyUserAfterLogin, reconnects)
   currentOpts = Object.assign({}, opts);
+  currentToken = accessToken || currentToken || null;
 
-  currentOpts.onWelcome = (message) => {
-    // console.log('server sent welcome message @ ---> ', JSON.stringify(message))
-  };
-
-  // Track token used for auth; may be null for anonymous connection
-  currentToken = accessToken || null;
   const url = opts.url || process.env.REACT_APP_WS_URL || "http://localhost:5000";
   const path = opts.path || "/socket.io";
-  const reconnectionAttempts = opts.reconnectionAttempts ?? 10;
+  // Do not limit reconnection attempts: keep connection alive for lifetime of client
+  const reconnectionDelay = opts.reconnectionDelay ?? 1000;
+  const reconnectionDelayMax = opts.reconnectionDelayMax ?? 5000;
 
-  // Create socket instance (allow polling fallback)
+  // Create socket instance with infinite reconnect attempts (omit reconnectionAttempts)
   socket = io(url, {
     path,
     autoConnect: true,
     auth: currentToken ? { token: currentToken } : undefined,
     transports: ["websocket", "polling"],
     withCredentials: true,
-    reconnectionAttempts,
-    reconnectionDelay: 1000,
-    reconnectionDelayMax: 5000,
+    reconnection: true,
+    reconnectionDelay,
+    reconnectionDelayMax,
+    // do not set reconnectionAttempts so socket.io will keep trying indefinitely
   });
 
-  // Ensure auth is refreshed on each reconnect attempt using latest token getter if provided
+  // Refresh auth on each reconnect attempt using latest token getter if provided
   socket.io.on("reconnect_attempt", () => {
     try {
-      const getAuth = typeof currentOpts.getAuth === "function" ? currentOpts.getAuth : null;
-      const latest = getAuth ? getAuth() : null;
-      const latestToken = latest && latest.accessToken ? latest.accessToken : currentToken;
+      const latest = _latestAuthFromOpts();
+      const latestToken = latest && (latest.accessToken || latest.token) ? (latest.accessToken || latest.token) : (currentToken || _tokenFromStorage());
       if (latestToken) {
         socket.auth = { token: latestToken };
-        socket.user = latest.user;
+        socket.user = latest && latest.user ? latest.user : socket.user;
       }
     } catch (e) {
       // swallow
     }
   });
 
-  // Core lifecycle
-  socket.on("connect", () => {
-    console.log("[ socket 🟢 ] Connected to server:", `[${socket.id }]`);
+  // Also refresh auth on handshake retry errors
+  socket.io.on("reconnect_error", () => {
+    try {
+      const latest = _latestAuthFromOpts();
+      const latestToken = latest && (latest.accessToken || latest.token) ? (latest.accessToken || latest.token) : (currentToken || _tokenFromStorage());
+      if (latestToken) socket.auth = { token: latestToken };
+    } catch (_) {}
+  });
 
-    // console.debug("[socket] connected", socket.id);
-    
+  /* -------------------------
+   * Core lifecycle
+   * ------------------------- */
+
+  socket.on("connect", () => {
+    console.log("[ socket 🟢 ] Connected to server:", `[ ${socket.id} ]`);
+
     // announce region immediately if provided
     if (currentOpts.region) {
       try {
         socket.emit("identifyRegion", { region: currentOpts.region }, (resp) => {
-          console.debug("[socket] identifyRegion ack", resp);
-          console.log("[ socket 🟢 ] identifyRegion ack", resp);
+          console.debug("[ socket 🟢 ] identifyRegion ack", resp);
         });
       } catch (e) {
         console.debug("[ socket 🔴 ] identifyRegion emit failed", e && e.message);
       }
     }
 
+    // onConnected callback
     if (typeof currentOpts.onConnected === "function") {
       try {
         currentOpts.onConnected({ socketId: socket.id });
@@ -98,80 +215,106 @@ export function initSocket(accessToken = null, opts = {}) {
         console.debug("[ socket 🔴 ] onConnected handler error", e && e.message);
       }
     }
+
+    // Always attempt to identify after connect (covers sign-in and reconnects)
+    try {
+      const latest = _latestAuthFromOpts();
+      const latestToken = latest && (latest.accessToken || latest.token) ? (latest.accessToken || latest.token) : (currentToken || _tokenFromStorage());
+      const latestUserId = latest && latest.user ? (latest.user.userId || latest.user._id) : null;
+      _maybeIdentifyOnConnect({ token: latestToken, userId: latestUserId });
+    } catch (e) {
+      // swallow
+    }
+  });
+
+  socket.on("reconnect", (attemptNumber) => {
+    console.debug("[ socket 🔁 ] reconnected attempt:", attemptNumber, "socketId:", socket && socket.id);
+    try {
+      const latest = _latestAuthFromOpts();
+      const latestToken = latest && (latest.accessToken || latest.token) ? (latest.accessToken || latest.token) : (currentToken || _tokenFromStorage());
+      const latestUserId = latest && latest.user ? (latest.user.userId || latest.user._id) : null;
+      _maybeIdentifyOnConnect({ token: latestToken, userId: latestUserId });
+    } catch (e) {
+      // swallow
+    }
   });
 
   socket.on("disconnect", (reason) => {
     console.debug("[ socket 🔴 ] disconnected", reason);
+    // socket.io will attempt reconnect automatically; nothing to do here
   });
 
   socket.on("connect_error", (err) => {
     console.warn("[ socket 🔴 ] connect_error", err && (err.message || err));
   });
 
-  // server sends a safe connected ack { socketId, serverTime }
   socket.on("connected", (payload) => {
     if (typeof currentOpts.onConnected === "function") {
       try {
         currentOpts.onConnected(payload);
-        console.log("'this is the Connected message from the server ======> ',[ socket 🟢 ] Socket Connected", payload);
+        console.log("[ socket 🟢 ] server connected ack", payload);
       } catch (e) {
         console.debug("[ socket 🔴 ] onConnected callback error", e && e.message);
       }
+    } else {
+      console.debug("[ socket 🟢 ] server connected ack", payload);
     }
-    console.debug("[ socket] server connected ack", payload);
   });
 
-  // server may send a welcome message after login upgrade
   socket.on("welcome", (payload) => {
     if (typeof currentOpts.onWelcome === "function") {
       try {
         currentOpts.onWelcome(payload);
       } catch (e) {
-        console.debug("[socket] onWelcome handler error", e && e.message);
+        console.debug("[ socket 🔴 ] onWelcome handler error", e && e.message);
       }
     }
-    console.info("[socket] welcome", payload);
+    console.info("[ socket 🟢 ] welcome", payload);
   });
 
-  // notification handler
+  /* -------------------------
+   * Notification & domain handlers
+   * ------------------------- */
+
   socket.on("notification", (msg) => {
     try {
       if (typeof currentOpts.onNotification === "function") {
         currentOpts.onNotification(msg);
       } else {
-        console.info("[socket] notification", msg);
+        console.info("[ socket 🟢 ] notification", msg);
       }
 
       // best-effort ack via socket
       const seq = msg?.metadata?.notification?.seq;
       if (seq && socket && socket.connected) {
         socket.emit("ackNotification", { id: msg.id, seq }, (ackResp) => {
-          console.debug("[socket] ackNotification callback", ackResp);
+          console.debug("[ socket 🟢 ] ackNotification callback", ackResp);
         });
       }
     } catch (e) {
-      console.debug("[socket] notification handler error", e && e.message);
+      console.debug("[ socket 🔴 ] notification handler error", e && e.message);
     }
   });
 
-  // system broadcasts
   socket.on("system:update", (payload) => {
-    console.info("[socket] system update", payload);
+    try {
+      console.info("[ socket 🟢 ] system update", payload);
+    } catch (e) {
+      console.debug("[ socket 🔴 ] system:update handler error", e && e.message);
+    }
   });
 
-  // generic error logging
   socket.on("error", (err) => {
-    console.warn("[socket] error", err);
+    console.warn("[ socket 🔴 ] error", err);
   });
 
-  // ui:update-products+orders (specialized handler)
   socket.on("ui:update-products+orders", (cmd) => {
     try {
       const getOpsContext = typeof currentOpts.getOpsContext === "function" ? currentOpts.getOpsContext : () => ({});
       const ops = getOpsContext() || {};
       const { wsuproducts = 0, setWsuproducts = () => {}, wsuorders = 0, setWsuorders = () => {} } = ops;
 
-      console.debug("[socket] ui:update received", cmd && cmd.action);
+      console.debug("[ socket 🟢 ] ui:update received", cmd && cmd.action);
 
       switch (cmd.action) {
         case "refreshActivity":
@@ -185,23 +328,21 @@ export function initSocket(accessToken = null, opts = {}) {
         case "update-products":
           try {
             if (typeof setWsuproducts === "function") {
-              // call setter with updater if available
               setWsuproducts((prev) => (typeof prev === "number" ? prev + 1 : wsuproducts + 1));
             }
           } catch (e) {
-            console.debug("[socket] update-products handler error", e && e.message);
+            console.debug("[ socket 🔴 ] update-products handler error", e && e.message);
           }
           break;
 
         case "update-orders":
-          // only update orders UI if ops context indicates an authenticated user
           if (ops.user && (ops.user.userId || ops.user._id)) {
             try {
               if (typeof setWsuorders === "function") {
                 setWsuorders((prev) => (typeof prev === "number" ? prev + 1 : wsuorders + 1));
               }
             } catch (e) {
-              console.debug("[socket] update-orders handler error", e && e.message);
+              console.debug("[ socket 🔴 ] update-orders handler error", e && e.message);
             }
           }
           break;
@@ -222,129 +363,79 @@ export function initSocket(accessToken = null, opts = {}) {
       const seq = cmd?.metadata?.notification?.seq;
       if (seq && socket && socket.connected) {
         socket.emit("ackNotification", { id: cmd.id, seq }, (ackResp) => {
-          console.debug("[socket] ui:update ack callback", ackResp);
+          console.debug("[ socket 🟢 ] ui:update ack callback", ackResp);
         });
       }
     } catch (e) {
-      console.debug("[socket] ui:update handler error", e && e.message);
+      console.debug("[ socket 🔴 ] ui:update handler error", e && e.message);
     }
   });
 
   return socket;
 }
 
-/**
- * identifyUserAfterLogin
- * - Call this after the user successfully logs in on the client.
- * - Provide either the new auth token or the userId (server must accept chosen format).
- * - If socket is disconnected, this will set auth and connect.
- */
-// export function identifyUserAfterLogin({ token, userId } = {}, opts = {}) {
-//   // update tracked token
-//   if (token) currentToken = token;
+/* -------------------------
+ * Public: identifyUserAfterLogin
+ * ------------------------- */
 
-//   if (!socket) {
-//     // create a new socket with token if none exists
-//     return initSocket(currentToken, currentOpts);
-//   }
-
-//   // If socket exists but is not connected, update auth and connect
-//   if (!socket.connected || !socket?.auth?.token ) {
-//     socket.auth = token ? { token } : socket.auth;
-//     try {
-//       socket.connect();
-//     } catch (e) {
-//       console.debug("[socket] connect after identify failed", e && e.message);
-//     }
-//     return socket;
-//   }
-
-//   // If already connected, prefer emitting identifyUser to upgrade session
-//   if (token) {
-//     try {
-//       // update auth for future reconnects
-//       socket.auth = { token };
-//       socket.emit("identifyUser", { token }, (resp) => {
-//         console.debug("[socket] identifyUser ack", resp);
-//       });
-//     } catch (e) {
-//       console.debug("[socket] identifyUser emit failed", e && e.message);
-//     }
-//     return socket;
-//   }
-
-//   // Fallback: send userId if token not available (less secure)
-//   if (userId) {
-//     try {
-//       socket.emit("identifyUser", { userId }, (resp) => {
-//         console.debug("[socket] identifyUser (userId) ack", resp);
-//       });
-//     } catch (e) {
-//       console.debug("[socket] identifyUser (userId) emit failed", e && e.message);
-//     }
-//   }
-
-//   return socket;
-// }
-
-export function identifyUserAfterLogin({ token, userId } = {}, opts={}) {
+export function identifyUserAfterLogin({ token, userId } = {}, opts = {}) {
   if (token) currentToken = token;
 
   // Ensure socket exists; create anonymous one if needed
   if (!socket) {
-    return initSocket(currentToken, {...currentOpts, ...opts});
+    return initSocket(currentToken, { ...currentOpts, ...opts });
   }
 
-  // Helper to emit identify once connected
   const doIdentify = () => {
-    // prefer token
     if (token) {
-      // update auth for future reconnects
       socket.auth = { token };
       try {
-        socket.emit('identifyUser', { token, userId }, (resp) => {
-          console.debug('[socket] identifyUser ack', resp);
+        socket.emit("identifyUser", { token, userId , ops_region : opts.ops_region || null }, (resp) => {
+          console.debug("[ socket 🟢 ] identifyUser ack", resp);
           if (resp && resp.ok && resp.userId) {
-            // reflect authenticated state locally
             socket.user = { _id: resp.userId };
-            console.log(`[ socket 🟢 ] identifyUser (ack) -> socketId= [ ${socket.id} ] user= [ ${resp.userId} ]`);
+            console.log(`[ socket 🟢 ] identifyUser (ack) -> socketId=[ ${socket.id} ] user=[ ${resp.userId} ]`);
           }
         });
       } catch (e) {
-        console.debug('[ socket 🔴 ] identifyUser emit failed', e && e.message);
+        console.debug("[ socket 🔴 ] identifyUser emit failed", e && e.message);
       }
       return;
     }
+
+    if (userId) {
+      try {
+        socket.emit("identifyUser", { userId }, (resp) => {
+          console.debug("[ socket 🟢 ] identifyUser (userId) ack", resp);
+        });
+      } catch (e) {
+        console.debug("[ socket 🔴 ] identifyUser (userId) emit failed", e && e.message);
+      }
+    }
   };
 
-  // If not connected yet, wait for connect then identify
   if (!socket.connected) {
-    socket.once('connect', () => {
-      doIdentify();
-    });
-    // ensure socket has auth set so the handshake on connect (if any) includes token
+    socket.once("connect", () => doIdentify());
     if (token) socket.auth = { token };
-    try { socket.connect(); } catch (e) { /* ignore */ }
+    try { socket.connect(); } catch (_) {}
     return socket;
   }
 
-  // Already connected: identify immediately
   doIdentify();
   return socket;
 }
 
+/* -------------------------
+ * Public: disconnect, getSocket, ackViaRest
+ * ------------------------- */
 
-/**
- * disconnectSocket
- * - Cleanly disconnects and removes listeners
- */
 export function disconnectSocket() {
   if (!socket) return;
   try {
     socket.removeAllListeners();
     socket.disconnect();
   } catch (e) {
-    console.debug("[socket] disconnectSocket error", e && e.message);
+    console.debug("[ socket 🔴 ] disconnectSocket error", e && e.message);
   } finally {
     socket = null;
     currentToken = null;
@@ -352,10 +443,6 @@ export function disconnectSocket() {
   }
 }
 
-/**
- * getSocket
- * - Returns the current socket instance (or null)
- */
 export function getSocket() {
   return socket;
 }
@@ -369,7 +456,9 @@ export async function ackViaRest(seq) {
   if (!seq) return null;
   try {
     const headers = { "Content-Type": "application/json" };
-    if (currentToken) headers.Authorization = `Bearer ${currentToken}`;
+    const latest = typeof currentOpts.getAuth === "function" ? currentOpts.getAuth() : null;
+    const token = (latest && (latest.accessToken || latest.token)) || currentToken || _tokenFromStorage();
+    if (token) headers.Authorization = `Bearer ${token}`;
     const res = await fetch("/api/comms/ack", {
       method: "POST",
       headers,
@@ -377,12 +466,12 @@ export async function ackViaRest(seq) {
       credentials: "same-origin",
     });
     if (!res.ok) {
-      console.debug("[socket] ackViaRest non-ok", res.status);
+      console.debug("[ socket 🔴 ] ackViaRest non-ok", res.status);
       return null;
     }
     return await res.json();
   } catch (err) {
-    console.debug("[socket] ackViaRest failed", err && err.message);
+    console.debug("[ socket 🔴 ] ackViaRest failed", err && err.message);
     return null;
   }
 }

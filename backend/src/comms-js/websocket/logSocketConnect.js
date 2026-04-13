@@ -1,6 +1,20 @@
 // src/comms-js/websocket/utils/logSocketConnect.js
 const pino = require('pino');
-const logger = pino({ level: process.env.LOG_LEVEL || 'info' });
+
+const logger = pino({
+  level: process.env.LOG_LEVEL || 'info',
+  // Only use pretty printing if we are NOT in production
+  transport: process.env.NODE_ENV !== 'production' 
+    ? {
+        target: 'pino-pretty',
+        options: {
+          colorize: true,
+          messageFormat: '{hostname} - {msg}',
+          ignore: 'pid,time,level',
+        },
+      } 
+    : undefined,
+});
 
 /**
  * shortId - produce a short, non-PII socket id for logs
@@ -67,7 +81,7 @@ function logSocketConnect(ioSocket, opts = {}) {
     serverTime: new Date().toISOString()
   };
   const {event, socketId, auth, userId, roles, ops_region, rooms, msg, serverTime } = payload
-  logger.info(`Authenticated ---|> user : ${user.userId}, ops_region: ${ops_region || "N/A"}`)
+  logger.info(`[ socket 🟢 ] Authenticated ---|> user : ${user.userId}, ops_region: ${ops_region || "N/A"}`)
 }
 
 module.exports = { logSocketConnect };

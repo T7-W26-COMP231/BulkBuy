@@ -155,13 +155,13 @@ export default function SupplierApprovedItemsPage() {
             </p>
           </div>
           <button
-  type="button"
-  onClick={() => navigate("/supplier/approved-items/request")}
-  className="relative z-20 inline-flex cursor-pointer items-center gap-2 rounded-2xl bg-primary px-5 py-3 text-sm font-bold text-text-main transition hover:opacity-90"
->
-  <span className="material-symbols-outlined text-[18px]">add</span>
-  Request New Item
-</button>
+            type="button"
+            onClick={() => navigate("/supplier/approved-items/request")}
+            className="relative z-20 inline-flex cursor-pointer items-center gap-2 rounded-2xl bg-primary px-5 py-3 text-sm font-bold text-text-main transition hover:opacity-90"
+          >
+            <span className="material-symbols-outlined text-[18px]">add</span>
+            Request New Item
+          </button>
         </div>
 
         {/* Filters + Search */}
@@ -265,8 +265,26 @@ export default function SupplierApprovedItemsPage() {
                       <td className="px-6 py-4 text-right">
                         <ActionButton
                           status={item.quoteStatus}
-                          onCreateQuote={() => navigate(`/supplier/quotes/create?itemId=${item._id}`)}
-                          onResumeQuote={() => navigate(`/supplier/quotes/create?itemId=${item._id}&resume=true`)}
+                          onCreateQuote={() => navigate(
+                            `/supplier/quotes/create?itemId=${item._id}`,
+                            {
+                              state: {
+                                itemTitle: item.title,
+                                itemSku: item.sku,
+                                itemImage: item.images?.[0] || null,
+                              }
+                            }
+                          )}
+                          onResumeQuote={() => navigate(
+                            `/supplier/quotes/create?itemId=${item._id}&resume=true`,
+                            {
+                              state: {
+                                itemTitle: item.title,
+                                itemSku: item.sku,
+                                itemImage: item.images?.[0] || null,
+                              }
+                            }
+                          )}
                           onViewDetails={() => navigate(`/supplier/quotes?itemId=${item._id}`)}
                         />
                       </td>

@@ -1,17 +1,21 @@
-// src/utils/ShoppingCart.Utils.js
-/**
- * ShoppingCart.Utils.js
- *
- * API helpers and pure utilities for the Shopping Cart feature.
- * - Configurable BASE_API via environment variable.
- * - Robust fetch wrapper with timeout and improved error objects.
- * - Pure helpers for formatting, totals, grouping, and safe parsing.
- *
- * Keep this file easy to mock in unit tests.
- */
+/*
+// on region change, also change the region of the draft order.
+// ops contex load the locations drop down on lunch
+- on read or write,
+    - update sales window collection
+    - update draft order
+    - real time trigger update UI
+        - getSwItem(windowId, productId, itemId)
+        - patchSwItem(windowId, productId, itemId)
+        - getDraftOrder(userId, orderId =null)
+        - patchDraftOrder(userId, orderId =null)
+        - ws send the update signal region wide
 
-const DEFAULT_API_BASE = "http://localhost:5000/api";
+*/
 
+
+
+const DEFAULT_API_BASE = "http://localhost:5000/api/opscs";
 export const BASE_API = DEFAULT_API_BASE || process.env.REACT_APP_API_BASE;
 const DEFAULT_TIMEOUT_MS = 10_000;
 

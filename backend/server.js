@@ -33,7 +33,7 @@ const start = async () => {
 
     // start HTTP server
     const server = app.listen(config.port, () => {
-      console.log(`\n---///--Server running in ${config.nodeEnv} mode on port ${config.port} --------------------> 🕊\n`);
+      console.log(`\n---///--- Server running in ${config.nodeEnv} mode on port ${config.port} ---> 🕊\n`);
     });
 
     // ---------------------------------------------------------
@@ -63,7 +63,6 @@ const start = async () => {
             logger: console
             // pass redisClient here if you have one: redisClient: myRedisClient
           });
-          console.log('\nComms initialized via comms-js.initComms ');
         } catch (err) {
           console.error('comms-js.initComms failed:', err);
           // continue running HTTP server even if comms init fails

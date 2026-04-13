@@ -29,12 +29,13 @@ import ProductListPage from "./pages/customer/ProductListPage";
 import CartPage from "./pages/shared/ShoppingCart";
 import Shop from "./pages/customer/Marketplace";
 import Item from "./pages/customer/Itemsdetails";
-import ReviewModifyIntentPage from "./pages/customer/ReviewModifyIntentPage";
+
 import OrdersPage from "./pages/customer/OrdersPage";
+import ReviewModifyIntentPage from "./pages/customer/ReviewModifyIntentPage";
 import OrderDetailsPage from "./pages/customer/OrderDetails";
 import OrderTrackingPage from "./pages/customer/OrderTrackingPage";
 import ProfilePage from "./pages/customer/ProfilePage";
-
+import UserMessageCenter from './pages/shared/UserMessageCenter';
 
 function PlaceholderPage({ title }) {
   return (
@@ -144,12 +145,12 @@ export default function App() {
         <Route path="/supplier/dashboard" element={<SupplierDashboard />} />
         <Route path="/supplier/profile" element={<SupplierProfilePage />} />
         <Route path="/supplier/approved-items" element={<SupplierApprovedItemsPage />} />
-<Route
-  path="/supplier/approved-items/request"
-  element={<SupplierRequestItemPage />}
-/>
+        <Route
+          path="/supplier/approved-items/request"
+          element={<SupplierRequestItemPage />}
+        />
         <Route path="/supplier/quotes" element={<SupplierQuotesPage />} />
-<Route path="/supplier/quotes/create" element={<SupplierQuotesPage />} />
+        <Route path="/supplier/quotes/create" element={<SupplierQuotesPage />} />
         <Route path="/supplier/order-requests" element={<SupplierOrdersPage />} />
         <Route path="/supplier/reports" element={<SupplierReportsPage />} />
         <Route

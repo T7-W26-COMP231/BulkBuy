@@ -5,12 +5,27 @@
 // - Delegates heavy work to specialized modules (sendEmail, sendBulk, sendToRecipients factories if present).
 // - Non-disruptive: if factories are missing, provides sensible defaults that use renderer/runtime.
 
-const pino = require('pino');
-const assert = require('assert');
-
 const initEmailService = require('./initEmailService'); // runtime factory
 const defaultRenderer = require('./renderTemplate'); // { renderTemplate(name, payload, opts, deps) }
 const userAccess = require('../user.access/user.access'); // resolveRecipients helper (optional)
+const emailCfgs = require('./emailConfig');  
+
+const pino = require('pino');
+
+const logger = pino({
+  level: process.env.LOG_LEVEL || 'info',
+  // Only use pretty printing if we are NOT in production
+  transport: process.env.NODE_ENV !== 'production' 
+    ? {
+        target: 'pino-pretty',
+        options: {
+          colorize: true,
+          messageFormat: '{hostname} - {msg}',
+          ignore: 'pid,time,level',
+        },
+      } 
+    : undefined,
+});
 
 // Business factories (may be factory functions or direct functions)
 let sendEmailFactory;
@@ -20,8 +35,6 @@ let sendToRecipientsFactory;
 try { sendEmailFactory = require('./sendEmail'); } catch (e) { sendEmailFactory = null; }
 try { sendBulkFactory = require('./sendBulk'); } catch (e) { sendBulkFactory = null; }
 try { sendToRecipientsFactory = require('./sendToRecipients'); } catch (e) { sendToRecipientsFactory = null; }
-
-const logger = pino({ level: process.env.LOG_LEVEL || 'info' });
 
 /* Module state */
 let runtime = null;
@@ -53,7 +66,7 @@ function makeId(seed = {}) {
  * - config.templateRenderer optional; if not provided, uses default renderTemplate
  * - returns module.exports for convenience
  */
-async function init(config = {}) {
+async function init(config = emailCfgs.mailer || {}) {
   if (initialized) {
     logger.debug('emailService: already initialized');
     return module.exports;
@@ -216,6 +229,25 @@ async function sendEmail(opts = {}) {
   ensureInitialized();
   return services.sendEmail(opts);
 }
+
+const p = {
+  "subject": "Test Email from Postman",
+  "details": "This is a functional test of the email flow. Please ignore.",
+  "type": "email",
+  "ops_region": "Brampton",
+  "status": "submitted",
+  "recipients": { "all": false, "users": ["660000000000000000000002"] },
+  "attachments": ["https://cdn.example.com/uploads/file-abc123.pdf"],
+  "email": {
+    "to": ["t7.w26.comp231@gmail.com"],
+    "cc": ["cc@example.com"],
+    "bcc": ["bcc@example.com"],
+    "template": "default",
+    "sendImmediate": true
+  }
+}
+
+
 
 async function sendBulk(opts = {}) {
   ensureInitialized();

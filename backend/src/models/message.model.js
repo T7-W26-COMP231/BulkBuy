@@ -27,8 +27,8 @@ const { Schema } = mongoose;
 
 const { generateDefaultIdStr } = require('./generateDefaultIdStr');
 
-const TYPE_ENUM = ['issue_wall', 'email', 'notification', 'order', 'review'];
-const STATUS_ENUM = ['draft', 'submitted', 'deleted', 'read', 'unread'];
+const TYPE_ENUM = ['issue_wall', 'email', 'notification', 'order', 'review', 'system'];
+const STATUS_ENUM = ['draft', 'submitted', 'read', 'unread'];
 
 const RecipientsSchema = new Schema(
   {

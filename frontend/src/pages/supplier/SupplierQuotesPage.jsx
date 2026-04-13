@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useLocation } from "react-router-dom";
 import SupplierLayout from "../../components/supplier/SupplierLayout";
 import { useNotifications } from "../../contexts/NotificationContext";
 
@@ -12,6 +12,9 @@ export default function SupplierQuotesPage() {
 
   const [searchParams] = useSearchParams();
   const itemId = searchParams.get("itemId");
+
+  const location = useLocation();
+  const itemState = location.state;
 
   const [selectedItem, setSelectedItem] = useState(null);
   const [baseUnitPrice, setBaseUnitPrice] = useState("");
@@ -48,9 +51,12 @@ export default function SupplierQuotesPage() {
             supplies[0];
 
           setIsReviewLocked(false);
+
           setSelectedItem(supply);
-          setProductName(supply?.productName || supply?.title || "");
-          setSkuId(supply?.skuId || supply?.sku || supply?.itemCode || "");
+          // ← only pre-fill from API if not already filled from navigation state
+          setProductName(prev => prev || supply?.productName || supply?.title || "");
+          setSkuId(prev => prev || supply?.skuId || supply?.sku || supply?.itemCode || "");
+
           setSupplyId(supply._id);
 
           const restoredTiers =
@@ -89,6 +95,13 @@ export default function SupplierQuotesPage() {
 
     fetchSupplies();
   }, [itemId]);
+
+  // ← ADD THIS NEW useEffect HERE:
+  useEffect(() => {
+    if (!itemState) return;
+    if (itemState.itemTitle) setProductName(itemState.itemTitle);
+    if (itemState.itemSku) setSkuId(itemState.itemSku);
+  }, [itemState]);
 
   const handleSaveDraft = async () => {
     try {
@@ -611,9 +624,9 @@ export default function SupplierQuotesPage() {
             </div>
 
             <div className="mt-6 overflow-hidden rounded-2xl bg-neutral-light">
-              {selectedItem?.imageUrl || selectedItem?.image ? (
+              {selectedItem?.imageUrl || selectedItem?.image || itemState?.itemImage ? (
                 <img
-                  src={selectedItem.imageUrl || selectedItem.image}
+                  src={selectedItem?.imageUrl || selectedItem?.image || itemState?.itemImage}
                   alt={productName || "Product"}
                   className="h-48 w-full object-cover"
                 />

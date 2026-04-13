@@ -304,7 +304,7 @@ export default function AuthTabs(props) {
           // setSocket(initSocket(res.accessToken || null, { user: res.user, region: ops_region, url : backendUrl, getAuth: () => useAuth()}));
             
           console.log("Socket Initialization s-up---> | ", res.user.userId, backendUrl); //--------------------------
-          identifyUserAfterLogin({token : res.accessToken, userId : res.user._id}, { user: user, region: ops_region, url : backendUrl, getAuth: () => useAuth()});
+          identifyUserAfterLogin({token : res.accessToken, userId : res.user._id}, { user: user, ops_region: ops_region, url : backendUrl, getAuth: () => useAuth()});
         } catch (error) {
           console.log("Socket Initializtion error ---> | ", error);
         }
@@ -392,12 +392,12 @@ export default function AuthTabs(props) {
       setSuConfirm("");
     }
   };
-
+  const labelStyle = { display: 'block', textAlign: 'left', width: '100%', paddingLeft: '5px' };
   /* Render (note: we never spread `props` onto DOM elements) */
   return (
     <div
       className={`auth-tabs-folder ${className}`}
-      style={{ width: 520, maxWidth: "calc(100% - 24px)", ...style }}
+      style={{ width: 520, maxWidth: "calc(100% - 24px)", ...style, border : '1em solid #0fb3a6' }}
     >
       <div className="folder-flap" aria-hidden="true">
         <div
@@ -415,8 +415,7 @@ export default function AuthTabs(props) {
               width: "fit-content",
               color: "#6b6b6b",
               fontWeight: 700,
-            }}
-          >
+            }}>
             {" "}
             [ Account ]{" "}
           </div>
@@ -468,7 +467,7 @@ export default function AuthTabs(props) {
           <form onSubmit={handleSignIn} aria-labelledby="tab-signin" noValidate>
             <div style={{ display: "grid", gap: 12 }}>
               <div>
-                <label htmlFor="si-email">Email</label>
+                <label htmlFor="si-email" style={labelStyle}>Email</label>
                 <input
                   id="si-email"
                   ref={emailInputRef}
@@ -477,8 +476,7 @@ export default function AuthTabs(props) {
                   type="email"
                   autoComplete="email"
                   placeholder="alice@example.com"
-                  disabled={busy}
-                />
+                  disabled={busy}/>
                 {siErrors.email && (
                   <div className="field-error" role="alert">
                     {siErrors.email}
@@ -487,7 +485,7 @@ export default function AuthTabs(props) {
               </div>
 
               <div>
-                <label htmlFor="si-password">Password</label>
+                <label htmlFor="si-password" style={labelStyle}>Password</label>
                 <input
                   id="si-password"
                   value={siPassword}
@@ -495,8 +493,7 @@ export default function AuthTabs(props) {
                   type="password"
                   autoComplete="current-password"
                   placeholder="Enter your password"
-                  disabled={busy}
-                />
+                  disabled={busy}/>
                 {siErrors.password && (
                   <div className="field-error" role="alert">
                     {siErrors.password}
@@ -528,7 +525,7 @@ export default function AuthTabs(props) {
             <div style={{ display: "grid", gap: 12 }}>
               <div className="two-col" role="group" aria-label="Name fields">
                 <div>
-                  <label htmlFor="su-first" className="required">
+                  <label htmlFor="su-first" className="required" style={labelStyle}>
                     First name
                   </label>
                   <input
@@ -549,7 +546,7 @@ export default function AuthTabs(props) {
                 </div>
 
                 <div>
-                  <label htmlFor="su-last">Last name (optional)</label>
+                  <label htmlFor="su-last" style={labelStyle} >Last name (optional)</label>
                   <input
                     id="su-last"
                     value={suLastName}
@@ -567,9 +564,7 @@ export default function AuthTabs(props) {
               </div>
 
               <div>
-                <label htmlFor="su-email" className="required">
-                  Email
-                </label>
+                <label htmlFor="su-email" className="required" style={labelStyle}>Email</label>
                 <input
                   id="su-email"
                   value={suEmail}
@@ -593,9 +588,7 @@ export default function AuthTabs(props) {
                 aria-label="Password fields"
               >
                 <div>
-                  <label htmlFor="su-password" className="required">
-                    Password
-                  </label>
+                  <label htmlFor="su-password" className="required" style={labelStyle}>Password</label>
                   <input
                     id="su-password"
                     value={suPassword}
@@ -614,9 +607,7 @@ export default function AuthTabs(props) {
                 </div>
 
                 <div>
-                  <label htmlFor="su-confirm" className="required">
-                    Confirm password
-                  </label>
+                  <label htmlFor="su-confirm" className="required" style={labelStyle}>Confirm password</label>
                   <input
                     id="su-confirm"
                     value={suConfirm}

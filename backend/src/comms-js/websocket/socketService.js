@@ -11,7 +11,23 @@ const socketHandlers = require('./socketHandlers');
 const rooms = require('./rooms');
 
 const pino = require('pino');
-const logger = pino({ level: process.env.LOG_LEVEL || 'info' });
+
+const logger = pino({
+  level: process.env.LOG_LEVEL || 'info',
+  // Only use pretty printing if we are NOT in production
+  transport: process.env.NODE_ENV !== 'production' 
+    ? {
+        target: 'pino-pretty',
+        options: {
+          colorize: true,
+          messageFormat: '{hostname} - {msg}',
+          ignore: 'pid,time,level',
+        },
+      } 
+    : undefined,
+});
+
+logger.info("socketService: auth middleware not initialized");
 
 let io = null;
 let handlersApi = null;
@@ -62,7 +78,7 @@ async function initSocket(server, opts = {}) {
     maxHttpBufferSize: 1e6 // 1MB default payload cap; adjust as needed
   });
 
-  logger.info('socketService: io created', { path: typeof io.path === 'function' ? io.path() : path, httpServerEqualsProvided: !!(io.httpServer === server) });
+  logger.info('socketService: -> [ io created ]', { path: typeof io.path === 'function' ? io.path() : path, httpServerEqualsProvided: !!(io.httpServer === server) });
 
   // optional Redis adapter for multi-instance deployments
   if (redisClient) {
@@ -97,9 +113,9 @@ async function initSocket(server, opts = {}) {
 
   if (opts?.accessToken) {
     authApi = initSocketAuth(io, initsocketAuthOpts);
-    logger.info('socketService: auth middleware initialized (connect-time auth enabled)');
+    logger.info('socketService: auth middleware initialized -> | [ connect-time auth enabled ]');
   } else {
-    logger.info('socketService: auth middleware not initialized — anonymous connections allowed');
+    logger.info('socketService: auth middleware not initialized -> | [ anonymous connections allowed ]');
   }
 
   // attach handlers (connection lifecycle, emit helpers) and hold for updates on signin
@@ -108,7 +124,7 @@ async function initSocket(server, opts = {}) {
 
   initialized = true;
 
-  logger.info('Socket service initialized');
+  logger.info('-> | [ Socket service initialized ... ]');
 
   initAapi = buildApi(io, handlersApi);
   

@@ -14,5 +14,5 @@ export const fetchOrderStatus = async (orderId) => {
 export const fetchAllOrders = async () => {
   const { data } = await api.get("/orders");
   console.log("fetchAllOrders response:", data); // ← add this
-  return data.data;
+  return data.items || data.data || []; // ← fix this line
 };

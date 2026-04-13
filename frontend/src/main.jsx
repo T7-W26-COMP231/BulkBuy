@@ -23,7 +23,7 @@ function Root() {
         <ToastProvider>
           <BrowserRouter>
             <NotificationProvider>
-              <SavingsProvider ref={savingsRef}>
+              <SavingsProvider>
                 <App />
               </SavingsProvider>
             </NotificationProvider>

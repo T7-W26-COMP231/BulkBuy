@@ -12,6 +12,14 @@ const STATUS_STYLES = {
   fulfilled: "bg-emerald-100 text-emerald-700",
 };
 
+const NEXT_STATUS_BY_CURRENT = {
+  confirmed: "dispatched",
+  dispatched: "fulfilled",
+};
+
+const getNextOrderStatus = (status) =>
+  NEXT_STATUS_BY_CURRENT[String(status || "").toLowerCase()] || "";
+
 const formatEpochDate = (value) => {
   if (!value) return "N/A";
   const date = new Date(Number(value));
@@ -66,6 +74,9 @@ export default function SupplierOrdersPage() {
   const [declineTargetId, setDeclineTargetId] = useState(null);
   const [declineReason, setDeclineReason] = useState("");
   const [declineError, setDeclineError] = useState("");
+  const [statusTargetOrder, setStatusTargetOrder] = useState(null);
+  const [nextStatus, setNextStatus] = useState("");
+  const [statusUpdateError, setStatusUpdateError] = useState("");
 
   const itemsPerPage = 5;
 
@@ -383,16 +394,34 @@ export default function SupplierOrdersPage() {
                             </>
 
                           )}
-                          {/* ADD THIS RIGHT AFTER ↓ */}
+                          {/* Existing fulfillment action */}
                           {order.status === "approved" && (
                             <button
                               type="button"
-                              onClick={() => navigate(`/supplier/order-requests/${order.id}/fulfillment`)}
+                              onClick={() =>
+                                navigate(`/supplier/order-requests/${order.id}/fulfillment`)
+                              }
                               className="rounded-lg bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700 transition hover:bg-blue-100"
                             >
                               Confirm Fulfillment
                             </button>
                           )}
+
+                          {/* New supplier order status update modal trigger */}
+                          {getNextOrderStatus(order.status) && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setStatusTargetOrder(order);
+                                setNextStatus(getNextOrderStatus(order.status));
+                                setStatusUpdateError("");
+                              }}
+                              className="rounded-lg bg-indigo-50 px-3 py-1 text-xs font-bold text-indigo-700 transition hover:bg-indigo-100"
+                            >
+                              Update Status
+                            </button>
+                          )}
+
                         </div>
                       </td>
                     </tr>
@@ -401,6 +430,7 @@ export default function SupplierOrdersPage() {
               </tbody>
             </table>
           </div>
+
 
           {/* Pagination */}
           <div className="flex items-center justify-between border-t border-neutral-light px-6 py-4">
@@ -550,6 +580,108 @@ export default function SupplierOrdersPage() {
                     }`}
                 >
                   Submit Decline
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {statusTargetOrder && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+            <div className="w-full max-w-lg rounded-3xl bg-white shadow-2xl">
+              <div className="border-b border-neutral-light px-6 py-4">
+                <h2 className="text-lg font-bold text-text-main">
+                  Update Order Status
+                </h2>
+                <p className="mt-1 text-sm text-text-muted">
+                  Move this order to the next fulfillment step.
+                </p>
+              </div>
+
+              <div className="px-6 py-5">
+                <label className="mb-2 block text-sm font-semibold text-text-main">
+                  Next Status
+                </label>
+
+                <input
+                  type="text"
+                  value={nextStatus}
+                  readOnly
+                  className="w-full rounded-2xl border border-neutral-light bg-neutral-light px-4 py-3 text-sm capitalize outline-none"
+                />
+
+                {statusUpdateError && (
+                  <p className="mt-2 text-sm font-medium text-red-600">
+                    {statusUpdateError}
+                  </p>
+                )}
+              </div>
+
+              <div className="flex justify-end gap-3 border-t border-neutral-light px-6 py-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setStatusTargetOrder(null);
+                    setNextStatus("");
+                    setStatusUpdateError("");
+                  }}
+                  className="rounded-xl border border-neutral-light px-4 py-2 text-sm font-semibold text-text-main"
+                >
+                  Cancel
+                </button>
+
+                <button
+                  type="button"
+                  onClick={async () => {
+                    try {
+                      const response = await fetch(
+                        `${import.meta.env.VITE_API_URL}/api/ordrs/${statusTargetOrder.id}/update-status`,
+                        {
+                          method: "POST",
+                          headers: {
+                            "Content-Type": "application/json",
+                            ...(accessToken
+                              ? { Authorization: `Bearer ${accessToken}` }
+                              : {}),
+                          },
+                          body: JSON.stringify({
+                            status: nextStatus,
+                          }),
+                        }
+                      );
+
+                      const data = await response.json();
+
+                      if (!response.ok) {
+                        throw new Error(data?.message || "Failed to update order status");
+                      }
+
+                      setOrders((prev) =>
+                        prev.map((o) =>
+                          o.id === statusTargetOrder.id
+                            ? { ...o, status: nextStatus }
+                            : o
+                        )
+                      );
+
+                      if (selectedOrder?.id === statusTargetOrder.id) {
+                        setSelectedOrder((prev) =>
+                          prev ? { ...prev, status: nextStatus } : prev
+                        );
+                      }
+
+                      setStatusTargetOrder(null);
+                      setNextStatus("");
+                      setStatusUpdateError("");
+                    } catch (err) {
+                      setStatusUpdateError(
+                        err.message || "Failed to update order status"
+                      );
+                    }
+                  }}
+                  className="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-bold text-white transition hover:opacity-90"
+                >
+                  Confirm Update
                 </button>
               </div>
             </div>

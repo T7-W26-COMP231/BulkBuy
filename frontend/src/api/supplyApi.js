@@ -73,3 +73,6 @@ export const fetchSupplierDemandStatus = async () => {
   const response = await api.get("/aggrs/supplier/demand-status");
   return response;
 };
+
+export const fetchAggregationById = (aggregationId) =>
+  api.get(`/aggrs/${aggregationId}`);

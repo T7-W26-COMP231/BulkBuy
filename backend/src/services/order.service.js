@@ -1494,7 +1494,7 @@ class OrderService {
     }
   }
 
-    async getSupplierHistoricalReport(opts = {}) {
+  async getSupplierHistoricalReport(opts = {}) {
     const page = Math.max(1, parseInt(opts.page, 10) || 1);
     const limit = Math.max(1, parseInt(opts.limit, 10) || 25);
 
@@ -1504,36 +1504,67 @@ class OrderService {
       filter.userId = opts.supplierId;
     }
 
-  if (opts.startDate || opts.endDate) {
-  filter.createdAt = {};
+    if (opts.startDate || opts.endDate) {
+      filter.createdAt = {};
 
-  if (opts.startDate) {
-    filter.createdAt.$gte = new Date(opts.startDate).getTime();
-  }
+      if (opts.startDate) {
+        filter.createdAt.$gte = new Date(opts.startDate).getTime();
+      }
 
-  if (opts.endDate) {
-    const end = new Date(opts.endDate);
-    end.setHours(23, 59, 59, 999);
-    filter.createdAt.$lte = end.getTime();
-  }
-}
+      if (opts.endDate) {
+        const end = new Date(opts.endDate);
+        end.setHours(23, 59, 59, 999);
+        filter.createdAt.$lte = end.getTime();
+      }
+    }
 
-    const result = await OrderRepo.paginate(filter, {
-      page,
-      limit,
-      sort: 'createdAt:-1'
-    });
+   const result = await OrderRepo.paginate(filter, {
+  page,
+  limit,
+  sort: "createdAt:-1",
+});
 
-    result.items = (result.items || []).map(sanitizeForClient);
+const enrichedItems = await Promise.all(
+  (result.items || []).map(async (order) => {
+    const safeOrder = sanitizeForClient(order);
+
+    const enrichedOrderItems = await Promise.all(
+      (safeOrder.items || []).map(async (item) => {
+        try {
+          const itemData = await getById(item.itemId);
+
+          return {
+            ...item,
+            productTitle:
+              itemData?.title ||
+              itemData?.name ||
+              item.itemId,
+          };
+        } catch {
+          return {
+            ...item,
+            productTitle: item.itemId,
+          };
+        }
+      })
+    );
 
     return {
-      items: result.items,
-      total: result.total || 0,
-      page: result.page || page,
-      limit: result.limit || limit,
-      pages: result.pages || 0
+      ...safeOrder,
+      items: enrichedOrderItems,
     };
+  })
+);
+
+return {
+  items: enrichedItems,
+  total: result.total || 0,
+  page: result.page || page,
+  limit: result.limit || limit,
+  pages: result.pages || 0
+};
   }
+
 
   async getDashboardMetrics() {
     const pendingQuotes = await this.count({

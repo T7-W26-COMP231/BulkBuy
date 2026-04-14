@@ -6,12 +6,20 @@ import api from "../../api/api";
 
 const getStatusClasses = (status) => {
   switch (status) {
+    case "Fulfilled":
     case "Delivered":
       return "bg-green-100 text-green-700";
-    case "In Transit":
+
+    case "Submitted":
       return "bg-blue-100 text-blue-700";
-    case "Pending Review":
+
+    case "Draft":
       return "bg-yellow-100 text-yellow-700";
+
+    case "Cancelled":
+    case "Declined":
+      return "bg-red-100 text-red-700";
+
     default:
       return "bg-neutral-light text-text-muted";
   }
@@ -31,7 +39,10 @@ const getTierClasses = (tier) => {
 };
 export default function SupplierReportsPage() {
   const [reports, setReports] = useState([]);
+  const [allReports, setAllReports] = useState([]);
   const [range, setRange] = useState("30");
+  const [selectedProduct, setSelectedProduct] = useState("All Items");
+  const [selectedStatus, setSelectedStatus] = useState("All Statuses");
   const [loading, setLoading] = useState(false);
 
   const dateRange = useMemo(() => {
@@ -45,6 +56,30 @@ export default function SupplierReportsPage() {
       endDate: end.toISOString().split("T")[0],
     };
   }, [range]);
+
+  const productOptions = useMemo(() => {
+    const unique = [...new Set(allReports.map((report) => report.item))];
+    return ["All Items", ...unique];
+  }, [allReports]);
+
+  const statusOptions = useMemo(() => {
+    const unique = [...new Set(allReports.map((report) => report.status))];
+    return ["All Statuses", ...unique];
+  }, [allReports]);
+
+  const applyFilters = (sourceReports) => {
+    let filtered = [...sourceReports];
+
+    if (selectedProduct !== "All Items") {
+      filtered = filtered.filter((report) => report.item === selectedProduct);
+    }
+
+    if (selectedStatus !== "All Statuses") {
+      filtered = filtered.filter((report) => report.status === selectedStatus);
+    }
+
+    setReports(filtered);
+  };
 
   const fetchReports = async () => {
     try {
@@ -64,36 +99,56 @@ export default function SupplierReportsPage() {
         },
       });
 
-      setReports(
-        (data?.items || []).map((report) => ({
-          id: report._id,
-          date: report.createdAt
-            ? new Date(Number(report.createdAt)).toLocaleDateString()
-            : "N/A",
-          item:
-            report.items?.[0]?.ItemSysInfo?.title ||
-            report.items?.[0]?.productId ||
-            "Unknown Item",
-          subtitle:
-            report.items?.[0]?.ItemSysInfo?.shortDescription ||
-            "Bulk order item",
-          city: report.ops_region || "Unknown City",
-          quantity: report.items?.reduce(
+      const mappedReports = (data?.items || []).map((report) => ({
+        id: report._id,
+        date: report.createdAt
+          ? new Date(Number(report.createdAt)).toLocaleDateString()
+          : "N/A",
+        item:
+          report.items?.[0]?.productTitle ||
+          report.items?.[0]?.itemId ||
+          "Unknown Item",
+
+        subtitle:
+          report.items?.[0]?.ItemSysInfo?.shortDescription ||
+          report.items?.[0]?.productTitle ||
+          "No description available",
+
+        city: report.city || report.ops_region || "Unknown City",
+        quantity: report.items?.reduce(
+          (sum, item) => sum + Number(item.quantity || 0),
+          0
+        ),
+
+        priceTier: (() => {
+          const totalQty = report.items?.reduce(
             (sum, item) => sum + Number(item.quantity || 0),
             0
-          ),
-          priceTier:
+          );
+
+          if (
             report.items?.[0]?.latestPricingSnapshot?.discountBracket?.final != null
-              ? `Tier ${report.items[0].latestPricingSnapshot.discountBracket.final}`
-              : "Tier 1",
-          status: report.status
-            ? report.status.charAt(0).toUpperCase() + report.status.slice(1)
-            : "Submitted",
-        }))
-      );
+          ) {
+            return `Tier ${report.items[0].latestPricingSnapshot.discountBracket.final}`;
+          }
+
+          if (totalQty >= 3) return "Tier 3";
+          if (totalQty >= 2) return "Tier 2";
+          return "Tier 1";
+        })(),
+
+        status: report.status
+          ? report.status.charAt(0).toUpperCase() + report.status.slice(1)
+          : "Submitted",
+      }));
+
+      setAllReports(mappedReports);
+      applyFilters(mappedReports);
+
     } catch (error) {
       console.error("Failed to fetch reports", error);
       setReports([]);
+      setAllReports([]);
     } finally {
       setLoading(false);
     }
@@ -102,6 +157,11 @@ export default function SupplierReportsPage() {
   useEffect(() => {
     fetchReports();
   }, [range]);
+
+  useEffect(() => {
+    applyFilters(allReports);
+  }, [selectedProduct, selectedStatus]);
+
   return (
     <SupplierLayout>
       <div className="flex flex-col gap-6">
@@ -134,17 +194,33 @@ export default function SupplierReportsPage() {
               <label className="mb-2 block text-xs font-bold uppercase tracking-wide text-text-muted">
                 Product Item
               </label>
-              <select className="w-full rounded-xl border border-neutral-light bg-white px-4 py-3 text-sm text-text-main outline-none focus:border-primary">
-                <option>All Items</option>
+              <select
+                value={selectedProduct}
+                onChange={(e) => setSelectedProduct(e.target.value)}
+                className="w-full rounded-xl border border-neutral-light bg-white px-4 py-3 text-sm text-text-main outline-none focus:border-primary"
+              >
+                {productOptions.map((product) => (
+                  <option key={product} value={product}>
+                    {product}
+                  </option>
+                ))}
               </select>
             </div>
 
             <div>
               <label className="mb-2 block text-xs font-bold uppercase tracking-wide text-text-muted">
-                City
+                Status
               </label>
-              <select className="w-full rounded-xl border border-neutral-light bg-white px-4 py-3 text-sm text-text-main outline-none focus:border-primary">
-                <option>All Cities</option>
+              <select
+                value={selectedStatus}
+                onChange={(e) => setSelectedStatus(e.target.value)}
+                className="w-full rounded-xl border border-neutral-light bg-white px-4 py-3 text-sm text-text-main outline-none focus:border-primary"
+              >
+                {statusOptions.map((status) => (
+                  <option key={status} value={status}>
+                    {status}
+                  </option>
+                ))}
               </select>
             </div>
 

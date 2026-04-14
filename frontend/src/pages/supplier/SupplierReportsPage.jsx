@@ -44,6 +44,8 @@ export default function SupplierReportsPage() {
   const [selectedProduct, setSelectedProduct] = useState("All Items");
   const [selectedStatus, setSelectedStatus] = useState("All Statuses");
   const [loading, setLoading] = useState(false);
+  const [downloadMessage, setDownloadMessage] = useState("");
+const [downloadError, setDownloadError] = useState("");
 
   const dateRange = useMemo(() => {
     const end = new Date();
@@ -163,50 +165,65 @@ export default function SupplierReportsPage() {
   }, [selectedProduct, selectedStatus]);
 
   const handleExportCSV = () => {
-    if (!reports.length) return;
+  if (!reports.length) {
+    setDownloadError("No reports available to export.");
+    setDownloadMessage("");
+    return;
+  }
 
-    const headers = [
-      "Date",
-      "Item",
-      "City",
-      "Quantity",
-      "Price Tier",
-      "Status",
-    ];
+  const headers = [
+    "Date",
+    "Item",
+    "City",
+    "Quantity",
+    "Price Tier",
+    "Status",
+  ];
 
-    const rows = reports.map((report) => [
-      report.date,
-      report.item,
-      report.city,
-      report.quantity,
-      report.priceTier,
-      report.status,
-    ]);
+  const rows = reports.map((report) => [
+    report.date,
+    report.item,
+    report.city,
+    report.quantity,
+    report.priceTier,
+    report.status,
+  ]);
 
-    const csvContent = [headers, ...rows]
-      .map((row) => row.map((cell) => `"${cell}"`).join(","))
-      .join("\n");
+  const csvContent = [headers, ...rows]
+    .map((row) => row.map((cell) => `"${cell}"`).join(","))
+    .join("\n");
 
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
 
-    const link = document.createElement("a");
-    link.href = url;
-    link.setAttribute("download", `supplier-order-reports-${Date.now()}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
+  const link = document.createElement("a");
+  link.href = url;
+  link.setAttribute("download", `supplier-order-reports-${Date.now()}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 
-  const handleExportPDF = () => {
-    if (!reports.length) return;
+  setDownloadMessage("CSV download started successfully.");
+  setDownloadError("");
+};
 
-    const printWindow = window.open("", "_blank");
-    if (!printWindow) return;
+ const handleExportPDF = () => {
+  if (!reports.length) {
+    setDownloadError("No reports available to export.");
+    setDownloadMessage("");
+    return;
+  }
 
-    const rowsHtml = reports
-      .map(
-        (report) => `
+  const printWindow = window.open("", "_blank");
+  if (!printWindow) {
+    setDownloadError("Popup blocked. Please allow popups for PDF export.");
+    setDownloadMessage("");
+    return;
+  }
+
+  const rowsHtml = reports
+    .map(
+      (report) => `
         <tr>
           <td>${report.date}</td>
           <td>${report.item}</td>
@@ -216,34 +233,24 @@ export default function SupplierReportsPage() {
           <td>${report.status}</td>
         </tr>
       `
-      )
-      .join("");
+    )
+    .join("");
 
-    printWindow.document.write(`
+  printWindow.document.write(`
     <html>
       <head>
         <title>Supplier Reports PDF</title>
         <style>
-          body {
-            font-family: Arial, sans-serif;
-            padding: 24px;
-          }
-          h1 {
-            margin-bottom: 20px;
-          }
-          table {
-            width: 100%;
-            border-collapse: collapse;
-          }
+          body { font-family: Arial, sans-serif; padding: 24px; }
+          h1 { margin-bottom: 20px; }
+          table { width: 100%; border-collapse: collapse; }
           th, td {
             border: 1px solid #ccc;
             padding: 8px;
             text-align: left;
             font-size: 12px;
           }
-          th {
-            background: #f5f5f5;
-          }
+          th { background: #f5f5f5; }
         </style>
       </head>
       <body>
@@ -259,18 +266,19 @@ export default function SupplierReportsPage() {
               <th>Status</th>
             </tr>
           </thead>
-          <tbody>
-            ${rowsHtml}
-          </tbody>
+          <tbody>${rowsHtml}</tbody>
         </table>
       </body>
     </html>
   `);
 
-    printWindow.document.close();
-    printWindow.focus();
-    printWindow.print();
-  };
+  printWindow.document.close();
+  printWindow.focus();
+  printWindow.print();
+
+  setDownloadMessage("PDF export opened successfully.");
+  setDownloadError("");
+};
 
   return (
     <SupplierLayout>
@@ -427,6 +435,17 @@ export default function SupplierReportsPage() {
             <p className="text-sm text-text-muted">
               Showing {reports.length} report results
             </p>
+            {downloadMessage && (
+  <p className="text-sm font-medium text-green-600">
+    {downloadMessage}
+  </p>
+)}
+
+{downloadError && (
+  <p className="text-sm font-medium text-red-600">
+    {downloadError}
+  </p>
+)}
 
             <div className="flex items-center gap-3">
               <button

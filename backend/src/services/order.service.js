@@ -1493,21 +1493,27 @@ class OrderService {
       throw err;
     }
   }
-
-  async getSupplierHistoricalReport(opts = {}) {
+async getSupplierHistoricalReport(opts = {}) {
   const page = Math.max(1, parseInt(opts.page, 10) || 1);
   const limit = Math.max(1, parseInt(opts.limit, 10) || 25);
 
   const filter = {};
 
-  if (opts.supplierId) {
-    filter.userId = opts.supplierId;
-  }
+  // ✅ supplier reports should show historical processed orders
+ if (opts.ops_region) {
+  filter.ops_region = opts.ops_region;
+}
 
+filter.status = {
+  $in: ["approved", "confirmed", "dispatched", "fulfilled"],
+};
+
+  // ✅ optional status filter from dropdown
   if (opts.status && opts.status.toLowerCase() !== "all") {
     filter.status = opts.status.toLowerCase();
   }
 
+  // ✅ optional date filtering
   if (opts.startDate || opts.endDate) {
     filter.createdAt = {};
 
@@ -1521,6 +1527,8 @@ class OrderService {
       filter.createdAt.$lte = end.getTime();
     }
   }
+
+  console.log("📊 SUPPLIER REPORT FILTER:", filter);
 
   const result = await OrderRepo.paginate(filter, {
     page,
@@ -1571,17 +1579,14 @@ class OrderService {
 
   const filteredItems = enrichedItems.filter(Boolean);
 
- return {
-  items: filteredItems,
-  total: result.total || filteredItems.length,
-  page: result.page || page,
-  limit: result.limit || limit,
-  pages:
-    result.pages ||
-    Math.max(1, Math.ceil((result.total || filteredItems.length) / limit)),
-};
+  return {
+    items: filteredItems,
+    total: filteredItems.length,
+    page,
+    limit,
+    pages: Math.max(1, Math.ceil(filteredItems.length / limit)),
+  };
 }
-
 
   async getDashboardMetrics() {
     const pendingQuotes = await this.count({

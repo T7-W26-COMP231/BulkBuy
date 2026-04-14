@@ -40,7 +40,7 @@ const getTierClasses = (tier) => {
 export default function SupplierReportsPage() {
   const [reports, setReports] = useState([]);
   const [allReports, setAllReports] = useState([]);
-  const [range, setRange] = useState("30");
+  const [range, setRange] = useState("3650");
   const [selectedProduct, setSelectedProduct] = useState("All Items");
   const [selectedStatus, setSelectedStatus] = useState("All Statuses");
   const [loading, setLoading] = useState(false);
@@ -101,48 +101,49 @@ const [downloadError, setDownloadError] = useState("");
         },
       });
 
-      const mappedReports = (data?.items || []).map((report) => ({
-        id: report._id,
-        date: report.createdAt
-          ? new Date(Number(report.createdAt)).toLocaleDateString()
-          : "N/A",
-        item:
-          report.items?.[0]?.productTitle ||
-          report.items?.[0]?.itemId ||
-          "Unknown Item",
+      console.log("REPORT RESPONSE:", data);
 
-        subtitle:
-          report.items?.[0]?.ItemSysInfo?.shortDescription ||
-          report.items?.[0]?.productTitle ||
-          "No description available",
+      const mappedReports = (data?.reports || data?.items || []).map((report) => ({
+  id: report._id,
+  date: report.createdAt
+    ? new Date(Number(report.createdAt)).toLocaleDateString()
+    : "N/A",
+  item:
+    report.items?.[0]?.productTitle ||
+    report.items?.[0]?.itemId ||
+    "Unknown Item",
 
-        city: report.city || report.ops_region || "Unknown City",
-        quantity: report.items?.reduce(
-          (sum, item) => sum + Number(item.quantity || 0),
-          0
-        ),
+  subtitle:
+    report.items?.[0]?.ItemSysInfo?.shortDescription ||
+    report.items?.[0]?.productTitle ||
+    "No description available",
 
-        priceTier: (() => {
-          const totalQty = report.items?.reduce(
-            (sum, item) => sum + Number(item.quantity || 0),
-            0
-          );
+  city:
+    report.orderLocation?.city ||
+    report.deliveryLocation?.city ||
+    report.ops_region ||
+    "Unknown City",
 
-          if (
-            report.items?.[0]?.latestPricingSnapshot?.discountBracket?.final != null
-          ) {
-            return `Tier ${report.items[0].latestPricingSnapshot.discountBracket.final}`;
-          }
+  quantity: report.items?.reduce(
+    (sum, item) => sum + Number(item.quantity || 0),
+    0
+  ),
 
-          if (totalQty >= 3) return "Tier 3";
-          if (totalQty >= 2) return "Tier 2";
-          return totalQty > 0 ? "Tier 1" : "N/A";
-        })(),
+  priceTier: (() => {
+    const totalQty = report.items?.reduce(
+      (sum, item) => sum + Number(item.quantity || 0),
+      0
+    );
 
-        status: report.status
-          ? report.status.charAt(0).toUpperCase() + report.status.slice(1)
-          : "Submitted",
-      }));
+    if (totalQty >= 200) return "Tier 3";
+    if (totalQty >= 50) return "Tier 2";
+    return totalQty > 0 ? "Tier 1" : "N/A";
+  })(),
+
+  status: report.status
+    ? report.status.charAt(0).toUpperCase() + report.status.slice(1)
+    : "Submitted",
+}));
 
       setAllReports(mappedReports);
       applyFilters(mappedReports);
@@ -291,69 +292,69 @@ const [downloadError, setDownloadError] = useState("");
           </p>
         </section>
 
-        <section className="rounded-2xl border border-neutral-light bg-white p-6 shadow-sm">
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <div>
-              <label className="mb-2 block text-xs font-bold uppercase tracking-wide text-text-muted">
-                Date Range
-              </label>
-              <select
-                value={range}
-                onChange={(e) => setRange(e.target.value)}
-                className="w-full rounded-xl border border-neutral-light bg-white px-4 py-3 text-sm text-text-main outline-none focus:border-primary"
-              >
-                <option value="30">Last 30 Days</option>
-                <option value="7">Last 7 Days</option>
-                <option value="90">Last 90 Days</option>
-              </select>
-            </div>
+       <section className="rounded-2xl border border-neutral-light bg-white p-6 shadow-sm">
+  <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+    <div>
+      <label className="mb-2 block text-xs font-bold uppercase tracking-wide text-text-muted">
+        Date Range
+      </label>
+      <select
+        value={range}
+        onChange={(e) => setRange(e.target.value)}
+        className="w-full rounded-xl border border-neutral-light bg-white px-4 py-3 text-sm text-text-main outline-none focus:border-primary"
+      >
+        <option value="3650">All Historical Data</option>
+        <option value="30">Last 30 Days</option>
+        <option value="7">Last 7 Days</option>
+        <option value="90">Last 90 Days</option>
+      </select>
+    </div>
 
-            <div>
-              <label className="mb-2 block text-xs font-bold uppercase tracking-wide text-text-muted">
-                Product Item
-              </label>
-              <select
-                value={selectedProduct}
-                onChange={(e) => setSelectedProduct(e.target.value)}
-                className="w-full rounded-xl border border-neutral-light bg-white px-4 py-3 text-sm text-text-main outline-none focus:border-primary"
-              >
-                {productOptions.map((product) => (
-                  <option key={product} value={product}>
-                    {product}
-                  </option>
-                ))}
-              </select>
-            </div>
+    <div>
+      <label className="mb-2 block text-xs font-bold uppercase tracking-wide text-text-muted">
+        Product Item
+      </label>
+      <select
+        value={selectedProduct}
+        onChange={(e) => setSelectedProduct(e.target.value)}
+        className="w-full rounded-xl border border-neutral-light bg-white px-4 py-3 text-sm text-text-main outline-none focus:border-primary"
+      >
+        {productOptions.map((product) => (
+          <option key={product} value={product}>
+            {product}
+          </option>
+        ))}
+      </select>
+    </div>
 
-            <div>
-              <label className="mb-2 block text-xs font-bold uppercase tracking-wide text-text-muted">
-                Status
-              </label>
-              <select
-                value={selectedStatus}
-                onChange={(e) => setSelectedStatus(e.target.value)}
-                className="w-full rounded-xl border border-neutral-light bg-white px-4 py-3 text-sm text-text-main outline-none focus:border-primary"
-              >
-                {statusOptions.map((status) => (
-                  <option key={status} value={status}>
-                    {status}
-                  </option>
-                ))}
-              </select>
-            </div>
+    <div>
+      <label className="mb-2 block text-xs font-bold uppercase tracking-wide text-text-muted">
+        Status
+      </label>
+      <select
+        value={selectedStatus}
+        onChange={(e) => setSelectedStatus(e.target.value)}
+        className="w-full rounded-xl border border-neutral-light bg-white px-4 py-3 text-sm text-text-main outline-none focus:border-primary"
+      >
+        {statusOptions.map((status) => (
+          <option key={status} value={status}>
+            {status}
+          </option>
+        ))}
+      </select>
+    </div>
 
-            <div className="flex items-end">
-              <button
-                type="button"
-                onClick={fetchReports}
-                className="w-full rounded-xl bg-primary px-5 py-3 font-semibold text-text-main transition hover:opacity-90"
-              >
-                {loading ? "Loading..." : "Generate Report"}
-              </button>
-            </div>
-          </div>
-        </section>
-
+    <div className="flex items-end">
+      <button
+        type="button"
+        onClick={fetchReports}
+        className="w-full rounded-xl bg-primary px-5 py-3 font-semibold text-text-main transition hover:opacity-90"
+      >
+        {loading ? "Loading..." : "Generate Report"}
+      </button>
+    </div>
+  </div>
+</section>
         <section className="rounded-2xl border border-neutral-light bg-white shadow-sm">
           <div className="overflow-x-auto">
             <table className="min-w-full text-sm">

@@ -175,7 +175,7 @@ delete safe.updatedAt;
     }
   }
 
-  /**
+    /**
    * Get dashboard summary metrics for a supplier
    * @param {String} supplierId
    * @param {Object} opts
@@ -255,6 +255,79 @@ delete safe.updatedAt;
       });
       throw err;
     }
+  }
+
+  /**
+   * Historical quote report query
+   * @param {Object} opts
+   */
+  async getHistoricalQuoteReport(opts = {}) {
+    const page = Math.max(1, parseInt(opts.page, 10) || 1);
+    const limit = Math.max(1, parseInt(opts.limit, 10) || 25);
+
+    const filter = {};
+
+    if (opts.supplierId) {
+      filter.supplierId = opts.supplierId;
+    }
+
+    if (opts.status && opts.status.toLowerCase() !== 'all') {
+      filter.status = opts.status.toLowerCase();
+    }
+
+    if (opts.startDate || opts.endDate) {
+      filter.createdAt = {};
+
+      if (opts.startDate) {
+        filter.createdAt.$gte = new Date(opts.startDate).getTime();
+      }
+
+      if (opts.endDate) {
+        const end = new Date(opts.endDate);
+        end.setHours(23, 59, 59, 999);
+        filter.createdAt.$lte = end.getTime();
+      }
+    }
+
+    const result = await SupplyRepo.paginate(filter, {
+      page,
+      limit,
+      sort: 'createdAt:-1',
+    });
+
+    const filteredItems = (result.items || [])
+      .map((supply) => {
+        const safeSupply = sanitize(supply);
+
+        const productTitle =
+          safeSupply?.metadata?.quoteDraft?.productName ||
+          safeSupply?.items?.[0]?.meta?.productName ||
+          safeSupply?.items?.[0]?.productName ||
+          'Unknown Product';
+
+        const productMatch =
+          !opts.product ||
+          opts.product === 'All Products' ||
+          productTitle === opts.product;
+
+        if (!productMatch) return null;
+
+        return {
+          ...safeSupply,
+          productTitle,
+        };
+      })
+      .filter(Boolean);
+
+    return {
+      items: filteredItems,
+      total: result.total || filteredItems.length,
+      page: result.page || page,
+      limit: result.limit || limit,
+      pages:
+        result.pages ||
+        Math.max(1, Math.ceil((result.total || filteredItems.length) / limit)),
+    };
   }
 
   /**

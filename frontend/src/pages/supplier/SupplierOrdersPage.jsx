@@ -19,6 +19,7 @@ const NEXT_STATUS_BY_CURRENT = {
 
 const getNextOrderStatus = (status) =>
   NEXT_STATUS_BY_CURRENT[String(status || "").toLowerCase()] || "";
+const AGGREGATION_PROGRESS = 92;
 
 const formatEpochDate = (value) => {
   if (!value) return "N/A";
@@ -240,9 +241,12 @@ export default function SupplierOrdersPage() {
               <p className="text-xs font-bold uppercase tracking-widest text-white/60">
                 Aggregation Progress
               </p>
-              <p className="text-4xl font-bold">92%</p>
+              <p className="text-4xl font-bold">{AGGREGATION_PROGRESS}%</p>
               <div className="h-2.5 w-48 overflow-hidden rounded-full bg-white/15">
-                <div className="h-full w-[92%] rounded-full bg-primary" />
+                <div
+  className="h-full rounded-full bg-primary"
+  style={{ width: `${AGGREGATION_PROGRESS}%` }}
+/>
               </div>
             </div>
           </div>
@@ -602,13 +606,17 @@ export default function SupplierOrdersPage() {
                 <label className="mb-2 block text-sm font-semibold text-text-main">
                   Next Status
                 </label>
-
-                <input
-                  type="text"
+                <select
                   value={nextStatus}
-                  readOnly
-                  className="w-full rounded-2xl border border-neutral-light bg-neutral-light px-4 py-3 text-sm capitalize outline-none"
-                />
+                  onChange={(e) => setNextStatus(e.target.value)}
+                  className="w-full rounded-2xl border border-neutral-light bg-white px-4 py-3 text-sm capitalize outline-none focus:border-primary"
+                >
+                  {getNextOrderStatus(statusTargetOrder?.status) && (
+                    <option value={getNextOrderStatus(statusTargetOrder?.status)}>
+                      {getNextOrderStatus(statusTargetOrder?.status)}
+                    </option>
+                  )}
+                </select>
 
                 {statusUpdateError && (
                   <p className="mt-2 text-sm font-medium text-red-600">

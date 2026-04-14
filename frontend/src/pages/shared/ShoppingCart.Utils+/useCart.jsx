@@ -483,7 +483,6 @@ export function useCart({ userId = null, persistence = "batch", batchDelay = 800
 
   const submitOrder = useCallback(
     async ({ orderId = state.orderId, paymentPayload = {} } = {}) => {
-      // flush pending batch patch before submit
       if (isBatchMode && pendingPatchRef.current) {
         if (patchTimerRef.current) {
           clearTimeout(patchTimerRef.current);
@@ -501,24 +500,26 @@ export function useCart({ userId = null, persistence = "batch", batchDelay = 800
       if (typeof Utils.submitOrder === "function") {
         try {
           const res = await Utils.submitOrder({ orderId, paymentPayload });
-          toast.showSuccess("Order submitted.");
-          if (typeof Utils.getDraftOrder === "function") {
-            const r = await Utils.getDraftOrder({ userId });
-            const order = r?.order ?? r ?? {};
-            if (mountedRef.current) dispatch({ type: ACTIONS.CONFIRM_UPDATE, payload: { order } });
+
+          // Optional: clear local cart state after successful submit
+          if (mountedRef.current) {
+            dispatch({
+              type: ACTIONS.CONFIRM_UPDATE,
+              payload: {
+                order: { ...state.order, status: "submitted", items: [] },
+              },
+            });
           }
+
           return res;
         } catch (err) {
-          toast.showError("Could not submit order.");
           throw err;
         }
       }
 
-      // No backend submit available — return a resolved placeholder
-      toast.showSuccess("Submit intent recorded (local).");
       return { success: true, local: true };
     },
-    [isBatchMode, doPatchDraftOrder, userId, toast]
+    [isBatchMode, doPatchDraftOrder, state.order, state.orderId]
   );
 
   const refreshPricing = useCallback(

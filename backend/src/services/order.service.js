@@ -1495,75 +1495,92 @@ class OrderService {
   }
 
   async getSupplierHistoricalReport(opts = {}) {
-    const page = Math.max(1, parseInt(opts.page, 10) || 1);
-    const limit = Math.max(1, parseInt(opts.limit, 10) || 25);
+  const page = Math.max(1, parseInt(opts.page, 10) || 1);
+  const limit = Math.max(1, parseInt(opts.limit, 10) || 25);
 
-    const filter = {};
+  const filter = {};
 
-    if (opts.supplierId) {
-      filter.userId = opts.supplierId;
+  if (opts.supplierId) {
+    filter.userId = opts.supplierId;
+  }
+
+  if (opts.status && opts.status.toLowerCase() !== "all") {
+    filter.status = opts.status.toLowerCase();
+  }
+
+  if (opts.startDate || opts.endDate) {
+    filter.createdAt = {};
+
+    if (opts.startDate) {
+      filter.createdAt.$gte = new Date(opts.startDate).getTime();
     }
 
-    if (opts.startDate || opts.endDate) {
-      filter.createdAt = {};
-
-      if (opts.startDate) {
-        filter.createdAt.$gte = new Date(opts.startDate).getTime();
-      }
-
-      if (opts.endDate) {
-        const end = new Date(opts.endDate);
-        end.setHours(23, 59, 59, 999);
-        filter.createdAt.$lte = end.getTime();
-      }
+    if (opts.endDate) {
+      const end = new Date(opts.endDate);
+      end.setHours(23, 59, 59, 999);
+      filter.createdAt.$lte = end.getTime();
     }
+  }
 
-   const result = await OrderRepo.paginate(filter, {
-  page,
-  limit,
-  sort: "createdAt:-1",
-});
+  const result = await OrderRepo.paginate(filter, {
+    page,
+    limit,
+    sort: "createdAt:-1",
+  });
 
-const enrichedItems = await Promise.all(
-  (result.items || []).map(async (order) => {
-    const safeOrder = sanitizeForClient(order);
+  const enrichedItems = await Promise.all(
+    (result.items || []).map(async (order) => {
+      const safeOrder = sanitizeForClient(order);
 
-    const enrichedOrderItems = await Promise.all(
-      (safeOrder.items || []).map(async (item) => {
-        try {
-          const itemData = await getById(item.itemId);
+      const enrichedOrderItems = await Promise.all(
+        (safeOrder.items || []).map(async (item) => {
+          try {
+            const itemData = await getById(item.itemId);
 
-          return {
-            ...item,
-            productTitle:
-              itemData?.title ||
-              itemData?.name ||
-              item.itemId,
-          };
-        } catch {
-          return {
-            ...item,
-            productTitle: item.itemId,
-          };
-        }
-      })
-    );
+            return {
+              ...item,
+              productTitle:
+                itemData?.title ||
+                itemData?.name ||
+                item.itemId,
+            };
+          } catch {
+            return {
+              ...item,
+              productTitle: item.itemId,
+            };
+          }
+        })
+      );
 
-    return {
-      ...safeOrder,
-      items: enrichedOrderItems,
-    };
-  })
-);
+      const productMatch =
+        !opts.product ||
+        opts.product === "All Items" ||
+        enrichedOrderItems.some(
+          (item) => item.productTitle === opts.product
+        );
 
-return {
-  items: enrichedItems,
-  total: result.total || 0,
+      if (!productMatch) return null;
+
+      return {
+        ...safeOrder,
+        items: enrichedOrderItems,
+      };
+    })
+  );
+
+  const filteredItems = enrichedItems.filter(Boolean);
+
+ return {
+  items: filteredItems,
+  total: result.total || filteredItems.length,
   page: result.page || page,
   limit: result.limit || limit,
-  pages: result.pages || 0
+  pages:
+    result.pages ||
+    Math.max(1, Math.ceil((result.total || filteredItems.length) / limit)),
 };
-  }
+}
 
 
   async getDashboardMetrics() {

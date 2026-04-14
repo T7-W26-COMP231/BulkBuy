@@ -134,7 +134,7 @@ export default function SupplierReportsPage() {
 
           if (totalQty >= 3) return "Tier 3";
           if (totalQty >= 2) return "Tier 2";
-          return "Tier 1";
+          return totalQty > 0 ? "Tier 1" : "N/A";
         })(),
 
         status: report.status

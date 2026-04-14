@@ -15,7 +15,7 @@
  * Adjust the import path for getSocket() if your project layout differs.
  */
 
-import jwtDecode from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 import { getSocket } from "../../comms-js/socket"; // adjust path if needed
 
 const STORAGE_KEY = "app_auth_session_v1";
@@ -351,13 +351,13 @@ export async function sendMessagesBatch(messages = [], opts = {}) {
       try {
         const token = _getValidTokenOrThrow();
         if (token) headers.Authorization = `Bearer ${token}`;
-      } catch (_) {}
+      } catch (_) { }
       await fetch(cleanupUrl, {
         method: "POST",
         headers,
         body: JSON.stringify({ items }),
         credentials: opts.credentials ?? "same-origin",
-      }).catch(() => {});
+      }).catch(() => { });
     } catch (_) {
       // swallow
     }
@@ -409,7 +409,7 @@ export async function ackMessage(seq, opts = {}) {
     try {
       const token = _getValidTokenOrThrow();
       if (token) headers.Authorization = `Bearer ${token}`;
-    } catch (_) {}
+    } catch (_) { }
     const res = await fetch(`${(opts.base || DEFAULT_COMMS_BASE).replace(/\/+$/, "")}/ack`, {
       method: "POST",
       headers,

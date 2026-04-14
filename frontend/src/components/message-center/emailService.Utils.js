@@ -21,7 +21,7 @@
  * - All functions throw Error objects with `.code` and `.details` for programmatic handling.
  */
 
-import jwtDecode from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 
 const STORAGE_KEY = "app_auth_session_v1";
 const DEFAULT_COMMS_BASE = "http://localhost:5000/api/comms/em";

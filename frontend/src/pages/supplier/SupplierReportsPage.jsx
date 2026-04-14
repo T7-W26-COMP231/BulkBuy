@@ -162,6 +162,42 @@ export default function SupplierReportsPage() {
     applyFilters(allReports);
   }, [selectedProduct, selectedStatus]);
 
+  const handleExportCSV = () => {
+    if (!reports.length) return;
+
+    const headers = [
+      "Date",
+      "Item",
+      "City",
+      "Quantity",
+      "Price Tier",
+      "Status",
+    ];
+
+    const rows = reports.map((report) => [
+      report.date,
+      report.item,
+      report.city,
+      report.quantity,
+      report.priceTier,
+      report.status,
+    ]);
+
+    const csvContent = [headers, ...rows]
+      .map((row) => row.map((cell) => `"${cell}"`).join(","))
+      .join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `supplier-order-reports-${Date.now()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <SupplierLayout>
       <div className="flex flex-col gap-6">
@@ -321,10 +357,12 @@ export default function SupplierReportsPage() {
             <div className="flex items-center gap-3">
               <button
                 type="button"
+                onClick={handleExportCSV}
                 className="rounded-xl border border-neutral-light bg-white px-4 py-2 text-sm font-medium text-text-main hover:bg-background-light"
               >
                 Export CSV
               </button>
+
               <button
                 type="button"
                 className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-text-main hover:opacity-90"

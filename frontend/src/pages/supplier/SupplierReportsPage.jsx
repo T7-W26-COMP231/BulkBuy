@@ -198,6 +198,80 @@ export default function SupplierReportsPage() {
     document.body.removeChild(link);
   };
 
+  const handleExportPDF = () => {
+    if (!reports.length) return;
+
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) return;
+
+    const rowsHtml = reports
+      .map(
+        (report) => `
+        <tr>
+          <td>${report.date}</td>
+          <td>${report.item}</td>
+          <td>${report.city}</td>
+          <td>${report.quantity}</td>
+          <td>${report.priceTier}</td>
+          <td>${report.status}</td>
+        </tr>
+      `
+      )
+      .join("");
+
+    printWindow.document.write(`
+    <html>
+      <head>
+        <title>Supplier Reports PDF</title>
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            padding: 24px;
+          }
+          h1 {
+            margin-bottom: 20px;
+          }
+          table {
+            width: 100%;
+            border-collapse: collapse;
+          }
+          th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+            font-size: 12px;
+          }
+          th {
+            background: #f5f5f5;
+          }
+        </style>
+      </head>
+      <body>
+        <h1>Supplier Order Reports</h1>
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Item</th>
+              <th>City</th>
+              <th>Quantity</th>
+              <th>Price Tier</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rowsHtml}
+          </tbody>
+        </table>
+      </body>
+    </html>
+  `);
+
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+  };
+
   return (
     <SupplierLayout>
       <div className="flex flex-col gap-6">
@@ -365,6 +439,7 @@ export default function SupplierReportsPage() {
 
               <button
                 type="button"
+                onClick={handleExportPDF}
                 className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-text-main hover:opacity-90"
               >
                 Export PDF

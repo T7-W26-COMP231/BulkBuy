@@ -1,47 +1,8 @@
+import { useEffect, useMemo, useState } from "react";
 import SupplierLayout from "../../components/supplier/SupplierLayout";
+import api from "../../api/api";
 
-const mockReports = [
-  {
-    id: 1,
-    date: "Oct 12, 2023",
-    item: "Organic Arabica Beans",
-    subtitle: "Premium Grade-A",
-    city: "San Francisco",
-    quantity: 500,
-    priceTier: "Tier 2",
-    status: "Delivered",
-  },
-  {
-    id: 2,
-    date: "Oct 15, 2023",
-    item: "Fair Trade Cocoa",
-    subtitle: "25kg Bulk Sacks",
-    city: "Austin, TX",
-    quantity: 250,
-    priceTier: "Tier 1",
-    status: "Delivered",
-  },
-  {
-    id: 3,
-    date: "Oct 20, 2023",
-    item: "Pasteurized Whole Egg",
-    subtitle: "Liquid Carton Bulk",
-    city: "Portland, OR",
-    quantity: 1200,
-    priceTier: "Tier 3",
-    status: "In Transit",
-  },
-  {
-    id: 4,
-    date: "Oct 25, 2023",
-    item: "Himalayan Pink Salt",
-    subtitle: "Fine Grain 50lb Bags",
-    city: "Seattle, WA",
-    quantity: 100,
-    priceTier: "Tier 1",
-    status: "Pending Review",
-  },
-];
+
 
 const getStatusClasses = (status) => {
   switch (status) {
@@ -68,8 +29,79 @@ const getTierClasses = (tier) => {
       return "bg-neutral-light text-text-muted";
   }
 };
-
 export default function SupplierReportsPage() {
+  const [reports, setReports] = useState([]);
+  const [range, setRange] = useState("30");
+  const [loading, setLoading] = useState(false);
+
+  const dateRange = useMemo(() => {
+    const end = new Date();
+    const start = new Date();
+
+    start.setDate(end.getDate() - Number(range));
+
+    return {
+      startDate: start.toISOString().split("T")[0],
+      endDate: end.toISOString().split("T")[0],
+    };
+  }, [range]);
+
+  const fetchReports = async () => {
+    try {
+      setLoading(true);
+
+      const sessionRaw = localStorage.getItem("app_auth_session_v1");
+      const session = sessionRaw ? JSON.parse(sessionRaw) : null;
+      const supplierId = session?.user?._id;
+
+      const { data } = await api.get("/orders/supplier-reports", {
+        params: {
+          supplierId,
+          startDate: dateRange.startDate,
+          endDate: dateRange.endDate,
+          page: 1,
+          limit: 50,
+        },
+      });
+
+      setReports(
+        (data?.items || []).map((report) => ({
+          id: report._id,
+          date: report.createdAt
+            ? new Date(Number(report.createdAt)).toLocaleDateString()
+            : "N/A",
+          item:
+            report.items?.[0]?.ItemSysInfo?.title ||
+            report.items?.[0]?.productId ||
+            "Unknown Item",
+          subtitle:
+            report.items?.[0]?.ItemSysInfo?.shortDescription ||
+            "Bulk order item",
+          city: report.ops_region || "Unknown City",
+          quantity: report.items?.reduce(
+            (sum, item) => sum + Number(item.quantity || 0),
+            0
+          ),
+          priceTier:
+            report.items?.[0]?.latestPricingSnapshot?.discountBracket?.final != null
+              ? `Tier ${report.items[0].latestPricingSnapshot.discountBracket.final}`
+              : "Tier 1",
+          status: report.status
+            ? report.status.charAt(0).toUpperCase() + report.status.slice(1)
+            : "Submitted",
+        }))
+      );
+    } catch (error) {
+      console.error("Failed to fetch reports", error);
+      setReports([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchReports();
+  }, [range]);
   return (
     <SupplierLayout>
       <div className="flex flex-col gap-6">
@@ -87,11 +119,14 @@ export default function SupplierReportsPage() {
               <label className="mb-2 block text-xs font-bold uppercase tracking-wide text-text-muted">
                 Date Range
               </label>
-              <select className="w-full rounded-xl border border-neutral-light bg-white px-4 py-3 text-sm text-text-main outline-none focus:border-primary">
-                <option>Last 30 Days</option>
-                <option>Last 7 Days</option>
-                <option>Last 90 Days</option>
-                <option>Custom Range</option>
+              <select
+                value={range}
+                onChange={(e) => setRange(e.target.value)}
+                className="w-full rounded-xl border border-neutral-light bg-white px-4 py-3 text-sm text-text-main outline-none focus:border-primary"
+              >
+                <option value="30">Last 30 Days</option>
+                <option value="7">Last 7 Days</option>
+                <option value="90">Last 90 Days</option>
               </select>
             </div>
 
@@ -101,10 +136,6 @@ export default function SupplierReportsPage() {
               </label>
               <select className="w-full rounded-xl border border-neutral-light bg-white px-4 py-3 text-sm text-text-main outline-none focus:border-primary">
                 <option>All Items</option>
-                <option>Organic Arabica Beans</option>
-                <option>Fair Trade Cocoa</option>
-                <option>Pasteurized Whole Egg</option>
-                <option>Himalayan Pink Salt</option>
               </select>
             </div>
 
@@ -114,19 +145,16 @@ export default function SupplierReportsPage() {
               </label>
               <select className="w-full rounded-xl border border-neutral-light bg-white px-4 py-3 text-sm text-text-main outline-none focus:border-primary">
                 <option>All Cities</option>
-                <option>San Francisco</option>
-                <option>Austin, TX</option>
-                <option>Portland, OR</option>
-                <option>Seattle, WA</option>
               </select>
             </div>
 
             <div className="flex items-end">
               <button
                 type="button"
+                onClick={fetchReports}
                 className="w-full rounded-xl bg-primary px-5 py-3 font-semibold text-text-main transition hover:opacity-90"
               >
-                Generate Report
+                {loading ? "Loading..." : "Generate Report"}
               </button>
             </div>
           </div>
@@ -147,55 +175,71 @@ export default function SupplierReportsPage() {
               </thead>
 
               <tbody>
-                {mockReports.map((report) => (
-                  <tr
-                    key={report.id}
-                    className="border-b border-neutral-light last:border-b-0"
-                  >
-                    <td className="px-6 py-5 text-text-muted">{report.date}</td>
-
-                    <td className="px-6 py-5">
-                      <div className="font-semibold text-text-main">{report.item}</div>
-                      <div className="text-xs text-text-muted">{report.subtitle}</div>
-                    </td>
-
-                    <td className="px-6 py-5 text-text-main">{report.city}</td>
-
-                    <td className="px-6 py-5">
-                      <span className="font-bold text-text-main">
-                        {report.quantity.toLocaleString()}
-                      </span>
-                      <span className="ml-1 text-xs text-text-muted">Units</span>
-                    </td>
-
-                    <td className="px-6 py-5">
-                      <span
-                        className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${getTierClasses(
-                          report.priceTier
-                        )}`}
-                      >
-                        {report.priceTier}
-                      </span>
-                    </td>
-
-                    <td className="px-6 py-5">
-                      <span
-                        className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${getStatusClasses(
-                          report.status
-                        )}`}
-                      >
-                        {report.status}
-                      </span>
+                {reports.length === 0 ? (
+                  <tr>
+                    <td colSpan="6" className="px-6 py-10 text-center text-text-muted">
+                      No reports found for selected date range
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  reports.map((report) => (
+                    <tr
+                      key={report.id}
+                      className="border-b border-neutral-light last:border-b-0"
+                    >
+                      <td className="px-6 py-5 text-text-muted">
+                        {report.date}
+                      </td>
+
+                      <td className="px-6 py-5">
+                        <div className="font-semibold text-text-main">
+                          {report.item}
+                        </div>
+                        <div className="text-xs text-text-muted">
+                          {report.subtitle}
+                        </div>
+                      </td>
+
+                      <td className="px-6 py-5 text-text-main">
+                        {report.city}
+                      </td>
+
+                      <td className="px-6 py-5">
+                        <span className="font-bold text-text-main">
+                          {report.quantity}
+                        </span>
+                        <span className="ml-1 text-xs text-text-muted">Units</span>
+                      </td>
+
+                      <td className="px-6 py-5">
+                        <span
+                          className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${getTierClasses(
+                            report.priceTier
+                          )}`}
+                        >
+                          {report.priceTier}
+                        </span>
+                      </td>
+
+                      <td className="px-6 py-5">
+                        <span
+                          className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${getStatusClasses(
+                            report.status
+                          )}`}
+                        >
+                          {report.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
 
           <div className="flex flex-col gap-4 border-t border-neutral-light px-6 py-4 md:flex-row md:items-center md:justify-between">
             <p className="text-sm text-text-muted">
-              Showing 4 of 28 pending order requests
+              Showing {reports.length} report results
             </p>
 
             <div className="flex items-center gap-3">

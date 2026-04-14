@@ -116,6 +116,20 @@ router.get(
 );
 
 /* -------------------------------------------------------------------------- */
+/* Supplier historical reports
+ * purpose: Retrieve supplier historical reports with date range filter
+ * method: GET
+ * path: /orders/supplier-reports
+ * params:
+ *   - query: supplierId, startDate, endDate, page, limit
+ * controller: OrderController.getSupplierHistoricalReport
+ */
+router.get(
+  '/supplier-reports',
+  asyncHandler(OrderController.getSupplierHistoricalReport)
+);
+
+/* -------------------------------------------------------------------------- */
 /* Dashboard metrics (admin)
  * purpose: Retrieve summary metrics for the admin dashboard
  * method: GET

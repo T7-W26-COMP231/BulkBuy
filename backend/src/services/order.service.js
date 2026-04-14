@@ -1494,6 +1494,47 @@ class OrderService {
     }
   }
 
+    async getSupplierHistoricalReport(opts = {}) {
+    const page = Math.max(1, parseInt(opts.page, 10) || 1);
+    const limit = Math.max(1, parseInt(opts.limit, 10) || 25);
+
+    const filter = {};
+
+    if (opts.supplierId) {
+      filter.userId = opts.supplierId;
+    }
+
+  if (opts.startDate || opts.endDate) {
+  filter.createdAt = {};
+
+  if (opts.startDate) {
+    filter.createdAt.$gte = new Date(opts.startDate).getTime();
+  }
+
+  if (opts.endDate) {
+    const end = new Date(opts.endDate);
+    end.setHours(23, 59, 59, 999);
+    filter.createdAt.$lte = end.getTime();
+  }
+}
+
+    const result = await OrderRepo.paginate(filter, {
+      page,
+      limit,
+      sort: 'createdAt:-1'
+    });
+
+    result.items = (result.items || []).map(sanitizeForClient);
+
+    return {
+      items: result.items,
+      total: result.total || 0,
+      page: result.page || page,
+      limit: result.limit || limit,
+      pages: result.pages || 0
+    };
+  }
+
   async getDashboardMetrics() {
     const pendingQuotes = await this.count({
       status: "submitted",

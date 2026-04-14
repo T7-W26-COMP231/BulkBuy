@@ -476,6 +476,27 @@ const OrderController = {
     return send(res, 200, { success: true, data: removed });
   }),
 
+    /**
+   * GET /orders/supplier-reports
+   * Supplier historical report query with date range filter
+   */
+  getSupplierHistoricalReport: asyncHandler(async (req, res) => {
+    const serviceOpts = {
+      supplierId: req.query.supplierId,
+      startDate: req.query.startDate,
+      endDate: req.query.endDate,
+      page: req.query.page,
+      limit: req.query.limit
+    };
+
+    const result = await OrderService.getSupplierHistoricalReport(serviceOpts);
+
+    return send(res, 200, {
+      success: true,
+      ...result
+    });
+  }),
+
   /**
    * POST /orders/bulk
    */

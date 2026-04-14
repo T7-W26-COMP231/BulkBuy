@@ -47,7 +47,7 @@ async function resolveSocketIdsForUserId(userId) {
  * Attach handlers
  * ------------------------- */
 
-function attachHandlers(io, opts={}) {
+function attachHandlers(io, opts = {}) {
   if (!io) throw new Error('Socket.IO instance required');
   ioInstance = io;
 
@@ -71,7 +71,7 @@ function attachHandlers(io, opts={}) {
  * Per-socket lifecycle
  * ------------------------- */
 
-async function onConnect(socket, opts={}) {
+async function onConnect(socket, opts = {}) {
   const user = socket.user || null;
   debug('socket connected', socket.id);
 
@@ -151,7 +151,7 @@ async function onConnect(socket, opts={}) {
  * Common listeners (lightweight)
  * ------------------------- */
 
-function setupCommonListeners(socket, opts={}) {
+function setupCommonListeners(socket, opts = {}) {
   socket.on('ping', (payload, cb) => {
     if (cb && typeof cb === 'function') cb({ pong: true, ts: Date.now() });
   });
@@ -231,7 +231,7 @@ function setupCommonListeners(socket, opts={}) {
       const { token, userId } = payload;
       try {
         if (opts && opts.initSocketAuth && typeof opts.initSocketAuth === 'function') {
-          opts.authApi = opts.initSocketAuth(opts.io, {...opts.initsocketAuthOpts, accessToken : token});
+          opts.authApi = opts.initSocketAuth(opts.io, { ...opts.initsocketAuthOpts, accessToken: token });
         };
       } catch (error) {
         console.log('\nsocket identifyUser error | ', error, "\n");
@@ -240,22 +240,21 @@ function setupCommonListeners(socket, opts={}) {
 
       //join region room
       const region = payload && payload.ops_region;
-      if(region){
+      if (region) {
         if (typeof rooms.joinRegionRoom === 'function') {
           await rooms.joinRegionRoom(socket, region);
         } else {
           socket.join(rooms.regionRoom ? rooms.regionRoom(region) : `region:${region}`);
         }
       };
-     
+
 
       // Resolve user: prefer token validation
       let resolvedUser = null;
       if (token && typeof socketAuthValidateToken === 'function') {
         resolvedUser = await socketAuthValidateToken(token);
       } else if (userId) {
-        // fallback only when token validation is not available; less secure
-        resolvedUser = { _id: userId };
+        resolvedUser = { _id: userId, role: payload.role || null }; // ← ADD role
       }
 
       if (!resolvedUser || !resolvedUser._id) {
@@ -266,7 +265,7 @@ function setupCommonListeners(socket, opts={}) {
       // Unmap any previous mapping for this socket (safe, idempotent)
       try {
         if (typeof socketRegistry.unmapSocket === 'function') {
-          await socketRegistry.unmapSocket(socket.id).catch(() => {});
+          await socketRegistry.unmapSocket(socket.id).catch(() => { });
         }
       } catch (e) {
         logger.debug({ err: e && e.message }, 'identifyUser: unmapSocket non-fatal');
@@ -287,9 +286,15 @@ function setupCommonListeners(socket, opts={}) {
       }
 
       // Join rooms for the user (region/roles)
+      // Join rooms for the user (region/roles)
       try {
         if (typeof rooms.joinRoomsForUser === 'function') {
           await rooms.joinRoomsForUser(socket, resolvedUser);
+        }
+        // ← ADD: also join single role room (user.role vs user.roles)
+        if (resolvedUser.role && typeof rooms.joinRoleRoom === 'function') {
+          await rooms.joinRoleRoom(socket, resolvedUser.role);
+          console.log(`[ socket 🟢 ] joined role room: role:${resolvedUser.role}`);
         }
       } catch (e) {
         logger.debug({ err: e && e.message }, 'joinRoomsForUser on identifyUser non-fatal');

@@ -13,6 +13,7 @@ const SalesWindowService = require('./salesWindow.service');
 const UserRepo = require('../repositories/user.repo');
 const { sendOrderConfirmation } = require('./email.service');
 const { getById } = require('./item.service');
+const { emitUiUpdate } = require('../comms-js/websocket/services/uiUpdate.service');
 
 function sanitizeForClient(doc) {
   if (!doc) return doc;
@@ -480,189 +481,197 @@ class OrderService {
 
 
   async updateStatus(orderId, status, opts = {}) {
-  if (!orderId || !status) {
-    throw createError(400, 'orderId and status are required');
-  }
+    if (!orderId || !status) {
+      throw createError(400, 'orderId and status are required');
+    }
 
-  const actor = actorFromOpts(opts);
-  const correlationId = opts.correlationId || null;
+    const actor = actorFromOpts(opts);
+    const correlationId = opts.correlationId || null;
 
-  const allowedTransitions = {
-    confirmed: ['dispatched'],
-    dispatched: ['fulfilled'],
-  };
+    const allowedTransitions = {
+      confirmed: ['dispatched'],
+      dispatched: ['fulfilled'],
+    };
 
-  try {
-    const currentOrder = await OrderRepo.findById(orderId, { lean: true });
+    try {
+      const currentOrder = await OrderRepo.findById(orderId, { lean: true });
 
-    if (!currentOrder) {
+      if (!currentOrder) {
+        await this._audit(
+          'order.updateStatus', actor, orderId, 'failure', 'warn', correlationId,
+          { reason: 'not_found' }
+        );
+        throw createError(404, 'Order not found');
+      }
+
+      const currentStatus = String(currentOrder.status || '').toLowerCase();
+      const nextStatus = String(status || '').toLowerCase();
+
+      const validNextStatuses = allowedTransitions[currentStatus] || [];
+
+      if (!validNextStatuses.includes(nextStatus)) {
+        throw createError(
+          409,
+          `Invalid status transition from ${currentStatus} to ${nextStatus}`
+        );
+      }
+
+      const updated = await OrderRepo.updateStatus(orderId, nextStatus);
+
+      await this._audit(
+        'order.updateStatus',
+        actor,
+        orderId,
+        'success',
+        'info',
+        correlationId,
+        {
+          fromStatus: currentStatus,
+          toStatus: nextStatus,
+          changedAt: Date.now(),
+        }
+      );
+
+      // ── Task #243 — Notify administrator ─────────────────────────────
+      try {
+        await emitUiUpdate('order:status-updated', {
+          orderId: String(orderId),
+          fromStatus: currentStatus,
+          toStatus: nextStatus,
+          changedAt: Date.now(),
+        }, { scope: 'role', role: 'administrator' });
+        console.log(`📡 [order:status-updated] emitted for order ${orderId}: ${currentStatus} → ${nextStatus}`);
+      } catch (e) {
+        console.warn('order:status-updated emit failed (non-fatal):', e?.message);
+      }
+
+      return sanitizeForClient(updated);
+    } catch (err) {
       await this._audit(
         'order.updateStatus',
         actor,
         orderId,
         'failure',
-        'warn',
+        'error',
         correlationId,
-        { reason: 'not_found' }
+        { error: err && err.message }
       );
-      throw createError(404, 'Order not found');
+      throw err;
+    }
+  }
+
+  async approveSupplierOrder(orderId, opts = {}) {
+    if (!orderId) {
+      throw createError(400, 'orderId is required');
     }
 
-    const currentStatus = String(currentOrder.status || '').toLowerCase();
-    const nextStatus = String(status || '').toLowerCase();
+    const actor = actorFromOpts(opts);
+    const correlationId = opts.correlationId || null;
 
-    const validNextStatuses = allowedTransitions[currentStatus] || [];
+    try {
+      const updated = await OrderRepo.updateStatus(orderId, 'approved');
 
-    if (!validNextStatuses.includes(nextStatus)) {
-      throw createError(
-        409,
-        `Invalid status transition from ${currentStatus} to ${nextStatus}`
-      );
-    }
-
-    const updated = await OrderRepo.updateStatus(orderId, nextStatus);
-
-    await this._audit(
-      'order.updateStatus',
-      actor,
-      orderId,
-      'success',
-      'info',
-      correlationId,
-      {
-        fromStatus: currentStatus,
-        toStatus: nextStatus,
-        changedAt: Date.now(),
+      if (!updated) {
+        await this._audit(
+          'supplier.order.approve',
+          actor,
+          orderId,
+          'failure',
+          'warn',
+          correlationId,
+          { reason: 'not_found' }
+        );
+        throw createError(404, 'Order not found');
       }
-    );
 
-    return sanitizeForClient(updated);
-  } catch (err) {
-    await this._audit(
-      'order.updateStatus',
-      actor,
-      orderId,
-      'failure',
-      'error',
-      correlationId,
-      { error: err && err.message }
-    );
-    throw err;
-  }
-}
+      await this._audit(
+        'supplier.order.approve',
+        actor,
+        orderId,
+        'success',
+        'info',
+        correlationId,
+        { status: 'approved' }
+      );
 
-async approveSupplierOrder(orderId, opts = {}) {
-  if (!orderId) {
-    throw createError(400, 'orderId is required');
-  }
-
-  const actor = actorFromOpts(opts);
-  const correlationId = opts.correlationId || null;
-
-  try {
-    const updated = await OrderRepo.updateStatus(orderId, 'approved');
-
-    if (!updated) {
+      return sanitizeForClient(updated);
+    } catch (err) {
       await this._audit(
         'supplier.order.approve',
         actor,
         orderId,
         'failure',
-        'warn',
+        'error',
         correlationId,
-        { reason: 'not_found' }
+        { error: err && err.message }
       );
-      throw createError(404, 'Order not found');
+      throw err;
+    }
+  }
+
+  async declineSupplierOrder(orderId, reason, opts = {}) {
+    if (!orderId) {
+      throw createError(400, 'orderId is required');
     }
 
-    await this._audit(
-      'supplier.order.approve',
-      actor,
-      orderId,
-      'success',
-      'info',
-      correlationId,
-      { status: 'approved' }
-    );
+    if (!reason || !reason.trim()) {
+      throw createError(400, 'decline reason is required');
+    }
 
-    return sanitizeForClient(updated);
-  } catch (err) {
-    await this._audit(
-      'supplier.order.approve',
-      actor,
-      orderId,
-      'failure',
-      'error',
-      correlationId,
-      { error: err && err.message }
-    );
-    throw err;
-  }
-}
+    const actor = actorFromOpts(opts);
+    const correlationId = opts.correlationId || null;
 
-async declineSupplierOrder(orderId, reason, opts = {}) {
-  if (!orderId) {
-    throw createError(400, 'orderId is required');
-  }
+    try {
+      const updated = await OrderRepo.updateById(
+        orderId,
+        {
+          status: 'declined',
+          declineReason: reason.trim(),
+          updatedAt: Date.now()
+        },
+        { new: true }
+      );
 
-  if (!reason || !reason.trim()) {
-    throw createError(400, 'decline reason is required');
-  }
+      if (!updated) {
+        await this._audit(
+          'supplier.order.decline',
+          actor,
+          orderId,
+          'failure',
+          'warn',
+          correlationId,
+          { reason: 'not_found' }
+        );
+        throw createError(404, 'Order not found');
+      }
 
-  const actor = actorFromOpts(opts);
-  const correlationId = opts.correlationId || null;
+      await this._audit(
+        'supplier.order.decline',
+        actor,
+        orderId,
+        'success',
+        'info',
+        correlationId,
+        {
+          status: 'declined',
+          declineReason: reason.trim()
+        }
+      );
 
-  try {
-    const updated = await OrderRepo.updateById(
-      orderId,
-      {
-        status: 'declined',
-        declineReason: reason.trim(),
-        updatedAt: Date.now()
-      },
-      { new: true }
-    );
-
-    if (!updated) {
+      return sanitizeForClient(updated);
+    } catch (err) {
       await this._audit(
         'supplier.order.decline',
         actor,
         orderId,
         'failure',
-        'warn',
+        'error',
         correlationId,
-        { reason: 'not_found' }
+        { error: err && err.message }
       );
-      throw createError(404, 'Order not found');
+      throw err;
     }
-
-    await this._audit(
-      'supplier.order.decline',
-      actor,
-      orderId,
-      'success',
-      'info',
-      correlationId,
-      {
-        status: 'declined',
-        declineReason: reason.trim()
-      }
-    );
-
-    return sanitizeForClient(updated);
-  } catch (err) {
-    await this._audit(
-      'supplier.order.decline',
-      actor,
-      orderId,
-      'failure',
-      'error',
-      correlationId,
-      { error: err && err.message }
-    );
-    throw err;
   }
-}
 
 
   async confirmFulfillment(orderId, expectedDeliveryDate, opts = {}) {

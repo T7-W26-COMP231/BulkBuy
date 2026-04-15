@@ -440,6 +440,108 @@ class ConfigService {
       throw err;
     }
   }
+    /**
+   * Save admin delivery rules
+   */
+  async saveDeliveryRules(deliveryRules = {}, opts = {}) {
+    const actor = actorFromOpts(opts);
+    const correlationId = opts.correlationId || null;
+
+    const userId =
+      actor?.userId ||
+      actor?._id ||
+      opts?.actor?.userId ||
+      opts?.actor?._id;
+
+    if (!userId) {
+      throw createError(400, "Authenticated userId is required");
+    }
+
+    if (!deliveryRules || typeof deliveryRules !== "object") {
+      throw createError(400, "deliveryRules payload is required");
+    }
+
+    try {
+      const saved = await ConfigRepo.saveDeliveryRules(
+        userId,
+        deliveryRules,
+        opts
+      );
+
+      await auditService.logEvent({
+        eventType: "config.deliveryRules.save.success",
+        actor,
+        target: { type: "Config", id: saved?._id || null },
+        outcome: "success",
+        severity: "info",
+        correlationId,
+        details: {
+          supplierId: deliveryRules?.supplierId || null,
+        },
+      });
+
+      return sanitize(saved);
+    } catch (err) {
+      await auditService.logEvent({
+        eventType: "config.deliveryRules.save.failed",
+        actor,
+        target: { type: "Config", id: null },
+        outcome: "failure",
+        severity: "error",
+        correlationId,
+        details: { message: err.message },
+      });
+
+      throw err;
+    }
+  }
+
+  /**
+   * Get admin delivery rules
+   */
+  async getDeliveryRules(opts = {}) {
+    const actor = actorFromOpts(opts);
+    const correlationId = opts.correlationId || null;
+
+    const userId =
+      actor?.userId ||
+      actor?._id ||
+      opts?.actor?.userId ||
+      opts?.actor?._id;
+
+    if (!userId) {
+      throw createError(400, "Authenticated userId is required");
+    }
+
+    try {
+      const config = await ConfigRepo.getDeliveryRules(userId, opts);
+
+      await auditService.logEvent({
+        eventType: "config.deliveryRules.get.success",
+        actor,
+        target: { type: "Config", id: config?._id || null },
+        outcome: "success",
+        severity: "info",
+        correlationId,
+        details: {},
+      });
+
+      return sanitize(config);
+    } catch (err) {
+      await auditService.logEvent({
+        eventType: "config.deliveryRules.get.failed",
+        actor,
+        target: { type: "Config", id: null },
+        outcome: "failure",
+        severity: "error",
+        correlationId,
+        details: { message: err.message },
+      });
+
+      throw err;
+    }
+  }
+
   /**
    * Save admin pricing tiers
    */

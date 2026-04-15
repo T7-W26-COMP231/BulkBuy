@@ -375,7 +375,11 @@ export default function AdminFulfillmentPage() {
                                             paginated.map((row) => {
                                                 const isOverdue = row.confirmationAge != null && row.confirmationAge > 5;
                                                 return (
-                                                    <tr key={row.id} className="transition hover:bg-neutral-light/30">
+                                                    <tr
+                                                        key={row.id}
+                                                        className={`transition hover:bg-neutral-light/30 ${isOverdue ? "bg-amber-50" : ""
+                                                            }`}
+                                                    >
                                                         <td className="px-6 py-5 font-mono text-xs font-semibold text-text-muted">
                                                             #{row.orderId}
                                                         </td>

@@ -1493,100 +1493,100 @@ class OrderService {
       throw err;
     }
   }
-async getSupplierHistoricalReport(opts = {}) {
-  const page = Math.max(1, parseInt(opts.page, 10) || 1);
-  const limit = Math.max(1, parseInt(opts.limit, 10) || 25);
+  async getSupplierHistoricalReport(opts = {}) {
+    const page = Math.max(1, parseInt(opts.page, 10) || 1);
+    const limit = Math.max(1, parseInt(opts.limit, 10) || 25);
 
-  const filter = {};
+    const filter = {};
 
-  // ✅ supplier reports should show historical processed orders
- if (opts.ops_region) {
-  filter.ops_region = opts.ops_region;
-}
-
-filter.status = {
-  $in: ["approved", "confirmed", "dispatched", "fulfilled"],
-};
-
-  // ✅ optional status filter from dropdown
-  if (opts.status && opts.status.toLowerCase() !== "all") {
-    filter.status = opts.status.toLowerCase();
-  }
-
-  // ✅ optional date filtering
-  if (opts.startDate || opts.endDate) {
-    filter.createdAt = {};
-
-    if (opts.startDate) {
-      filter.createdAt.$gte = new Date(opts.startDate).getTime();
+    // ✅ supplier reports should show historical processed orders
+    if (opts.ops_region) {
+      filter.ops_region = opts.ops_region;
     }
 
-    if (opts.endDate) {
-      const end = new Date(opts.endDate);
-      end.setHours(23, 59, 59, 999);
-      filter.createdAt.$lte = end.getTime();
+    filter.status = {
+      $in: ["approved", "confirmed", "dispatched", "fulfilled"],
+    };
+
+    // ✅ optional status filter from dropdown
+    if (opts.status && opts.status.toLowerCase() !== "all") {
+      filter.status = opts.status.toLowerCase();
     }
-  }
 
-  console.log("📊 SUPPLIER REPORT FILTER:", filter);
+    // ✅ optional date filtering
+    if (opts.startDate || opts.endDate) {
+      filter.createdAt = {};
 
-  const result = await OrderRepo.paginate(filter, {
-    page,
-    limit,
-    sort: "createdAt:-1",
-  });
+      if (opts.startDate) {
+        filter.createdAt.$gte = new Date(opts.startDate).getTime();
+      }
 
-  const enrichedItems = await Promise.all(
-    (result.items || []).map(async (order) => {
-      const safeOrder = sanitizeForClient(order);
+      if (opts.endDate) {
+        const end = new Date(opts.endDate);
+        end.setHours(23, 59, 59, 999);
+        filter.createdAt.$lte = end.getTime();
+      }
+    }
 
-      const enrichedOrderItems = await Promise.all(
-        (safeOrder.items || []).map(async (item) => {
-          try {
-            const itemData = await getById(item.itemId);
+    console.log("📊 SUPPLIER REPORT FILTER:", filter);
 
-            return {
-              ...item,
-              productTitle:
-                itemData?.title ||
-                itemData?.name ||
-                item.itemId,
-            };
-          } catch {
-            return {
-              ...item,
-              productTitle: item.itemId,
-            };
-          }
-        })
-      );
+    const result = await OrderRepo.paginate(filter, {
+      page,
+      limit,
+      sort: "createdAt:-1",
+    });
 
-      const productMatch =
-        !opts.product ||
-        opts.product === "All Items" ||
-        enrichedOrderItems.some(
-          (item) => item.productTitle === opts.product
+    const enrichedItems = await Promise.all(
+      (result.items || []).map(async (order) => {
+        const safeOrder = sanitizeForClient(order);
+
+        const enrichedOrderItems = await Promise.all(
+          (safeOrder.items || []).map(async (item) => {
+            try {
+              const itemData = await getById(item.itemId);
+
+              return {
+                ...item,
+                productTitle:
+                  itemData?.title ||
+                  itemData?.name ||
+                  item.itemId,
+              };
+            } catch {
+              return {
+                ...item,
+                productTitle: item.itemId,
+              };
+            }
+          })
         );
 
-      if (!productMatch) return null;
+        const productMatch =
+          !opts.product ||
+          opts.product === "All Items" ||
+          enrichedOrderItems.some(
+            (item) => item.productTitle === opts.product
+          );
 
-      return {
-        ...safeOrder,
-        items: enrichedOrderItems,
-      };
-    })
-  );
+        if (!productMatch) return null;
 
-  const filteredItems = enrichedItems.filter(Boolean);
+        return {
+          ...safeOrder,
+          items: enrichedOrderItems,
+        };
+      })
+    );
 
-  return {
-    items: filteredItems,
-    total: filteredItems.length,
-    page,
-    limit,
-    pages: Math.max(1, Math.ceil(filteredItems.length / limit)),
-  };
-}
+    const filteredItems = enrichedItems.filter(Boolean);
+
+    return {
+      items: filteredItems,
+      total: filteredItems.length,
+      page,
+      limit,
+      pages: Math.max(1, Math.ceil(filteredItems.length / limit)),
+    };
+  }
 
   async getDashboardMetrics() {
     const pendingQuotes = await this.count({

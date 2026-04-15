@@ -52,11 +52,32 @@ function validateItemId(req, res, next) {
 router.post('/', requireAuth, supplyValidators.create, asyncHandler(SupplyController.createSupply));
 router.get('/', requireAuth, supplyValidators.query, asyncHandler(SupplyController.listSupplies));
 router.get('/dashboard/summary', requireAuth, asyncHandler(SupplyController.getDashboardSummary));
+
 router.get(
   '/historical-reports',
   requireAuth,
   asyncHandler(SupplyController.getHistoricalQuoteReport)
 );
+
+/* -------------------------------------------------------------------------- */
+/* Approved quotes with delivery metadata (admin)
+ * purpose: Retrieve accepted supply quotes enriched with delivery metadata
+ *          (confirmationAge, deliveryStatus, isOverdue, productName)
+ *          for the admin fulfillment monitoring dashboard
+ * method: GET
+ * path: /supplies/approved-quotes
+ * params:
+ *   - query: ops_region, supplierId, status, page, limit, overdueOnly, ageDays
+ * validators: requireAuth
+ * controller: SupplyController.getApprovedQuotesWithDeliveryMetadata
+ */
+router.get(
+  '/approved-quotes',
+  requireAuth,
+  asyncHandler(SupplyController.getApprovedQuotesWithDeliveryMetadata)
+);
+
+
 router.get('/:id', requireAuth, supplyValidators.idParam, asyncHandler(SupplyController.getById));
 
 /* Supply modifications */

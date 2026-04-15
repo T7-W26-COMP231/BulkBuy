@@ -298,8 +298,10 @@ class SupplyRepo {
   async addQuoteToItem(supplyId, itemId, quotePayload = {}, opts = {}) {
     if (!supplyId || !itemId || !quotePayload) throw createError(400, 'supplyId, itemId and quotePayload are required');
     const o = normalizeOpts(opts);
-    const update = { $push: { 'items.$[it].quotes': quotePayload } };
-    const updateOpts = { new: !!o.new, session: o.session, arrayFilters: [{ 'it.itemId': mongoose.Types.ObjectId(itemId) }] };
+    //const update = { $push: { 'items.$[it].quotes': quotePayload } };
+    const update = { $set: { 'items.$[it].quotes': [quotePayload] } };
+
+    const updateOpts = { new: !!o.new, session: o.session, arrayFilters: [{ 'it.itemId': itemId }] };
     const q = Supply.findOneAndUpdate({ _id: supplyId, deleted: false }, update, updateOpts);
     if (o.select) q.select(o.select);
     if (o.populate) q.populate(o.populate);

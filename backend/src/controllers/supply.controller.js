@@ -38,6 +38,7 @@ async function createSupply(req, res) {
     });
     return res.status(201).json({ success: true, data: created });
   } catch (err) {
+    console.error('❌ createSupply error:', err); // ← add this
     await auditService.logEvent({
       eventType: 'supply.create.failed',
       actor,
@@ -719,6 +720,42 @@ async function removeItem(req, res) {
   }
 }
 
+/**
+ * GET /supplies/approved-quotes
+ * Admin fulfillment monitoring — accepted supply quotes enriched with delivery metadata
+ * Query params: ops_region, supplierId, status, page, limit, overdueOnly, ageDays
+ */
+async function getApprovedQuotesWithDeliveryMetadata(req, res) {
+  const correlationId = req.correlationId || null;
+  const actor = actorFromReq(req);
+
+  try {
+    const opts = {
+      ops_region: req.query.ops_region || null,
+      supplierId: req.query.supplierId || null,
+      status: req.query.status || "accepted",
+      page: req.query.page || 1,
+      limit: req.query.limit || 10,
+      overdueOnly: req.query.overdueOnly === "true",
+      ageDays: req.query.ageDays ? Number(req.query.ageDays) : 5,
+      correlationId,
+      actor,
+    };
+
+    const result = await supplyService.getApprovedQuotesWithDeliveryMetadata(opts);
+
+    return res.status(200).json({
+      success: true,
+      ...result,
+    });
+  } catch (err) {
+    return res.status(err.status || 500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+}
+
 module.exports = {
   createSupply,
   listSupplies,
@@ -735,5 +772,6 @@ module.exports = {
   updateItem,
   removeItem,
   saveDraft,
-  submitForReview
+  submitForReview,
+  getApprovedQuotesWithDeliveryMetadata
 };

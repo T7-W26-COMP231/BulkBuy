@@ -59,16 +59,16 @@ class SupplyService {
     if (!Array.isArray(payload.items) || payload.items.length === 0) throw createError(422, 'items must be a non-empty array');
 
     const safe = {
-  ...payload,
-  supplierId:
-    payload.supplierId ||
-    actor.userId ||
-    null,
-};
+      ...payload,
+      supplierId:
+        payload.supplierId ||
+        actor.userId ||
+        null,
+    };
 
-delete safe._id;
-delete safe.createdAt;
-delete safe.updatedAt;
+    delete safe._id;
+    delete safe.createdAt;
+    delete safe.updatedAt;
 
     try {
       const created = await SupplyRepo.create(safe, { session: opts.session });
@@ -175,11 +175,11 @@ delete safe.updatedAt;
     }
   }
 
-    /**
-   * Get dashboard summary metrics for a supplier
-   * @param {String} supplierId
-   * @param {Object} opts
-   */
+  /**
+ * Get dashboard summary metrics for a supplier
+ * @param {String} supplierId
+ * @param {Object} opts
+ */
   async getDashboardSummary(supplierId, opts = {}) {
     const actor = actorFromOpts(opts);
     const correlationId = opts.correlationId || null;
@@ -327,6 +327,108 @@ delete safe.updatedAt;
       pages:
         result.pages ||
         Math.max(1, Math.ceil((result.total || filteredItems.length) / limit)),
+    };
+  }
+
+  /**
+     * getApprovedQuotesWithDeliveryMetadata
+     *
+     * Fetches supply records at "accepted" status and enriches each
+     * with computed delivery metadata for the admin fulfillment dashboard.
+     *
+     * Delivery metadata fields added per supply:
+     *  - confirmationAge   : days elapsed since updatedAt (integer)
+     *  - deliveryStatus    : "on_track" | "overdue" | "delivered" | "unknown"
+     *  - isOverdue         : true if confirmationAge > ageDays threshold
+     *  - productName       : pulled from metadata.quoteDraft.productName
+     *
+     * Query opts:
+     *  - ops_region   filter by region code  (e.g. ON-TOR)
+     *  - supplierId   filter by supplierId
+     *  - status       supply status to query  (default: "accepted")
+     *  - page         default 1
+     *  - limit        default 10
+     *  - overdueOnly  if true, only return overdue records
+     *  - ageDays      overdue threshold in days (default 5)
+     */
+  async getApprovedQuotesWithDeliveryMetadata(opts = {}) {
+    const page = Math.max(1, parseInt(opts.page, 10) || 1);
+    const limit = Math.max(1, parseInt(opts.limit, 10) || 10);
+    const ageDays = typeof opts.ageDays === "number" ? opts.ageDays : 5;
+    const MS_PER_DAY = 1000 * 60 * 60 * 24;
+    const nowMs = Date.now();
+
+    // ── Build filter ───────────────────────────────────────────────────
+    const filter = {
+      status: opts.status || "accepted",
+      deleted: false,
+    };
+
+    if (opts.ops_region) {
+      filter.ops_region = opts.ops_region;
+    }
+
+    if (opts.supplierId) {
+      filter.supplierId = opts.supplierId;
+    }
+
+    // ── Paginate via SupplyRepo ────────────────────────────────────────
+    const result = await SupplyRepo.paginate(filter, {
+      page,
+      limit,
+      sort: { createdAt: -1 },
+    });
+
+    // ── Enrich each supply with delivery metadata ──────────────────────
+    let enriched = (result.items || []).map((supply) => {
+      const safe = sanitize(supply);
+
+      // Days since last update
+      const updatedMs = safe.updatedAt ? new Date(safe.updatedAt).getTime() : nowMs;
+      const confirmationAge = Math.floor((nowMs - updatedMs) / MS_PER_DAY);
+
+      // Derive delivery status
+      let deliveryStatus = "unknown";
+      if (safe.status === "delivered" || safe.status === "received") {
+        deliveryStatus = "delivered";
+      } else if (confirmationAge > ageDays) {
+        deliveryStatus = "overdue";
+      } else {
+        deliveryStatus = "on_track";
+      }
+
+      // Pull product name from metadata.quoteDraft
+      const metadata = safe.metadata;
+      const quoteDraft =
+        metadata instanceof Map
+          ? metadata.get("quoteDraft")
+          : metadata?.quoteDraft;
+
+      const productName =
+        quoteDraft?.productName ||
+        safe.items?.[0]?.meta?.productName ||
+        "N/A";
+
+      return {
+        ...safe,
+        productName,
+        confirmationAge,
+        deliveryStatus,
+        isOverdue: deliveryStatus === "overdue",
+      };
+    });
+
+    // ── Optional: filter to overdue only ──────────────────────────────
+    if (opts.overdueOnly) {
+      enriched = enriched.filter((s) => s.isOverdue);
+    }
+
+    return {
+      items: enriched,
+      total: result.total,
+      page: result.page,
+      limit: result.limit,
+      pages: result.pages,
     };
   }
 

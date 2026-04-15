@@ -476,10 +476,10 @@ const OrderController = {
     return send(res, 200, { success: true, data: removed });
   }),
 
-    /**
-   * GET /orders/supplier-reports
-   * Supplier historical report query with date range filter
-   */
+  /**
+ * GET /orders/supplier-reports
+ * Supplier historical report query with date range filter
+ */
   getSupplierHistoricalReport: asyncHandler(async (req, res) => {
     const serviceOpts = {
       supplierId: req.query.supplierId,

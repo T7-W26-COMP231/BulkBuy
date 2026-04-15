@@ -29,6 +29,7 @@ const aggregationRoutes = require('./routes/aggregation.routes');
 const configRoutes = require('./routes/config.routes');
 const opsContextRoutes = require('./routes/ops-context.routes');
 const s3storeRoutes = require('./routes/s3Storage.routes');
+const deliveryRuleRoutes = require('./routes/deliveryRule.routes');
 
 const errorMiddleware = require('./middleware/error.middleware');
 const correlationMiddleware = require('./middleware/correlation.middleware');
@@ -103,6 +104,9 @@ const createApp = async () => {
   app.use('/api/revws', reviewRoutes);
   app.use('/api/opscs', opsContextRoutes);
   app.use('/api/s3fgo', s3storeRoutes);
+  app.use('/api/configs', configRoutes);
+  app.use('/api/delivery-rules', deliveryRuleRoutes);
+  app.use('/api/comms', messageRoutes);
 
   // 404 handler
   app.use((req, res, next) => {

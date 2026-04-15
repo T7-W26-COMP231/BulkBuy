@@ -7,6 +7,7 @@ const sidebarItems = [
   { label: "Dashboard", icon: "dashboard", to: "/admin" },
   { label: "Product Catalog", icon: "inventory_2", to: "/admin/product-catalog" },
   { label: "FulFillment", icon: "local_shipping", to: "/admin/monitor-quotes" },
+  { label: "Delivery Rules", icon: "rule_settings", to: "/admin/delivery-rules" },
   { label: "Supplier Quotes", icon: "request_quote", to: "/admin/supplier-quotes" },
   { label: "Pricing Brackets", icon: "sell", to: "/admin/pricing-brackets" },
   { label: "Sales Window", icon: "sell", to: "/admin/sales-window" },

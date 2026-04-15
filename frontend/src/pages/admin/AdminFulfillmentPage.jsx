@@ -28,10 +28,11 @@ const STATUS_DOT = {
     accepted: "bg-green-500",
 };
 
-function getComplianceStatus(confirmationAge) {
+// WITH
+function getComplianceStatus(confirmationAge, warningAfterDays = 5, maxDeliveryDays = 7) {
     if (confirmationAge == null) return "compliant";
-    if (confirmationAge > 7) return "non_compliant";
-    if (confirmationAge > 5) return "warning";
+    if (confirmationAge > maxDeliveryDays) return "non_compliant";
+    if (confirmationAge > warningAfterDays) return "warning";
     return "compliant";
 }
 
@@ -117,6 +118,7 @@ function normalizeQuote(row) {
 
 export default function AdminFulfillmentPage() {
     const [mobileOpen, setMobileOpen] = useState(false);
+    const [deliveryRules, setDeliveryRules] = useState([]);
 
     const [supplierFilter, setSupplierFilter] = useState("");
     const [cityFilter, setCityFilter] = useState("");
@@ -139,6 +141,12 @@ export default function AdminFulfillmentPage() {
     useEffect(() => {
         fetchApprovedQuotes();
     }, [currentPage, appliedSupplier, appliedCity, appliedStatus]);
+
+    useEffect(() => {
+        getDeliveryRules()
+            .then(result => setDeliveryRules(result?.items || []))
+            .catch(() => { });
+    }, []);
 
     async function fetchApprovedQuotes() {
         try {
@@ -204,13 +212,25 @@ export default function AdminFulfillmentPage() {
         }
     }
 
+    function findMatchingRule(supplierId, region) {
+        const active = deliveryRules.filter(r => r.isActive);
+        return (
+            active.find(r => r.supplierId === supplierId && r.deliveryRegion === region) ||
+            active.find(r => r.supplierId === supplierId && !r.deliveryRegion) ||
+            active.find(r => !r.supplierId && r.deliveryRegion === region) ||
+            active.find(r => !r.supplierId && !r.deliveryRegion) ||
+            { warningAfterDays: 5, maxDeliveryDays: 7 }
+        );
+    }
+
     const totalPages = Math.max(1, Math.ceil(totalResults / ITEMS_PER_PAGE));
 
     const hasActionRequired = useMemo(() => {
-        return rows.some(
-            (s) => s.confirmationAge != null && s.confirmationAge > 5
-        );
-    }, [rows]);
+        return rows.some((row) => {
+            const rule = findMatchingRule(row.supplierId, row.city);
+            return row.confirmationAge != null && row.confirmationAge > rule.warningAfterDays;
+        });
+    }, [rows, deliveryRules]);
 
     const handleApply = () => {
         setCurrentPage(1);
@@ -350,7 +370,33 @@ export default function AdminFulfillmentPage() {
                                     {error}
                                 </div>
                             )}
-
+                            {!loading && rows.length > 0 && (() => {
+                                const violations = rows.filter(row => {
+                                    const rule = findMatchingRule(row.supplierId, row.city);
+                                    return getComplianceStatus(row.confirmationAge, rule.warningAfterDays, rule.maxDeliveryDays) === "non_compliant";
+                                });
+                                const warnings = rows.filter(row => {
+                                    const rule = findMatchingRule(row.supplierId, row.city);
+                                    return getComplianceStatus(row.confirmationAge, rule.warningAfterDays, rule.maxDeliveryDays) === "warning";
+                                });
+                                if (violations.length === 0 && warnings.length === 0) return null;
+                                return (
+                                    <div className="border-b border-neutral-light px-6 py-3 flex flex-wrap items-center gap-3">
+                                        {violations.length > 0 && (
+                                            <span className="inline-flex items-center gap-2 rounded-full bg-red-50 border border-red-200 px-4 py-1.5 text-xs font-bold text-red-700">
+                                                <span className="inline-block h-2 w-2 rounded-full bg-red-500" />
+                                                {violations.length} Non-Compliant {violations.length === 1 ? "Shipment" : "Shipments"}
+                                            </span>
+                                        )}
+                                        {warnings.length > 0 && (
+                                            <span className="inline-flex items-center gap-2 rounded-full bg-amber-50 border border-amber-200 px-4 py-1.5 text-xs font-bold text-amber-700">
+                                                <span className="inline-block h-2 w-2 rounded-full bg-amber-400" />
+                                                {warnings.length} {warnings.length === 1 ? "Shipment" : "Shipments"} Approaching Deadline
+                                            </span>
+                                        )}
+                                    </div>
+                                );
+                            })()}
                             <div className="overflow-x-auto">
                                 <table className="w-full min-w-[800px] text-left">
                                     <thead className="border-b border-neutral-light bg-neutral-light/40">
@@ -389,11 +435,9 @@ export default function AdminFulfillmentPage() {
                                             </tr>
                                         ) : (
                                             rows.map((row) => {
-                                                const isOverdue =
-                                                    row.isOverdue ||
-                                                    (row.confirmationAge != null && row.confirmationAge > 5);
-
-                                                const complianceStatus = getComplianceStatus(row.confirmationAge);
+                                                const rule = findMatchingRule(row.supplierId, row.city);
+                                                const isOverdue = row.confirmationAge != null && row.confirmationAge > rule.warningAfterDays;
+                                                const complianceStatus = getComplianceStatus(row.confirmationAge, rule.warningAfterDays, rule.maxDeliveryDays);
 
                                                 return (
                                                     <tr

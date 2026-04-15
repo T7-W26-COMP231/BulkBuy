@@ -1588,6 +1588,62 @@ class OrderService {
     };
   }
 
+  async getThresholdChangeEvents(opts = {}) {
+  const page = Math.max(1, parseInt(opts.page, 10) || 1);
+  const limit = Math.max(1, parseInt(opts.limit, 10) || 10);
+
+  const filter = {};
+
+  if (opts.ops_region) {
+    filter.ops_region = opts.ops_region;
+  }
+
+  filter.status = {
+    $in: ["submitted", "approved", "confirmed", "fulfilled"],
+  };
+
+  const result = await OrderRepo.paginate(filter, {
+    page,
+    limit,
+    sort: "updatedAt:-1",
+    select: "_id ops_region status items updatedAt createdAt",
+  });
+
+  const events = (result.items || []).map((order) => {
+    const totalDemand = (order.items || []).reduce(
+      (sum, item) => sum + Number(item.quantity || 0),
+      0
+    );
+
+    let activeTier = "Tier 1";
+
+    if (totalDemand >= 100) {
+      activeTier = "Tier 4";
+    } else if (totalDemand >= 50) {
+      activeTier = "Tier 3";
+    } else if (totalDemand >= 20) {
+      activeTier = "Tier 2";
+    }
+
+    return {
+      orderId: order._id,
+      ops_region: order.ops_region || "north-america:ca-on",
+      totalDemand,
+      activeTier,
+      status: order.status,
+      changedAt: order.updatedAt || order.createdAt || Date.now(),
+    };
+  });
+
+  return {
+    items: events,
+    total: result.total,
+    page: result.page,
+    limit: result.limit,
+    pages: result.pages,
+  };
+}
+
   async getDashboardMetrics() {
     const pendingQuotes = await this.count({
       status: "submitted",

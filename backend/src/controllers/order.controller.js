@@ -210,6 +210,21 @@ const OrderController = {
     });
   }),
 
+  getThresholdChangeEvents: asyncHandler(async (req, res) => {
+  const serviceOpts = {
+    ops_region: req.query.ops_region,
+    page: req.query.page,
+    limit: req.query.limit
+  };
+
+  const events = await OrderService.getThresholdChangeEvents(serviceOpts);
+
+  return send(res, 200, {
+    success: true,
+    ...events
+  });
+}),
+
   /**
    * PATCH /orders/:id
    */

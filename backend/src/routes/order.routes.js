@@ -146,6 +146,13 @@ router.get(
   asyncHandler(OrderController.getDashboardMetrics)
 );
 
+router.get(
+  '/threshold-change-events',
+  requireAuth,
+  requireAdmin,
+  asyncHandler(OrderController.getThresholdChangeEvents)
+);
+
 /* -------------------------------------------------------------------------- */
 /* Get order status by id
  * purpose: Retrieve current status snapshot for a single order

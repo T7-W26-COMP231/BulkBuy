@@ -3,6 +3,7 @@ import AdminSidebar from "../../components/admin/AdminSidebar";
 import AdminTopbar from "../../components/admin/AdminTopbar";
 import { getApprovedQuotes } from "../../api/supplyApi";
 import { getDeliveryRules } from "../../api/DeliveryRuleApi";
+import { getThresholdChangeEvents } from "../../api/orderApi";
 // ADD this import alongside existing imports
 import { getSuppliers } from "../../api/UserApi";
 
@@ -141,6 +142,8 @@ export default function AdminFulfillmentPage() {
 
     const [rows, setRows] = useState([]);
     const [totalResults, setTotalResults] = useState(0);
+    const [thresholdEvents, setThresholdEvents] = useState([]);
+    const [eventsLoading, setEventsLoading] = useState(false);
     const [supplierOptions, setSupplierOptions] = useState([
         { label: "All Suppliers", value: "" },
     ]);
@@ -150,7 +153,9 @@ export default function AdminFulfillmentPage() {
 
     useEffect(() => {
         fetchApprovedQuotes();
+        fetchThresholdEvents();
     }, [currentPage, appliedSupplier, appliedRegion, appliedStatus]);
+
     useEffect(() => {
         getDeliveryRules()
             .then(result => setDeliveryRules(result?.items || []))
@@ -217,6 +222,31 @@ export default function AdminFulfillmentPage() {
             setTotalResults(0);
         } finally {
             setLoading(false);
+        }
+    }
+
+    async function fetchThresholdEvents() {
+        try {
+            setEventsLoading(true);
+
+            const result = await getThresholdChangeEvents({
+                ops_region: appliedRegion || undefined,
+                page: 1,
+                limit: 5,
+            });
+
+            const events =
+                result?.items ||
+                result?.data ||
+                result?.rows ||
+                [];
+
+            setThresholdEvents(events);
+        } catch (err) {
+            console.error("Failed to load threshold events:", err);
+            setThresholdEvents([]);
+        } finally {
+            setEventsLoading(false);
         }
     }
 
@@ -640,6 +670,86 @@ export default function AdminFulfillmentPage() {
                                     </button>
                                 </div>
                             </div>
+                        </section>
+
+                        <section className="rounded-2xl border border-neutral-light bg-white p-6 shadow-sm">
+                            <div className="mb-4 flex items-center justify-between">
+                                <h2 className="text-base font-bold text-text-main">
+                                    Threshold Change Events
+                                </h2>
+                                <span className="text-xs font-semibold uppercase tracking-wide text-text-muted">
+                                    Latest 5 updates
+                                </span>
+                            </div>
+
+                            {eventsLoading ? (
+                                <p className="py-6 text-sm text-text-muted">
+                                    Loading threshold events...
+                                </p>
+                            ) : thresholdEvents.length === 0 ? (
+                                <p className="py-6 text-sm text-text-muted">
+                                    No threshold changes found.
+                                </p>
+                            ) : (
+                                <div className="space-y-3">
+                                    {thresholdEvents.map((event, index) => (
+                                        <div
+                                            key={event.orderId || index}
+                                            className="rounded-2xl border border-neutral-light bg-white px-5 py-4 shadow-sm"
+                                        >
+                                            <div className="mb-3 flex items-center justify-between">
+                                                <span
+                                                    className={`inline-flex rounded-full px-3 py-1 text-xs font-bold ${String(event.activeTier || "").includes("4")
+                                                            ? "bg-red-100 text-red-700"
+                                                            : String(event.activeTier || "").includes("3")
+                                                                ? "bg-orange-100 text-orange-700"
+                                                                : "bg-emerald-100 text-emerald-700"
+                                                        }`}
+                                                >
+                                                    {event.activeTier || "Threshold Updated"}
+                                                </span>
+
+                                                <span className="text-xs font-medium text-text-muted">
+                                                    {event.changedAt
+                                                        ? new Date(event.changedAt).toLocaleString()
+                                                        : "No timestamp"}
+                                                </span>
+                                            </div>
+
+                                            <div className="grid gap-3 md:grid-cols-3">
+                                                <div>
+                                                    <p className="text-xs font-semibold uppercase tracking-wide text-text-muted">
+                                                        Region
+                                                    </p>
+                                                    <p className="text-sm font-semibold text-text-main">
+                                                        {REGION_LABELS[event.ops_region] ||
+                                                            event.ops_region ||
+                                                            "N/A"}
+                                                    </p>
+                                                </div>
+
+                                                <div>
+                                                    <p className="text-xs font-semibold uppercase tracking-wide text-text-muted">
+                                                        Demand
+                                                    </p>
+                                                    <p className="text-sm font-bold text-primary">
+                                                        {event.totalDemand ?? 0}
+                                                    </p>
+                                                </div>
+
+                                                <div>
+                                                    <p className="text-xs font-semibold uppercase tracking-wide text-text-muted">
+                                                        Status
+                                                    </p>
+                                                    <p className="text-sm font-semibold capitalize text-text-main">
+                                                        {event.status || "N/A"}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                         </section>
                     </div>
                 </main>

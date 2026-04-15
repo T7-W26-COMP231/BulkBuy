@@ -10,6 +10,12 @@ const STATUS_STYLES = {
     confirmed: "bg-green-100 text-green-700",
 };
 
+const COMPLIANCE_STYLES = {
+    compliant: "bg-emerald-100 text-emerald-700",
+    warning: "bg-amber-100 text-amber-700",
+    non_compliant: "bg-red-100 text-red-700",
+};
+
 const STATUS_DOT = {
     delivered: "bg-emerald-500",
     pending: "bg-amber-400",
@@ -17,6 +23,24 @@ const STATUS_DOT = {
     dispatched: "bg-blue-500",
     confirmed: "bg-green-500",
 };
+
+function getComplianceStatus(confirmationAge) {
+    if (confirmationAge == null) return "compliant";
+    if (confirmationAge > 7) return "non_compliant";
+    if (confirmationAge > 5) return "warning";
+    return "compliant";
+}
+
+function getComplianceLabel(status) {
+    switch (status) {
+        case "non_compliant":
+            return "Non-Compliant";
+        case "warning":
+            return "Warning";
+        default:
+            return "Compliant";
+    }
+}
 
 const SUPPLIER_OPTIONS = [
     { label: "All Suppliers", value: "" },
@@ -353,7 +377,7 @@ export default function AdminFulfillmentPage() {
                                 <table className="w-full min-w-[800px] text-left">
                                     <thead className="border-b border-neutral-light bg-neutral-light/40">
                                         <tr>
-                                            {["Order ID", "Item", "Supplier", "City", "Status", "Confirmation Age", ""].map((h) => (
+                                            {["Order ID", "Item", "Supplier", "City", "Status", "Confirmation Age", "Compliance", ""].map((h) => (
                                                 <th
                                                     key={h}
                                                     className="px-6 py-4 text-xs font-bold uppercase tracking-[0.14em] text-text-muted"
@@ -367,13 +391,14 @@ export default function AdminFulfillmentPage() {
                                     <tbody className="divide-y divide-neutral-light">
                                         {paginated.length === 0 ? (
                                             <tr>
-                                                <td colSpan={7} className="px-6 py-12 text-center text-sm text-text-muted">
+                                                <td colSpan={8} className="px-6 py-12 text-center text-sm text-text-muted">
                                                     No shipments found.
                                                 </td>
                                             </tr>
                                         ) : (
                                             paginated.map((row) => {
                                                 const isOverdue = row.confirmationAge != null && row.confirmationAge > 5;
+const complianceStatus = getComplianceStatus(row.confirmationAge);
                                                 return (
                                                     <tr
                                                         key={row.id}
@@ -411,6 +436,13 @@ export default function AdminFulfillmentPage() {
                                                             {row.confirmationAge != null
                                                                 ? `${row.confirmationAge} day${row.confirmationAge !== 1 ? "s" : ""}`
                                                                 : "N/A"}
+                                                                                          </td>
+                                                        <td className="px-6 py-5">
+                                                            <span
+                                                                className={`inline-flex rounded-full px-3 py-1 text-xs font-bold ${COMPLIANCE_STYLES[complianceStatus]}`}
+                                                            >
+                                                                {getComplianceLabel(complianceStatus)}
+                                                            </span>
                                                         </td>
                                                         <td className="px-6 py-5">
                                                             <button

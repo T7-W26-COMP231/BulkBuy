@@ -23,6 +23,7 @@ import PricingBracketsPage from "./pages/admin/PricingBracketsPage";
 import AdminQuotesReviewPage from "./pages/admin/AdminQuotesReviewPage";
 import CreateSalesWindowForm from "./pages/admin/CreateSalesWindowForm";
 import AdminSettingsPage from "./pages/admin/AdminSettingsPage";
+import AdminFulfillmentPage from "./pages/admin/AdminFulfillmentPage";
 
 import ProductDetailsPage from "./pages/customer/ProductDetailsPage";
 import ProductListPage from "./pages/customer/ProductListPage";
@@ -181,6 +182,7 @@ export default function App() {
         <Route path="/admin/supplier-quotes" element={<AdminRoute><AdminQuotesReviewPage /></AdminRoute>} />
         <Route path="/admin/sales-window" element={<AdminRoute><CreateSalesWindowForm /></AdminRoute>} />
         <Route path="/admin/settings" element={<AdminRoute><AdminSettingsPage /></AdminRoute>} />
+        <Route path="/admin/monitor-quotes" element={<AdminRoute><AdminFulfillmentPage /></AdminRoute>} />
 
         {/* General placeholder routes */}
         <Route path="/about" element={<PlaceholderPage title="About Us" />} />

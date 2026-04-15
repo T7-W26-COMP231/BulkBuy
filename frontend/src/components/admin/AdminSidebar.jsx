@@ -6,7 +6,7 @@ import AuthTabs from "../sign-in-up/AuthTabs.jsx";
 const sidebarItems = [
   { label: "Dashboard", icon: "dashboard", to: "/admin" },
   { label: "Product Catalog", icon: "inventory_2", to: "/admin/product-catalog" },
-  { label: "Bulk Orders", icon: "local_shipping", to: "/admin/bulk-orders" },
+  { label: "FulFillment", icon: "local_shipping", to: "/admin/monitor-quotes" },
   { label: "Supplier Quotes", icon: "request_quote", to: "/admin/supplier-quotes" },
   { label: "Pricing Brackets", icon: "sell", to: "/admin/pricing-brackets" },
   { label: "Sales Window", icon: "sell", to: "/admin/sales-window" },
@@ -44,7 +44,7 @@ function ToastAuthWrapper({ toastControls }) {
 
 export default function AdminSidebar({
   isMobileOpen = false,
-  onClose = () => {},
+  onClose = () => { },
 }) {
   const { user, signOut } = useAuth();
   const { showToast, clearAll } = useToast();
@@ -137,10 +137,9 @@ export default function AdminSidebar({
               end={item.to === "/admin"}
               onClick={handleNavClick}
               className={({ isActive }) =>
-                `flex items-center gap-4 rounded-2xl px-4 py-4 text-base font-semibold transition-all duration-200 ${
-                  isActive
-                    ? "bg-primary text-text-main shadow-sm"
-                    : "text-text-muted hover:bg-neutral-light hover:translate-x-1"
+                `flex items-center gap-4 rounded-2xl px-4 py-4 text-base font-semibold transition-all duration-200 ${isActive
+                  ? "bg-primary text-text-main shadow-sm"
+                  : "text-text-muted hover:bg-neutral-light hover:translate-x-1"
                 }`
               }
             >

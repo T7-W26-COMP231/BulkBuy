@@ -63,16 +63,6 @@ function getComplianceLabel(status) {
     }
 }
 
-const CITY_OPTIONS = [
-    { label: "All Cities", value: "" },
-    { label: "Toronto", value: "ON-TOR" },
-    { label: "Mississauga", value: "ON-MIS" },
-    { label: "Brampton", value: "ON-BRA" },
-    { label: "Vaughan", value: "ON-VAU" },
-    { label: "Markham", value: "ON-MAR" },
-    { label: "Richmond Hill", value: "ON-RHL" },
-    { label: "Oakville", value: "ON-OAK" },
-];
 
 const STATUS_OPTIONS = [
     { label: "All Status", value: "" },
@@ -89,7 +79,14 @@ const ITEMS_PER_PAGE = 5;
 function normalizeQuote(row) {
     return {
         id: row._id || row.id || `${row.supplyId || ""}-${row.itemId || ""}`,
-        orderId: row.orderId || row.supplyId || row.quoteId || "N/A",
+        orderId:
+            row.orderId ||
+            row.orderRef ||
+            row.referenceNumber ||
+            row.supplyId ||
+            row.quoteId ||
+            row._id ||
+            "N/A",
         product:
             row.productName ||
             row.product ||
@@ -236,6 +233,48 @@ export default function AdminFulfillmentPage() {
 
     const totalPages = Math.max(1, Math.ceil(totalResults / ITEMS_PER_PAGE));
 
+    const thresholdSummary = useMemo(() => {
+        const total = rows.length;
+
+        const warningCount = rows.filter((row) => {
+            const rule = findMatchingRule(row.supplierId, row.region);
+            return (
+                getComplianceStatus(
+                    row.confirmationAge,
+                    rule.warningAfterDays,
+                    rule.maxDeliveryDays
+                ) === "warning"
+            );
+        }).length;
+
+        const breachCount = rows.filter((row) => {
+            const rule = findMatchingRule(row.supplierId, row.region);
+            return (
+                getComplianceStatus(
+                    row.confirmationAge,
+                    rule.warningAfterDays,
+                    rule.maxDeliveryDays
+                ) === "non_compliant"
+            );
+        }).length;
+
+        const demandPercent =
+            total === 0 ? 0 : Math.min(100, Math.round(((warningCount + breachCount) / total) * 100));
+
+        return {
+            total,
+            warningCount,
+            breachCount,
+            demandPercent,
+            activeTier:
+                breachCount > 0
+                    ? "Critical Tier"
+                    : warningCount > 0
+                        ? "Elevated Tier"
+                        : "Normal Tier",
+        };
+    }, [rows, deliveryRules]);
+
     const hasActionRequired = useMemo(() => {
         return rows.some((row) => {
             const rule = findMatchingRule(row.supplierId, row.region);
@@ -246,17 +285,17 @@ export default function AdminFulfillmentPage() {
     const handleApply = () => {
         setCurrentPage(1);
         setAppliedSupplier(supplierFilter);
-        setAppliedCity(cityFilter);
+
         setAppliedRegion(regionFilter);
         setAppliedStatus(statusFilter);
     };
 
     const handleClear = () => {
         setSupplierFilter("");
-        setCityFilter("");
+        setRegionFilter("");
         setStatusFilter("");
         setAppliedSupplier("");
-        setAppliedCity("");
+        setAppliedRegion("");
         setAppliedStatus("");
         setCurrentPage(1);
     };
@@ -285,8 +324,58 @@ export default function AdminFulfillmentPage() {
                                 Fulfillment &amp; Delivery Monitoring
                             </h1>
                             <p className="mt-3 max-w-xl text-sm leading-7 text-white/60 md:text-base">
-                                Track approved quotes, delivery status, and supplier compliance across regions in real-time.
+                                Monitor threshold warnings, breached pricing tiers, and automated platform rule triggers across supplier regions in real-time.
                             </p>
+                        </section>
+
+                        <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+                            <div className="rounded-2xl border border-neutral-light bg-white p-5 shadow-sm">
+                                <p className="text-xs font-bold uppercase tracking-[0.14em] text-text-muted">
+                                    Current Demand Level
+                                </p>
+                                <p className="mt-3 text-3xl font-bold text-text-main">
+                                    {thresholdSummary.demandPercent}%
+                                </p>
+                                <p className="mt-2 text-sm text-text-muted">
+                                    Based on warning and breached thresholds in current filtered results.
+                                </p>
+                            </div>
+
+                            <div className="rounded-2xl border border-neutral-light bg-white p-5 shadow-sm">
+                                <p className="text-xs font-bold uppercase tracking-[0.14em] text-text-muted">
+                                    Active Pricing Tier
+                                </p>
+                                <p className="mt-3 text-2xl font-bold text-text-main">
+                                    {thresholdSummary.activeTier}
+                                </p>
+                                <p className="mt-2 text-sm text-text-muted">
+                                    Automatically derived from current threshold conditions.
+                                </p>
+                            </div>
+
+                            <div className="rounded-2xl border border-neutral-light bg-white p-5 shadow-sm">
+                                <p className="text-xs font-bold uppercase tracking-[0.14em] text-text-muted">
+                                    Threshold Warnings
+                                </p>
+                                <p className="mt-3 text-3xl font-bold text-amber-600">
+                                    {thresholdSummary.warningCount}
+                                </p>
+                                <p className="mt-2 text-sm text-text-muted">
+                                    Demand approaching configured threshold limits.
+                                </p>
+                            </div>
+
+                            <div className="rounded-2xl border border-neutral-light bg-white p-5 shadow-sm">
+                                <p className="text-xs font-bold uppercase tracking-[0.14em] text-text-muted">
+                                    Threshold Breaches
+                                </p>
+                                <p className="mt-3 text-3xl font-bold text-red-600">
+                                    {thresholdSummary.breachCount}
+                                </p>
+                                <p className="mt-2 text-sm text-text-muted">
+                                    Platform rules triggered by exceeded threshold conditions.
+                                </p>
+                            </div>
                         </section>
 
                         <section className="rounded-2xl border border-neutral-light bg-white p-5 shadow-sm">
@@ -310,7 +399,7 @@ export default function AdminFulfillmentPage() {
 
                                 <div className="flex flex-col gap-1.5">
                                     <label className="text-xs font-semibold uppercase tracking-wide text-text-muted">
-                                        City
+                                        Region
                                     </label>
                                     <select
                                         value={regionFilter}
@@ -384,11 +473,11 @@ export default function AdminFulfillmentPage() {
                             )}
                             {!loading && rows.length > 0 && (() => {
                                 const violations = rows.filter(row => {
-                                    const rule = findMatchingRule(row.supplierId, row.city);
+                                    const rule = findMatchingRule(row.supplierId, row.region);
                                     return getComplianceStatus(row.confirmationAge, rule.warningAfterDays, rule.maxDeliveryDays) === "non_compliant";
                                 });
                                 const warnings = rows.filter(row => {
-                                    const rule = findMatchingRule(row.supplierId, row.city);
+                                    const rule = findMatchingRule(row.supplierId, row.region);
                                     return getComplianceStatus(row.confirmationAge, rule.warningAfterDays, rule.maxDeliveryDays) === "warning";
                                 });
                                 if (violations.length === 0 && warnings.length === 0) return null;
@@ -417,7 +506,7 @@ export default function AdminFulfillmentPage() {
                                                 "Order ID",
                                                 "Item",
                                                 "Supplier",
-                                                "City",
+                                                "Region",
                                                 "Status",
                                                 "Confirmation Age",
                                                 "Compliance",
@@ -447,7 +536,7 @@ export default function AdminFulfillmentPage() {
                                             </tr>
                                         ) : (
                                             rows.map((row) => {
-                                                const rule = findMatchingRule(row.supplierId, row.city);
+                                                const rule = findMatchingRule(row.supplierId, row.region);
                                                 const isOverdue = row.confirmationAge != null && row.confirmationAge > rule.warningAfterDays;
                                                 const complianceStatus = getComplianceStatus(row.confirmationAge, rule.warningAfterDays, rule.maxDeliveryDays);
 
@@ -470,7 +559,7 @@ export default function AdminFulfillmentPage() {
                                                         </td>
 
                                                         <td className="px-6 py-5 text-sm text-text-muted">
-                                                            {row.cityLabel}
+                                                            {row.regionLabel}
                                                         </td>
 
                                                         <td className="px-6 py-5">

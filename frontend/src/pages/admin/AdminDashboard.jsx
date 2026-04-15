@@ -1,6 +1,7 @@
 import AdminSidebar from "../../components/admin/AdminSidebar";
 import AdminTopbar from "../../components/admin/AdminTopbar";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 
 // ── Stat Card ──────────────────────────────────────────────────────────────
@@ -38,6 +39,7 @@ const STATUS_STYLES = {
 // ── Dashboard ──────────────────────────────────────────────────────────────
 export default function AdminDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false); // ← add this
+  const navigate = useNavigate();
 
   const { accessToken } = useAuth();
 
@@ -205,16 +207,18 @@ export default function AdminDashboard() {
                       </p>
                     </div>
                   </div>
-
                   <div className="flex flex-col gap-3 lg:items-end">
                     <button
                       type="button"
+                      onClick={() => navigate("/admin/monitor-quotes")}
                       className="w-full rounded-2xl bg-primary px-6 py-4 text-base font-bold text-text-main transition hover:opacity-90 lg:max-w-[230px]"
                     >
                       View Full Status
                     </button>
+
                     <button
                       type="button"
+                      onClick={() => navigate("/admin/monitor-quotes")}
                       className="w-full rounded-2xl border border-white/20 bg-white/10 px-6 py-4 text-base font-bold text-white transition hover:bg-white/15 lg:max-w-[230px]"
                     >
                       System Diagnostics

@@ -691,69 +691,84 @@ export default function AdminFulfillmentPage() {
                                     No threshold changes found.
                                 </p>
                             ) : (
-                                <div className="space-y-3">
-                                    {thresholdEvents.map((event, index) => (
-                                        <div
-                                            key={event.orderId || index}
-                                            className="rounded-2xl border border-neutral-light bg-white px-5 py-4 shadow-sm"
-                                        >
-                                            <div className="mb-3 flex items-center justify-between">
-                                                <span
-                                                    className={`inline-flex rounded-full px-3 py-1 text-xs font-bold ${String(event.activeTier || "").includes("4")
-                                                            ? "bg-red-100 text-red-700"
-                                                            : String(event.activeTier || "").includes("3")
-                                                                ? "bg-orange-100 text-orange-700"
-                                                                : "bg-emerald-100 text-emerald-700"
-                                                        }`}
-                                                >
-                                                    {event.activeTier || "Threshold Updated"}
-                                                </span>
+ <div className="overflow-x-auto">
+    <table className="w-full min-w-[720px] text-left">
+        <thead className="border-b border-neutral-light bg-neutral-light/40">
+            <tr>
+                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wide text-text-muted">
+                    Timestamp
+                </th>
+                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wide text-text-muted">
+                    Tier
+                </th>
+                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wide text-text-muted">
+                    Region
+                </th>
+                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wide text-text-muted">
+                    Demand
+                </th>
+                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wide text-text-muted">
+                    Affected Item
+                </th>
+                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wide text-text-muted">
+                    Status
+                </th>
+            </tr>
+        </thead>
 
-                                                <span className="text-xs font-medium text-text-muted">
-                                                    {event.changedAt
-                                                        ? new Date(event.changedAt).toLocaleString()
-                                                        : "No timestamp"}
-                                                </span>
-                                            </div>
+        <tbody className="divide-y divide-neutral-light">
+            {thresholdEvents.map((event, index) => (
+                <tr
+                    key={event.orderId || index}
+                    className="transition hover:bg-neutral-light/30"
+                >
+                    <td className="px-4 py-4 text-sm text-text-muted">
+                        {event.changedAt
+                            ? new Date(event.changedAt).toLocaleString()
+                            : "No timestamp"}
+                    </td>
 
-                                            <div className="grid gap-3 md:grid-cols-3">
-                                                <div>
-                                                    <p className="text-xs font-semibold uppercase tracking-wide text-text-muted">
-                                                        Region
-                                                    </p>
-                                                    <p className="text-sm font-semibold text-text-main">
-                                                        {REGION_LABELS[event.ops_region] ||
-                                                            event.ops_region ||
-                                                            "N/A"}
-                                                    </p>
-                                                </div>
+                    <td className="px-4 py-4">
+                        <span
+                            className={`inline-flex rounded-full px-3 py-1 text-xs font-bold ${
+                                String(event.activeTier || "").includes("4")
+                                    ? "bg-red-100 text-red-700"
+                                    : String(event.activeTier || "").includes("3")
+                                    ? "bg-orange-100 text-orange-700"
+                                    : "bg-emerald-100 text-emerald-700"
+                            }`}
+                        >
+                            {event.activeTier || "Updated"}
+                        </span>
+                    </td>
 
-                                                <div>
-                                                    <p className="text-xs font-semibold uppercase tracking-wide text-text-muted">
-                                                        Demand
-                                                    </p>
-                                                    <p className="text-sm font-bold text-primary">
-                                                        {event.totalDemand ?? 0}
-                                                    </p>
-                                                </div>
+                    <td className="px-4 py-4 text-sm font-semibold text-text-main">
+                        {REGION_LABELS[event.ops_region] ||
+                            event.ops_region ||
+                            "N/A"}
+                    </td>
 
-                                                <div>
-                                                    <p className="text-xs font-semibold uppercase tracking-wide text-text-muted">
-                                                        Status
-                                                    </p>
-                                                    <p className="text-sm font-semibold capitalize text-text-main">
-                                                        {event.status || "N/A"}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                        </section>
-                    </div>
-                </main>
-            </div>
-        </div>
-    );
+                    <td className="px-4 py-4 text-sm font-bold text-primary">
+                        {event.totalDemand ?? 0}
+                    </td>
+
+                    <td className="px-4 py-4 text-sm text-text-main">
+                        #{event.orderId || "N/A"}
+                    </td>
+
+                    <td className="px-4 py-4 text-sm font-semibold capitalize text-text-main">
+                        {event.status || "N/A"}
+                    </td>
+                </tr>
+            ))}
+        </tbody>
+    </table>
+</div>
+)}
+</section>
+</div>
+</main>
+</div>
+</div>
+);
 }

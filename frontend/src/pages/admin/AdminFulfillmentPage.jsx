@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import AdminSidebar from "../../components/admin/AdminSidebar";
 import AdminTopbar from "../../components/admin/AdminTopbar";
 import { getApprovedQuotes } from "../../api/supplyApi";
+import { getDeliveryRules } from "../../api/DeliveryRuleApi";
 
 const STATUS_STYLES = {
     delivered: "bg-emerald-100 text-emerald-700",

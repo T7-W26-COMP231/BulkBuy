@@ -2,10 +2,13 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../contexts/AuthContext.jsx";
 import { useToast } from "../contexts/ToastProvider.jsx";
+import { useAuth, STORAGE_KEY } from "../contexts/AuthContext.jsx";
+import { useOpsContext } from "../contexts/OpsContext";
 import AuthTabs from "./sign-in-up/AuthTabs.jsx";
 import "./Navbar.css";
+import { jwtDecode } from "jwt-decode";
+
 
 export default function Navbar({
   detectedCity,
@@ -29,9 +32,55 @@ export default function Navbar({
 
   const headerRef = useRef(null);
 
-  const { user, accessToken, signOut } = useAuth();
+  //const { user, accessToken, signOut } = useAuth();
   const { showToast, clearAll } = useToast();
+
+
   const navigate = useNavigate();
+
+
+  // Auth + Ops contexts  
+  const { user, accessToken, signOut } = useAuth() ?? {};
+  const { msgCenter, setMsgCenter, jwtExpiryTracker } = useOpsContext() ?? {};
+
+  useEffect(() => {
+    const checkToken = async () => {
+      const token = accessToken || localStorage.getItem(STORAGE_KEY);
+      if (!token) return;
+
+      try {
+        const { exp } = jwtDecode(token);
+        const timeLeft = (exp * 1000) - Date.now();
+
+        // 1. CLEAR existing timer to prevent "race conditions" 
+        // (e.g., if a new token was just issued)
+        if (jwtExpiryTracker.current) {
+          clearTimeout(jwtExpiryTracker.current);
+        }
+
+        if (timeLeft <= 0) {
+          await handleSignOut();
+        } else {
+          // 2. SET the system-wide timer
+          jwtExpiryTracker.current = setTimeout(async () => {
+            await handleSignOut();
+          }, timeLeft);
+        }
+      } catch (error) {
+        console.error("Invalid token:", error);
+        await handleSignOut();
+      }
+    };
+
+    checkToken();
+
+    // NOTE: We REMOVED the return/clearTimeout here.
+    // This allows the timer to survive even if this component unmounts.
+  }, [accessToken]);
+
+  useEffect(() => {
+    if (detectedCity) setSelected(detectedCity);
+  }, [detectedCity]);
 
   // Sync selected when detectedCity or activeRegionCode changes
   useEffect(() => {
@@ -107,11 +156,16 @@ export default function Navbar({
   };
 
   const handleSignOut = async () => {
+    if (jwtExpiryTracker.current) {
+      clearTimeout(jwtExpiryTracker.current);
+      jwtExpiryTracker.current = null;
+    }
     try {
       await signOut();
       try { clearAll(); } catch { }
       showToast(() => <div style={{ padding: 12 }}><strong>Signed out</strong></div>, { value: "TR", IsToStack: false, duration: 2500, toastName: "Signed out", mt: '2em' });
       window.location.href = "/";
+      setProfileOpen((s) => !s);
     } catch (err) {
       console.error("signOut error:", err);
       showToast(() => (
@@ -275,10 +329,21 @@ export default function Navbar({
           </div>
 
           <div className="flex gap-3">
-            <Link to="/notifications" className="flex h-10 w-10 items-center justify-center rounded-lg bg-neutral-light transition-colors hover:bg-primary/20" aria-label="Notifications">
-              <span className="material-symbols-outlined">notifications</span>
-            </Link>
 
+            <Link to="/notifications"
+              className="relative flex h-10 w-10 items-center justify-center rounded-lg bg-neutral-light transition-colors hover:bg-primary/20"
+              aria-label="Notifications">
+              <span className="material-symbols-outlined">notifications</span>
+
+              {/* The Badge */}
+              {
+                msgCenter.notifs.length > 0 &&
+                <span className="absolute bottom-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
+                  {msgCenter.notifs.length}
+                </span>
+              }
+
+            </Link>
             {window.location.pathname !== "/cart" &&
               <Link to={accessToken ? '/cart' : '/'} className="flex h-10 w-10 items-center justify-center rounded-lg bg-neutral-light transition-colors hover:bg-primary/20" aria-label="Cart">
                 <span className="material-symbols-outlined">shopping_cart</span>

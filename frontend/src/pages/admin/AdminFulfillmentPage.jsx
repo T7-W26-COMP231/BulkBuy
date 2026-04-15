@@ -20,6 +20,12 @@ const COMPLIANCE_STYLES = {
     warning: "bg-amber-100 text-amber-700",
     non_compliant: "bg-red-100 text-red-700",
 };
+const REGION_LABELS = {
+    "north-america:ca-on": "Ontario",
+    "north-america:ca-qc": "Quebec",
+    "north-america:ca-bc": "British Columbia",
+    "north-america:ca-ab": "Alberta",
+};
 
 const STATUS_DOT = {
     delivered: "bg-emerald-500",
@@ -29,6 +35,14 @@ const STATUS_DOT = {
     confirmed: "bg-green-500",
     accepted: "bg-green-500",
 };
+
+const REGION_OPTIONS = [
+    { label: "All Regions", value: "" },
+    { label: "Ontario", value: "north-america:ca-on" },
+    { label: "Quebec", value: "north-america:ca-qc" },
+    { label: "British Columbia", value: "north-america:ca-bc" },
+    { label: "Alberta", value: "north-america:ca-ab" },
+];
 
 // WITH
 function getComplianceStatus(confirmationAge, warningAfterDays = 5, maxDeliveryDays = 7) {
@@ -92,15 +106,10 @@ function normalizeQuote(row) {
             row.supplierId?._id ||
             row.supplierId ||
             "",
-        city:
-            row.deliveryLocation?.city ||
-            row.ops_region ||
-            "",
-        cityLabel:
-            row.deliveryLocation?.city ||
-            row.cityLabel ||
-            row.ops_region ||
-            "N/A",
+        region:
+            row.ops_region || "",
+        regionLabel:
+            REGION_LABELS[row.ops_region] || row.ops_region || "N/A",
         status:
             row.deliveryStatus ||
             row.status ||
@@ -123,11 +132,12 @@ export default function AdminFulfillmentPage() {
     const [deliveryRules, setDeliveryRules] = useState([]);
 
     const [supplierFilter, setSupplierFilter] = useState("");
-    const [cityFilter, setCityFilter] = useState("");
+    const [regionFilter, setRegionFilter] = useState("");
+    const [appliedRegion, setAppliedRegion] = useState("");
     const [statusFilter, setStatusFilter] = useState("");
 
     const [appliedSupplier, setAppliedSupplier] = useState("");
-    const [appliedCity, setAppliedCity] = useState("");
+
     const [appliedStatus, setAppliedStatus] = useState("");
 
     const [currentPage, setCurrentPage] = useState(1);
@@ -137,13 +147,13 @@ export default function AdminFulfillmentPage() {
     const [supplierOptions, setSupplierOptions] = useState([
         { label: "All Suppliers", value: "" },
     ]);
+
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
 
     useEffect(() => {
         fetchApprovedQuotes();
-    }, [currentPage, appliedSupplier, appliedCity, appliedStatus]);
-
+    }, [currentPage, appliedSupplier, appliedRegion, appliedStatus]);
     useEffect(() => {
         getDeliveryRules()
             .then(result => setDeliveryRules(result?.items || []))
@@ -175,7 +185,7 @@ export default function AdminFulfillmentPage() {
                 limit: ITEMS_PER_PAGE,
                 status: appliedStatus || undefined,
                 supplierId: appliedSupplier || undefined,
-                ops_region: appliedCity || undefined,
+                ops_region: appliedRegion || undefined,
                 ageDays: 5,
             };
 
@@ -228,7 +238,7 @@ export default function AdminFulfillmentPage() {
 
     const hasActionRequired = useMemo(() => {
         return rows.some((row) => {
-            const rule = findMatchingRule(row.supplierId, row.city);
+            const rule = findMatchingRule(row.supplierId, row.region);
             return row.confirmationAge != null && row.confirmationAge > rule.warningAfterDays;
         });
     }, [rows, deliveryRules]);
@@ -237,6 +247,7 @@ export default function AdminFulfillmentPage() {
         setCurrentPage(1);
         setAppliedSupplier(supplierFilter);
         setAppliedCity(cityFilter);
+        setAppliedRegion(regionFilter);
         setAppliedStatus(statusFilter);
     };
 
@@ -302,12 +313,12 @@ export default function AdminFulfillmentPage() {
                                         City
                                     </label>
                                     <select
-                                        value={cityFilter}
-                                        onChange={(e) => setCityFilter(e.target.value)}
+                                        value={regionFilter}
+                                        onChange={(e) => setRegionFilter(e.target.value)}
                                         className="rounded-xl border border-neutral-light bg-white px-4 py-2.5 text-sm text-text-main outline-none focus:border-primary"
                                     >
-                                        {CITY_OPTIONS.map((o) => (
-                                            <option key={o.value || "all-city"} value={o.value}>
+                                        {REGION_OPTIONS.map((o) => (
+                                            <option key={o.value || "all-region"} value={o.value}>
                                                 {o.label}
                                             </option>
                                         ))}

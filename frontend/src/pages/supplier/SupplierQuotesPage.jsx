@@ -60,7 +60,7 @@ export default function SupplierQuotesPage() {
       try {
         const token = JSON.parse(localStorage.getItem("app_auth_session_v1"))?.accessToken;
         const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/regionmaps`,
+          `${import.meta.env.VITE_API_URL}/api/rmaps`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         const result = await response.json();

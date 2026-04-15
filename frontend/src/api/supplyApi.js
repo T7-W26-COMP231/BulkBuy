@@ -76,3 +76,11 @@ export const fetchSupplierDemandStatus = async () => {
 
 export const fetchAggregationById = (aggregationId) =>
   api.get(`/aggrs/${aggregationId}`);
+
+export const getApprovedQuotes = async (params = {}) => {
+  const response = await api.get("/supls/approved-quotes", {
+    params,
+  });
+
+  return response.data;
+};

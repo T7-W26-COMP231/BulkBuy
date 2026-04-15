@@ -1,6 +1,7 @@
-import { useState, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import AdminSidebar from "../../components/admin/AdminSidebar";
 import AdminTopbar from "../../components/admin/AdminTopbar";
+import { getApprovedQuotes } from "../../api/supplyApi";
 
 const STATUS_STYLES = {
     delivered: "bg-emerald-100 text-emerald-700",
@@ -8,6 +9,7 @@ const STATUS_STYLES = {
     delayed: "bg-red-100 text-red-700",
     dispatched: "bg-blue-100 text-blue-700",
     confirmed: "bg-green-100 text-green-700",
+    accepted: "bg-green-100 text-green-700",
 };
 
 const COMPLIANCE_STYLES = {
@@ -22,6 +24,7 @@ const STATUS_DOT = {
     delayed: "bg-red-500",
     dispatched: "bg-blue-500",
     confirmed: "bg-green-500",
+    accepted: "bg-green-500",
 };
 
 function getComplianceStatus(confirmationAge) {
@@ -42,13 +45,6 @@ function getComplianceLabel(status) {
     }
 }
 
-const SUPPLIER_OPTIONS = [
-    { label: "All Suppliers", value: "" },
-    { label: "Global Logistics Corp", value: "Global Logistics Corp" },
-    { label: "Prime Delivery Systems", value: "Prime Delivery Systems" },
-    { label: "Swift Freight Solutions", value: "Swift Freight Solutions" },
-];
-
 const CITY_OPTIONS = [
     { label: "All Cities", value: "" },
     { label: "Toronto", value: "ON-TOR" },
@@ -67,132 +63,56 @@ const STATUS_OPTIONS = [
     { label: "Delayed", value: "delayed" },
     { label: "Dispatched", value: "dispatched" },
     { label: "Confirmed", value: "confirmed" },
-];
-
-const MOCK_SHIPMENTS = [
-    {
-        id: "1",
-        orderId: "ORD-90234",
-        product: "Industrial Grade Steel Pipes",
-        supplier: "Global Logistics Corp",
-        city: "ON-TOR",
-        cityLabel: "Toronto",
-        status: "delivered",
-        confirmationAge: 2,
-    },
-    {
-        id: "2",
-        orderId: "ORD-88120",
-        product: "HVAC Cooling Units (x12)",
-        supplier: "Prime Delivery Systems",
-        city: "ON-MIS",
-        cityLabel: "Mississauga",
-        status: "pending",
-        confirmationAge: 8,
-    },
-    {
-        id: "3",
-        orderId: "ORD-90511",
-        product: "Electrical Wiring Kits",
-        supplier: "Swift Freight Solutions",
-        city: "ON-BRA",
-        cityLabel: "Brampton",
-        status: "delayed",
-        confirmationAge: 4,
-    },
-    {
-        id: "4",
-        orderId: "ORD-87442",
-        product: "Solar Panel Array A-Grade",
-        supplier: "Global Logistics Corp",
-        city: "ON-VAU",
-        cityLabel: "Vaughan",
-        status: "pending",
-        confirmationAge: 6,
-    },
-    {
-        id: "5",
-        orderId: "ORD-96600",
-        product: "Bulk Concrete Mix (500t)",
-        supplier: "Prime Delivery Systems",
-        city: "ON-MAR",
-        cityLabel: "Markham",
-        status: "delivered",
-        confirmationAge: 1,
-    },
-    {
-        id: "6",
-        orderId: "ORD-91023",
-        product: "Reinforced Aluminum Sheets",
-        supplier: "Swift Freight Solutions",
-        city: "ON-RHL",
-        cityLabel: "Richmond Hill",
-        status: "confirmed",
-        confirmationAge: 3,
-    },
-    {
-        id: "7",
-        orderId: "ORD-85317",
-        product: "Commercial Grade Lumber",
-        supplier: "Global Logistics Corp",
-        city: "ON-OAK",
-        cityLabel: "Oakville",
-        status: "dispatched",
-        confirmationAge: 7,
-    },
-    {
-        id: "8",
-        orderId: "ORD-93840",
-        product: "Copper Piping Bundle",
-        supplier: "Prime Delivery Systems",
-        city: "ON-TOR",
-        cityLabel: "Toronto",
-        status: "delayed",
-        confirmationAge: 9,
-    },
-    {
-        id: "9",
-        orderId: "ORD-79214",
-        product: "LED Flood Lights (x50)",
-        supplier: "Swift Freight Solutions",
-        city: "ON-MIS",
-        cityLabel: "Mississauga",
-        status: "delivered",
-        confirmationAge: 1,
-    },
-    {
-        id: "10",
-        orderId: "ORD-88765",
-        product: "Insulation Foam Boards",
-        supplier: "Global Logistics Corp",
-        city: "ON-BRA",
-        cityLabel: "Brampton",
-        status: "pending",
-        confirmationAge: 5,
-    },
-    {
-        id: "11",
-        orderId: "ORD-92150",
-        product: "Hydraulic Pumps (x4)",
-        supplier: "Prime Delivery Systems",
-        city: "ON-VAU",
-        cityLabel: "Vaughan",
-        status: "confirmed",
-        confirmationAge: 2,
-    },
-    {
-        id: "12",
-        orderId: "ORD-80431",
-        product: "Fire Suppression Systems",
-        supplier: "Swift Freight Solutions",
-        city: "ON-MAR",
-        cityLabel: "Markham",
-        status: "dispatched",
-        confirmationAge: 6,
-    },
+    { label: "Accepted", value: "accepted" },
 ];
 
 const ITEMS_PER_PAGE = 5;
+
+function normalizeQuote(row) {
+    return {
+        id: row._id || row.id || `${row.supplyId || ""}-${row.itemId || ""}`,
+        orderId: row.orderId || row.supplyId || row.quoteId || "N/A",
+        product:
+            row.productName ||
+            row.product ||
+            row.itemName ||
+            row?.meta?.productName ||
+            "Unknown Product",
+        supplier:
+            row.supplierName ||
+            row.supplier ||
+            row?.supplierId?.companyName ||
+            row?.supplierId?.name ||
+            "Unknown Supplier",
+        supplierId:
+            row.supplierId?._id ||
+            row.supplierId ||
+            "",
+        city:
+            row.deliveryLocation?.city ||
+            row.ops_region ||
+            "",
+        cityLabel:
+            row.deliveryLocation?.city ||
+            row.cityLabel ||
+            row.ops_region ||
+            "N/A",
+        status:
+            row.deliveryStatus ||
+            row.status ||
+            "pending",
+        confirmationAge:
+            typeof row.confirmationAge === "number"
+                ? row.confirmationAge
+                : null,
+        isOverdue:
+            typeof row.isOverdue === "boolean"
+                ? row.isOverdue
+                : typeof row.confirmationAge === "number"
+                    ? row.confirmationAge > 5
+                    : false,
+    };
+}
 
 export default function AdminFulfillmentPage() {
     const [mobileOpen, setMobileOpen] = useState(false);
@@ -207,25 +127,89 @@ export default function AdminFulfillmentPage() {
 
     const [currentPage, setCurrentPage] = useState(1);
 
-    const filtered = useMemo(() => {
-        return MOCK_SHIPMENTS.filter((s) => {
-            if (appliedSupplier && s.supplier !== appliedSupplier) return false;
-            if (appliedCity && s.city !== appliedCity) return false;
-            if (appliedStatus && s.status !== appliedStatus) return false;
-            return true;
-        });
-    }, [appliedSupplier, appliedCity, appliedStatus]);
+    const [rows, setRows] = useState([]);
+    const [totalResults, setTotalResults] = useState(0);
+    const [supplierOptions, setSupplierOptions] = useState([
+        { label: "All Suppliers", value: "" },
+    ]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
 
-    const totalResults = filtered.length;
+    useEffect(() => {
+        fetchApprovedQuotes();
+    }, [currentPage, appliedSupplier, appliedCity, appliedStatus]);
+
+    async function fetchApprovedQuotes() {
+        try {
+            setLoading(true);
+            setError("");
+
+            const params = {
+                page: currentPage,
+                limit: ITEMS_PER_PAGE,
+                status: appliedStatus || undefined,
+                supplierId: appliedSupplier || undefined,
+                ops_region: appliedCity || undefined,
+                ageDays: 5,
+            };
+
+            const result = await getApprovedQuotes(params);
+
+            const rawRows =
+                result?.data ||
+                result?.rows ||
+                result?.quotes ||
+                result?.items ||
+                [];
+
+            const normalizedRows = rawRows.map(normalizeQuote);
+
+            setRows(normalizedRows);
+
+            setTotalResults(
+                result?.total ||
+                result?.pagination?.total ||
+                normalizedRows.length
+            );
+
+            const supplierMap = new Map();
+            normalizedRows.forEach((row) => {
+                if (row.supplierId || row.supplier) {
+                    supplierMap.set(
+                        row.supplierId || row.supplier,
+                        row.supplier
+                    );
+                }
+            });
+
+            setSupplierOptions([
+                { label: "All Suppliers", value: "" },
+                ...Array.from(supplierMap.entries()).map(([value, label]) => ({
+                    value,
+                    label,
+                })),
+            ]);
+        } catch (err) {
+            console.error("Failed to fetch approved quotes:", err);
+            setError(
+                err?.response?.data?.message ||
+                err?.message ||
+                "Failed to load approved quotes."
+            );
+            setRows([]);
+            setTotalResults(0);
+        } finally {
+            setLoading(false);
+        }
+    }
+
     const totalPages = Math.max(1, Math.ceil(totalResults / ITEMS_PER_PAGE));
-    const paginated = filtered.slice(
-        (currentPage - 1) * ITEMS_PER_PAGE,
-        currentPage * ITEMS_PER_PAGE
-    );
 
-    const hasActionRequired = filtered.some(
-        (s) => s.confirmationAge != null && s.confirmationAge > 5
-    );
+    const hasActionRequired = useMemo(() => {
+        return rows.some(
+            (s) => s.confirmationAge != null && s.confirmationAge > 5
+        );
+    }, [rows]);
 
     const handleApply = () => {
         setCurrentPage(1);
@@ -238,34 +222,28 @@ export default function AdminFulfillmentPage() {
         setSupplierFilter("");
         setCityFilter("");
         setStatusFilter("");
-        setCurrentPage(1);
         setAppliedSupplier("");
         setAppliedCity("");
         setAppliedStatus("");
+        setCurrentPage(1);
     };
 
     return (
         <div className="flex h-screen overflow-hidden bg-neutral-light/30">
-            {/* Sidebar */}
             <AdminSidebar
                 isMobileOpen={mobileOpen}
                 onClose={() => setMobileOpen(false)}
             />
 
-            {/* Main */}
             <div className="flex flex-1 flex-col overflow-hidden">
-                {/* Topbar */}
                 <AdminTopbar
                     title="Fulfillment"
                     searchPlaceholder="Search orders, suppliers, or locations..."
                     onMenuClick={() => setMobileOpen(true)}
                 />
 
-                {/* Page content */}
                 <main className="flex-1 overflow-y-auto p-6">
                     <div className="flex flex-col gap-6">
-
-                        {/* Hero */}
                         <section className="overflow-hidden rounded-3xl bg-[#0d3028] px-8 py-8 text-white shadow-lg">
                             <span className="mb-3 inline-flex items-center rounded-full border border-[#a8f0c6]/30 bg-[#a8f0c6]/10 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-[#a8f0c6]">
                                 Operational Insight
@@ -278,7 +256,6 @@ export default function AdminFulfillmentPage() {
                             </p>
                         </section>
 
-                        {/* Filters */}
                         <section className="rounded-2xl border border-neutral-light bg-white p-5 shadow-sm">
                             <div className="flex flex-wrap items-end gap-4">
                                 <div className="flex flex-col gap-1.5">
@@ -290,8 +267,10 @@ export default function AdminFulfillmentPage() {
                                         onChange={(e) => setSupplierFilter(e.target.value)}
                                         className="rounded-xl border border-neutral-light bg-white px-4 py-2.5 text-sm text-text-main outline-none focus:border-primary"
                                     >
-                                        {SUPPLIER_OPTIONS.map((o) => (
-                                            <option key={o.value} value={o.value}>{o.label}</option>
+                                        {supplierOptions.map((o) => (
+                                            <option key={o.value || "all"} value={o.value}>
+                                                {o.label}
+                                            </option>
                                         ))}
                                     </select>
                                 </div>
@@ -306,7 +285,9 @@ export default function AdminFulfillmentPage() {
                                         className="rounded-xl border border-neutral-light bg-white px-4 py-2.5 text-sm text-text-main outline-none focus:border-primary"
                                     >
                                         {CITY_OPTIONS.map((o) => (
-                                            <option key={o.value} value={o.value}>{o.label}</option>
+                                            <option key={o.value || "all-city"} value={o.value}>
+                                                {o.label}
+                                            </option>
                                         ))}
                                     </select>
                                 </div>
@@ -321,7 +302,9 @@ export default function AdminFulfillmentPage() {
                                         className="rounded-xl border border-neutral-light bg-white px-4 py-2.5 text-sm text-text-main outline-none focus:border-primary"
                                     >
                                         {STATUS_OPTIONS.map((o) => (
-                                            <option key={o.value} value={o.value}>{o.label}</option>
+                                            <option key={o.value || "all-status"} value={o.value}>
+                                                {o.label}
+                                            </option>
                                         ))}
                                     </select>
                                 </div>
@@ -345,10 +328,12 @@ export default function AdminFulfillmentPage() {
                             </div>
                         </section>
 
-                        {/* Table */}
                         <section className="overflow-hidden rounded-2xl border border-neutral-light bg-white shadow-sm">
                             <div className="flex items-center justify-between border-b border-neutral-light px-6 py-4">
-                                <h2 className="text-base font-bold text-text-main">Shipment Tracking</h2>
+                                <h2 className="text-base font-bold text-text-main">
+                                    Shipment Tracking
+                                </h2>
+
                                 <div className="flex items-center gap-4">
                                     {hasActionRequired && (
                                         <span className="flex items-center gap-1.5 text-xs text-text-muted">
@@ -356,28 +341,28 @@ export default function AdminFulfillmentPage() {
                                             Action Required (&gt; 5 days)
                                         </span>
                                     )}
-                                    <div className="flex overflow-hidden rounded-xl border border-neutral-light">
-                                        <button
-                                            type="button"
-                                            className="bg-neutral-light/60 px-4 py-1.5 text-xs font-semibold text-text-main"
-                                        >
-                                            Table View
-                                        </button>
-                                        <button
-                                            type="button"
-                                            className="px-4 py-1.5 text-xs font-semibold text-text-muted transition hover:bg-neutral-light/30"
-                                        >
-                                            Map View
-                                        </button>
-                                    </div>
                                 </div>
                             </div>
+
+                            {error && (
+                                <div className="border-b border-red-100 bg-red-50 px-6 py-3 text-sm text-red-700">
+                                    {error}
+                                </div>
+                            )}
 
                             <div className="overflow-x-auto">
                                 <table className="w-full min-w-[800px] text-left">
                                     <thead className="border-b border-neutral-light bg-neutral-light/40">
                                         <tr>
-                                            {["Order ID", "Item", "Supplier", "City", "Status", "Confirmation Age", "Compliance", ""].map((h) => (
+                                            {[
+                                                "Order ID",
+                                                "Item",
+                                                "Supplier",
+                                                "City",
+                                                "Status",
+                                                "Confirmation Age",
+                                                "Compliance",
+                                            ].map((h) => (
                                                 <th
                                                     key={h}
                                                     className="px-6 py-4 text-xs font-bold uppercase tracking-[0.14em] text-text-muted"
@@ -389,16 +374,26 @@ export default function AdminFulfillmentPage() {
                                     </thead>
 
                                     <tbody className="divide-y divide-neutral-light">
-                                        {paginated.length === 0 ? (
+                                        {loading ? (
                                             <tr>
-                                                <td colSpan={8} className="px-6 py-12 text-center text-sm text-text-muted">
+                                                <td colSpan={7} className="px-6 py-12 text-center text-sm text-text-muted">
+                                                    Loading approved quotes...
+                                                </td>
+                                            </tr>
+                                        ) : rows.length === 0 ? (
+                                            <tr>
+                                                <td colSpan={7} className="px-6 py-12 text-center text-sm text-text-muted">
                                                     No shipments found.
                                                 </td>
                                             </tr>
                                         ) : (
-                                            paginated.map((row) => {
-                                                const isOverdue = row.confirmationAge != null && row.confirmationAge > 5;
-const complianceStatus = getComplianceStatus(row.confirmationAge);
+                                            rows.map((row) => {
+                                                const isOverdue =
+                                                    row.isOverdue ||
+                                                    (row.confirmationAge != null && row.confirmationAge > 5);
+
+                                                const complianceStatus = getComplianceStatus(row.confirmationAge);
+
                                                 return (
                                                     <tr
                                                         key={row.id}
@@ -408,15 +403,19 @@ const complianceStatus = getComplianceStatus(row.confirmationAge);
                                                         <td className="px-6 py-5 font-mono text-xs font-semibold text-text-muted">
                                                             #{row.orderId}
                                                         </td>
+
                                                         <td className="px-6 py-5 text-sm text-text-main">
                                                             {row.product}
                                                         </td>
+
                                                         <td className="px-6 py-5 text-sm font-semibold text-[#0f6e56]">
                                                             {row.supplier}
                                                         </td>
+
                                                         <td className="px-6 py-5 text-sm text-text-muted">
                                                             {row.cityLabel}
                                                         </td>
+
                                                         <td className="px-6 py-5">
                                                             <span
                                                                 className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold capitalize ${STATUS_STYLES[row.status] ?? "bg-slate-100 text-slate-700"
@@ -429,6 +428,7 @@ const complianceStatus = getComplianceStatus(row.confirmationAge);
                                                                 {row.status.charAt(0).toUpperCase() + row.status.slice(1)}
                                                             </span>
                                                         </td>
+
                                                         <td
                                                             className={`px-6 py-5 text-sm font-semibold ${isOverdue ? "text-amber-600" : "text-text-main"
                                                                 }`}
@@ -436,21 +436,15 @@ const complianceStatus = getComplianceStatus(row.confirmationAge);
                                                             {row.confirmationAge != null
                                                                 ? `${row.confirmationAge} day${row.confirmationAge !== 1 ? "s" : ""}`
                                                                 : "N/A"}
-                                                                                          </td>
+                                                        </td>
+
                                                         <td className="px-6 py-5">
                                                             <span
-                                                                className={`inline-flex rounded-full px-3 py-1 text-xs font-bold ${COMPLIANCE_STYLES[complianceStatus]}`}
+                                                                className={`inline-flex rounded-full px-3 py-1 text-xs font-bold ${COMPLIANCE_STYLES[complianceStatus]
+                                                                    }`}
                                                             >
                                                                 {getComplianceLabel(complianceStatus)}
                                                             </span>
-                                                        </td>
-                                                        <td className="px-6 py-5">
-                                                            <button
-                                                                type="button"
-                                                                className="rounded-lg border border-neutral-light px-2 py-1 text-base text-text-muted transition hover:bg-neutral-light"
-                                                            >
-                                                                ⋯
-                                                            </button>
                                                         </td>
                                                     </tr>
                                                 );
@@ -460,15 +454,10 @@ const complianceStatus = getComplianceStatus(row.confirmationAge);
                                 </table>
                             </div>
 
-                            {/* Pagination */}
                             <div className="flex items-center justify-between border-t border-neutral-light px-6 py-4">
                                 <p className="text-sm text-text-muted">
-                                    Showing{" "}
-                                    {totalResults === 0
-                                        ? 0
-                                        : (currentPage - 1) * ITEMS_PER_PAGE + 1}{" "}
-                                    to {Math.min(currentPage * ITEMS_PER_PAGE, totalResults)} of{" "}
-                                    {totalResults} shipments
+                                    Showing {totalResults === 0 ? 0 : (currentPage - 1) * ITEMS_PER_PAGE + 1} to{" "}
+                                    {Math.min(currentPage * ITEMS_PER_PAGE, totalResults)} of {totalResults} shipments
                                 </p>
 
                                 <div className="flex items-center gap-1">
@@ -506,7 +495,6 @@ const complianceStatus = getComplianceStatus(row.confirmationAge);
                                 </div>
                             </div>
                         </section>
-
                     </div>
                 </main>
             </div>

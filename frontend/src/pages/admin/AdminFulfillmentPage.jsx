@@ -3,6 +3,8 @@ import AdminSidebar from "../../components/admin/AdminSidebar";
 import AdminTopbar from "../../components/admin/AdminTopbar";
 import { getApprovedQuotes } from "../../api/supplyApi";
 import { getDeliveryRules } from "../../api/DeliveryRuleApi";
+// ADD this import alongside existing imports
+import { getSuppliers } from "../../api/UserApi";
 
 const STATUS_STYLES = {
     delivered: "bg-emerald-100 text-emerald-700",
@@ -59,7 +61,7 @@ const CITY_OPTIONS = [
 ];
 
 const STATUS_OPTIONS = [
-    { label: "All Statuses", value: "" },
+    { label: "All Status", value: "" },
     { label: "Delivered", value: "delivered" },
     { label: "Pending", value: "pending" },
     { label: "Delayed", value: "delayed" },
@@ -148,6 +150,21 @@ export default function AdminFulfillmentPage() {
             .catch(() => { });
     }, []);
 
+    useEffect(() => {
+        getSuppliers()
+            .then(result => {
+                const users = result?.items || [];
+                setSupplierOptions([
+                    { label: "All Suppliers", value: "" },
+                    ...users.map(u => ({
+                        value: u.userId || u._id,
+                        label: `${u.firstName} ${u.lastName}`,
+                    }))
+                ]);
+            })
+            .catch(() => { });
+    }, []);
+
     async function fetchApprovedQuotes() {
         try {
             setLoading(true);
@@ -181,23 +198,7 @@ export default function AdminFulfillmentPage() {
                 normalizedRows.length
             );
 
-            const supplierMap = new Map();
-            normalizedRows.forEach((row) => {
-                if (row.supplierId || row.supplier) {
-                    supplierMap.set(
-                        row.supplierId || row.supplier,
-                        row.supplier
-                    );
-                }
-            });
 
-            setSupplierOptions([
-                { label: "All Suppliers", value: "" },
-                ...Array.from(supplierMap.entries()).map(([value, label]) => ({
-                    value,
-                    label,
-                })),
-            ]);
         } catch (err) {
             console.error("Failed to fetch approved quotes:", err);
             setError(

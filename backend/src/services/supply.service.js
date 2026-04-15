@@ -12,7 +12,7 @@
 // - hardDeleteById
 //
 // All methods accept opts = { actor, correlationId, session, ... } where appropriate.
-
+const UserRepo = require("../repositories/user.repo");
 const createError = require('http-errors');
 const SupplyRepo = require('../repositories/supply.repo');
 const AggregationRepo = require('../repositories/aggregation.repo');
@@ -380,14 +380,12 @@ class SupplyService {
     });
 
     // ── Enrich each supply with delivery metadata ──────────────────────
-    let enriched = (result.items || []).map((supply) => {
+    let enriched = await Promise.all((result.items || []).map(async (supply) => {
       const safe = sanitize(supply);
 
-      // Days since last update
       const updatedMs = safe.updatedAt ? new Date(safe.updatedAt).getTime() : nowMs;
       const confirmationAge = Math.floor((nowMs - updatedMs) / MS_PER_DAY);
 
-      // Derive delivery status
       let deliveryStatus = "unknown";
       if (safe.status === "delivered" || safe.status === "received") {
         deliveryStatus = "delivered";
@@ -397,26 +395,41 @@ class SupplyService {
         deliveryStatus = "on_track";
       }
 
-      // Pull product name from metadata.quoteDraft
       const metadata = safe.metadata;
-      const quoteDraft =
-        metadata instanceof Map
-          ? metadata.get("quoteDraft")
-          : metadata?.quoteDraft;
+      const quoteDraft = metadata instanceof Map
+        ? metadata.get("quoteDraft")
+        : metadata?.quoteDraft;
 
       const productName =
         quoteDraft?.productName ||
         safe.items?.[0]?.meta?.productName ||
         "N/A";
 
+      // lookup supplier name
+      let supplierName = "Unknown Supplier";
+      try {
+        if (safe.supplierId) {
+          let supplier = await UserRepo.findByUserId(safe.supplierId);
+          if (!supplier) {
+            supplier = await UserRepo.findById(safe.supplierId, { includeDeleted: true });
+          }
+          if (supplier) {
+            supplierName = `${supplier.firstName || ""} ${supplier.lastName || ""}`.trim();
+          }
+        }
+      } catch (err) {
+        console.log("Supplier lookup error:", err.message);
+      }
+
       return {
         ...safe,
         productName,
+        supplierName,
         confirmationAge,
         deliveryStatus,
         isOverdue: deliveryStatus === "overdue",
       };
-    });
+    }));
 
     // ── Optional: filter to overdue only ──────────────────────────────
     if (opts.overdueOnly) {

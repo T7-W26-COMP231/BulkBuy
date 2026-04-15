@@ -10,7 +10,10 @@ export default function SupplierQuotesPage() {
   const [numberOfBulkUnits, setNumberOfBulkUnits] = useState("");
   const [requestedQuantity, setRequestedQuantity] = useState("");
   const [leadTimeDays, setLeadTimeDays] = useState("");
+  // Add state at the top with other delivery states
+  const [regions, setRegions] = useState([]);
 
+  const [opsRegion, setOpsRegion] = useState("");
   // ── Discount scheme rows ───────────────────────────────────────────
   const [discountRows, setDiscountRows] = useState([
     { id: 1, minQty: "", discountPercent: "", description: "" },
@@ -51,6 +54,24 @@ export default function SupplierQuotesPage() {
     if (itemState.itemTitle) setProductName(itemState.itemTitle);
     if (itemState.itemSku) setSkuId(itemState.itemSku);
   }, [itemState]);
+
+  useEffect(() => {
+    const fetchRegions = async () => {
+      try {
+        const token = JSON.parse(localStorage.getItem("app_auth_session_v1"))?.accessToken;
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/api/regionmaps`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        const result = await response.json();
+        const data = result?.data || result?.items || result?.regions || [];
+        setRegions(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error("Failed to fetch regions:", err);
+      }
+    };
+    fetchRegions();
+  }, []);
 
   // ── Load or create supply document ────────────────────────────────
   useEffect(() => {
@@ -122,6 +143,7 @@ export default function SupplierQuotesPage() {
           setDeliveryRegion(dl.region || "");
           setDeliveryPostalCode(dl.postalCode || "");
           setDeliveryCountry(dl.country || "CA");
+          setOpsRegion(supply.ops_region || "");
         }
 
         // ── Restore from existing quote ─────────────────────────
@@ -256,6 +278,8 @@ export default function SupplierQuotesPage() {
               postalCode: deliveryPostalCode,
               country: deliveryCountry,
             },
+            // ✅ auto-derive ops_region from city
+            ops_region: opsRegion,
           }),
         }
       );
@@ -520,6 +544,27 @@ export default function SupplierQuotesPage() {
                 <div>
                   <label className="mb-2 block text-sm font-medium text-text-main">Country</label>
                   <input type="text" value={deliveryCountry} placeholder="e.g. CA" readOnly={isReviewLocked} onChange={(e) => { setDeliveryCountry(e.target.value); setHasSavedDraft(false); }} className="w-full rounded-xl border border-neutral-light px-4 py-3" />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="mb-2 block text-sm font-medium text-text-main">
+                    Operational Region
+                  </label>
+                  <select
+                    value={opsRegion}
+                    disabled={isReviewLocked}
+                    onChange={(e) => { setOpsRegion(e.target.value); setHasSavedDraft(false); }}
+                    className="w-full rounded-xl border border-neutral-light bg-white px-4 py-3"
+                  >
+                    <option value="">Select operational region</option>
+                    {regions.map(r => (
+                      <option key={r.code} value={r.code}>
+                        {r.displayName || r.code}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="mt-2 text-xs text-text-muted">
+                    Select the operational delivery region for admin tracking.
+                  </p>
                 </div>
               </div>
             </div>

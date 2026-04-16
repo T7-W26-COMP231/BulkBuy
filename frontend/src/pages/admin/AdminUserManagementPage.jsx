@@ -212,7 +212,7 @@ export default function AdminUserManagementPage() {
         prev?._id === id ? { ...prev, status: newStatus } : prev
       );
     } catch (err) {
-      console.error("Failed to update user status", err);
+      console.error("Failed to update user status", err.response?.data);
     }
   };
 

@@ -147,7 +147,7 @@ export function initSocket(accessToken = null, opts = {}) {
   currentOpts = Object.assign({}, opts);
   currentToken = accessToken || currentToken || null;
 
-  const url = opts.url || process.env.REACT_APP_WS_URL || "http://localhost:5000";
+  const url = opts.url || import.meta.env.VITE_API_URL || "http://localhost:5000";
   const path = opts.path || "/socket.io";
   // Do not limit reconnection attempts: keep connection alive for lifetime of client
   const reconnectionDelay = opts.reconnectionDelay ?? 1000;
@@ -186,7 +186,7 @@ export function initSocket(accessToken = null, opts = {}) {
       const latest = _latestAuthFromOpts();
       const latestToken = latest && (latest.accessToken || latest.token) ? (latest.accessToken || latest.token) : (currentToken || _tokenFromStorage());
       if (latestToken) socket.auth = { token: latestToken };
-    } catch (_) {}
+    } catch (_) { }
   });
 
   /* -------------------------
@@ -302,17 +302,17 @@ export function initSocket(accessToken = null, opts = {}) {
     } catch (e) {
       console.debug("[ socket 🔴 ] system:update handler error", e && e.message);
     }
-  }); 
-  
-  
+  });
+
+
   socket.on("Region-UI-Update:RefreshActivity", (payload) => {
     try {
       console.info("[ socket 🟢 ] Region-UI-Update:RefreshActivity update-", payload);
     } catch (e) {
       console.debug("[ socket 🔴 ] Region-UI-Update:RefreshActivity handler error", e && e.message);
     }
-  }); 
-  
+  });
+
   socket.on("UI-Update:RefreshActivity", (payload) => {
     try {
       console.info("[ socket 🟢 ] UI-Update:RefreshActivity update-", payload);
@@ -329,7 +329,7 @@ export function initSocket(accessToken = null, opts = {}) {
     try {
       const getOpsContext = typeof currentOpts.getOpsContext === "function" ? currentOpts.getOpsContext : () => ({});
       const ops = getOpsContext() || {};
-      const { wsuproducts = 0, setWsuproducts = () => {}, wsuorders = 0, setWsuorders = () => {} } = ops;
+      const { wsuproducts = 0, setWsuproducts = () => { }, wsuorders = 0, setWsuorders = () => { } } = ops;
 
       console.debug("[ socket 🟢 ] ui:update received", cmd && cmd.action);
 
@@ -407,7 +407,7 @@ export function identifyUserAfterLogin({ token, userId } = {}, opts = {}) {
     if (token) {
       socket.auth = { token };
       try {
-        socket.emit("identifyUser", { token, userId , ops_region : opts.ops_region || null }, (resp) => {
+        socket.emit("identifyUser", { token, userId, ops_region: opts.ops_region || null }, (resp) => {
           console.debug("[ socket 🟢 ] identifyUser ack", resp);
           if (resp && resp.ok && resp.userId) {
             socket.user = { _id: resp.userId };
@@ -434,7 +434,7 @@ export function identifyUserAfterLogin({ token, userId } = {}, opts = {}) {
   if (!socket.connected) {
     socket.once("connect", () => doIdentify());
     if (token) socket.auth = { token };
-    try { socket.connect(); } catch (_) {}
+    try { socket.connect(); } catch (_) { }
     return socket;
   }
 

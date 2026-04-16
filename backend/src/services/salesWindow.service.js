@@ -1004,6 +1004,10 @@ class SalesWindowService {
                 itemId: it.itemId,
                 productId: p.productId,
                 windowId: sourceWindowId,
+                pricing_tiers: it.pricing_tiers ?? [],
+                pricing_snapshots: it.pricing_snapshots ?? [],
+                qtySold: it.qtySold ?? 0,
+                qtyAvailable: it.qtyAvailable ?? 0,
               };
               itemMap.set(iid, itemStub);
               itemsOut.push(itemStub);

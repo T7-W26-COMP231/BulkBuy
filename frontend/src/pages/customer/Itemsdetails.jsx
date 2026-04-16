@@ -299,7 +299,9 @@ export default function ItemDetail() {
     const currency = item.pricingCurrency ?? item.price?.[0]?.currency ?? "USD";
     const stock = item.inventory?.stock ?? 0;
     const images = item.images?.length > 0 ? item.images : [item.metadata?.imageUrl].filter(Boolean);
-    const tiers = item.pricingTiers ?? [];
+    //    const tiers = item.pricingTiers ?? [];
+    const tiers = item.pricingTiers ?? item.pricing_tiers ?? [];
+
 
     // Tabs — add "items" tab when viewing a product
     const tabs = isProduct
@@ -464,7 +466,7 @@ export default function ItemDetail() {
                                                         </span>
                                                     )}
                                                 </span>
-                                                <span className="font-bold">${tier.price.toFixed(2)} / unit</span>
+                                                <span className="font-bold">${(tier.price ?? tier.unitPrice ?? 0).toFixed(2)} / unit</span>
                                             </div>
                                         );
                                     })}
@@ -488,7 +490,8 @@ export default function ItemDetail() {
                             </div>
                             {nextTier ? (
                                 <p className="mt-1 text-xs text-primary">
-                                    ↗ Add more units to unlock ${nextTier.price.toFixed(2)} pricing at {nextTier.minQty} units!
+                                    //↗ Add more units to unlock ${nextTier.price.toFixed(2)} pricing at {nextTier.minQty} units!
+                                    ↗ Add more units to unlock ${(nextTier.price ?? nextTier.unitPrice ?? 0).toFixed(2)} pricing at {nextTier.minQty} units!
                                 </p>
                             ) : activeTier ? (
                                 <p className="mt-1 text-xs text-primary">

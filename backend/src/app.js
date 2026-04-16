@@ -60,8 +60,22 @@ const createApp = async () => {
   }
 
   // CORS 
+  // app.use(cors({
+  //   origin: config.clientUrl,
+  //   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  //   allowedHeaders: ['Content-Type', 'Authorization', 'authorization', 'X-Correlation-Id', 'x-correlation-id'],
+  //   credentials: true
+  // }));
+
   app.use(cors({
-    origin: config.clientUrl,
+    origin: function (origin, callback) {
+      const allowed = (config.clientUrl || '').split(',').map(u => u.trim());
+      if (!origin || allowed.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'authorization', 'X-Correlation-Id', 'x-correlation-id'],
     credentials: true
@@ -108,10 +122,26 @@ const createApp = async () => {
   app.use('/api/delivery-rules', deliveryRuleRoutes);
   app.use('/api/comms', messageRoutes);
 
-  // 404 handler
+
+  // Serve frontend in production
+  if (config.nodeEnv === 'production') {
+    const path = require('path');
+    const fs = require('fs');
+    const frontendDist = path.join(__dirname, '../../frontend/dist');
+
+    if (fs.existsSync(frontendDist)) {
+      app.use(express.static(frontendDist));
+      app.get('*', (req, res) => {
+        res.sendFile(path.join(frontendDist, 'index.html'));
+      });
+    }
+  }
+
+  // 404 handler (API routes only)
   app.use((req, res, next) => {
     res.status(404).json({ success: false, error: 'Not Found' });
   });
+
 
   // Centralized error handler
   app.use(errorMiddleware);

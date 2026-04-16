@@ -210,6 +210,8 @@ export default function AdminUserManagementPage() {
     }
 
     try {
+      //status updates immediately in the table after API success
+      // setUsers updates local state so no re-fetch needed after suspend/activate
       await api.patch(`/users/${id}`, { status: newStatus });
       setUsers((prev) =>
         prev.map((u) => (u._id === id ? { ...u, status: newStatus } : u))

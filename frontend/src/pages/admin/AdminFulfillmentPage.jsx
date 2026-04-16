@@ -150,10 +150,16 @@ export default function AdminFulfillmentPage() {
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
-
     useEffect(() => {
         fetchApprovedQuotes();
         fetchThresholdEvents();
+
+        const interval = setInterval(() => {
+            fetchApprovedQuotes();
+            fetchThresholdEvents();
+        }, 10000); // live refresh every 10 seconds
+
+        return () => clearInterval(interval);
     }, [currentPage, appliedSupplier, appliedRegion, appliedStatus]);
 
     useEffect(() => {
@@ -691,106 +697,102 @@ export default function AdminFulfillmentPage() {
                                     No threshold changes found.
                                 </p>
                             ) : (
- <div className="overflow-x-auto">
-    <table className="w-full min-w-[720px] text-left">
-        <thead className="border-b border-neutral-light bg-neutral-light/40">
-            <tr>
-                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wide text-text-muted">
-                    Timestamp
-                </th>
-                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wide text-text-muted">
-                    Tier
-                </th>
-                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wide text-text-muted">
-                    Region
-                </th>
-                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wide text-text-muted">
-                    Demand
-                </th>
-                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wide text-text-muted">
-                    Affected Item
-                </th>
-                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wide text-text-muted">
-                    Status
-                </th>
-            </tr>
-        </thead>
+                                <div className="overflow-x-auto">
+                                    <table className="w-full min-w-[720px] text-left">
+                                        <thead className="border-b border-neutral-light bg-neutral-light/40">
+                                            <tr>
+                                                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wide text-text-muted">
+                                                    Timestamp
+                                                </th>
+                                                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wide text-text-muted">
+                                                    Tier
+                                                </th>
+                                                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wide text-text-muted">
+                                                    Region
+                                                </th>
+                                                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wide text-text-muted">
+                                                    Demand
+                                                </th>
+                                                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wide text-text-muted">
+                                                    Affected Item
+                                                </th>
+                                                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wide text-text-muted">
+                                                    Status
+                                                </th>
+                                            </tr>
+                                        </thead>
 
-        <tbody className="divide-y divide-neutral-light">
-            {thresholdEvents.map((event, index) => (
-                <tr
-    key={event.orderId || index}
-    className={`transition hover:bg-neutral-light/30 ${
-        String(event.activeTier || "").includes("4")
-            ? "bg-red-50"
-            : String(event.activeTier || "").includes("3")
-            ? "bg-amber-50"
-            : ""
-    }`}
->
-    <td className="px-4 py-4 text-sm text-text-muted">
-        {event.changedAt
-            ? new Date(event.changedAt).toLocaleString()
-            : "No timestamp"}
-    </td>
+                                        <tbody className="divide-y divide-neutral-light">
+                                            {thresholdEvents.map((event, index) => (
+                                                <tr
+                                                    key={event.orderId || index}
+                                                    className={`transition hover:bg-neutral-light/30 ${String(event.activeTier || "").includes("4")
+                                                            ? "bg-red-50"
+                                                            : String(event.activeTier || "").includes("3")
+                                                                ? "bg-amber-50"
+                                                                : ""
+                                                        }`}
+                                                >
+                                                    <td className="px-4 py-4 text-sm text-text-muted">
+                                                        {event.changedAt
+                                                            ? new Date(event.changedAt).toLocaleString()
+                                                            : "No timestamp"}
+                                                    </td>
 
-    <td className="px-4 py-4">
-        <span
-            className={`inline-flex rounded-full px-3 py-1 text-xs font-bold ${
-                String(event.activeTier || "").includes("4")
-                    ? "bg-red-100 text-red-700"
-                    : String(event.activeTier || "").includes("3")
-                    ? "bg-orange-100 text-orange-700"
-                    : "bg-emerald-100 text-emerald-700"
-            }`}
-        >
-            {event.activeTier || "Updated"}
-        </span>
-    </td>
+                                                    <td className="px-4 py-4">
+                                                        <span
+                                                            className={`inline-flex rounded-full px-3 py-1 text-xs font-bold ${String(event.activeTier || "").includes("4")
+                                                                    ? "bg-red-100 text-red-700"
+                                                                    : String(event.activeTier || "").includes("3")
+                                                                        ? "bg-orange-100 text-orange-700"
+                                                                        : "bg-emerald-100 text-emerald-700"
+                                                                }`}
+                                                        >
+                                                            {event.activeTier || "Updated"}
+                                                        </span>
+                                                    </td>
 
-    <td className="px-4 py-4 text-sm font-semibold text-text-main">
-        {REGION_LABELS[event.ops_region] ||
-            event.ops_region ||
-            "N/A"}
-    </td>
+                                                    <td className="px-4 py-4 text-sm font-semibold text-text-main">
+                                                        {REGION_LABELS[event.ops_region] ||
+                                                            event.ops_region ||
+                                                            "N/A"}
+                                                    </td>
 
-    <td
-        className={`px-4 py-4 text-sm font-bold ${
-            String(event.activeTier || "").includes("4")
-                ? "text-red-600"
-                : "text-primary"
-        }`}
-    >
-        {event.totalDemand ?? 0}
-    </td>
+                                                    <td
+                                                        className={`px-4 py-4 text-sm font-bold ${String(event.activeTier || "").includes("4")
+                                                                ? "text-red-600"
+                                                                : "text-primary"
+                                                            }`}
+                                                    >
+                                                        {event.totalDemand ?? 0}
+                                                    </td>
 
-    <td className="px-4 py-4 text-sm text-text-main">
-        #{event.orderId || "N/A"}
-    </td>
+                                                    <td className="px-4 py-4 text-sm text-text-main">
+                                                        #{event.orderId || "N/A"}
+                                                    </td>
 
-    <td className="px-4 py-4">
-        <span
-            className={`inline-flex rounded-full px-3 py-1 text-xs font-bold ${
-                String(event.activeTier || "").includes("4")
-                    ? "bg-red-100 text-red-700"
-                    : "bg-slate-100 text-slate-700"
-            }`}
-        >
-            {String(event.activeTier || "").includes("4")
-                ? "Threshold Breach"
-                : event.status || "N/A"}
-        </span>
-    </td>
-</tr>
-            ))}
-        </tbody>
-    </table>
-</div>
-)}
-</section>
-</div>
-</main>
-</div>
-</div>
-);
+                                                    <td className="px-4 py-4">
+                                                        <span
+                                                            className={`inline-flex rounded-full px-3 py-1 text-xs font-bold ${String(event.activeTier || "").includes("4")
+                                                                    ? "bg-red-100 text-red-700"
+                                                                    : "bg-slate-100 text-slate-700"
+                                                                }`}
+                                                        >
+                                                            {String(event.activeTier || "").includes("4")
+                                                                ? "Threshold Breach"
+                                                                : event.status || "N/A"}
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
+                        </section>
+                    </div>
+                </main>
+            </div>
+        </div>
+    );
 }

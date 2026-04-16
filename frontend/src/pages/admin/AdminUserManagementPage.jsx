@@ -1,79 +1,70 @@
+import { useEffect, useState } from "react";
 import AdminSidebar from "../../components/admin/AdminSidebar";
 import AdminTopbar from "../../components/admin/AdminTopbar";
-import { useMemo, useState } from "react";
+import api from "../../api/api";
 
-const mockUsers = [
-  {
-    id: "U-1001",
-    name: "Sarah Jenkins",
-    role: "Customer",
-    email: "sarah.j@example.com",
-    status: "Active",
-    avatar: "https://i.pravatar.cc/100?img=32",
-  },
-  {
-    id: "U-1002",
-    name: "Michael Ross",
-    role: "Supplier",
-    email: "m.ross@logistics.net",
-    status: "Active",
-    avatar: "https://i.pravatar.cc/100?img=15",
-  },
-  {
-    id: "U-1003",
-    name: "Alicia Gomez",
-    role: "Customer",
-    email: "alicia.gomez@email.com",
-    status: "Suspended",
-    avatar: "https://i.pravatar.cc/100?img=48",
-  },
-  {
-    id: "U-1004",
-    name: "Daniel Reed",
-    role: "Supplier",
-    email: "daniel@reedwholesale.com",
-    status: "Active",
-    avatar: "https://i.pravatar.cc/100?img=12",
-  },
-];
-
+const LIMIT = 25;
 const filters = ["All", "Customers", "Suppliers", "Suspended"];
 
 export default function AdminUserManagementPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [activeFilter, setActiveFilter] = useState("All");
-  const [users, setUsers] = useState(mockUsers);
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
 
-  const filteredUsers = useMemo(() => {
-    return users.filter((user) => {
-      const matchesSearch =
-        user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.id.toLowerCase().includes(searchTerm.toLowerCase());
+  // Fetch from API — re-runs when page, searchTerm, or activeFilter changes
+  useEffect(() => {
+    const fetchUsers = async () => {
+      setLoading(true);
+      try {
+        const roleFilter =
+          activeFilter === "Customers" ? { role: "customer" } :
+            activeFilter === "Suppliers" ? { role: "supplier" } :
+              activeFilter === "Suspended" ? { role: { $in: ["customer", "supplier"] }, status: "suspended" } :
+                { role: { $in: ["customer", "supplier"] } };
 
-      const matchesFilter =
-        activeFilter === "All" ||
-        (activeFilter === "Customers" && user.role === "Customer") ||
-        (activeFilter === "Suppliers" && user.role === "Supplier") ||
-        (activeFilter === "Suspended" && user.status === "Suspended");
+        const res = await api.get(
+          `/users?filter=${encodeURIComponent(JSON.stringify(roleFilter))}&page=${page}&limit=${LIMIT}`
+        );
+        setUsers(res.data.items);
+        setTotal(res.data.total);
+      } catch (err) {
+        console.error("Failed to fetch users", err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-      return matchesSearch && matchesFilter;
-    });
-  }, [users, searchTerm, activeFilter]);
+    // Debounce search so we don't fire on every keystroke
+    const debounce = setTimeout(fetchUsers, searchTerm ? 400 : 0);
+    return () => clearTimeout(debounce);
+  }, [page, searchTerm, activeFilter]);
 
-  const toggleUserStatus = (id) => {
-    setUsers((prev) =>
-      prev.map((user) =>
-        user.id === id
-          ? {
-              ...user,
-              status: user.status === "Active" ? "Suspended" : "Active",
-            }
-          : user
-      )
-    );
+  // Reset to page 1 whenever filter or search changes
+  useEffect(() => {
+    setPage(1);
+  }, [searchTerm, activeFilter]);
+
+  // API already handles filtering — no client-side filter needed
+  const filteredUsers = users;
+
+  // Call API to suspend or activate, then update local state
+  const toggleUserStatus = async (id, currentStatus) => {
+    const newStatus = currentStatus === "active" ? "suspended" : "active";
+    try {
+      await api.patch(`/users/${id}`, { status: newStatus });
+      setUsers((prev) =>
+        prev.map((u) => (u._id === id ? { ...u, status: newStatus } : u))
+      );
+    } catch (err) {
+      console.error("Failed to update user status", err);
+    }
   };
+
+  const totalPages = Math.max(1, Math.ceil(total / LIMIT));
 
   return (
     <div className="min-h-screen bg-background-light text-text-main">
@@ -91,6 +82,7 @@ export default function AdminUserManagementPage() {
 
           <main className="flex-1 px-6 py-8 md:px-8 lg:px-10">
             <div className="mx-auto flex max-w-7xl flex-col gap-5">
+
               {/* Hero Banner */}
               <section className="overflow-hidden rounded-3xl bg-[#083b2d] px-6 py-7 text-white shadow-lg md:px-8 md:py-8">
                 <div className="grid gap-8 lg:grid-cols-[1.4fr_320px] lg:items-center">
@@ -104,7 +96,6 @@ export default function AdminUserManagementPage() {
                       ecosystem.
                     </p>
                   </div>
-
                   <div className="flex flex-col gap-3 lg:items-end">
                     <button
                       type="button"
@@ -112,7 +103,6 @@ export default function AdminUserManagementPage() {
                     >
                       View Documentation
                     </button>
-
                     <button
                       type="button"
                       className="w-full rounded-2xl border border-white/20 bg-white/10 px-6 py-4 text-base font-bold text-white transition hover:bg-white/15 lg:max-w-[230px]"
@@ -139,21 +129,19 @@ export default function AdminUserManagementPage() {
                 </div>
               </section>
 
-              {/* Filters */}
+              {/* Filter tabs */}
               <section className="flex flex-wrap gap-3">
                 {filters.map((filter) => {
                   const isActive = activeFilter === filter;
-
                   return (
                     <button
                       key={filter}
                       type="button"
                       onClick={() => setActiveFilter(filter)}
-                      className={`rounded-full px-5 py-2.5 text-sm font-bold transition ${
-                        isActive
-                          ? "bg-primary text-text-main"
-                          : "bg-neutral-light text-text-muted hover:bg-neutral-light/80"
-                      }`}
+                      className={`rounded-full px-5 py-2.5 text-sm font-bold transition ${isActive
+                        ? "bg-primary text-text-main"
+                        : "bg-neutral-light text-text-muted hover:bg-neutral-light/80"
+                        }`}
                     >
                       {filter}
                     </button>
@@ -167,92 +155,82 @@ export default function AdminUserManagementPage() {
                   <table className="w-full min-w-[900px] text-left">
                     <thead className="border-b border-neutral-light bg-neutral-light/40">
                       <tr>
-                        <th className="px-6 py-4 text-xs font-bold uppercase tracking-[0.16em] text-text-muted">
-                          Name
-                        </th>
-                        <th className="px-6 py-4 text-xs font-bold uppercase tracking-[0.16em] text-text-muted">
-                          Role
-                        </th>
-                        <th className="px-6 py-4 text-xs font-bold uppercase tracking-[0.16em] text-text-muted">
-                          Email
-                        </th>
-                        <th className="px-6 py-4 text-xs font-bold uppercase tracking-[0.16em] text-text-muted">
-                          Status
-                        </th>
-                        <th className="px-6 py-4 text-right text-xs font-bold uppercase tracking-[0.16em] text-text-muted">
-                          Actions
-                        </th>
+                        <th className="px-6 py-4 text-xs font-bold uppercase tracking-[0.16em] text-text-muted">Name</th>
+                        <th className="px-6 py-4 text-xs font-bold uppercase tracking-[0.16em] text-text-muted">Role</th>
+                        <th className="px-6 py-4 text-xs font-bold uppercase tracking-[0.16em] text-text-muted">Email</th>
+                        <th className="px-6 py-4 text-xs font-bold uppercase tracking-[0.16em] text-text-muted">Status</th>
+                        <th className="px-6 py-4 text-right text-xs font-bold uppercase tracking-[0.16em] text-text-muted">Actions</th>
                       </tr>
                     </thead>
 
                     <tbody className="divide-y divide-neutral-light">
-                      {filteredUsers.length > 0 ? (
+                      {loading ? (
+                        <tr>
+                          <td colSpan={5} className="px-6 py-10 text-center text-sm text-text-muted">
+                            Loading users...
+                          </td>
+                        </tr>
+                      ) : filteredUsers.length > 0 ? (
                         filteredUsers.map((user) => (
-                          <tr
-                            key={user.id}
-                            className="transition hover:bg-neutral-light/40"
-                          >
+                          <tr key={user._id} className="transition hover:bg-neutral-light/40">
+
+                            {/* Name + Avatar */}
                             <td className="px-6 py-5">
                               <div className="flex items-center gap-3">
                                 <img
                                   src={user.avatar}
-                                  alt={user.name}
+                                  alt={user.firstName}
                                   className="h-12 w-12 rounded-full object-cover"
                                 />
                                 <div>
                                   <p className="text-sm font-semibold text-text-main">
-                                    {user.name}
+                                    {user.firstName} {user.lastName}
                                   </p>
-                                  <p className="mt-0.5 text-xs text-text-muted">
-                                    {user.id}
-                                  </p>
+                                  <p className="mt-0.5 text-xs text-text-muted">{user.userId}</p>
                                 </div>
                               </div>
                             </td>
 
+                            {/* Role */}
                             <td className="px-6 py-5 text-sm font-medium text-text-main">
-                              {user.role}
+                              {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
                             </td>
 
+                            {/* Email */}
                             <td className="px-6 py-5 text-sm text-text-muted">
-                              {user.email}
+                              {user.emails?.[0]?.address || "—"}
                             </td>
 
+                            {/* Status badge */}
                             <td className="px-6 py-5">
                               <span
-                                className={`inline-flex rounded-lg px-3 py-1 text-xs font-bold ${
-                                  user.status === "Active"
-                                    ? "bg-emerald-100 text-emerald-700"
-                                    : "bg-red-100 text-red-600"
-                                }`}
+                                className={`inline-flex rounded-lg px-3 py-1 text-xs font-bold ${user.status === "active"
+                                  ? "bg-emerald-100 text-emerald-700"
+                                  : "bg-red-100 text-red-600"
+                                  }`}
                               >
-                                {user.status}
+                                {user.status.charAt(0).toUpperCase() + user.status.slice(1)}
                               </span>
                             </td>
 
+                            {/* Suspend / Activate */}
                             <td className="px-6 py-5 text-right">
                               <button
                                 type="button"
-                                onClick={() => toggleUserStatus(user.id)}
-                                className={`text-sm font-bold transition ${
-                                  user.status === "Active"
-                                    ? "text-red-500 hover:text-red-600"
-                                    : "text-emerald-600 hover:text-emerald-700"
-                                }`}
+                                onClick={() => toggleUserStatus(user._id, user.status)}
+                                className={`text-sm font-bold transition ${user.status === "active"
+                                  ? "text-red-500 hover:text-red-600"
+                                  : "text-emerald-600 hover:text-emerald-700"
+                                  }`}
                               >
-                                {user.status === "Active"
-                                  ? "Suspend"
-                                  : "Activate"}
+                                {user.status === "active" ? "Suspend" : "Activate"}
                               </button>
                             </td>
                           </tr>
                         ))
                       ) : (
                         <tr>
-                          <td
-                            colSpan={5}
-                            className="px-6 py-10 text-center text-sm text-text-muted"
-                          >
+                          <td colSpan={5} className="px-6 py-10 text-center text-sm text-text-muted">
                             No users found
                           </td>
                         </tr>
@@ -261,51 +239,53 @@ export default function AdminUserManagementPage() {
                   </table>
                 </div>
 
-                {/* Footer */}
+                {/* Pagination footer */}
                 <div className="flex flex-col gap-3 border-t border-neutral-light px-6 py-5 md:flex-row md:items-center md:justify-between">
                   <p className="text-sm text-text-muted">
-                    Showing 1 to {filteredUsers.length} of {users.length} results
+                    Showing {total === 0 ? 0 : (page - 1) * LIMIT + 1} to{" "}
+                    {Math.min(page * LIMIT, total)} of {total} results
                   </p>
 
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
-                      className="flex h-10 w-10 items-center justify-center rounded-xl border border-neutral-light bg-white text-text-muted transition hover:bg-neutral-light/40"
+                      onClick={() => setPage((p) => Math.max(1, p - 1))}
+                      disabled={page === 1}
+                      className="flex h-10 w-10 items-center justify-center rounded-xl border border-neutral-light bg-white text-text-muted transition hover:bg-neutral-light/40 disabled:opacity-40"
                     >
-                      <span className="material-symbols-outlined text-[18px]">
-                        chevron_left
-                      </span>
+                      <span className="material-symbols-outlined text-[18px]">chevron_left</span>
                     </button>
+
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                      <button
+                        key={p}
+                        type="button"
+                        onClick={() => setPage(p)}
+                        className={`flex h-10 w-10 items-center justify-center rounded-xl text-sm font-bold transition ${p === page
+                          ? "bg-primary text-text-main"
+                          : "border border-neutral-light bg-white text-text-muted hover:bg-neutral-light/40"
+                          }`}
+                      >
+                        {p}
+                      </button>
+                    ))}
 
                     <button
                       type="button"
-                      className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-sm font-bold text-text-main"
+                      onClick={() => setPage((p) => p + 1)}
+                      disabled={page >= totalPages}
+                      className="flex h-10 w-10 items-center justify-center rounded-xl border border-neutral-light bg-white text-text-muted transition hover:bg-neutral-light/40 disabled:opacity-40"
                     >
-                      1
-                    </button>
-
-                    <button
-                      type="button"
-                      className="flex h-10 w-10 items-center justify-center rounded-xl border border-neutral-light bg-white text-sm font-bold text-text-muted transition hover:bg-neutral-light/40"
-                    >
-                      2
-                    </button>
-
-                    <button
-                      type="button"
-                      className="flex h-10 w-10 items-center justify-center rounded-xl border border-neutral-light bg-white text-text-muted transition hover:bg-neutral-light/40"
-                    >
-                      <span className="material-symbols-outlined text-[18px]">
-                        chevron_right
-                      </span>
+                      <span className="material-symbols-outlined text-[18px]">chevron_right</span>
                     </button>
                   </div>
                 </div>
               </section>
+
             </div>
           </main>
         </div>
       </div>
     </div>
   );
-}
+} 

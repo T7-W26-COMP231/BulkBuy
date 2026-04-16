@@ -364,7 +364,7 @@ export default function AdminFulfillmentPage() {
                             </p>
                         </section>
 
-                        <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+                        <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-5">
                             <div className="rounded-2xl border border-neutral-light bg-white p-5 shadow-sm">
                                 <p className="text-xs font-bold uppercase tracking-[0.14em] text-text-muted">
                                     Current Demand Level
@@ -410,6 +410,34 @@ export default function AdminFulfillmentPage() {
                                 </p>
                                 <p className="mt-2 text-sm text-text-muted">
                                     Platform rules triggered by exceeded threshold conditions.
+                                </p>
+                            </div>
+
+                            <div className="rounded-2xl border border-neutral-light bg-white p-5 shadow-sm">
+                                <p className="text-xs font-bold uppercase tracking-[0.14em] text-text-muted">
+                                    Rule Re-evaluation
+                                </p>
+
+                                <div className="mt-3 flex items-center gap-2">
+                                    <span
+                                        className={`inline-block h-3 w-3 rounded-full ${thresholdSummary.breachCount > 0
+                                                ? "bg-red-500"
+                                                : thresholdSummary.warningCount > 0
+                                                    ? "bg-amber-400"
+                                                    : "bg-emerald-500"
+                                            }`}
+                                    />
+                                    <p className="text-xl font-bold text-text-main">
+                                        {thresholdSummary.breachCount > 0
+                                            ? "Critical Rules Re-evaluated"
+                                            : thresholdSummary.warningCount > 0
+                                                ? "Rules Re-evaluated"
+                                                : "Stable"}
+                                    </p>
+                                </div>
+
+                                <p className="mt-2 text-sm text-text-muted">
+                                    Status updates automatically after each threshold refresh cycle.
                                 </p>
                             </div>
                         </section>
@@ -727,10 +755,10 @@ export default function AdminFulfillmentPage() {
                                                 <tr
                                                     key={event.orderId || index}
                                                     className={`transition hover:bg-neutral-light/30 ${String(event.activeTier || "").includes("4")
-                                                            ? "bg-red-50"
-                                                            : String(event.activeTier || "").includes("3")
-                                                                ? "bg-amber-50"
-                                                                : ""
+                                                        ? "bg-red-50"
+                                                        : String(event.activeTier || "").includes("3")
+                                                            ? "bg-amber-50"
+                                                            : ""
                                                         }`}
                                                 >
                                                     <td className="px-4 py-4 text-sm text-text-muted">
@@ -742,10 +770,10 @@ export default function AdminFulfillmentPage() {
                                                     <td className="px-4 py-4">
                                                         <span
                                                             className={`inline-flex rounded-full px-3 py-1 text-xs font-bold ${String(event.activeTier || "").includes("4")
-                                                                    ? "bg-red-100 text-red-700"
-                                                                    : String(event.activeTier || "").includes("3")
-                                                                        ? "bg-orange-100 text-orange-700"
-                                                                        : "bg-emerald-100 text-emerald-700"
+                                                                ? "bg-red-100 text-red-700"
+                                                                : String(event.activeTier || "").includes("3")
+                                                                    ? "bg-orange-100 text-orange-700"
+                                                                    : "bg-emerald-100 text-emerald-700"
                                                                 }`}
                                                         >
                                                             {event.activeTier || "Updated"}
@@ -760,8 +788,8 @@ export default function AdminFulfillmentPage() {
 
                                                     <td
                                                         className={`px-4 py-4 text-sm font-bold ${String(event.activeTier || "").includes("4")
-                                                                ? "text-red-600"
-                                                                : "text-primary"
+                                                            ? "text-red-600"
+                                                            : "text-primary"
                                                             }`}
                                                     >
                                                         {event.totalDemand ?? 0}
@@ -774,8 +802,8 @@ export default function AdminFulfillmentPage() {
                                                     <td className="px-4 py-4">
                                                         <span
                                                             className={`inline-flex rounded-full px-3 py-1 text-xs font-bold ${String(event.activeTier || "").includes("4")
-                                                                    ? "bg-red-100 text-red-700"
-                                                                    : "bg-slate-100 text-slate-700"
+                                                                ? "bg-red-100 text-red-700"
+                                                                : "bg-slate-100 text-slate-700"
                                                                 }`}
                                                         >
                                                             {String(event.activeTier || "").includes("4")

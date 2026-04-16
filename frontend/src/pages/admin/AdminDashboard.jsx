@@ -3,6 +3,7 @@ import AdminTopbar from "../../components/admin/AdminTopbar";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
+import Navbar from "../../components/Navbar";
 
 // ── Stat Card ──────────────────────────────────────────────────────────────
 function AdminStatCard({ icon, label, value, extra, extraColor, accent }) {
@@ -24,6 +25,7 @@ function AdminStatCard({ icon, label, value, extra, extraColor, accent }) {
         {value}
       </p>
     </article>
+    
   );
 }
 
@@ -161,6 +163,13 @@ export default function AdminDashboard() {
   }, [accessToken]);
 
   return (
+    <>
+    {/* <Navbar/>  */}
+    <AdminTopbar
+            title="Admin Dashboard"
+            onMenuClick={() => setSidebarOpen(true)}    // ← add this
+    />
+   
     <div className="min-h-screen bg-background-light text-text-main">
       <div className="flex min-h-screen">
         <AdminSidebar
@@ -169,10 +178,7 @@ export default function AdminDashboard() {
         />
 
         <div className="flex min-h-screen flex-1 flex-col">
-          <AdminTopbar
-            title="Admin Dashboard"
-            onMenuClick={() => setSidebarOpen(true)}    // ← add this
-          />
+          
 
           <main className="flex-1 px-6 py-8 md:px-8 lg:px-10">
             <div className="mx-auto flex max-w-7xl flex-col gap-5">
@@ -453,5 +459,6 @@ export default function AdminDashboard() {
         </div>
       </div>
     </div>
+     </>
   );
 }

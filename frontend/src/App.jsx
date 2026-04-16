@@ -39,6 +39,8 @@ import OrderTrackingPage from "./pages/customer/OrderTrackingPage";
 import ProfilePage from "./pages/customer/ProfilePage";
 import UserMessageCenter from './pages/shared/UserMessageCenter';
 
+import MessageCenter from './pages/shared/UserMessageCenter';
+
 function PlaceholderPage({ title }) {
   return (
     <div className="min-h-screen bg-background-light px-6 py-10 md:px-20 lg:px-40">
@@ -196,7 +198,7 @@ export default function App() {
         <Route path="/safety" element={<PlaceholderPage title="Safety" />} />
         <Route path="/privacy-policy" element={<PlaceholderPage title="Privacy Policy" />} />
         <Route path="/terms-of-service" element={<PlaceholderPage title="Terms of Service" />} />
-        <Route path="/notifications" element={<PlaceholderPage title="Notifications" />} />
+        <Route path="/notifications" element={<MessageCenter />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/community" element={<PlaceholderPage title="Community" />} />
         <Route path="/settings" element={<PlaceholderPage title="Settings" />} />

@@ -128,8 +128,9 @@ export function OpsContextProvider({
   const ordersCacheRef = useRef(new Map());
 
   //---------------------------------------------------
-  const ioMsg = useSocketEvent('welcome');
 
+  // listen for signIn calls
+  const ioMsg = useSocketEvent('welcome');
   useEffect(() => {
     if (ioMsg) {
       console.log("Got a new message via socket:", ioMsg);
@@ -138,7 +139,35 @@ export function OpsContextProvider({
       setMsgCenter({ ...msgCenter, notifs: notifAdd });
       console.log('this the ioMsg ---> |', ioMsg); //--------------------------------
     }
+
   }, [ioMsg]);
+
+  // listen for order submit/cancel calls
+  const userCartUpdateMsg = useSocketEvent('UI-Update:RefreshActivity');
+  useEffect(() => {
+    if (userCartUpdateMsg) {
+      console.log("Got a new message via socket:", userCartUpdateMsg);
+      // Logic to add to a list or show a notification
+      const notifAdd = [...msgCenter.notifs, userCartUpdateMsg];
+      setMsgCenter({ ...msgCenter, notifs: notifAdd });
+      setWsuorders(wsuorders + 1);
+      console.log('this the userCartUpdateMsg ---> |', userCartUpdateMsg); //--------------------------------
+    }
+  }, [userCartUpdateMsg]);
+
+  // listen for uiUpdates calls
+  const regionUiUpdateMsg = useSocketEvent('Region-UI-Update:RefreshActivity');
+  useEffect(() => {
+    if (regionUiUpdateMsg) {
+      console.log("Got a new message via socket:", regionUiUpdateMsg);
+      // Logic to add to a list or show a notification
+      const notifAdd = [...msgCenter.notifs, regionUiUpdateMsg];
+      setMsgCenter({ ...msgCenter, notifs: notifAdd });
+      setWsuproducts(wsuproducts + 1);
+      console.log('this the regionUiUpdateMsg ---> |', regionUiUpdateMsg); //--------------------------------
+    }
+  }, [ regionUiUpdateMsg ]);
+  
 
   //---------------------------------------------------
 

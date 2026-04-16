@@ -914,20 +914,6 @@ class OrderService {
         }
       }*/
 
-      /*const missing = [];
-      for (const it of orderDoc.items || []) {
-        const pid = String(it.productId);
-        const iid = String(it.itemId);
-        const pEntry = productLookup.get(pid);
-        if (!pEntry) {
-          missing.push({ productId: pid, itemId: iid });
-          continue;
-        }
-        const swItem = pEntry.itemMap.get(iid);
-        if (!swItem) {
-          missing.push({ productId: pid, itemId: iid });
-        }
-      }*/
 
       const missing = [];
       for (const it of orderDoc.items || []) {
@@ -965,6 +951,7 @@ class OrderService {
         const pEntry = productLookup.get(pid);
         const swItem = pEntry.itemMap.get(iid);*/
 
+      const tierChanges = 0;
       for (const it of orderDoc.items || []) {
         const pid = String(it.productId);
         const iid = String(it.itemId);
@@ -999,22 +986,162 @@ class OrderService {
 
         const currentQtySold = Number(swItem.qtySold || 0);
         const increment = Number(it.quantity || 1);
+        
         const newQtySold = currentQtySold + increment;
+        const swItemPricingTiers = swItem.pricing_tiers;
+
+        
         console.log("🔍 windowId being used:", pEntry.windowId);
         console.log("🔍 productId:", pid);
         console.log("🔍 itemId:", iid);
         console.log("🔍 newQtySold:", newQtySold);
+
+        // pricing tier logic placeholder
+        /*
+        //TODO
+        - let toBeActiveTier = {minQty: 0};
+        - loop through the swItemPricingTiers one tier at a time:
+                if tier.minQty >  toBeActiveTier.minQty and tier.minQty <= newQtySold
+                    toBeActiveTier = tier
+
+
+        - If toBeActiveTier.unitPrice != swItemLastPricingSnapShort.atInstantPrice
+                create a newSnapshot and append it to swItem.pricing_snapshots. (initial = first pricing tier unit price and final = the last)
+                tierChanges += 1;
+                         
+        */
+
+      
+        //-----------------------------------------------------
+
+      
+
+        try {
+          // ensure tiers is an array (collection is unordered)
+          const tiers = Array.isArray(swItemPricingTiers) ? swItemPricingTiers : [];
+
+          // last short snapshot price (fallback)
+          const swItemLastPricingSnapShort = latestSnapshot || null;
+          const lastPrice = swItemLastPricingSnapShort ? Number(swItemLastPricingSnapShort.atInstantPrice) : null;
+
+          // sort tiers by minQty for initial/final derivation
+          const sortedTiers = tiers.slice().sort((a, b) => Number(a.minQty) - Number(b.minQty));
+          const firstTier = sortedTiers.length > 0 ? sortedTiers[0] : null;
+          const lastTier = sortedTiers.length > 0 ? sortedTiers[sortedTiers.length - 1] : null;
+
+          const computeRateFromPrices = (basePrice, tierPrice) => {
+            if (!basePrice || tierPrice == null) return 0;
+            const diff = basePrice - tierPrice;
+            const pct = basePrice ? Math.round((diff / basePrice) * 100 * 100) / 100 : 0;
+            return isFinite(pct) ? pct : 0;
+          };
+
+          // derive final discount rate from tiers (prefer explicit field)
+          const finalRateFromTiers = lastTier && lastTier.discountPercentagePerUnitBulk != null
+            ? Number(lastTier.discountPercentagePerUnitBulk)
+            : (lastPrice ? computeRateFromPrices(lastPrice, lastTier && lastTier.unitPrice) : 0);
+
+          // determine current discount on last short snapshot (prefer explicit snapshot field)
+          const currentDiscount = (swItemLastPricingSnapShort && swItemLastPricingSnapShort.discountedPercentage != null)
+            ? Number(swItemLastPricingSnapShort.discountedPercentage)
+            : 0;
+
+          // If final discount already reached or exceeded, skip snapshot creation and only update qtySold
+          if (finalRateFromTiers != null && currentDiscount >= finalRateFromTiers) {
+            // final discount already reached — do not create a new snapshot
+            // just update qtySold below (no snapshot push)
+          } else {
+            // pick the effective tier by scanning all tiers (unordered safe)
+            let toBeActiveTier = { minQty: 0 };
+            for (const tier of tiers) {
+              const tMin = Number(tier && tier.minQty) || 0;
+              if (tMin > (Number(toBeActiveTier.minQty) || 0) && tMin <= newQtySold) {
+                toBeActiveTier = tier;
+              }
+            }
+
+            const newTierPrice = (toBeActiveTier && toBeActiveTier.unitPrice != null) ? Number(toBeActiveTier.unitPrice) : null;
+
+            // initial/final discount rates derived from explicit tier field if present,
+            // otherwise computed from lastPrice (if available) vs tier.unitPrice
+            const initialRateFromTiers = firstTier && firstTier.discountPercentagePerUnitBulk != null
+              ? Number(firstTier.discountPercentagePerUnitBulk)
+              : (lastPrice ? computeRateFromPrices(lastPrice, firstTier && firstTier.unitPrice) : 0);
+
+            const bracketInitialRate = (swItemLastPricingSnapShort && swItemLastPricingSnapShort.discountBracket && swItemLastPricingSnapShort.discountBracket.initial != null)
+              ? Number(swItemLastPricingSnapShort.discountBracket.initial)
+              : initialRateFromTiers;
+
+            const bracketFinalRate = (swItemLastPricingSnapShort && swItemLastPricingSnapShort.discountBracket && swItemLastPricingSnapShort.discountBracket.final != null)
+              ? Number(swItemLastPricingSnapShort.discountBracket.final)
+              : finalRateFromTiers;
+
+            // If tier price changed vs last short snapshot, create snapshot and append
+            if (newTierPrice != null && newTierPrice !== lastPrice) {
+              const now = new Date();
+              const atInstantPrice = newTierPrice;
+
+              // compute discountedPercentage: prefer tier legacy field, otherwise compute from lastPrice
+              let discountedPercentage = 0;
+              if (toBeActiveTier && toBeActiveTier.discountPercentagePerUnitBulk != null) {
+                discountedPercentage = Number(toBeActiveTier.discountPercentagePerUnitBulk);
+              } else if (lastPrice) {
+                const diff = lastPrice - atInstantPrice;
+                discountedPercentage = lastPrice ? Math.round((diff / lastPrice) * 100 * 100) / 100 : 0;
+                if (!isFinite(discountedPercentage)) discountedPercentage = 0;
+              }
+
+              // bracket initial/final are discount rates (copied from first snapshot or derived from tiers)
+              const newSnap = {
+                atInstantPrice,
+                discountedPercentage,
+                discountBracket: { initial: bracketInitialRate, final: bracketFinalRate },
+                createdAt: now,
+                updatedAt: now,
+                metadata: {
+                  tierMinQty: toBeActiveTier && toBeActiveTier.minQty != null ? Number(toBeActiveTier.minQty) : undefined,
+                  tierUnitPrice: atInstantPrice,
+                  tierFingerprint: toBeActiveTier && (toBeActiveTier.tierId ? String(toBeActiveTier.tierId) : `${Number(toBeActiveTier.minQty)}:${Number(toBeActiveTier.unitPrice)}`),
+                  reason: `qty ${currentQtySold} -> ${newQtySold}`
+                }
+              };
+
+              // append in-memory (preserve existing doc state)
+              swItem.pricing_snapshots = swItem.pricing_snapshots || [];
+              swItem.pricing_snapshots.push(newSnap);
+
+              // best-effort atomic push to sales window (non-fatal)
+              try {
+                await SalesWindowService.upsertPricingSnapshot(pEntry.windowId, pid, iid, newSnap, { session, actor, correlationId });
+              } catch (pushErr) {
+                // eslint-disable-next-line no-console
+                console.warn('Failed to push pricing snapshot atomically', pushErr && pushErr.message);
+              }
+
+              tierChanges += 1;
+            }
+          }
+        } catch (tierErr) {
+          // protect submit flow from tier-detection errors
+          // eslint-disable-next-line no-console
+          console.warn('Tier detection failed', tierErr && tierErr.message);
+        }
+
+
+
+        //-----------------------------------------------------
+
+
         try {
           //await SalesWindowService.addOrUpdateItem(pEntry.windowId, pid, iid, { qtySold: newQtySold }, { session, actor, correlationId });
           await SalesWindowService.addOrUpdateItem(pEntry.windowId, pid, iid, { qtySold: newQtySold }, { actor, correlationId });
-
         } catch (e) {
           // non-fatal for submission
           // eslint-disable-next-line no-console
           console.warn('Failed to update qtySold on sales window', e && e.message);
         }
 
-        // pricing tier logic placeholder
+        
       }
 
       orderDoc.status = 'submitted';
@@ -1034,7 +1161,29 @@ class OrderService {
       await this._audit('order.submit', actor, orderDoc._id, 'success', 'info', correlationId, { userId: orderDoc.userId, region });
 
       const updatedPlain = await OrderRepo.findById(orderDoc._id, { lean: true });
-      return sanitizeForClient(updatedPlain);
+
+
+
+      // TODO
+      // notify customer  ('order.submit', actor, orderDoc._id, 'success', 'info', correlationId, { userId: orderDoc.userId, region })
+      // trigger system wide update notif if a new treshold was reached -- tierChanges > 0. 
+      // or simply so because a new quantity was reached.
+
+      // update the entire region
+      
+      await emitUiUpdate(
+        'Region-UI-Update:RefreshActivity', 
+        { message : `Changes : ${tierChanges} items on the current ${region} saleswindow`}, {region : region, scope: 'region'} 
+      )
+
+      //notify user
+      await emitUiUpdate(
+        'UI-Update:RefreshActivity', 
+        { message : `Order Intent Submitted successfully : Changes - ${tierChanges} items on the current ${region} saleswindow`}, { targetUserIds :[ actor?._id, actor?.userId ], scope: 'user'} 
+      )
+    
+      
+       return sanitizeForClient(updatedPlain);
     }
     catch (err) {
       try {
@@ -1054,7 +1203,7 @@ class OrderService {
 
       await this._audit('order.submit', actor, orderId, 'failure', 'error', correlationId, { error: err && err.message });
       throw err;
-    }*/
+    }*/ 
 
   }
 
@@ -1102,6 +1251,25 @@ class OrderService {
       await this._audit('order.cancel', actor, orderDoc._id, 'success', 'info', correlationId, { userId: orderDoc.userId });
 
       const plain = await OrderRepo.findById(orderDoc._id, { lean: true });
+
+
+      // TODO
+      // notify customer  ('order.submit', actor, orderDoc._id, 'success', 'info', correlationId, { userId: orderDoc.userId, region })
+      // trigger system wide update notif if a new treshold was reached -- tierChanges > 0. 
+      // or simply so because a new quantity was reached.
+
+      // update the entire region      
+      await emitUiUpdate(
+        'Region-UI-Update:RefreshActivity', 
+        { message : `Changes : ${tierChanges} items on the current ${region} saleswindow`}, {region : region, scope: 'region'} 
+      )
+
+      //notify user
+      await emitUiUpdate(
+        'UI-Update:RefreshActivity', 
+        { message : `Order Cancelled : Changes - ${tierChanges} items on the current ${region} saleswindow`}, { targetUserIds :[ actor?._id, actor?.userId ], scope: 'user'} 
+      )
+
       return sanitizeForClient(plain);
     } catch (err) {
       await session.abortTransaction();

@@ -302,6 +302,23 @@ export function initSocket(accessToken = null, opts = {}) {
     } catch (e) {
       console.debug("[ socket 🔴 ] system:update handler error", e && e.message);
     }
+  }); 
+  
+  
+  socket.on("Region-UI-Update:RefreshActivity", (payload) => {
+    try {
+      console.info("[ socket 🟢 ] Region-UI-Update:RefreshActivity update-", payload);
+    } catch (e) {
+      console.debug("[ socket 🔴 ] Region-UI-Update:RefreshActivity handler error", e && e.message);
+    }
+  }); 
+  
+  socket.on("UI-Update:RefreshActivity", (payload) => {
+    try {
+      console.info("[ socket 🟢 ] UI-Update:RefreshActivity update-", payload);
+    } catch (e) {
+      console.debug("[ socket 🔴 ] UI-Update:RefreshActivity handler error", e && e.message);
+    }
   });
 
   socket.on("error", (err) => {

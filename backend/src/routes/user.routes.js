@@ -41,7 +41,7 @@ router.post(
 
 /* Authenticate */
 router.post(
-  '/authenticate',  
+  '/authenticate',
   requireAuth,
   asyncHandler(UserController.authenticate)
 );
@@ -65,6 +65,16 @@ router.get(
 /* List users (supports ?page=&limit=&filter= JSON) */
 router.get(
   '/',
+
+  // Returns paginated list of users filterable by role, status, and other fields.
+  // Usage:
+  //   GET /api/users                                          -> all users
+  //   GET /api/users?filter={"role":"customer"}              -> customers only
+  //   GET /api/users?filter={"role":"supplier"}              -> suppliers only
+  //   GET /api/users?filter={"role":{"$in":["customer","supplier"]}} -> all non-admins
+  //   GET /api/users?filter={"role":"customer"}&page=2&limit=10      -> paginated
+  // Requires: admin auth token
+
   userValidators.query,
   requireAuth,
   requireRole('administrator'),
@@ -137,6 +147,12 @@ router.get(
 );
 
 /* Update user by _id (partial update) */
+
+// Allows updating user status to 'active' or 'suspended'.
+// Used by admin user management page to suspend/activate accounts.
+// Body: { "status": "suspended" | "active" }
+// Also supports other partial updates: firstName, lastName, emails, etc.
+
 router.patch(
   '/:id',
   userValidators.idParam,

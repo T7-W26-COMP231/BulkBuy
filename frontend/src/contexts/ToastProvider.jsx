@@ -337,6 +337,24 @@ export default function ToastProvider({ children }) {
   }, [toasts, stackToasts]);
 
   /* -------------------------
+     Global API error handler
+     ------------------------- */
+  useEffect(() => {
+    const handleApiError = (e) => {
+      const { message } = e.detail;
+      addToast(
+        <div style={{ padding: "12px 16px", fontWeight: 600, color: "#dc2626" }}>
+          ⚠ {message}
+        </div>,
+        { duration: 5000, value: "TR" }
+      );
+    };
+
+    window.addEventListener("api:error", handleApiError);
+    return () => window.removeEventListener("api:error", handleApiError);
+  }, [addToast]);
+
+  /* -------------------------
      Render helpers
      ------------------------- */
   const renderContentWithControls = (toast) => {

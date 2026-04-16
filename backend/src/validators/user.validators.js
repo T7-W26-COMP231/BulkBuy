@@ -124,6 +124,7 @@ const update = validate(
     lastName: Joi.string().trim().allow('', null),
     role: Joi.string().valid('customer', 'administrator', 'supplier'),
     emails: Joi.array().items(EmailSchema).max(5).optional(),
+    status: Joi.string().valid('active', 'suspended', 'inactive', 'member'), // ADD THIS
     phones: Joi.array().items(PhoneSchema).max(5).optional(),
     addresses: Joi.array().items(AddressSchema).max(5).optional(),
     config: objectId.optional(),
@@ -155,16 +156,30 @@ const bulkCreate = validate(
 );
 
 /* ID param validator */
+// const idParam = validate(
+//   Joi.object({ id: objectId.required() }),
+//   'params'
+// );
+
+/* ID param validator */
 const idParam = validate(
-  Joi.object({ id: objectId.required() }),
+  Joi.object({ id: Joi.string().min(1).required() }),
   'params'
 );
 
+
+
 /* userId param validator (16-digit human id) */
+// const userIdParam = validate(
+//   Joi.object({ userId: Joi.string().pattern(/^\d{16}$/).required() }),
+//   'params'
+// );
+
 const userIdParam = validate(
   Joi.object({ userId: Joi.string().pattern(/^\d{16}$/).required() }),
   'params'
 );
+
 
 /* Query validator for list endpoint */
 const query = validate(

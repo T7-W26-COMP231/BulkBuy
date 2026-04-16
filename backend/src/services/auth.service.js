@@ -152,6 +152,11 @@ async function login(credentials = {}, correlationId = null) {
   try {
     const { user } = await userService.authenticate(credentials, correlationId);
 
+    //  block suspended users from logging in
+    if (user.status === 'suspended') {
+      throw createError(403, 'Your account has been suspended. Please contact support.');
+    }
+
     const payload = tokenPayloadFromUser(user);
     const accessToken = generateAccessToken(payload);
     const refreshToken = generateRefreshToken(payload);
@@ -197,7 +202,7 @@ async function logout(userId, refreshToken, correlationId = null) {
       await userService.logout(userId, refreshToken, correlationId);
       await disconnectUserSockets(userId);
     }
-    
+
     await auditService.logEvent({
       eventType: 'auth.logout.success',
       actor,

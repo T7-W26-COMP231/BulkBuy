@@ -20,12 +20,12 @@ const { requireRole } = require('../middleware/rbac.middleware');
 // GET /audits?correlationId=... OR /audits?targetType=Request&targetId=...
 router.get('/', requireAuth, requireRole('administrator'), async (req, res) => {
   try {
-    const { correlationId, targetType, targetId } = req.query;
+    const { correlationId, targetType, targetId, eventType } = req.query;
     const page = Math.max(1, parseInt(req.query.page || '1', 10));
     const pageSize = Math.min(200, Math.max(1, parseInt(req.query.pageSize || '50', 10)));
     const skip = (page - 1) * pageSize;
 
-    if (!correlationId && !(targetType && targetId)) {
+    /*if (!correlationId && !(targetType && targetId)) {
       return res.status(400).json({ message: 'Provide correlationId or targetType and targetId' });
     }
 
@@ -35,6 +35,25 @@ router.get('/', requireAuth, requireRole('administrator'), async (req, res) => {
     } else {
       filter['target.type'] = targetType;
       filter['target.id'] = targetId;
+    }*/
+
+    if (!correlationId && !targetId && !eventType) {
+      return res.status(400).json({ message: 'Provide at least one of: correlationId, targetId, or eventType' });
+    }
+
+    let filter = {};
+    if (correlationId) {
+      filter.correlationId = correlationId;
+    } else if (targetType && targetId) {
+      filter['target.type'] = targetType;
+      filter['target.id'] = targetId;
+    } else if (targetId) {
+      // Task #281 — plain string target support (how audit.service.js saves it)
+      filter.target = targetId;
+    }
+
+    if (eventType) {
+      filter.eventType = eventType;
     }
 
     const [results, total] = await Promise.all([

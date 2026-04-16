@@ -25,6 +25,7 @@ import CreateSalesWindowForm from "./pages/admin/CreateSalesWindowForm";
 import AdminSettingsPage from "./pages/admin/AdminSettingsPage";
 import AdminFulfillmentPage from "./pages/admin/AdminFulfillmentPage";
 import AdminDeliveryRulesPage from "./pages/admin/AdminDeliveryRulesPage";
+import AdminUserManagementPage from "./pages/admin/AdminUserManagementPage";
 import ProductDetailsPage from "./pages/customer/ProductDetailsPage";
 import ProductListPage from "./pages/customer/ProductListPage";
 import CartPage from "./pages/shared/ShoppingCart";
@@ -184,6 +185,7 @@ export default function App() {
         <Route path="/admin/settings" element={<AdminRoute><AdminSettingsPage /></AdminRoute>} />
         <Route path="/admin/monitor-quotes" element={<AdminRoute><AdminFulfillmentPage /></AdminRoute>} />
         <Route path="/admin/delivery-rules" element={<AdminRoute><AdminDeliveryRulesPage /></AdminRoute>} />
+        <Route path="/admin/users" element={<AdminUserManagementPage />} />
 
         {/* General placeholder routes */}
         <Route path="/about" element={<PlaceholderPage title="About Us" />} />

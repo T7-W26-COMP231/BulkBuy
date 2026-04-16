@@ -6,6 +6,153 @@ import api from "../../api/api";
 const LIMIT = 25;
 const filters = ["All", "Customers", "Suppliers", "Suspended"];
 
+/* -------------------------
+   User Detail Modal
+   ------------------------- */
+function UserDetailModal({ user, onClose, onToggleStatus }) {
+  if (!user) return null;
+
+  const primaryEmail = user.emails?.[0]?.address || "—";
+  const primaryPhone = user.phones?.[0]?.number || "—";
+  const primaryAddress = user.addresses?.[0];
+  const isActive = user.status === "active";
+
+  return (
+    /* Backdrop */
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
+      onClick={onClose}
+    >
+      {/* Modal panel */}
+      <div
+        className="relative w-full max-w-lg overflow-hidden rounded-3xl bg-white shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header banner */}
+        <div className="bg-[#083b2d] px-6 py-6 text-white">
+          <div className="flex items-center gap-4">
+            <img
+              src={user.avatar}
+              alt={user.firstName}
+              className="h-16 w-16 rounded-full border-2 border-white/30 object-cover"
+            />
+            <div>
+              <h2 className="text-xl font-bold">
+                {user.firstName} {user.lastName}
+              </h2>
+              <p className="mt-0.5 text-sm text-white/70">{user.userId}</p>
+              <div className="mt-2 flex gap-2">
+                {/* Role badge */}
+                <span className="rounded-full bg-white/20 px-3 py-0.5 text-xs font-bold capitalize">
+                  {user.role}
+                </span>
+                {/* Status badge */}
+                <span
+                  className={`rounded-full px-3 py-0.5 text-xs font-bold ${isActive
+                    ? "bg-emerald-400/30 text-emerald-200"
+                    : "bg-red-400/30 text-red-200"
+                    }`}
+                >
+                  {user.status.charAt(0).toUpperCase() + user.status.slice(1)}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Body */}
+        <div className="divide-y divide-neutral-100 px-6 py-4">
+
+          {/* Contact info */}
+          <div className="py-4">
+            <h3 className="mb-3 text-xs font-bold uppercase tracking-widest text-text-muted">
+              Contact
+            </h3>
+            <div className="flex flex-col gap-2">
+              <Row icon="email" label="Email" value={primaryEmail} />
+              <Row icon="phone" label="Phone" value={primaryPhone} />
+            </div>
+          </div>
+
+          {/* Address */}
+          <div className="py-4">
+            <h3 className="mb-3 text-xs font-bold uppercase tracking-widest text-text-muted">
+              Address
+            </h3>
+            {primaryAddress ? (
+              <p className="text-sm text-text-main">
+                {primaryAddress.line1}
+                {primaryAddress.city ? `, ${primaryAddress.city}` : ""}
+                {primaryAddress.region ? `, ${primaryAddress.region}` : ""}
+                {primaryAddress.postalCode ? ` ${primaryAddress.postalCode}` : ""}
+                {primaryAddress.country ? `, ${primaryAddress.country}` : ""}
+              </p>
+            ) : (
+              <p className="text-sm text-text-muted">No address on file</p>
+            )}
+          </div>
+
+          {/* Account info */}
+          <div className="py-4">
+            <h3 className="mb-3 text-xs font-bold uppercase tracking-widest text-text-muted">
+              Account
+            </h3>
+            <div className="flex flex-col gap-2">
+              <Row icon="calendar_today" label="Joined" value={new Date(user.createdAt).toLocaleDateString("en-CA", { year: "numeric", month: "short", day: "numeric" })} />
+              <Row icon="update" label="Last updated" value={new Date(user.updatedAt).toLocaleDateString("en-CA", { year: "numeric", month: "short", day: "numeric" })} />
+              <Row icon="verified" label="Email verified" value={user.emails?.[0]?.verified ? "Yes" : "No"} />
+            </div>
+          </div>
+        </div>
+
+        {/* Footer actions */}
+        <div className="flex gap-3 border-t border-neutral-100 px-6 py-4">
+          <button
+            type="button"
+            onClick={() => { onToggleStatus(user._id, user.status); onClose(); }}
+            className={`flex-1 rounded-2xl py-3 text-sm font-bold transition ${isActive
+              ? "bg-red-50 text-red-500 hover:bg-red-100"
+              : "bg-emerald-50 text-emerald-600 hover:bg-emerald-100"
+              }`}
+          >
+            {isActive ? "Suspend User" : "Activate User"}
+          </button>
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex-1 rounded-2xl bg-neutral-100 py-3 text-sm font-bold text-text-muted transition hover:bg-neutral-200"
+          >
+            Close
+          </button>
+        </div>
+
+        {/* Close X */}
+        <button
+          type="button"
+          onClick={onClose}
+          className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-white transition hover:bg-white/30"
+        >
+          <span className="material-symbols-outlined text-[18px]">close</span>
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* Small helper row for the modal */
+function Row({ icon, label, value }) {
+  return (
+    <div className="flex items-center gap-3">
+      <span className="material-symbols-outlined text-[18px] text-text-muted">{icon}</span>
+      <span className="w-24 text-xs text-text-muted">{label}</span>
+      <span className="text-sm font-medium text-text-main">{value}</span>
+    </div>
+  );
+}
+
+/* -------------------------
+   Main Page
+   ------------------------- */
 export default function AdminUserManagementPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -14,6 +161,9 @@ export default function AdminUserManagementPage() {
   const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
+
+  // Task #276 — selected user for detail modal
+  const [selectedUser, setSelectedUser] = useState(null);
 
   // Fetch from API — re-runs when page, searchTerm, or activeFilter changes
   useEffect(() => {
@@ -38,7 +188,6 @@ export default function AdminUserManagementPage() {
       }
     };
 
-    // Debounce search so we don't fire on every keystroke
     const debounce = setTimeout(fetchUsers, searchTerm ? 400 : 0);
     return () => clearTimeout(debounce);
   }, [page, searchTerm, activeFilter]);
@@ -48,7 +197,6 @@ export default function AdminUserManagementPage() {
     setPage(1);
   }, [searchTerm, activeFilter]);
 
-  // API already handles filtering — no client-side filter needed
   const filteredUsers = users;
 
   // Call API to suspend or activate, then update local state
@@ -59,6 +207,10 @@ export default function AdminUserManagementPage() {
       setUsers((prev) =>
         prev.map((u) => (u._id === id ? { ...u, status: newStatus } : u))
       );
+      // Also update selectedUser if the modal is open for this user
+      setSelectedUser((prev) =>
+        prev?._id === id ? { ...prev, status: newStatus } : prev
+      );
     } catch (err) {
       console.error("Failed to update user status", err);
     }
@@ -68,6 +220,16 @@ export default function AdminUserManagementPage() {
 
   return (
     <div className="min-h-screen bg-background-light text-text-main">
+
+      {/* User detail modal — Task #276 */}
+      {selectedUser && (
+        <UserDetailModal
+          user={selectedUser}
+          onClose={() => setSelectedUser(null)}
+          onToggleStatus={toggleUserStatus}
+        />
+      )}
+
       <div className="flex min-h-screen">
         <AdminSidebar
           isMobileOpen={sidebarOpen}
@@ -172,8 +334,11 @@ export default function AdminUserManagementPage() {
                         </tr>
                       ) : filteredUsers.length > 0 ? (
                         filteredUsers.map((user) => (
-                          <tr key={user._id} className="transition hover:bg-neutral-light/40">
-
+                          <tr
+                            key={user._id}
+                            className="cursor-pointer transition hover:bg-neutral-light/40"
+                            onClick={() => setSelectedUser(user)}
+                          >
                             {/* Name + Avatar */}
                             <td className="px-6 py-5">
                               <div className="flex items-center gap-3">
@@ -213,18 +378,29 @@ export default function AdminUserManagementPage() {
                               </span>
                             </td>
 
-                            {/* Suspend / Activate */}
+                            {/* Actions — stop propagation so row click doesn't fire */}
                             <td className="px-6 py-5 text-right">
-                              <button
-                                type="button"
-                                onClick={() => toggleUserStatus(user._id, user.status)}
-                                className={`text-sm font-bold transition ${user.status === "active"
-                                  ? "text-red-500 hover:text-red-600"
-                                  : "text-emerald-600 hover:text-emerald-700"
-                                  }`}
-                              >
-                                {user.status === "active" ? "Suspend" : "Activate"}
-                              </button>
+                              <div className="flex items-center justify-end gap-4">
+                                {/* View details button — Task #276 */}
+                                <button
+                                  type="button"
+                                  onClick={(e) => { e.stopPropagation(); setSelectedUser(user); }}
+                                  className="text-sm font-bold text-primary transition hover:opacity-70"
+                                >
+                                  View
+                                </button>
+                                {/* Suspend / Activate */}
+                                <button
+                                  type="button"
+                                  onClick={(e) => { e.stopPropagation(); toggleUserStatus(user._id, user.status); }}
+                                  className={`text-sm font-bold transition ${user.status === "active"
+                                    ? "text-red-500 hover:text-red-600"
+                                    : "text-emerald-600 hover:text-emerald-700"
+                                    }`}
+                                >
+                                  {user.status === "active" ? "Suspend" : "Activate"}
+                                </button>
+                              </div>
                             </td>
                           </tr>
                         ))
@@ -288,4 +464,4 @@ export default function AdminUserManagementPage() {
       </div>
     </div>
   );
-} 
+}

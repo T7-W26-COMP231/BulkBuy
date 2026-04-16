@@ -79,17 +79,29 @@ export default function SupplierProfilePage() {
   }, []);
 
   useEffect(() => {
-    if (!logoFile) {
-      return undefined;
-    }
+  if (!logoFile) {
+    return undefined;
+  }
 
-    const previewUrl = URL.createObjectURL(logoFile);
-    setLogoPreview(previewUrl);
+  const previewUrl = URL.createObjectURL(logoFile);
+  setLogoPreview(previewUrl);
 
-    return () => {
-      URL.revokeObjectURL(previewUrl);
-    };
-  }, [logoFile]);
+  return () => {
+    URL.revokeObjectURL(previewUrl);
+  };
+}, [logoFile]);
+
+useEffect(() => {
+  if (!saveMessage) {
+    return undefined;
+  }
+
+  const timeout = setTimeout(() => {
+    setSaveMessage("");
+  }, 3000);
+
+  return () => clearTimeout(timeout);
+}, [saveMessage]);
 
   const isDirty = useMemo(() => {
     return JSON.stringify(profile) !== JSON.stringify(savedProfile);
@@ -250,10 +262,16 @@ export default function SupplierProfilePage() {
           ) : null}
 
           {saveMessage ? (
-            <p className="mt-3 text-sm font-medium text-green-600">
-              {saveMessage}
-            </p>
-          ) : null}
+  <div className="mt-4 rounded-xl border border-green-200 bg-green-50 px-4 py-3">
+    <p className="text-sm font-semibold text-green-700">
+      ✅ {saveMessage}
+    </p>
+    <p className="mt-1 text-xs text-green-600">
+      Your supplier company profile was saved and synced with the database.
+    </p>
+  </div>
+) : null}
+
         </div>
 
         <div className="rounded-2xl border border-neutral-light bg-white p-6 shadow-sm">

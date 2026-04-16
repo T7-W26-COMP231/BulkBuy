@@ -9,8 +9,7 @@ const navItems = [
   { to: "/marketplace", icon: "receipt_long", label: "Marketplace" },
   { to: "/orders", icon: "receipt_long", label: "My Orders" },
   { to: "/review-modify-intent", icon: "track_changes", label: "My Intents" },
-  { to: "/savings", icon: "trending_up", label: "Savings Vault" },
-  { to: "/community", icon: "group", label: "Community" },
+
   { to: "/profile", icon: "settings", label: "Settings" },
 ];
 

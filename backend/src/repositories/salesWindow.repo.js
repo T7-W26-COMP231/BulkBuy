@@ -447,6 +447,7 @@ class SalesWindowRepo {
   async addOrUpdateItem(windowId, productId, itemId, payload = {}, opts = {}) {
     const sessionInfo = await this._maybeStartSession(opts);
     const session = sessionInfo.session || null;
+    console.log("54u685468954/*/***********************************>SALESWINOW.REPO PRINT-1", windowId)
 
     try {
       const now = new Date();
@@ -468,12 +469,15 @@ class SalesWindowRepo {
       };
 
       // Step 1: item already exists → update pricing_tiers
+
       const step1 = await this.Model.findOneAndUpdate(
         {
           _id: windowId,
           "products.productId": String(productId),
           "products.items.itemId": String(itemId),
+
         },
+
         {
           $set: {
             "products.$[p].items.$[it].pricing_tiers": pricingTiers,

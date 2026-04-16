@@ -33,7 +33,7 @@ export const SavingsProvider = React.forwardRef(({ children }, ref) => {
             (orders || []).forEach((order) => {
                 const status = order.status?.toLowerCase();
                 const isUsersOrder = !userId || String(order.userId) === String(userId); // ← ADD
-                console.log(`order ${order._id}: userId=${order.userId} match=${isUsersOrder} status=${status}`);
+                //console.log(`order ${order._id}: userId=${order.userId} match=${isUsersOrder} status=${status}`);
                 if (CONFIRMED_STATUSES.includes(status) && isUsersOrder) {
                     const savings = calcOrderSavings(order);
                     if (savings > 0) savingsMap[order._id] = savings;

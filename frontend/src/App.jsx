@@ -87,7 +87,7 @@ export default function App() {
   const { setSocket } = useOpsContext() ?? {};
   const socketRef = useRef(null);
 
-  useEffect(() => {
+  /*useEffect(() => {
     // Create a dedicated socket for notifications (forceNew = isolated from comms-js socket)
     const socket = io(`${import.meta.env.VITE_API_URL}`, {
       forceNew: true,
@@ -146,6 +146,8 @@ export default function App() {
       socketRef.current = null;
     };
   }, [user?._id]); // only re-run when user id changes
+
+  */
 
   return (
     <>

@@ -248,10 +248,18 @@ export default function Marketplace() {
                       category={getCardSubtitle(product)}
                       price={price ?? 0}
                       image={
-                        product.previewImage ||
-                        product.image ||
-                        product.images?.[0] ||
-                        ""
+                        (() => {
+                          const featuredItem = getFeaturedItem(product);
+                          // Use enriched item images first, then fall back to product-level fields
+                          return (
+                            featuredItem?.images?.[0] ||
+                            featuredItem?.metadata?.imageUrl ||
+                            product.previewImage ||
+                            product.image ||
+                            product.images?.[0] ||
+                            ""
+                          );
+                        })()
                       }
                       size="large"
                       minTierPrice={null}

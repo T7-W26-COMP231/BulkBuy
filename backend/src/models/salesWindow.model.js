@@ -103,6 +103,8 @@ const ProductSchema = new Schema({
  * ------------------------- */
 
 const SalesWindowSchema = new Schema({
+
+  _id: { type: String, required: true, trim: true }, // only for testing
   window: {
     fromEpoch: { type: Number, required: true, index: true },
     toEpoch: { type: Number, required: true, index: true }

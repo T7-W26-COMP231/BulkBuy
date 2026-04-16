@@ -32,10 +32,10 @@ const IMMUTABLE_STATUSES = new Set(['confirmed', 'dispatched', 'fulfilled']);
 
 class OrderService {
   /* -------------------------
-   * Reusable audit helper
-   * - One-line usage: await this._audit('event.type', actor, target, 'success', 'info', correlationId, { details })
-   * - Best-effort: does not throw if audit fails
-   * ------------------------- */
+  * Reusable audit helper
+  * - One-line usage: await this._audit('event.type', actor, target, 'success', 'info', correlationId, { details })
+  * - Best-effort: does not throw if audit fails
+  * ------------------------- */
   async _audit(eventType, actor = {}, target = undefined, outcome = 'success', severity = 'info', correlationId = null, details = {}) {
     try {
       await auditService.logEvent({
@@ -55,8 +55,8 @@ class OrderService {
   }
 
   /* -------------------------
-   * Core CRUD
-   * ------------------------- */
+  * Core CRUD
+  * ------------------------- */
 
   async createOrder(payload = {}, opts = {}) {
     if (!payload || typeof payload !== 'object') throw createError(400, 'Invalid payload');
@@ -456,8 +456,8 @@ class OrderService {
   }
 
   /* -------------------------
-   * Messages & status
-   * ------------------------- */
+  * Messages & status
+  * ------------------------- */
 
   async addMessage(orderId, messageId, opts = {}) {
     if (!orderId || !messageId) throw createError(400, 'orderId and messageId are required');
@@ -740,8 +740,8 @@ class OrderService {
 
 
   /* -------------------------
-   * Cart / item-level operations with immutability guards
-   * ------------------------- */
+  * Cart / item-level operations with immutability guards
+  * ------------------------- */
 
   async addItem(orderId, item = {}, opts = {}) {
     if (!orderId) throw createError(400, 'orderId is required');
@@ -865,8 +865,8 @@ class OrderService {
   }
 
   /* -------------------------
-   * Submit / Cancel flows (transactional)
-   * ------------------------- */
+  * Submit / Cancel flows (transactional)
+  * ------------------------- */
 
   async submitOrder(orderId, opts = {}) {
     if (!orderId) throw createError(400, 'orderId is required');
@@ -986,11 +986,11 @@ class OrderService {
 
         const currentQtySold = Number(swItem.qtySold || 0);
         const increment = Number(it.quantity || 1);
-        
+
         const newQtySold = currentQtySold + increment;
         const swItemPricingTiers = swItem.pricing_tiers;
 
-        
+
         console.log("🔍 windowId being used:", pEntry.windowId);
         console.log("🔍 productId:", pid);
         console.log("🔍 itemId:", iid);
@@ -1008,13 +1008,13 @@ class OrderService {
         - If toBeActiveTier.unitPrice != swItemLastPricingSnapShort.atInstantPrice
                 create a newSnapshot and append it to swItem.pricing_snapshots. (initial = first pricing tier unit price and final = the last)
                 tierChanges += 1;
-                         
+                        
         */
 
-      
+
         //-----------------------------------------------------
 
-      
+
 
         try {
           // ensure tiers is an array (collection is unordered)
@@ -1135,13 +1135,14 @@ class OrderService {
         try {
           //await SalesWindowService.addOrUpdateItem(pEntry.windowId, pid, iid, { qtySold: newQtySold }, { session, actor, correlationId });
           await SalesWindowService.addOrUpdateItem(pEntry.windowId, pid, iid, { qtySold: newQtySold }, { actor, correlationId });
+          console.log("order.service.js coming-****************************************>", newQtySold);
         } catch (e) {
           // non-fatal for submission
           // eslint-disable-next-line no-console
           console.warn('Failed to update qtySold on sales window', e && e.message);
         }
 
-        
+
       }
 
       orderDoc.status = 'submitted';
@@ -1170,20 +1171,26 @@ class OrderService {
       // or simply so because a new quantity was reached.
 
       // update the entire region
-      
-      await emitUiUpdate(
-        'Region-UI-Update:RefreshActivity', 
-        { message : `Changes : ${tierChanges} items on the current ${region} saleswindow`}, {region : region, scope: 'region'} 
-      )
 
-      //notify user
-      await emitUiUpdate(
-        'UI-Update:RefreshActivity', 
-        { message : `Order Intent Submitted successfully : Changes - ${tierChanges} items on the current ${region} saleswindow`}, { targetUserIds :[ actor?._id, actor?.userId ], scope: 'user'} 
-      )
-    
-      
-       return sanitizeForClient(updatedPlain);
+      try {
+        await emitUiUpdate(
+          'Region-UI-Update:RefreshActivity',
+          { message: `Changes : ${tierChanges} items on the current ${region} saleswindow` }, { region: region, scope: 'region' }
+
+        )
+
+        //notify user
+        await emitUiUpdate(
+          'UI-Update:RefreshActivity',
+          { message: `Order Intent Submitted successfully : Changes - ${tierChanges} items on the current ${region} saleswindow` }, { targetUserIds: [actor?._id, actor?.userId], scope: 'user' }
+        )
+      }
+
+      catch (error) {
+        console.log(`web socket message /**-**************************++++++++++:${error}`)
+      }
+      console.log("Realtime update coming from order.service.js------------------------------------------------------>");
+      return sanitizeForClient(updatedPlain);
     }
     catch (err) {
       try {
@@ -1203,7 +1210,7 @@ class OrderService {
 
       await this._audit('order.submit', actor, orderId, 'failure', 'error', correlationId, { error: err && err.message });
       throw err;
-    }*/ 
+    }*/
 
   }
 
@@ -1260,14 +1267,14 @@ class OrderService {
 
       // update the entire region      
       await emitUiUpdate(
-        'Region-UI-Update:RefreshActivity', 
-        { message : `Changes : ${tierChanges} items on the current ${region} saleswindow`}, {region : region, scope: 'region'} 
+        'Region-UI-Update:RefreshActivity',
+        { message: `Changes : ${tierChanges} items on the current ${region} saleswindow` }, { region: region, scope: 'region' }
       )
 
       //notify user
       await emitUiUpdate(
-        'UI-Update:RefreshActivity', 
-        { message : `Order Cancelled : Changes - ${tierChanges} items on the current ${region} saleswindow`}, { targetUserIds :[ actor?._id, actor?.userId ], scope: 'user'} 
+        'UI-Update:RefreshActivity',
+        { message: `Order Cancelled : Changes - ${tierChanges} items on the current ${region} saleswindow` }, { targetUserIds: [actor?._id, actor?.userId], scope: 'user' }
       )
 
       return sanitizeForClient(plain);
@@ -1281,8 +1288,8 @@ class OrderService {
   }
 
   /* -------------------------
-   * Read-intensive enrichment (TODO)
-   * ------------------------- */
+  * Read-intensive enrichment (TODO)
+  * ------------------------- */
 
   // TODO: implement _getEnrichedOrdersForUser(userId, opts)
   // Signature:
@@ -1435,52 +1442,52 @@ class OrderService {
 
     //-------------------------------------------------
     /* function replacer(key, value) {
-       if (value instanceof Map) {
-         return Object.fromEntries(value);
-       }
-       return value;
-     }
+      if (value instanceof Map) {
+        return Object.fromEntries(value);
+      }
+      return value;
+    }
  
-     const getItemObj = async (item = {}, itemId = null) => {
-       let safe = Object.assign({}, item);
-       if (Object.keys(safe).length <= 0) {
-         safe = await getById(itemId);
-       }
-       const images = Array.isArray(safe?.images) ? safe?.images : [];
-       const primaryImage = images.length > 0 ? safe.images[0] : null;
-       return {
-         // Your custom mappings
-         _id: safe._id,
-         sku: safe.sku,
-         title: safe.title,
-         slug: safe.slug,
-         shortDescription: safe.shortDescription || safe.description || '',
-         images: images, // using your variable
-         image: primaryImage, // using your variable
-         published: safe.published,
-         status: safe.status,
+    const getItemObj = async (item = {}, itemId = null) => {
+      let safe = Object.assign({}, item);
+      if (Object.keys(safe).length <= 0) {
+        safe = await getById(itemId);
+      }
+      const images = Array.isArray(safe?.images) ? safe?.images : [];
+      const primaryImage = images.length > 0 ? safe.images[0] : null;
+      return {
+        // Your custom mappings
+        _id: safe._id,
+        sku: safe.sku,
+        title: safe.title,
+        slug: safe.slug,
+        shortDescription: safe.shortDescription || safe.description || '',
+        images: images, // using your variable
+        image: primaryImage, // using your variable
+        published: safe.published,
+        status: safe.status,
  
-         // Adding the missing fields from your list
-         description: safe.description,
-         brand: safe.brand,
-         categories: safe.categories,
-         tags: safe.tags,
-         media: safe.media,
-         inventory: safe.inventory,
-         variants: safe.variants,
-         weight: safe.weight,
-         dimensions: safe.dimensions,
-         taxClass: safe.taxClass,
-         ratings: safe.ratings,
-         reviews: safe.reviews,
-         relatedProducts: safe.relatedProducts,
-         seller: safe.seller,
-         metadata: safe.metadata,
-         ops_region: safe.ops_region,
-         createdAt: safe.createdAt,
-         updatedAt: safe.updatedAt,
-       };
-     }*/
+        // Adding the missing fields from your list
+        description: safe.description,
+        brand: safe.brand,
+        categories: safe.categories,
+        tags: safe.tags,
+        media: safe.media,
+        inventory: safe.inventory,
+        variants: safe.variants,
+        weight: safe.weight,
+        dimensions: safe.dimensions,
+        taxClass: safe.taxClass,
+        ratings: safe.ratings,
+        reviews: safe.reviews,
+        relatedProducts: safe.relatedProducts,
+        seller: safe.seller,
+        metadata: safe.metadata,
+        ops_region: safe.ops_region,
+        createdAt: safe.createdAt,
+        updatedAt: safe.updatedAt,
+      };
+    }*/
 
     // console.log('\nthese are the regionLookups ---------> | ', JSON.stringify(JSON.stringify(regionLookups, replacer, 2)));//-----------------------------
 
@@ -1622,8 +1629,8 @@ class OrderService {
 
 
   /* -------------------------
-   * Misc / helpers
-   * ------------------------- */
+  * Misc / helpers
+  * ------------------------- */
 
   async hardDeleteById(id, opts = {}) {
     if (!id) throw createError(400, 'id is required');
@@ -1757,60 +1764,60 @@ class OrderService {
   }
 
   async getThresholdChangeEvents(opts = {}) {
-  const page = Math.max(1, parseInt(opts.page, 10) || 1);
-  const limit = Math.max(1, parseInt(opts.limit, 10) || 10);
+    const page = Math.max(1, parseInt(opts.page, 10) || 1);
+    const limit = Math.max(1, parseInt(opts.limit, 10) || 10);
 
-  const filter = {};
+    const filter = {};
 
-  if (opts.ops_region) {
-    filter.ops_region = opts.ops_region;
-  }
-
-  filter.status = {
-    $in: ["submitted", "approved", "confirmed", "fulfilled"],
-  };
-
-  const result = await OrderRepo.paginate(filter, {
-    page,
-    limit,
-    sort: "updatedAt:-1",
-    select: "_id ops_region status items updatedAt createdAt",
-  });
-
-  const events = (result.items || []).map((order) => {
-    const totalDemand = (order.items || []).reduce(
-      (sum, item) => sum + Number(item.quantity || 0),
-      0
-    );
-
-    let activeTier = "Tier 1";
-
-    if (totalDemand >= 100) {
-      activeTier = "Tier 4";
-    } else if (totalDemand >= 50) {
-      activeTier = "Tier 3";
-    } else if (totalDemand >= 20) {
-      activeTier = "Tier 2";
+    if (opts.ops_region) {
+      filter.ops_region = opts.ops_region;
     }
 
-    return {
-      orderId: order._id,
-      ops_region: order.ops_region || "north-america:ca-on",
-      totalDemand,
-      activeTier,
-      status: order.status,
-      changedAt: order.updatedAt || order.createdAt || Date.now(),
+    filter.status = {
+      $in: ["submitted", "approved", "confirmed", "fulfilled"],
     };
-  });
 
-  return {
-    items: events,
-    total: result.total,
-    page: result.page,
-    limit: result.limit,
-    pages: result.pages,
-  };
-}
+    const result = await OrderRepo.paginate(filter, {
+      page,
+      limit,
+      sort: "updatedAt:-1",
+      select: "_id ops_region status items updatedAt createdAt",
+    });
+
+    const events = (result.items || []).map((order) => {
+      const totalDemand = (order.items || []).reduce(
+        (sum, item) => sum + Number(item.quantity || 0),
+        0
+      );
+
+      let activeTier = "Tier 1";
+
+      if (totalDemand >= 100) {
+        activeTier = "Tier 4";
+      } else if (totalDemand >= 50) {
+        activeTier = "Tier 3";
+      } else if (totalDemand >= 20) {
+        activeTier = "Tier 2";
+      }
+
+      return {
+        orderId: order._id,
+        ops_region: order.ops_region || "north-america:ca-on",
+        totalDemand,
+        activeTier,
+        status: order.status,
+        changedAt: order.updatedAt || order.createdAt || Date.now(),
+      };
+    });
+
+    return {
+      items: events,
+      total: result.total,
+      page: result.page,
+      limit: result.limit,
+      pages: result.pages,
+    };
+  }
 
   async getDashboardMetrics() {
     const pendingQuotes = await this.count({

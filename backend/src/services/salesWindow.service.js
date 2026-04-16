@@ -350,6 +350,7 @@ class SalesWindowService {
   async addOrUpdateItem(windowId, productId, itemId, payload = {}, opts = {}) {
     const actor = actorFromOpts(opts);
     const correlationId = opts.correlationId || null;
+    console.log("jksbvbrv/**********************************************>", windowId)
     if (!windowId) throw createError(400, "windowId is required");
     if (!productId) throw createError(400, "productId is required");
     if (!itemId) throw createError(400, "itemId is required");

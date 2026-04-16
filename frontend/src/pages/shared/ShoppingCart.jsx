@@ -60,7 +60,7 @@ export default function ShoppingCart({ onContinueShopping }) {
 
 
   /* --------------------------------------------------------------------------
-     Load draft from OpsContext (idempotent)
+    Load draft from OpsContext (idempotent)
   -------------------------------------------------------------------------- */
 
   // ORDERS: ensure fetch runs only when auth is available (user._id AND accessToken)
@@ -202,8 +202,8 @@ export default function ShoppingCart({ onContinueShopping }) {
         // );
 
         // If you only want the single latest draft (instead of the array)
-        const latestDraft = latestDraftFromPayload(payload, userId);
 
+        /*const latestDraft = latestDraftFromPayload(payload, userId);
 
         const userOrders = latestDraft;
 
@@ -211,7 +211,13 @@ export default function ShoppingCart({ onContinueShopping }) {
 
         if (userOrders.length === 0) return;
 
-        const allOrderItems = userOrders.flatMap(o => o.items ?? []);
+        const allOrderItems = userOrders.flatMap(o => o.items ?? []);*/
+
+        const latestDraft = latestDraftFromPayload(payload, userId);
+
+        if (!latestDraft) return;  // guard if no draft found
+
+        const allOrderItems = latestDraft.items ?? [];
 
         const enrichedItems = await Promise.all(
           allOrderItems.map(async (orderItem) => {
@@ -227,9 +233,25 @@ export default function ShoppingCart({ onContinueShopping }) {
               const snap = Array.isArray(orderItem.pricingSnapshot)
                 ? orderItem.pricingSnapshot[0]
                 : orderItem.pricingSnapshot;
+
+              //   return {
+              //   ...orderItem,
+              //   pricingSnapshot: snap,
+              //   ItemSysInfo: {
+              //     title: itemDoc.title,
+              //     sku: itemDoc.sku,
+              //     brand: itemDoc.brand,
+              //     image: itemDoc.images?.[0] || itemDoc.metadata?.imageUrl,
+              //     images: itemDoc.images,
+              //     shortDescription: itemDoc.shortDescription,
+              //     inventory: itemDoc.inventory,
+              //   },
+              // };
+
               return {
                 ...orderItem,
                 pricingSnapshot: snap,
+                pricingTiers: orderItem.pricingTiers ?? orderItem.pricing_tiers ?? [],
                 ItemSysInfo: {
                   title: itemDoc.title,
                   sku: itemDoc.sku,
@@ -238,6 +260,7 @@ export default function ShoppingCart({ onContinueShopping }) {
                   images: itemDoc.images,
                   shortDescription: itemDoc.shortDescription,
                   inventory: itemDoc.inventory,
+                  pricingTiers: itemDoc.pricingTiers ?? itemDoc.pricing_tiers ?? [],
                 },
               };
             } catch {
@@ -248,7 +271,10 @@ export default function ShoppingCart({ onContinueShopping }) {
 
         if (!mounted) return;
 
-        const draft = { ...userOrders[0], items: enrichedItems };
+        // const draft = { ...userOrders[0], items: enrichedItems };
+
+        const draft = { ...latestDraft, items: enrichedItems };
+
         setCart(draft);
         setCartItems(enrichedItems);
         //cart.loadDraft?.({ draftOrder: draft }).catch(() => { });
@@ -279,7 +305,7 @@ export default function ShoppingCart({ onContinueShopping }) {
 
 
   /* --------------------------------------------------------------------------
-     Derived lists and filters
+    Derived lists and filters
   -------------------------------------------------------------------------- */
   //const { active = [], savedForLater = [] } = useMemo(() => groupItemsByStatus(cart.items ?? []), [cart.items]);
   // ✅ NEW - reads from cartItems state which you control
@@ -330,7 +356,7 @@ export default function ShoppingCart({ onContinueShopping }) {
   ]);
 
   /* --------------------------------------------------------------------------
-     Confirm remove modal flow
+    Confirm remove modal flow
   -------------------------------------------------------------------------- */
   const showConfirmRemove = useCallback((itemId, onConfirm) => {
     setConfirmModal({ open: true, itemId, onConfirm });
@@ -363,7 +389,7 @@ export default function ShoppingCart({ onContinueShopping }) {
   );
 
   /* --------------------------------------------------------------------------
-     Navigation / actions
+    Navigation / actions
   -------------------------------------------------------------------------- */
   const handleProceedToCheckout = useCallback(() => {
     setActiveTab(2);
@@ -393,18 +419,19 @@ export default function ShoppingCart({ onContinueShopping }) {
   }, [cart, toast]);*/
 
   const handleSubmitIntent = useCallback(async () => {
-    if (orderStatus === 'submitted') {
-      toast.showInfo("Order already submitted.");
-      return;
-    }
+    // if (orderStatus === 'submitted') {
+    //   toast.showInfo("Order already submitted.");
+    //   return;
+    // }
     try {
       await cart.submitOrder?.({
         orderId: cart.orderId,
         paymentPayload: { intent: "submit_intent" }
       });
+
       // ✅ Update local cart status immediately
       setCart(prev => prev ? { ...prev, status: 'submitted' } : prev);
-      setCartItems([]); // ✅ Clear cart items so they don't show anymore
+      //setCartItems([]); // ✅ Clear cart items so they don't show anymore
       setOrderStatus('submitted');
       toast.showSuccess("Order submitted successfully! 🎉");
 
@@ -447,7 +474,7 @@ export default function ShoppingCart({ onContinueShopping }) {
   }
 
   /* --------------------------------------------------------------------------
-     Render
+    Render
   -------------------------------------------------------------------------- */
   return (
     <>

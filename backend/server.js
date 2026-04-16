@@ -44,7 +44,7 @@ const start = async () => {
     //  - If comms-js is missing or initComms throws, logs the error and continues running the HTTP server.
     //  - Does not call attachSocketHandlers at all.
     // ---------------------------------------------------------
-    
+
     try {
       const comms = require('./src/comms-js'); // must export initComms
       if (!comms || typeof comms.initComms !== 'function') {
@@ -57,7 +57,7 @@ const start = async () => {
             path: process.env.SOCKET_PATH || '/socket.io',
             cors: {
               origin: ("http://localhost:5173" || config.clientUrl || '*').replace(/\/$/, ''),
-              methods: ['GET','POST','PUT','PATCH','DELETE','OPTIONS'],
+              methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
               credentials: true
             },
             logger: console

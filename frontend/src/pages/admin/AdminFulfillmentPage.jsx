@@ -318,6 +318,23 @@ export default function AdminFulfillmentPage() {
         });
     }, [rows, deliveryRules]);
 
+    const criticalThresholdAlert = useMemo(() => {
+    const criticalEvent = thresholdEvents.find((event) =>
+        String(event.activeTier || "").includes("4")
+    );
+
+    if (!criticalEvent) return null;
+
+    return {
+        region:
+            REGION_LABELS[criticalEvent.ops_region] ||
+            criticalEvent.ops_region ||
+            "Unknown Region",
+        demand: criticalEvent.totalDemand ?? 0,
+        tier: criticalEvent.activeTier || "Critical Tier",
+    };
+}, [thresholdEvents]);
+
     const handleApply = () => {
         setCurrentPage(1);
         setAppliedSupplier(supplierFilter);
@@ -364,155 +381,183 @@ export default function AdminFulfillmentPage() {
                             </p>
                         </section>
 
-                        <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-5">
-                            <div className="rounded-2xl border border-neutral-light bg-white p-5 shadow-sm">
-                                <p className="text-xs font-bold uppercase tracking-[0.14em] text-text-muted">
-                                    Current Demand Level
-                                </p>
-                                <p className="mt-3 text-3xl font-bold text-text-main">
-                                    {thresholdSummary.demandPercent}%
-                                </p>
-                                <p className="mt-2 text-sm text-text-muted">
-                                    Based on warning and breached thresholds in current filtered results.
-                                </p>
-                            </div>
+                       <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-5">
+    <div className="rounded-2xl border border-neutral-light bg-white p-5 shadow-sm">
+        <p className="text-xs font-bold uppercase tracking-[0.14em] text-text-muted">
+            Current Demand Level
+        </p>
+        <p className="mt-3 text-3xl font-bold text-text-main">
+            {thresholdSummary.demandPercent}%
+        </p>
+        <p className="mt-2 text-sm text-text-muted">
+            Based on warning and breached thresholds in current filtered results.
+        </p>
+    </div>
 
-                            <div className="rounded-2xl border border-neutral-light bg-white p-5 shadow-sm">
-                                <p className="text-xs font-bold uppercase tracking-[0.14em] text-text-muted">
-                                    Active Pricing Tier
-                                </p>
-                                <p className="mt-3 text-2xl font-bold text-text-main">
-                                    {thresholdSummary.activeTier}
-                                </p>
-                                <p className="mt-2 text-sm text-text-muted">
-                                    Automatically derived from current threshold conditions.
-                                </p>
-                            </div>
+    <div className="rounded-2xl border border-neutral-light bg-white p-5 shadow-sm">
+        <p className="text-xs font-bold uppercase tracking-[0.14em] text-text-muted">
+            Active Pricing Tier
+        </p>
+        <p className="mt-3 text-2xl font-bold text-text-main">
+            {thresholdSummary.activeTier}
+        </p>
+        <p className="mt-2 text-sm text-text-muted">
+            Automatically derived from current threshold conditions.
+        </p>
+    </div>
 
-                            <div className="rounded-2xl border border-neutral-light bg-white p-5 shadow-sm">
-                                <p className="text-xs font-bold uppercase tracking-[0.14em] text-text-muted">
-                                    Threshold Warnings
-                                </p>
-                                <p className="mt-3 text-3xl font-bold text-amber-600">
-                                    {thresholdSummary.warningCount}
-                                </p>
-                                <p className="mt-2 text-sm text-text-muted">
-                                    Demand approaching configured threshold limits.
-                                </p>
-                            </div>
+    <div className="rounded-2xl border border-neutral-light bg-white p-5 shadow-sm">
+        <p className="text-xs font-bold uppercase tracking-[0.14em] text-text-muted">
+            Threshold Warnings
+        </p>
+        <p className="mt-3 text-3xl font-bold text-amber-600">
+            {thresholdSummary.warningCount}
+        </p>
+        <p className="mt-2 text-sm text-text-muted">
+            Demand approaching configured threshold limits.
+        </p>
+    </div>
 
-                            <div className="rounded-2xl border border-neutral-light bg-white p-5 shadow-sm">
-                                <p className="text-xs font-bold uppercase tracking-[0.14em] text-text-muted">
-                                    Threshold Breaches
-                                </p>
-                                <p className="mt-3 text-3xl font-bold text-red-600">
-                                    {thresholdSummary.breachCount}
-                                </p>
-                                <p className="mt-2 text-sm text-text-muted">
-                                    Platform rules triggered by exceeded threshold conditions.
-                                </p>
-                            </div>
+    <div className="rounded-2xl border border-neutral-light bg-white p-5 shadow-sm">
+        <p className="text-xs font-bold uppercase tracking-[0.14em] text-text-muted">
+            Threshold Breaches
+        </p>
+        <p className="mt-3 text-3xl font-bold text-red-600">
+            {thresholdSummary.breachCount}
+        </p>
+        <p className="mt-2 text-sm text-text-muted">
+            Platform rules triggered by exceeded threshold conditions.
+        </p>
+    </div>
 
-                            <div className="rounded-2xl border border-neutral-light bg-white p-5 shadow-sm">
-                                <p className="text-xs font-bold uppercase tracking-[0.14em] text-text-muted">
-                                    Rule Re-evaluation
-                                </p>
+    <div className="rounded-2xl border border-neutral-light bg-white p-5 shadow-sm">
+        <p className="text-xs font-bold uppercase tracking-[0.14em] text-text-muted">
+            Rule Re-evaluation
+        </p>
 
-                                <div className="mt-3 flex items-center gap-2">
-                                    <span
-                                        className={`inline-block h-3 w-3 rounded-full ${thresholdSummary.breachCount > 0
-                                                ? "bg-red-500"
-                                                : thresholdSummary.warningCount > 0
-                                                    ? "bg-amber-400"
-                                                    : "bg-emerald-500"
-                                            }`}
-                                    />
-                                    <p className="text-xl font-bold text-text-main">
-                                        {thresholdSummary.breachCount > 0
-                                            ? "Critical Rules Re-evaluated"
-                                            : thresholdSummary.warningCount > 0
-                                                ? "Rules Re-evaluated"
-                                                : "Stable"}
-                                    </p>
-                                </div>
+        <div className="mt-3 flex items-center gap-2">
+            <span
+                className={`inline-block h-3 w-3 rounded-full ${
+                    thresholdSummary.breachCount > 0
+                        ? "bg-red-500"
+                        : thresholdSummary.warningCount > 0
+                        ? "bg-amber-400"
+                        : "bg-emerald-500"
+                }`}
+            />
+            <p className="text-xl font-bold text-text-main">
+                {thresholdSummary.breachCount > 0
+                    ? "Critical Rules Re-evaluated"
+                    : thresholdSummary.warningCount > 0
+                    ? "Rules Re-evaluated"
+                    : "Stable"}
+            </p>
+        </div>
 
-                                <p className="mt-2 text-sm text-text-muted">
-                                    Status updates automatically after each threshold refresh cycle.
-                                </p>
-                            </div>
-                        </section>
+        <p className="mt-2 text-sm text-text-muted">
+            Status updates automatically after each threshold refresh cycle.
+        </p>
+    </div>
+</section>
 
-                        <section className="rounded-2xl border border-neutral-light bg-white p-5 shadow-sm">
-                            <div className="flex flex-wrap items-end gap-4">
-                                <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold uppercase tracking-wide text-text-muted">
-                                        Supplier
-                                    </label>
-                                    <select
-                                        value={supplierFilter}
-                                        onChange={(e) => setSupplierFilter(e.target.value)}
-                                        className="rounded-xl border border-neutral-light bg-white px-4 py-2.5 text-sm text-text-main outline-none focus:border-primary"
-                                    >
-                                        {supplierOptions.map((o) => (
-                                            <option key={o.value || "all"} value={o.value}>
-                                                {o.label}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
+{criticalThresholdAlert && (
+    <section className="rounded-2xl border border-red-200 bg-red-50 px-6 py-4 shadow-sm">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-start gap-3">
+                <span className="mt-0.5 inline-flex h-8 w-8 items-center justify-center rounded-full bg-red-100 text-red-600">
+                    🚨
+                </span>
 
-                                <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold uppercase tracking-wide text-text-muted">
-                                        Region
-                                    </label>
-                                    <select
-                                        value={regionFilter}
-                                        onChange={(e) => setRegionFilter(e.target.value)}
-                                        className="rounded-xl border border-neutral-light bg-white px-4 py-2.5 text-sm text-text-main outline-none focus:border-primary"
-                                    >
-                                        {REGION_OPTIONS.map((o) => (
-                                            <option key={o.value || "all-region"} value={o.value}>
-                                                {o.label}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
+                <div>
+                    <p className="text-sm font-bold text-red-700">
+                        Critical Threshold Alert
+                    </p>
+                    <p className="mt-1 text-sm text-red-600">
+                        {criticalThresholdAlert.tier} activated in{" "}
+                        {criticalThresholdAlert.region} with demand of{" "}
+                        {criticalThresholdAlert.demand}.
+                    </p>
+                </div>
+            </div>
 
-                                <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold uppercase tracking-wide text-text-muted">
-                                        Status
-                                    </label>
-                                    <select
-                                        value={statusFilter}
-                                        onChange={(e) => setStatusFilter(e.target.value)}
-                                        className="rounded-xl border border-neutral-light bg-white px-4 py-2.5 text-sm text-text-main outline-none focus:border-primary"
-                                    >
-                                        {STATUS_OPTIONS.map((o) => (
-                                            <option key={o.value || "all-status"} value={o.value}>
-                                                {o.label}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
+            <span className="rounded-full bg-red-100 px-3 py-1 text-xs font-bold text-red-700">
+                Immediate Attention Required
+            </span>
+        </div>
+    </section>
+)}
 
-                                <div className="flex items-center gap-2">
-                                    <button
-                                        type="button"
-                                        onClick={handleClear}
-                                        className="rounded-xl border border-neutral-light px-5 py-2.5 text-sm font-semibold text-text-muted transition hover:bg-neutral-light"
-                                    >
-                                        Clear Filters
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={handleApply}
-                                        className="rounded-xl bg-primary px-6 py-2.5 text-sm font-bold text-text-main transition hover:opacity-90"
-                                    >
-                                        Apply Filters
-                                    </button>
-                                </div>
-                            </div>
-                        </section>
+<section className="rounded-2xl border border-neutral-light bg-white p-5 shadow-sm">
+    <div className="flex flex-wrap items-end gap-4">
+        <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-semibold uppercase tracking-wide text-text-muted">
+                Supplier
+            </label>
+            <select
+                value={supplierFilter}
+                onChange={(e) => setSupplierFilter(e.target.value)}
+                className="rounded-xl border border-neutral-light bg-white px-4 py-2.5 text-sm text-text-main outline-none focus:border-primary"
+            >
+                {supplierOptions.map((o) => (
+                    <option key={o.value || "all"} value={o.value}>
+                        {o.label}
+                    </option>
+                ))}
+            </select>
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-semibold uppercase tracking-wide text-text-muted">
+                Region
+            </label>
+            <select
+                value={regionFilter}
+                onChange={(e) => setRegionFilter(e.target.value)}
+                className="rounded-xl border border-neutral-light bg-white px-4 py-2.5 text-sm text-text-main outline-none focus:border-primary"
+            >
+                {REGION_OPTIONS.map((o) => (
+                    <option key={o.value || "all-region"} value={o.value}>
+                        {o.label}
+                    </option>
+                ))}
+            </select>
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-semibold uppercase tracking-wide text-text-muted">
+                Status
+            </label>
+            <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="rounded-xl border border-neutral-light bg-white px-4 py-2.5 text-sm text-text-main outline-none focus:border-primary"
+            >
+                {STATUS_OPTIONS.map((o) => (
+                    <option key={o.value || "all-status"} value={o.value}>
+                        {o.label}
+                    </option>
+                ))}
+            </select>
+        </div>
+
+        <div className="flex items-center gap-2">
+            <button
+                type="button"
+                onClick={handleClear}
+                className="rounded-xl border border-neutral-light px-5 py-2.5 text-sm font-semibold text-text-muted transition hover:bg-neutral-light"
+            >
+                Clear Filters
+            </button>
+            <button
+                type="button"
+                onClick={handleApply}
+                className="rounded-xl bg-primary px-6 py-2.5 text-sm font-bold text-text-main transition hover:opacity-90"
+            >
+                Apply Filters
+            </button>
+        </div>
+    </div>
+</section>
 
                         <section className="overflow-hidden rounded-2xl border border-neutral-light bg-white shadow-sm">
                             <div className="flex items-center justify-between border-b border-neutral-light px-6 py-4">

@@ -107,7 +107,7 @@ export async function apiFetch(path, { method = "GET", body = null, headers = {}
  */
 export async function getDraftOrder({ userId }) {
   if (!userId) throw new Error("getDraftOrder requires userId");
-  return apiFetch(`/orders/draft?userId=${encodeURIComponent(userId)}`, { method: "GET" });
+  return apiFetch(`/ordrs/draft?userId=${encodeURIComponent(userId)}`, { method: "GET" });
 }
 
 /**
@@ -118,7 +118,7 @@ export async function getDraftOrder({ userId }) {
  */
 export async function updateDraftOrder({ orderId, patch }) {
   if (!orderId) throw new Error("updateDraftOrder requires orderId");
-  return apiFetch(`/orders/${encodeURIComponent(orderId)}/draft`, {
+  return apiFetch(`/ordrs/${encodeURIComponent(orderId)}/draft`, {
     method: "PATCH",
     body: patch,
   });
@@ -132,7 +132,7 @@ export async function updateDraftOrder({ orderId, patch }) {
  */
 export async function addItemToDraft({ orderId, item }) {
   if (!orderId || !item) throw new Error("addItemToDraft requires orderId and item");
-  return apiFetch(`/orders/${encodeURIComponent(orderId)}/items`, {
+  return apiFetch(`/ordrs/${encodeURIComponent(orderId)}/items`, {
     method: "POST",
     body: item,
   });
@@ -146,7 +146,7 @@ export async function addItemToDraft({ orderId, item }) {
  */
 export async function removeItemFromDraft({ orderId, itemId }) {
   if (!orderId || !itemId) throw new Error("removeItemFromDraft requires orderId and itemId");
-  return apiFetch(`/orders/${encodeURIComponent(orderId)}/items/${encodeURIComponent(itemId)}`, {
+  return apiFetch(`/ordrs/${encodeURIComponent(orderId)}/items/${encodeURIComponent(itemId)}`, {
     method: "DELETE",
   });
 }
@@ -159,7 +159,7 @@ export async function removeItemFromDraft({ orderId, itemId }) {
  */
 export async function toggleSaveForLater({ orderId, itemId, saveForLater }) {
   if (!orderId || !itemId) throw new Error("toggleSaveForLater requires orderId and itemId");
-  return apiFetch(`/orders/${encodeURIComponent(orderId)}/items/${encodeURIComponent(itemId)}`, {
+  return apiFetch(`/ordrs/${encodeURIComponent(orderId)}/items/${encodeURIComponent(itemId)}`, {
     method: "PATCH",
     body: { saveForLater: !!saveForLater },
   });
@@ -173,7 +173,7 @@ export async function toggleSaveForLater({ orderId, itemId, saveForLater }) {
  */
 export async function submitOrder({ orderId, paymentPayload = {} }) {
   if (!orderId) throw new Error("submitOrder requires orderId");
-  return apiFetch(`/orders/${encodeURIComponent(orderId)}/submit`, {
+  return apiFetch(`/ordrs/${encodeURIComponent(orderId)}/submit`, {
     method: "POST",
     body: paymentPayload,
   });
@@ -187,7 +187,7 @@ export async function submitOrder({ orderId, paymentPayload = {} }) {
  */
 export async function refreshPricing({ orderId }) {
   if (!orderId) throw new Error("refreshPricing requires orderId");
-  return apiFetch(`/orders/${encodeURIComponent(orderId)}/pricing/refresh`, {
+  return apiFetch(`/ordrs/${encodeURIComponent(orderId)}/pricing/refresh`, {
     method: "POST",
   });
 }

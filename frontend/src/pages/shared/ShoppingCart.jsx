@@ -173,10 +173,39 @@ export default function ShoppingCart({ onContinueShopping }) {
 
         console.log("🛒 userOrders found:", payload.items.length);
 
-        const userOrders = payload.items.filter((o) =>
-          o && ['draft'].includes(o.status)
-          && String(o.userId) === String(userId || user._id)
-        );
+        // const userOrders = payload.items.filter((o) =>
+        //   o && ['draft'].includes(o.status)
+        //   && String(o.userId) === String(userId || user._id)
+        // );
+
+        // Return the single latest draft order for a user (prefers updatedAt, falls back to createdAt)
+        function latestDraftFromPayload(payload = {}, userId) {
+          const items = Array.isArray(payload.items) ? payload.items : [];
+          const drafts = items.filter(o =>
+            o && String(o.status) === 'draft' && String(o.userId) === String(userId)
+          );
+          if (drafts.length === 0) return null;
+
+          drafts.sort((a, b) => {
+            const aTs = Number(a.updatedAt ?? a.createdAt ?? 0);
+            const bTs = Number(b.updatedAt ?? b.createdAt ?? 0);
+            return bTs - aTs; // newest first
+          });
+
+          return drafts[0];
+        }
+
+        // // Example: integrate with your existing filter
+        // const userId = userIdFromContext || String(user._id);
+        // const userOrders = payload.items.filter((o) =>
+        //   o && ['draft'].includes(o.status) && String(o.userId) === String(userId)
+        // );
+
+        // If you only want the single latest draft (instead of the array)
+        const latestDraft = latestDraftFromPayload(payload, userId);
+
+
+        const userOrders = latestDraft;
 
         console.log("🛒 filtered orders:", userOrders.length);
 
@@ -416,12 +445,6 @@ export default function ShoppingCart({ onContinueShopping }) {
     taxRate: 0.13,
     shippingEstimator: null,
   }
-
-  /* --------------------------------------------------------------------------
-     Payment & Delivery form (reused in Cart main and Checkout)
-     - Prepopulated from cart.order when available
-  -------------------------------------------------------------------------- */
-  // ---?? moved to another to a standalone module
 
   /* --------------------------------------------------------------------------
      Render

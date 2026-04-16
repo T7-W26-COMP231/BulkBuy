@@ -505,8 +505,8 @@ export default function AuthTabs(props) {
                 <button
                   type="button"
                   onClick={() => {
-                    setSiEmail("aisha.khan@bulkbuy.org");
-                    setSiPassword("AdminPass!2026");
+                    setSiEmail("noah.patel@example.com");
+                    setSiPassword("CustomerPass2!");
                   }}
                   className="btn"
                   disabled={busy}

@@ -50,7 +50,8 @@ const MessageSchema = new Schema(
     attachments: [{ type: Schema.Types.ObjectId, ref: 'S3File' }],
     ops_region: { type: String, trim: true, index: true, default: '' },
     status: { type: String, enum: STATUS_ENUM, default: 'draft', index: true },
-    replyTo: { type: Schema.Types.ObjectId, ref: 'Message', default: null },
+    replyTo: { type: String, ref: 'Message', default: null },
+    // replyTo: { type: Schema.Types.ObjectId, ref: 'Message', default: null },
     metadata: { type: Map, of: Schema.Types.Mixed, default: {} },
     internalNotes: { type: String, trim: true, default: '' },
     deleted: { type: Boolean, default: false, index: true }

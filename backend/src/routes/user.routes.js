@@ -147,6 +147,12 @@ router.get(
 );
 
 /* Update user by _id (partial update) */
+
+// Allows updating user status to 'active' or 'suspended'.
+// Used by admin user management page to suspend/activate accounts.
+// Body: { "status": "suspended" | "active" }
+// Also supports other partial updates: firstName, lastName, emails, etc.
+
 router.patch(
   '/:id',
   userValidators.idParam,

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import SupplierLayout from "../../components/supplier/SupplierLayout";
 
 const initialProfile = {
@@ -20,6 +20,21 @@ export default function SupplierProfilePage() {
   const [savedProfile, setSavedProfile] = useState(initialProfile);
   const [errors, setErrors] = useState({});
   const [saveMessage, setSaveMessage] = useState("");
+  const [logoFile, setLogoFile] = useState(null);
+  const [logoPreview, setLogoPreview] = useState("");
+
+  useEffect(() => {
+    if (!logoFile) {
+      return undefined;
+    }
+
+    const previewUrl = URL.createObjectURL(logoFile);
+    setLogoPreview(previewUrl);
+
+    return () => {
+      URL.revokeObjectURL(previewUrl);
+    };
+  }, [logoFile]);
 
   const isDirty = useMemo(() => {
     return JSON.stringify(profile) !== JSON.stringify(savedProfile);
@@ -79,6 +94,19 @@ export default function SupplierProfilePage() {
   const handleCancel = () => {
     setProfile(savedProfile);
     setErrors({});
+    setSaveMessage("");
+    setLogoFile(null);
+    setLogoPreview("");
+  };
+
+  const handleLogoChange = (e) => {
+    const selectedFile = e.target.files?.[0];
+
+    if (!selectedFile) {
+      return;
+    }
+
+    setLogoFile(selectedFile);
     setSaveMessage("");
   };
 
@@ -157,6 +185,56 @@ export default function SupplierProfilePage() {
                   {errors.businessAddress}
                 </p>
               ) : null}
+            </div>
+
+            <div>
+              <label className="mb-2 block text-sm font-semibold text-text-main">
+                Company Logo
+              </label>
+
+              <div className="rounded-2xl border border-dashed border-primary/30 bg-white p-4 shadow-sm">
+                <div className="flex flex-col gap-4 md:flex-row md:items-center">
+                  <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-2xl border border-neutral-light bg-white">
+                    {logoPreview ? (
+                      <img
+                        src={logoPreview}
+                        alt="Company logo preview"
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-xs text-text-muted">No Logo</span>
+                    )}
+                  </div>
+
+                  <div className="flex-1">
+                    <input
+                      id="companyLogo"
+                      type="file"
+                      accept="image/png,image/jpeg,image/jpg,image/webp"
+                      onChange={handleLogoChange}
+                      className="hidden"
+                    />
+
+                    <label
+                      htmlFor="companyLogo"
+                      className="inline-flex cursor-pointer rounded-xl border border-neutral-light bg-white px-4 py-2 text-sm font-semibold text-text-main shadow-sm"
+                    >
+                      Choose Logo
+                    </label>
+
+                    <p className="mt-2 text-sm font-medium text-text-main">
+                      Upload a company logo to preview how it will appear on the
+                      supplier profile.
+                    </p>
+
+                    {logoFile ? (
+                      <p className="mt-2 text-sm font-semibold text-text-main">
+                        Selected file: {logoFile.name}
+                      </p>
+                    ) : null}
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

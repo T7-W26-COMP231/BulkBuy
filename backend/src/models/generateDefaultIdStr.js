@@ -32,4 +32,4 @@ const generateDefaultIdStr = async function (doc, options = {}) {
   return newId;
 };
 
-module.exports = { generateDefaultIdStr };
+module.exports = { generateDefaultIdStr, generateRandomId };

@@ -13,6 +13,7 @@ const SalesWindowService = require('./salesWindow.service');
 const UserRepo = require('../repositories/user.repo');
 const { sendOrderConfirmation } = require('./email.service');
 const { getById } = require('./item.service');
+const { emitUiUpdate } = require('../comms-js/websocket/services/uiUpdate.service');
 
 function sanitizeForClient(doc) {
   if (!doc) return doc;
@@ -478,22 +479,83 @@ class OrderService {
     }
   }
 
+
   async updateStatus(orderId, status, opts = {}) {
-    if (!orderId || !status) throw createError(400, 'orderId and status are required');
+    if (!orderId || !status) {
+      throw createError(400, 'orderId and status are required');
+    }
 
     const actor = actorFromOpts(opts);
     const correlationId = opts.correlationId || null;
 
+    const allowedTransitions = {
+      confirmed: ['dispatched'],
+      dispatched: ['fulfilled'],
+    };
+
     try {
-      const updated = await OrderRepo.updateStatus(orderId, status);
-      if (!updated) {
-        await this._audit('order.updateStatus', actor, orderId, 'failure', 'warn', correlationId, { reason: 'not_found' });
+      const currentOrder = await OrderRepo.findById(orderId, { lean: true });
+
+      if (!currentOrder) {
+        await this._audit(
+          'order.updateStatus', actor, orderId, 'failure', 'warn', correlationId,
+          { reason: 'not_found' }
+        );
         throw createError(404, 'Order not found');
       }
-      await this._audit('order.updateStatus', actor, orderId, 'success', 'info', correlationId, { status });
+
+      const currentStatus = String(currentOrder.status || '').toLowerCase();
+      const nextStatus = String(status || '').toLowerCase();
+
+      const validNextStatuses = allowedTransitions[currentStatus] || [];
+
+      if (!validNextStatuses.includes(nextStatus)) {
+        throw createError(
+          409,
+          `Invalid status transition from ${currentStatus} to ${nextStatus}`
+        );
+      }
+
+      const updated = await OrderRepo.updateStatus(orderId, nextStatus);
+
+      await this._audit(
+        'order.updateStatus',
+        actor,
+        orderId,
+        'success',
+        'info',
+        correlationId,
+        {
+          fromStatus: currentStatus,
+          toStatus: nextStatus,
+          changedAt: Date.now(),
+        }
+      );
+
+      // ── Task #243 — Notify administrator ─────────────────────────────
+      try {
+        await emitUiUpdate('order:status-updated', {
+          orderId: String(orderId),
+          fromStatus: currentStatus,
+          toStatus: nextStatus,
+          changedAt: Date.now(),
+        }, { scope: 'role', role: 'administrator' });
+        console.log(`📡 [order:status-updated] emitted for order ${orderId}: ${currentStatus} → ${nextStatus}`);
+      } catch (e) {
+        console.warn('order:status-updated emit failed (non-fatal):', e?.message);
+      }
+
       return sanitizeForClient(updated);
     } catch (err) {
-      await this._audit('order.updateStatus', actor, orderId, 'failure', 'error', correlationId, { error: err && err.message });
+      await this._audit(
+        'order.updateStatus',
+        actor,
+        orderId,
+        'failure',
+        'error',
+        correlationId,
+        { error: err && err.message }
+      );
       throw err;
     }
   }
@@ -1431,6 +1493,156 @@ class OrderService {
       throw err;
     }
   }
+  async getSupplierHistoricalReport(opts = {}) {
+    const page = Math.max(1, parseInt(opts.page, 10) || 1);
+    const limit = Math.max(1, parseInt(opts.limit, 10) || 25);
+
+    const filter = {};
+
+    // ✅ supplier reports should show historical processed orders
+    if (opts.ops_region) {
+      filter.ops_region = opts.ops_region;
+    }
+
+    filter.status = {
+      $in: ["approved", "confirmed", "dispatched", "fulfilled"],
+    };
+
+    // ✅ optional status filter from dropdown
+    if (opts.status && opts.status.toLowerCase() !== "all") {
+      filter.status = opts.status.toLowerCase();
+    }
+
+    // ✅ optional date filtering
+    if (opts.startDate || opts.endDate) {
+      filter.createdAt = {};
+
+      if (opts.startDate) {
+        filter.createdAt.$gte = new Date(opts.startDate).getTime();
+      }
+
+      if (opts.endDate) {
+        const end = new Date(opts.endDate);
+        end.setHours(23, 59, 59, 999);
+        filter.createdAt.$lte = end.getTime();
+      }
+    }
+
+    console.log("📊 SUPPLIER REPORT FILTER:", filter);
+
+    const result = await OrderRepo.paginate(filter, {
+      page,
+      limit,
+      sort: "createdAt:-1",
+    });
+
+    const enrichedItems = await Promise.all(
+      (result.items || []).map(async (order) => {
+        const safeOrder = sanitizeForClient(order);
+
+        const enrichedOrderItems = await Promise.all(
+          (safeOrder.items || []).map(async (item) => {
+            try {
+              const itemData = await getById(item.itemId);
+
+              return {
+                ...item,
+                productTitle:
+                  itemData?.title ||
+                  itemData?.name ||
+                  item.itemId,
+              };
+            } catch {
+              return {
+                ...item,
+                productTitle: item.itemId,
+              };
+            }
+          })
+        );
+
+        const productMatch =
+          !opts.product ||
+          opts.product === "All Items" ||
+          enrichedOrderItems.some(
+            (item) => item.productTitle === opts.product
+          );
+
+        if (!productMatch) return null;
+
+        return {
+          ...safeOrder,
+          items: enrichedOrderItems,
+        };
+      })
+    );
+
+    const filteredItems = enrichedItems.filter(Boolean);
+
+    return {
+      items: filteredItems,
+      total: filteredItems.length,
+      page,
+      limit,
+      pages: Math.max(1, Math.ceil(filteredItems.length / limit)),
+    };
+  }
+
+  async getThresholdChangeEvents(opts = {}) {
+  const page = Math.max(1, parseInt(opts.page, 10) || 1);
+  const limit = Math.max(1, parseInt(opts.limit, 10) || 10);
+
+  const filter = {};
+
+  if (opts.ops_region) {
+    filter.ops_region = opts.ops_region;
+  }
+
+  filter.status = {
+    $in: ["submitted", "approved", "confirmed", "fulfilled"],
+  };
+
+  const result = await OrderRepo.paginate(filter, {
+    page,
+    limit,
+    sort: "updatedAt:-1",
+    select: "_id ops_region status items updatedAt createdAt",
+  });
+
+  const events = (result.items || []).map((order) => {
+    const totalDemand = (order.items || []).reduce(
+      (sum, item) => sum + Number(item.quantity || 0),
+      0
+    );
+
+    let activeTier = "Tier 1";
+
+    if (totalDemand >= 100) {
+      activeTier = "Tier 4";
+    } else if (totalDemand >= 50) {
+      activeTier = "Tier 3";
+    } else if (totalDemand >= 20) {
+      activeTier = "Tier 2";
+    }
+
+    return {
+      orderId: order._id,
+      ops_region: order.ops_region || "north-america:ca-on",
+      totalDemand,
+      activeTier,
+      status: order.status,
+      changedAt: order.updatedAt || order.createdAt || Date.now(),
+    };
+  });
+
+  return {
+    items: events,
+    total: result.total,
+    page: result.page,
+    limit: result.limit,
+    pages: result.pages,
+  };
+}
 
   async getDashboardMetrics() {
     const pendingQuotes = await this.count({

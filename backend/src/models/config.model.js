@@ -64,6 +64,18 @@ const ConfigSchema = new Schema(
     theme: { type: String, enum: THEME_ENUM, default: 'system' },
     isPrivate: { type: Boolean, default: true, index: true },
     ops_region: { type: String, trim: true, default: '' },
+
+    // deliveryRules: {
+    //   supplierId: { type: String, trim: true, default: '' },
+    //   supplierName: { type: String, trim: true, default: '' },
+    //   deliveryRegion: { type: String, trim: true, default: '' },
+    //   maxDeliveryDays: { type: Number, default: 7, min: 1 },
+    //   warningAfterDays: { type: Number, default: 5, min: 1 },
+    //   notes: { type: String, trim: true, default: '' },
+    //   isActive: { type: Boolean, default: true },
+    //   updatedBy: { type: String, trim: true, default: '' }
+    // },
+
     metadata: { type: Map, of: Schema.Types.Mixed, default: {} },
     internalNotes: { type: String, trim: true, default: '' },
     deleted: { type: Boolean, default: false, index: true }

@@ -1,26 +1,56 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import NotificationBell from "../../pages/shared/NotificationBell";
+import { useAuth } from "../../contexts/AuthContext.jsx";
+import { useToast } from "../../contexts/ToastProvider.jsx";
 
-const CITIES = ["Seattle", "New York", "San Francisco", "Chicago", "Toronto"];
+const REGIONS = [
+  "Admin Region",
+  "North America",
+  "Ontario",
+  "Quebec",
+  "British Columbia",
+  "Alberta",
+];
 
-export default function AdminTopbar({ title, onSearch, searchPlaceholder = "Search system metrics...", onMenuClick }) {
-  const [city, setCity] = useState("Seattle");
+export default function AdminTopbar({
+  title,
+  onSearch,
+  searchPlaceholder = "Search system metrics...",
+  onMenuClick,
+}) {
+  const [region, setRegion] = useState("Admin Region");
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
-  return (
-    <header className="border-b border-neutral-light bg-white px-6 py-3 md:px-8">
-      <div className="flex items-center gap-4">
+  const { signOut } = useAuth();
+  const { clearAll } = useToast();
+  const navigate = useNavigate();
 
-        {/* ✅ ADD THIS THREE LINES */}
-        <button type="button" onClick={onMenuClick}
-          className="lg:hidden rounded-xl p-2 text-text-muted hover:bg-neutral-light">
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      clearAll();
+      navigate("/", { replace: true });
+    } catch (err) {
+      console.error("signOut error:", err);
+    }
+  };
+
+  return (
+    <header className="bg-white px-6 py-4 md:px-8">
+      <div className="flex items-center gap-4">
+        <button
+          type="button"
+          onClick={onMenuClick}
+          className="rounded-xl p-2 text-text-muted hover:bg-neutral-light lg:hidden"
+        >
           <span className="material-symbols-outlined">menu</span>
         </button>
 
-
-        {/* ── Left: Search bar ──────────────────────────────────────── */}
-        <div className="flex flex-1 max-w-sm items-center gap-2 rounded-2xl border border-neutral-light bg-neutral-light/50 px-4 py-2.5">
-          <span className="material-symbols-outlined text-[20px] text-text-muted">search</span>
+        <div className="flex max-w-xl flex-1 items-center gap-2 rounded-2xl border border-neutral-light bg-neutral-light/50 px-4 py-3">
+          <span className="material-symbols-outlined text-[20px] text-text-muted">
+            search
+          </span>
           <input
             type="text"
             placeholder={searchPlaceholder}
@@ -29,21 +59,17 @@ export default function AdminTopbar({ title, onSearch, searchPlaceholder = "Sear
           />
         </div>
 
-        {/* rest unchanged */}
-        {/* ── Right: City dropdown + bell + avatar ─────────────────── */}
-        <div className="ml-auto flex items-center gap-2">
-
-          {/* City dropdown */}
+        <div className="ml-auto flex items-center gap-3">
           <div className="relative">
             <button
               type="button"
               onClick={() => setDropdownOpen((o) => !o)}
-              className="flex items-center gap-1 rounded-xl px-3 py-2 text-sm font-semibold text-text-main transition hover:bg-neutral-light"
+              className="flex items-center gap-2 rounded-2xl border border-neutral-light bg-white px-4 py-3 text-sm font-semibold text-text-main transition hover:bg-neutral-light"
             >
               <span className="material-symbols-outlined text-[18px] text-primary">
                 location_on
               </span>
-              <span>{city}</span>
+              <span>{region}</span>
               <span className="material-symbols-outlined text-[18px] text-text-muted">
                 keyboard_arrow_down
               </span>
@@ -55,20 +81,29 @@ export default function AdminTopbar({ title, onSearch, searchPlaceholder = "Sear
                   className="fixed inset-0 z-40"
                   onClick={() => setDropdownOpen(false)}
                 />
-                <div className="absolute right-0 top-full z-50 mt-1 w-44 overflow-hidden rounded-2xl border border-neutral-light bg-white shadow-lg">
-                  {CITIES.map((c) => (
+                <div className="absolute right-0 top-full z-50 mt-2 w-52 overflow-hidden rounded-2xl border border-neutral-light bg-white shadow-lg">
+                  {REGIONS.map((r) => (
                     <button
-                      key={c}
+                      key={r}
                       type="button"
-                      onClick={() => { setCity(c); setDropdownOpen(false); }}
-                      className={`flex w-full items-center gap-2 px-4 py-3 text-left text-sm transition hover:bg-neutral-light ${c === city ? "font-bold text-primary" : "text-text-main"
-                        }`}
+                      onClick={() => {
+                        setRegion(r);
+                        setDropdownOpen(false);
+                      }}
+                      className={`flex w-full items-center gap-2 px-4 py-3 text-left text-sm transition hover:bg-neutral-light ${
+                        r === region
+                          ? "font-bold text-primary"
+                          : "text-text-main"
+                      }`}
                     >
-                      {c === city
-                        ? <span className="material-symbols-outlined text-[16px] text-primary">check</span>
-                        : <span className="w-4" />
-                      }
-                      {c}
+                      {r === region ? (
+                        <span className="material-symbols-outlined text-[16px] text-primary">
+                          check
+                        </span>
+                      ) : (
+                        <span className="w-4" />
+                      )}
+                      {r}
                     </button>
                   ))}
                 </div>
@@ -76,17 +111,18 @@ export default function AdminTopbar({ title, onSearch, searchPlaceholder = "Sear
             )}
           </div>
 
-          {/* Bell */}
           <NotificationBell />
 
-          {/* Avatar */}
           <button
             type="button"
-            className="flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-neutral-light text-text-muted transition hover:ring-2 hover:ring-primary"
+            onClick={handleSignOut}
+            className="flex size-10 shrink-0 items-center justify-center rounded-full bg-white text-red-400 transition hover:bg-red-50 hover:text-red-500"
+            title="Logout"
           >
-            <span className="material-symbols-outlined text-[20px]">person</span>
+            <span className="material-symbols-outlined text-[20px]">
+              logout
+            </span>
           </button>
-
         </div>
       </div>
     </header>

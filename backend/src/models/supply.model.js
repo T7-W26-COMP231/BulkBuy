@@ -21,7 +21,8 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
-const { generateDefaultIdStr } = require('./generateDefaultIdStr');
+//const { generateDefaultIdStr } = require('./generateDefaultIdStr');
+const { generateDefaultIdStr, generateRandomId } = require('./generateDefaultIdStr');
 
 const DiscountBracketSchema = new Schema(
   {
@@ -34,6 +35,7 @@ const DiscountBracketSchema = new Schema(
 
 const QuoteSchema = new Schema(
   {
+    _id: { type: String, default: () => generateRandomId(20) },
     pricePerBulkUnit: { type: Number, required: true, min: 0 },
     numberOfBulkUnits: { type: Number, required: true, min: 1 },
     discountingScheme: { type: [DiscountBracketSchema], default: [] },
@@ -47,6 +49,7 @@ const QuoteSchema = new Schema(
 const ItemSchema = new Schema(
   {
     //itemId: { type: Schema.Types.ObjectId, required: true, ref: 'Item' },
+    _id: { type: String, default: () => generateRandomId(20) },
     itemId: { type: String, required: true, ref: 'Item' },
 
 

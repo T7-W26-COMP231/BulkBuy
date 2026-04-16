@@ -73,13 +73,12 @@ return [
       supply?.supplier?.email || "No email provided",
     contactPhone:
       supply?.supplier?.phone || "No phone provided",
-    product: quoteDraft.productName || "Unnamed Product",
-    submittedOn: formatDate(
-      supply?.submittedAt ||
-      supply?.updatedAt ||
-      supply?.createdAt
-    ),
-    tiers: Array.isArray(quoteDraft.tiers)
+  product: quoteDraft.productName || "Unnamed Product",
+submittedOn:
+  supply?.submittedAt ||
+  supply?.updatedAt ||
+  supply?.createdAt,
+tiers: Array.isArray(quoteDraft.tiers)
       ? quoteDraft.tiers.map((tier) => ({
           minQty: tier.minQty,
           unitPrice: tier.unitPrice,
@@ -113,14 +112,13 @@ return supply.items.map((item, index) => {
       supply?.supplier?.email || "No email provided",
     contactPhone:
       supply?.supplier?.phone || "No phone provided",
-    product:
-      item?.itemId?.name ||
-      item?.meta?.productName ||
-      `Item ${index + 1}`,
-    submittedOn: formatDate(
-      firstQuote?.createdAt || supply?.createdAt
-    ),
-    tiers: (firstQuote?.discountingScheme || []).map((bracket) => ({
+   product:
+  item?.itemId?.name ||
+  item?.meta?.productName ||
+  `Item ${index + 1}`,
+submittedOn:
+  firstQuote?.createdAt || supply?.createdAt,
+tiers: (firstQuote?.discountingScheme || []).map((bracket) => ({
       minQty: bracket.minQty,
       unitPrice: firstQuote?.pricePerBulkUnit ?? null,
       discountPercent: bracket.discountPercent ?? null,
@@ -153,6 +151,8 @@ export default function AdminQuotesReviewPage() {
     Approved: 0,
     Rejected: 0,
   });
+
+  const [warningAfterDays, setWarningAfterDays] = useState(5);
 
   const statusMap = {
     Pending: "pending_review",
@@ -191,6 +191,30 @@ export default function AdminQuotesReviewPage() {
   useEffect(() => {
     loadCounts();
   }, []);
+
+  useEffect(() => {
+  const tokenRaw = localStorage.getItem("app_auth_session_v1");
+  const session = tokenRaw ? JSON.parse(tokenRaw) : null;
+  const accessToken = session?.accessToken;
+
+  if (!accessToken) return;
+
+  fetch(`${import.meta.env.VITE_API_URL}/api/configs/delivery-rules`, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      const days = data?.data?.deliveryRules?.warningAfterDays;
+      if (typeof days === "number") {
+        setWarningAfterDays(days);
+      }
+    })
+    .catch(() => {
+      setWarningAfterDays(5);
+    });
+}, []);
 
   // const quoteRows = useMemo(() => {
   //   if (supplies.length > 0) {
@@ -355,12 +379,24 @@ export default function AdminQuotesReviewPage() {
                       ) : filteredQuotes.length > 0 ? (
                         filteredQuotes.map((quote) => (
                           <tr
-                            key={quote.id}
-                            className={`transition hover:bg-neutral-light/40 ${selectedQuote?.id === quote.id
-                              ? "bg-primary/5"
-                              : ""
-                              }`}
-                          >
+  key={quote.id}
+  className={`transition hover:bg-neutral-light/40 ${
+    (() => {
+      const submitted = new Date(quote.submittedOn);
+      const ageDays = Number.isNaN(submitted.getTime())
+        ? 0
+        : Math.floor((Date.now() - submitted.getTime()) / (1000 * 60 * 60 * 24));
+
+      const isWarning =
+        quote.status === "Approved" &&
+        ageDays >= warningAfterDays;
+
+      if (selectedQuote?.id === quote.id) return "bg-primary/5";
+      if (isWarning) return "bg-yellow-100";
+      return "";
+    })()
+  }`}
+>
                             <td className="px-6 py-5 align-top">
                               <div className="flex items-start gap-3">
                                 <div className="mt-0.5 flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
@@ -397,8 +433,8 @@ export default function AdminQuotesReviewPage() {
                                   {quote.product}
                                 </p>
                                 <p className="mt-1 text-xs text-text-muted">
-                                  Submitted on {quote.submittedOn}
-                                </p>
+  Submitted on {formatDate(quote.submittedOn)}
+</p>
                               </div>
                             </td>
 

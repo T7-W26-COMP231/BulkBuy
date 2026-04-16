@@ -512,7 +512,7 @@ export default function ReviewModifyIntentPage() {
                       </button>
                       <button
                         onClick={() => handleCancelIntent(item.intentId, item.itemId)}
-                        disabled={!isWindowOpen}
+                        disabled={isSaving}
                         className="rounded-xl border border-neutral-light bg-white px-5 py-2.5 font-semibold text-text-main disabled:opacity-50"
                       >
                         Cancel

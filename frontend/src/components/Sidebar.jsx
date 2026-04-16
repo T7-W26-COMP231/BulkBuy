@@ -1,6 +1,8 @@
 import { NavLink } from "react-router-dom";
+import { useEffect } from "react";  // ← ADD
 import SavingsSummaryCard from "./SavingsSummaryCard";
 import { useSavings } from "../contexts/SavingsContext";
+import { useAuth } from "../contexts/AuthContext";
 
 const navItems = [
   { to: "/", icon: "grid_view", label: "BulkBuy (Recommended)" },
@@ -13,7 +15,17 @@ const navItems = [
 ];
 
 export default function Sidebar({ showSummary = true, goal = 600, city = "Toronto" }) {
-  const { totalSaved } = useSavings();
+  const { user } = useAuth();
+  const { totalSaved, loadSavings, loadingState, clearSavings } = useSavings();
+
+  useEffect(() => {
+    if (!user) return;
+    clearSavings();
+    // ← use user.userId not user._id
+
+    loadSavings(user?.userId || user?._id);
+
+  }, [user?.userId, user?._id]);
 
   return (
     <aside className="flex w-full flex-col gap-6 md:w-64">
@@ -42,6 +54,7 @@ export default function Sidebar({ showSummary = true, goal = 600, city = "Toront
           goal={goal}
           city={city}
           monthLabel="this month"
+          loading={loadingState}  // ← ADD
         />
       )}
     </aside>

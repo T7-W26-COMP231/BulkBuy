@@ -9,7 +9,7 @@
 const path = require('path');
 const crypto = require('crypto');
 
-const DEFAULT_PREFIX = process.env.STORAGE_PREFIX || 'uploads';
+const DEFAULT_PREFIX = process.env.STORAGE_PREFIX || 'db-bb';
 const MAX_FILENAME_LEN = 200; // keep room for other key parts
 
 function _nowIso() {

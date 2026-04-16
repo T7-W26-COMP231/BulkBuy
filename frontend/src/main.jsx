@@ -23,7 +23,7 @@ function Root() {
         <ToastProvider>
           <BrowserRouter>
             <NotificationProvider>
-              <SavingsProvider ref={savingsRef}>
+              <SavingsProvider>
                 <App />
               </SavingsProvider>
             </NotificationProvider>
@@ -35,7 +35,5 @@ function Root() {
 }
 
 ReactDOM.createRoot(document.getElementById("root")).render(
-  <React.StrictMode>
-    <Root />
-  </React.StrictMode>
+  <Root />
 );

@@ -192,7 +192,6 @@ class ConfigRepo {
     if (o.lean) q.lean();
     return q.exec();
   }
-
   /**
    * Find by filter
    * @param {Object} filter
@@ -220,11 +219,73 @@ class ConfigRepo {
     if (!userId) throw createError(400, 'userId is required');
     const o = normalizeOpts(opts);
     const update = { $set: { location } };
-    const options = { new: true, upsert: true, setDefaultsOnInsert: true, session: o.session };
+    const options = {
+      new: true,
+      upsert: true,
+      setDefaultsOnInsert: true,
+      session: o.session
+    };
+
     let q = Config.findOneAndUpdate({ userId }, update, options);
+
     if (o.select) q = q.select(o.select);
     if (o.populate) q = q.populate(o.populate);
     if (o.lean) q = q.lean();
+
+    return q.exec();
+  }
+
+  /**
+   * Save delivery rules for admin monitoring
+   * @param {String|ObjectId} userId
+   * @param {Object} deliveryRules
+   * @param {Object} opts
+   */
+  async saveDeliveryRules(userId, deliveryRules = {}, opts = {}) {
+    if (!userId) throw createError(400, 'userId is required');
+
+    const o = normalizeOpts(opts);
+
+    const update = {
+      $set: {
+        deliveryRules
+      }
+    };
+
+    const options = {
+      new: true,
+      upsert: true,
+      setDefaultsOnInsert: true,
+      session: o.session
+    };
+
+    let q = Config.findOneAndUpdate({ userId }, update, options);
+
+    if (o.select) q = q.select(o.select);
+    if (o.populate) q = q.populate(o.populate);
+    if (o.lean) q = q.lean();
+
+    return q.exec();
+  }
+
+  /**
+   * Get saved delivery rules
+   * @param {String|ObjectId} userId
+   * @param {Object} opts
+   */
+  async getDeliveryRules(userId, opts = {}) {
+    if (!userId) throw createError(400, 'userId is required');
+
+    const o = normalizeOpts(opts);
+
+    let q = Config.findOne(
+      { userId, deleted: false },
+      { deliveryRules: 1, userId: 1 }
+    );
+
+    if (o.session) q = q.session(o.session);
+    if (o.lean) q = q.lean();
+
     return q.exec();
   }
 }

@@ -12,7 +12,7 @@
 // - hardDeleteById
 //
 // All methods accept opts = { actor, correlationId, session, ... } where appropriate.
-
+const UserRepo = require("../repositories/user.repo");
 const createError = require('http-errors');
 const SupplyRepo = require('../repositories/supply.repo');
 const AggregationRepo = require('../repositories/aggregation.repo');
@@ -59,16 +59,16 @@ class SupplyService {
     if (!Array.isArray(payload.items) || payload.items.length === 0) throw createError(422, 'items must be a non-empty array');
 
     const safe = {
-  ...payload,
-  supplierId:
-    payload.supplierId ||
-    actor.userId ||
-    null,
-};
+      ...payload,
+      supplierId:
+        payload.supplierId ||
+        actor.userId ||
+        null,
+    };
 
-delete safe._id;
-delete safe.createdAt;
-delete safe.updatedAt;
+    delete safe._id;
+    delete safe.createdAt;
+    delete safe.updatedAt;
 
     try {
       const created = await SupplyRepo.create(safe, { session: opts.session });
@@ -176,10 +176,10 @@ delete safe.updatedAt;
   }
 
   /**
-   * Get dashboard summary metrics for a supplier
-   * @param {String} supplierId
-   * @param {Object} opts
-   */
+ * Get dashboard summary metrics for a supplier
+ * @param {String} supplierId
+ * @param {Object} opts
+ */
   async getDashboardSummary(supplierId, opts = {}) {
     const actor = actorFromOpts(opts);
     const correlationId = opts.correlationId || null;
@@ -255,6 +255,194 @@ delete safe.updatedAt;
       });
       throw err;
     }
+  }
+
+  /**
+   * Historical quote report query
+   * @param {Object} opts
+   */
+  async getHistoricalQuoteReport(opts = {}) {
+    const page = Math.max(1, parseInt(opts.page, 10) || 1);
+    const limit = Math.max(1, parseInt(opts.limit, 10) || 25);
+
+    const filter = {};
+
+    if (opts.supplierId) {
+      filter.supplierId = opts.supplierId;
+    }
+
+    if (opts.status && opts.status.toLowerCase() !== 'all') {
+      filter.status = opts.status.toLowerCase();
+    }
+
+    if (opts.startDate || opts.endDate) {
+      filter.createdAt = {};
+
+      if (opts.startDate) {
+        filter.createdAt.$gte = new Date(opts.startDate).getTime();
+      }
+
+      if (opts.endDate) {
+        const end = new Date(opts.endDate);
+        end.setHours(23, 59, 59, 999);
+        filter.createdAt.$lte = end.getTime();
+      }
+    }
+
+    const result = await SupplyRepo.paginate(filter, {
+      page,
+      limit,
+      sort: 'createdAt:-1',
+    });
+
+    const filteredItems = (result.items || [])
+      .map((supply) => {
+        const safeSupply = sanitize(supply);
+
+        const productTitle =
+          safeSupply?.metadata?.quoteDraft?.productName ||
+          safeSupply?.items?.[0]?.meta?.productName ||
+          safeSupply?.items?.[0]?.productName ||
+          'Unknown Product';
+
+        const productMatch =
+          !opts.product ||
+          opts.product === 'All Products' ||
+          productTitle === opts.product;
+
+        if (!productMatch) return null;
+
+        return {
+          ...safeSupply,
+          productTitle,
+        };
+      })
+      .filter(Boolean);
+
+    return {
+      items: filteredItems,
+      total: result.total || filteredItems.length,
+      page: result.page || page,
+      limit: result.limit || limit,
+      pages:
+        result.pages ||
+        Math.max(1, Math.ceil((result.total || filteredItems.length) / limit)),
+    };
+  }
+
+  /**
+     * getApprovedQuotesWithDeliveryMetadata
+     *
+     * Fetches supply records at "accepted" status and enriches each
+     * with computed delivery metadata for the admin fulfillment dashboard.
+     *
+     * Delivery metadata fields added per supply:
+     *  - confirmationAge   : days elapsed since updatedAt (integer)
+     *  - deliveryStatus    : "on_track" | "overdue" | "delivered" | "unknown"
+     *  - isOverdue         : true if confirmationAge > ageDays threshold
+     *  - productName       : pulled from metadata.quoteDraft.productName
+     *
+     * Query opts:
+     *  - ops_region   filter by region code  (e.g. ON-TOR)
+     *  - supplierId   filter by supplierId
+     *  - status       supply status to query  (default: "accepted")
+     *  - page         default 1
+     *  - limit        default 10
+     *  - overdueOnly  if true, only return overdue records
+     *  - ageDays      overdue threshold in days (default 5)
+     */
+  async getApprovedQuotesWithDeliveryMetadata(opts = {}) {
+    const page = Math.max(1, parseInt(opts.page, 10) || 1);
+    const limit = Math.max(1, parseInt(opts.limit, 10) || 10);
+    const ageDays = typeof opts.ageDays === "number" ? opts.ageDays : 5;
+    const MS_PER_DAY = 1000 * 60 * 60 * 24;
+    const nowMs = Date.now();
+
+    // ── Build filter ───────────────────────────────────────────────────
+    const filter = {
+      status: opts.status || "accepted",
+      deleted: false,
+    };
+
+    if (opts.ops_region) {
+      filter.ops_region = opts.ops_region;
+    }
+
+    if (opts.supplierId) {
+      filter.supplierId = opts.supplierId;
+    }
+
+    // ── Paginate via SupplyRepo ────────────────────────────────────────
+    const result = await SupplyRepo.paginate(filter, {
+      page,
+      limit,
+      sort: { createdAt: -1 },
+    });
+
+    // ── Enrich each supply with delivery metadata ──────────────────────
+    let enriched = await Promise.all((result.items || []).map(async (supply) => {
+      const safe = sanitize(supply);
+
+      const updatedMs = safe.updatedAt ? new Date(safe.updatedAt).getTime() : nowMs;
+      const confirmationAge = Math.floor((nowMs - updatedMs) / MS_PER_DAY);
+
+      let deliveryStatus = "unknown";
+      if (safe.status === "delivered" || safe.status === "received") {
+        deliveryStatus = "delivered";
+      } else if (confirmationAge > ageDays) {
+        deliveryStatus = "overdue";
+      } else {
+        deliveryStatus = "on_track";
+      }
+
+      const metadata = safe.metadata;
+      const quoteDraft = metadata instanceof Map
+        ? metadata.get("quoteDraft")
+        : metadata?.quoteDraft;
+
+      const productName =
+        quoteDraft?.productName ||
+        safe.items?.[0]?.meta?.productName ||
+        "N/A";
+
+      // lookup supplier name
+      let supplierName = "Unknown Supplier";
+      try {
+        if (safe.supplierId) {
+          let supplier = await UserRepo.findByUserId(safe.supplierId);
+          if (!supplier) {
+            supplier = await UserRepo.findById(safe.supplierId, { includeDeleted: true });
+          }
+          if (supplier) {
+            supplierName = `${supplier.firstName || ""} ${supplier.lastName || ""}`.trim();
+          }
+        }
+      } catch (err) {
+        console.log("Supplier lookup error:", err.message);
+      }
+
+      return {
+        ...safe,
+        productName,
+        supplierName,
+        confirmationAge,
+        deliveryStatus,
+        isOverdue: deliveryStatus === "overdue",
+      };
+    }));
+
+    // ── Optional: filter to overdue only ──────────────────────────────
+    if (opts.overdueOnly) {
+      enriched = enriched.filter((s) => s.isOverdue);
+    }
+
+    return {
+      items: enriched,
+      total: result.total,
+      page: result.page,
+      limit: result.limit,
+      pages: result.pages,
+    };
   }
 
   /**

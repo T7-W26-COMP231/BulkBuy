@@ -10,9 +10,16 @@ export const fetchOrderStatus = async (orderId) => {
   return data.data;
 };
 
-// src/api/orderApi.js  — add this function
 export const fetchAllOrders = async () => {
   const { data } = await api.get("/orders");
-  console.log("fetchAllOrders response:", data); // ← add this
-  return data.data;
+  console.log("fetchAllOrders response:", data);
+  return data.items || data.data || [];
+};
+
+export const getThresholdChangeEvents = async (params = {}) => {
+  const { data } = await api.get("/orders/threshold-change-events", {
+    params,
+  });
+
+  return data?.data || data || { items: [] };
 };

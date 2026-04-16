@@ -287,6 +287,75 @@ async function findByFilter(req, res) {
   }
 }
 
+ /* POST /configs/delivery-rules */
+async function saveDeliveryRules(req, res) {
+  const correlationId = req.correlationId || null;
+  const actor = actorFromReq(req);
+
+  try {
+    const deliveryRules = req.body || {};
+
+    const saved = await ConfigService.saveDeliveryRules(deliveryRules, {
+      actor,
+      correlationId,
+      session: req.mongoSession
+    });
+
+    return res.status(200).json({
+      success: true,
+      data: saved
+    });
+  } catch (err) {
+    await auditService.logEvent({
+      eventType: 'config.deliveryRules.save.failed',
+      actor,
+      target: { type: 'Config', id: null },
+      outcome: 'failure',
+      severity: 'error',
+      correlationId,
+      details: { message: err.message }
+    });
+
+    return res.status(err.status || 500).json({
+      success: false,
+      message: err.message
+    });
+  }
+}
+
+/* GET /configs/delivery-rules */
+async function getDeliveryRules(req, res) {
+  const correlationId = req.correlationId || null;
+  const actor = actorFromReq(req);
+
+  try {
+    const data = await ConfigService.getDeliveryRules({
+      actor,
+      correlationId
+    });
+
+    return res.status(200).json({
+      success: true,
+      data
+    });
+  } catch (err) {
+    await auditService.logEvent({
+      eventType: 'config.deliveryRules.get.failed',
+      actor,
+      target: { type: 'Config', id: null },
+      outcome: 'failure',
+      severity: 'error',
+      correlationId,
+      details: { message: err.message }
+    });
+
+    return res.status(err.status || 500).json({
+      success: false,
+      message: err.message
+    });
+  }
+}
+
 /* POST /configs/pricing-tiers */
 async function savePricingTiers(req, res) {
   const correlationId = req.correlationId || null;
@@ -342,5 +411,7 @@ module.exports = {
   hardDelete: asyncHandler(hardDelete),
   listConfigs: asyncHandler(listConfigs),
   findByFilter: asyncHandler(findByFilter),
+  saveDeliveryRules: asyncHandler(saveDeliveryRules),
+  getDeliveryRules: asyncHandler(getDeliveryRules),
   savePricingTiers: asyncHandler(savePricingTiers)
 };

@@ -38,6 +38,7 @@ async function createSupply(req, res) {
     });
     return res.status(201).json({ success: true, data: created });
   } catch (err) {
+    console.error('❌ createSupply error:', err); // ← add this
     await auditService.logEvent({
       eventType: 'supply.create.failed',
       actor,
@@ -145,6 +146,57 @@ async function getDashboardSummary(req, res) {
   } catch (err) {
     await auditService.logEvent({
       eventType: 'supply.dashboardSummary.failed',
+      actor,
+      target: { type: 'Supply', id: null },
+      outcome: 'failure',
+      severity: err.status && err.status >= 500 ? 'error' : 'warning',
+      correlationId,
+      details: { message: err.message }
+    });
+
+    return res.status(err.status || 500).json({
+      success: false,
+      message: err.message
+    });
+  }
+}
+
+/**
+ * GET /supplies/historical-reports
+ */
+async function getHistoricalQuoteReport(req, res) {
+  const correlationId = req.correlationId || null;
+  const actor = actorFromReq(req);
+
+  try {
+    const supplierId = req.user && (req.user.userId || req.user._id);
+
+    if (!supplierId) {
+      return res.status(401).json({
+        success: false,
+        message: 'Unauthorized',
+      });
+    }
+
+    const result = await supplyService.getHistoricalQuoteReport({
+      supplierId,
+      startDate: req.query.startDate,
+      endDate: req.query.endDate,
+      status: req.query.status,
+      product: req.query.product,
+      page: req.query.page,
+      limit: req.query.limit,
+      correlationId,
+      actor,
+    });
+
+    return res.status(200).json({
+      success: true,
+      ...result,
+    });
+  } catch (err) {
+    await auditService.logEvent({
+      eventType: 'supply.historicalReport.failed',
       actor,
       target: { type: 'Supply', id: null },
       outcome: 'failure',
@@ -668,10 +720,47 @@ async function removeItem(req, res) {
   }
 }
 
+/**
+ * GET /supplies/approved-quotes
+ * Admin fulfillment monitoring — accepted supply quotes enriched with delivery metadata
+ * Query params: ops_region, supplierId, status, page, limit, overdueOnly, ageDays
+ */
+async function getApprovedQuotesWithDeliveryMetadata(req, res) {
+  const correlationId = req.correlationId || null;
+  const actor = actorFromReq(req);
+
+  try {
+    const opts = {
+      ops_region: req.query.ops_region || null,
+      supplierId: req.query.supplierId || null,
+      status: req.query.status || "accepted",
+      page: req.query.page || 1,
+      limit: req.query.limit || 10,
+      overdueOnly: req.query.overdueOnly === "true",
+      ageDays: req.query.ageDays ? Number(req.query.ageDays) : 5,
+      correlationId,
+      actor,
+    };
+
+    const result = await supplyService.getApprovedQuotesWithDeliveryMetadata(opts);
+
+    return res.status(200).json({
+      success: true,
+      ...result,
+    });
+  } catch (err) {
+    return res.status(err.status || 500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+}
+
 module.exports = {
   createSupply,
   listSupplies,
   getDashboardSummary,
+  getHistoricalQuoteReport,
   getById,
   updateById,
   addQuote,
@@ -683,5 +772,6 @@ module.exports = {
   updateItem,
   removeItem,
   saveDraft,
-  submitForReview
+  submitForReview,
+  getApprovedQuotesWithDeliveryMetadata
 };

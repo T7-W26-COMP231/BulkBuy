@@ -17,26 +17,26 @@
  */
 
 const express = require('express');
-const mongoose = require('mongoose');
 const router = express.Router();
 
 const ConfigController = require('../controllers/config.controller');
 const { requireAuth } = require('../middleware/auth.middleware');
-const { requireRole, requireAnyRole } = require('../middleware/rbac.middleware');
 
 /* Async wrapper to forward errors to express error handler */
 const asyncHandler = (fn) => (req, res, next) => {
   Promise.resolve(fn(req, res, next)).catch(next);
 };
 
-/* Simple param validator for :id and other id params */
-const validateObjectIdParam = (paramName) => (req, res, next) => {
+/* ✅ String-safe validator for BulkBuy custom IDs */
+const validateIdParam = (paramName) => (req, res, next) => {
   const id = req.params[paramName];
-  if (!id || !mongoose.Types.ObjectId.isValid(String(id))) {
-    const err = new Error(`${paramName} must be a valid ObjectId`);
+
+  if (!id || typeof id !== 'string' || !id.trim()) {
+    const err = new Error(`${paramName} must be a valid string id`);
     err.status = 400;
     return next(err);
   }
+
   return next();
 };
 
@@ -66,19 +66,33 @@ const parseFilterQuery = (req, res, next) => {
 
 /* Routes */
 
-/* Create config for user (enforce one-per-user at service layer) */
+/* Create config for user */
 router.post(
   '/for-user/:userId',
   requireAuth,
-  validateObjectIdParam('userId'),
+  validateIdParam('userId'),
   asyncHandler(ConfigController.createForUser)
+);
+
+// ✅ Save admin delivery rules
+router.post(
+  '/delivery-rules',
+  requireAuth,
+  asyncHandler(ConfigController.saveDeliveryRules)
+);
+
+// ✅ Get admin delivery rules
+router.get(
+  '/delivery-rules',
+  requireAuth,
+  asyncHandler(ConfigController.getDeliveryRules)
 );
 
 /* Get config by id */
 router.get(
   '/:id',
   requireAuth,
-  validateObjectIdParam('id'),
+  validateIdParam('id'),
   asyncHandler(ConfigController.getById)
 );
 
@@ -86,53 +100,53 @@ router.get(
 router.get(
   '/by-user/:userId',
   requireAuth,
-  validateObjectIdParam('userId'),
+  validateIdParam('userId'),
   asyncHandler(ConfigController.getByUserId)
 );
 
-/* Update config by id (partial) */
+/* Update config by id */
 router.patch(
   '/:id',
   requireAuth,
-  validateObjectIdParam('id'),
+  validateIdParam('id'),
   asyncHandler(ConfigController.updateById)
 );
 
-/* Upsert config for user (create or update single config) */
+/* Upsert config for user */
 router.post(
   '/by-user/:userId/upsert',
   requireAuth,
-  validateObjectIdParam('userId'),
+  validateIdParam('userId'),
   asyncHandler(ConfigController.upsertForUser)
 );
 
-/* Set theme for user's config */
+/* Set theme */
 router.post(
   '/by-user/:userId/theme',
   requireAuth,
-  validateObjectIdParam('userId'),
+  validateIdParam('userId'),
   requireBodyField('theme'),
   asyncHandler(ConfigController.setTheme)
 );
 
-/* Set location for user's config */
+/* Set location */
 router.post(
   '/by-user/:userId/location',
   requireAuth,
-  validateObjectIdParam('userId'),
-  requireBodyField('lat'), // optional but helps catch empty body; service validates ranges
+  validateIdParam('userId'),
+  requireBodyField('lat'),
   asyncHandler(ConfigController.setLocation)
 );
 
-/* Soft delete config */
+/* Soft delete */
 router.post(
   '/:id/soft-delete',
   requireAuth,
-  validateObjectIdParam('id'),
+  validateIdParam('id'),
   asyncHandler(ConfigController.softDelete)
 );
 
-/* Hard delete config (admin only) */
+/* Hard delete (admin only) */
 const adminOnly = (req, res, next) => {
   const user = req.user;
   if (!user || user.role !== 'administrator') {
@@ -146,7 +160,7 @@ const adminOnly = (req, res, next) => {
 router.delete(
   '/:id/hard',
   requireAuth,
-  validateObjectIdParam('id'),
+  validateIdParam('id'),
   adminOnly,
   asyncHandler(ConfigController.hardDelete)
 );
@@ -161,35 +175,12 @@ router.get(
 
 // ✅ Save admin pricing tiers
 router.post(
-  "/pricing-tiers",
+  '/pricing-tiers',
   requireAuth,
-  asyncHandler(async (req, res) => {
-    const { tiers } = req.body;
-
-    if (!Array.isArray(tiers) || tiers.length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: "Pricing tiers are required",
-      });
-    }
-
-    // ✅ temporary safe response for frontend integration
-    return res.status(200).json({
-      success: true,
-      message: "Pricing tiers saved successfully",
-      tiers,
-    });
-  })
+  asyncHandler(ConfigController.savePricingTiers)
 );
 
-/* Find by filter (returns array) */
-router.get(
-  '/find',
-  requireAuth,
-  parseFilterQuery,
-  asyncHandler(ConfigController.findByFilter)
-);
-
+/* Find by filter */
 router.get(
   '/find',
   requireAuth,

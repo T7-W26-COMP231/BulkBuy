@@ -1,9 +1,9 @@
 import { Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useAuth } from "./contexts/AuthContext";
 import { useNotifications } from "./contexts/NotificationContext";
-import { io } from "socket.io-client";
 import { useOpsContext } from "./contexts/OpsContext";
+import { io } from "socket.io-client";
 
 import HomePage from "./pages/customer/HomePage";
 import SupplierDashboard from "./pages/supplier/SupplierDashboard";
@@ -16,7 +16,6 @@ import SupplierTierMonitoringPage from "./pages/supplier/SupplierTierMonitoringP
 import SupplierReportsPage from "./pages/supplier/SupplierReportsPage";
 import SupplierFulfillmentPage from "./pages/supplier/SupplierFulfillmentPage";
 
-
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminProductCatalogPage from "./pages/admin/AdminProductCatalogPage";
 import AdminBulkOrdersPage from "./pages/admin/AdminBulkOrdersPage";
@@ -24,7 +23,8 @@ import PricingBracketsPage from "./pages/admin/PricingBracketsPage";
 import AdminQuotesReviewPage from "./pages/admin/AdminQuotesReviewPage";
 import CreateSalesWindowForm from "./pages/admin/CreateSalesWindowForm";
 import AdminSettingsPage from "./pages/admin/AdminSettingsPage";
-
+import AdminFulfillmentPage from "./pages/admin/AdminFulfillmentPage";
+import AdminDeliveryRulesPage from "./pages/admin/AdminDeliveryRulesPage";
 import ProductDetailsPage from "./pages/customer/ProductDetailsPage";
 import ProductListPage from "./pages/customer/ProductListPage";
 import CartPage from "./pages/shared/ShoppingCart";
@@ -53,19 +53,9 @@ function PlaceholderPage({ title }) {
 
 function AdminRoute({ children }) {
   const { user } = useAuth();
-
-  if (!user) {
-    return <Navigate to="/" replace />;
-  }
-
-  if (user.role === "supplier") {
-    return <Navigate to="/supplier/dashboard" replace />;
-  }
-
-  if (user.role !== "administrator") {
-    return <Navigate to="/" replace />;
-  }
-
+  if (!user) return <Navigate to="/" replace />;
+  if (user.role === "supplier") return <Navigate to="/supplier/dashboard" replace />;
+  if (user.role !== "administrator") return <Navigate to="/" replace />;
   return children;
 }
 
@@ -77,11 +67,9 @@ function RoleRedirect() {
   useEffect(() => {
     if (initializing) return;
     if (!accessToken || !user) return;
-
     if (user.role === "supplier" && !location.pathname.startsWith("/supplier")) {
       navigate("/supplier/dashboard", { replace: true });
     }
-
     if (user.role === "administrator" && !location.pathname.startsWith("/admin")) {
       navigate("/admin", { replace: true });
     }
@@ -93,23 +81,51 @@ function RoleRedirect() {
 export default function App() {
   const { addNotification } = useNotifications();
   const { user } = useAuth();
-  const { setSocket } = useOpsContext() ?? {};  // ← must be HERE inside App
+  const { setSocket } = useOpsContext() ?? {};
+  const socketRef = useRef(null);
 
   useEffect(() => {
-    const socket = io(`${import.meta.env.VITE_API_URL}`);
-    setSocket?.(socket); // ← ADD THIS
-    socket.on("connect", () => {
-      console.log("🟢 Connected to server:", socket.id);
+    // Create a dedicated socket for notifications (forceNew = isolated from comms-js socket)
+    const socket = io(`${import.meta.env.VITE_API_URL}`, {
+      forceNew: true,
+      reconnection: true,
+      reconnectionDelay: 1000,
+    });
 
+    socketRef.current = socket;
+    setSocket?.(socket);
+
+    socket.on("connect", () => {
+      console.log("🟢 App socket connected:", socket.id);
       if (user?._id) {
-        socket.emit("register", user._id);
-        console.log("📝 Registered socket for user:", user._id);
+        socket.emit("identifyUser", {
+          userId: user._id,
+          role: user.role,
+          ops_region: user.ops_region || null,
+        });
+        console.log("📝 identifyUser emitted on connect, role:", user.role);
       }
     });
 
-    socket.on("order_created", () => {
-      addNotification("New order created", "info");
-      alert("🛒 New order created!");
+    // Also identify immediately if already connected
+    if (socket.connected && user?._id) {
+      socket.emit("identifyUser", {
+        userId: user._id,
+        role: user.role,
+        ops_region: user.ops_region || null,
+      });
+      console.log("📝 identifyUser emitted immediately, role:", user.role);
+    }
+
+    socket.on("ui:update", (msg) => {
+      console.log("📨 ui:update received:", msg?.action);
+      if (msg?.action === "order:status-updated") {
+        console.log("🔔 calling addNotification");
+        addNotification(
+          `Order #${String(msg.payload?.orderId || "").slice(-6)} updated: ${msg.payload?.fromStatus} → ${msg.payload?.toStatus}`,
+          "info"
+        );
+      }
     });
 
     socket.on("quote_submitted", (data) => {
@@ -123,9 +139,10 @@ export default function App() {
 
     return () => {
       socket.disconnect();
-      setSocket?.(null); // ← ADD THIS
+      setSocket?.(null);
+      socketRef.current = null;
     };
-  }, [user, addNotification]);
+  }, [user?._id]); // only re-run when user id changes
 
   return (
     <>
@@ -141,95 +158,32 @@ export default function App() {
         <Route path="/products" element={<ProductListPage />} />
         <Route path="/review-modify-intent" element={<ReviewModifyIntentPage />} />
         <Route path="/order-details/:orderId" element={<OrderDetailsPage />} />
-        <Route path="/order-tracking/:orderId" element={<OrderTrackingPage />} />  {/* ← ADDED THIS */}
+        <Route path="/order-tracking/:orderId" element={<OrderTrackingPage />} />
 
         {/* Supplier routes */}
         <Route path="/supplier" element={<Navigate to="/supplier/dashboard" replace />} />
         <Route path="/supplier/dashboard" element={<SupplierDashboard />} />
         <Route path="/supplier/profile" element={<SupplierProfilePage />} />
         <Route path="/supplier/approved-items" element={<SupplierApprovedItemsPage />} />
-        <Route
-          path="/supplier/approved-items/request"
-          element={<SupplierRequestItemPage />}
-        />
+        <Route path="/supplier/approved-items/request" element={<SupplierRequestItemPage />} />
         <Route path="/supplier/quotes" element={<SupplierQuotesPage />} />
         <Route path="/supplier/quotes/create" element={<SupplierQuotesPage />} />
         <Route path="/supplier/order-requests" element={<SupplierOrdersPage />} />
         <Route path="/supplier/reports" element={<SupplierReportsPage />} />
-        <Route
-          path="/supplier/order-requests/:id/fulfillment"
-          element={<SupplierFulfillmentPage />}
-        />
+        <Route path="/supplier/order-requests/:id/fulfillment" element={<SupplierFulfillmentPage />} />
         <Route path="/supplier/tier-progress" element={<SupplierTierMonitoringPage />} />
 
         {/* Admin routes */}
-        <Route
-          path="/admin"
-          element={
-            <AdminRoute>
-              <AdminDashboard />
-            </AdminRoute>
-          }
-        />
-
-        <Route
-          path="/admin/product-catalog"
-          element={
-            <AdminRoute>
-              <AdminProductCatalogPage />
-            </AdminRoute>
-          }
-        />
-
-        <Route
-          path="/admin/inventory"
-          element={<Navigate to="/admin/product-catalog" replace />}
-        />
-
-        <Route
-          path="/admin/bulk-orders"
-          element={
-            <AdminRoute>
-              <AdminBulkOrdersPage />
-            </AdminRoute>
-          }
-        />
-
-        <Route
-          path="/admin/pricing-brackets"
-          element={
-            <AdminRoute>
-              <PricingBracketsPage />
-            </AdminRoute>
-          }
-        />
-
-        <Route
-          path="/admin/supplier-quotes"
-          element={
-            <AdminRoute>
-              <AdminQuotesReviewPage />
-            </AdminRoute>
-          }
-        />
-
-        <Route
-          path="/admin/sales-window"
-          element={
-            <AdminRoute>
-              <CreateSalesWindowForm />
-            </AdminRoute>
-          }
-        />
-
-        <Route
-          path="/admin/settings"
-          element={
-            <AdminRoute>
-              <AdminSettingsPage />
-            </AdminRoute>
-          }
-        />
+        <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+        <Route path="/admin/product-catalog" element={<AdminRoute><AdminProductCatalogPage /></AdminRoute>} />
+        <Route path="/admin/inventory" element={<Navigate to="/admin/product-catalog" replace />} />
+        <Route path="/admin/bulk-orders" element={<AdminRoute><AdminBulkOrdersPage /></AdminRoute>} />
+        <Route path="/admin/pricing-brackets" element={<AdminRoute><PricingBracketsPage /></AdminRoute>} />
+        <Route path="/admin/supplier-quotes" element={<AdminRoute><AdminQuotesReviewPage /></AdminRoute>} />
+        <Route path="/admin/sales-window" element={<AdminRoute><CreateSalesWindowForm /></AdminRoute>} />
+        <Route path="/admin/settings" element={<AdminRoute><AdminSettingsPage /></AdminRoute>} />
+        <Route path="/admin/monitor-quotes" element={<AdminRoute><AdminFulfillmentPage /></AdminRoute>} />
+        <Route path="/admin/delivery-rules" element={<AdminRoute><AdminDeliveryRulesPage /></AdminRoute>} />
 
         {/* General placeholder routes */}
         <Route path="/about" element={<PlaceholderPage title="About Us" />} />

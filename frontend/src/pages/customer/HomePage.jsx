@@ -8,6 +8,7 @@ import { useAuth } from "../../contexts/AuthContext.jsx";
 import { useOpsContext } from "../../contexts/OpsContext.jsx";
 import { initSocket } from "../../comms-js/socket";
 import { useNavigate } from "react-router-dom";
+//const [regions, setRegions] = useState([]);
 
 
 function getDistance(lat1, lng1, lat2, lng2) {

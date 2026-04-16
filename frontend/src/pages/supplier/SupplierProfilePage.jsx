@@ -22,6 +22,7 @@ export default function SupplierProfilePage() {
   const [saveMessage, setSaveMessage] = useState("");
   const [logoFile, setLogoFile] = useState(null);
   const [logoPreview, setLogoPreview] = useState("");
+  const [logoError, setLogoError] = useState("");
 
   useEffect(() => {
     if (!logoFile) {
@@ -97,6 +98,7 @@ export default function SupplierProfilePage() {
     setSaveMessage("");
     setLogoFile(null);
     setLogoPreview("");
+    setLogoError("");
   };
 
   const handleLogoChange = (e) => {
@@ -106,6 +108,32 @@ export default function SupplierProfilePage() {
       return;
     }
 
+    const allowedTypes = [
+      "image/png",
+      "image/jpeg",
+      "image/jpg",
+      "image/webp",
+    ];
+
+    const maxSizeInBytes = 2 * 1024 * 1024;
+
+    if (!allowedTypes.includes(selectedFile.type)) {
+      setLogoError(
+        "Only PNG, JPG, JPEG, and WEBP files are allowed."
+      );
+      setLogoFile(null);
+      setLogoPreview("");
+      return;
+    }
+
+    if (selectedFile.size > maxSizeInBytes) {
+      setLogoError("Logo must be smaller than 2 MB.");
+      setLogoFile(null);
+      setLogoPreview("");
+      return;
+    }
+
+    setLogoError("");
     setLogoFile(selectedFile);
     setSaveMessage("");
   };
@@ -230,6 +258,12 @@ export default function SupplierProfilePage() {
                     {logoFile ? (
                       <p className="mt-2 text-sm font-semibold text-text-main">
                         Selected file: {logoFile.name}
+                      </p>
+                    ) : null}
+
+                    {logoError ? (
+                      <p className="mt-2 text-sm font-semibold text-red-500">
+                        {logoError}
                       </p>
                     ) : null}
                   </div>

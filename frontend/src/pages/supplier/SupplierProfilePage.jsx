@@ -27,6 +27,58 @@ export default function SupplierProfilePage() {
   const [logoError, setLogoError] = useState("");
 
   useEffect(() => {
+    const loadSavedProfile = async () => {
+      try {
+        const session = JSON.parse(
+          localStorage.getItem("app_auth_session_v1") || "{}"
+        );
+
+        const token = session?.accessToken;
+        const userId =
+          session?.user?._id ||
+          session?.user?.id ||
+          session?.userId;
+
+        if (!token || !userId) {
+          return;
+        }
+
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_URL}/api/configs/by-user/${userId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        const savedCompanyProfile =
+          response?.data?.data?.metadata?.companyProfile;
+
+        if (savedCompanyProfile) {
+          const nextProfile = {
+            ...initialProfile,
+            ...savedCompanyProfile,
+          };
+
+          setProfile(nextProfile);
+          setSavedProfile(nextProfile);
+
+          if (savedCompanyProfile.logoUrl) {
+            setLogoPreview(savedCompanyProfile.logoUrl);
+          }
+        }
+      } catch (error) {
+        if (error?.response?.status !== 404) {
+          console.error("Failed to load supplier profile", error);
+        }
+      }
+    };
+
+    loadSavedProfile();
+  }, []);
+
+  useEffect(() => {
     if (!logoFile) {
       return undefined;
     }
@@ -101,8 +153,8 @@ export default function SupplierProfilePage() {
       const token = session?.accessToken;
 
       await axios.patch(
-  `${import.meta.env.VITE_API_URL}/api/configs/company-profile`,
-  {
+        `${import.meta.env.VITE_API_URL}/api/configs/company-profile`,
+        {
           companyName: profile.companyName,
           businessAddress: profile.businessAddress,
           contactEmail: profile.contactEmail,
@@ -118,12 +170,15 @@ export default function SupplierProfilePage() {
         }
       );
 
-      setSavedProfile(profile);
+      setSavedProfile({
+        ...profile,
+        logoUrl: logoPreview || "",
+      });
       setSaveMessage("Company details saved successfully.");
     } catch (error) {
       setSaveMessage(
         error?.response?.data?.message ||
-          "Failed to save company details."
+        "Failed to save company details."
       );
     } finally {
       setIsSaving(false);
@@ -135,7 +190,7 @@ export default function SupplierProfilePage() {
     setErrors({});
     setSaveMessage("");
     setLogoFile(null);
-    setLogoPreview("");
+    setLogoPreview(savedProfile.logoUrl || "");
     setLogoError("");
   };
 
@@ -215,11 +270,10 @@ export default function SupplierProfilePage() {
                 type="text"
                 value={profile.companyName}
                 onChange={(e) => handleChange("companyName", e.target.value)}
-                className={`w-full rounded-xl px-4 py-3 outline-none focus:border-primary ${
-                  errors.companyName
+                className={`w-full rounded-xl px-4 py-3 outline-none focus:border-primary ${errors.companyName
                     ? "border border-red-300"
                     : "border border-neutral-light"
-                }`}
+                  }`}
                 placeholder="Enter company name"
               />
               {errors.companyName ? (
@@ -239,11 +293,10 @@ export default function SupplierProfilePage() {
                 onChange={(e) =>
                   handleChange("businessAddress", e.target.value)
                 }
-                className={`w-full rounded-xl px-4 py-3 outline-none focus:border-primary ${
-                  errors.businessAddress
+                className={`w-full rounded-xl px-4 py-3 outline-none focus:border-primary ${errors.businessAddress
                     ? "border border-red-300"
                     : "border border-neutral-light"
-                }`}
+                  }`}
                 placeholder="Enter business address"
               />
               {errors.businessAddress ? (
@@ -323,11 +376,10 @@ export default function SupplierProfilePage() {
                 type="email"
                 value={profile.contactEmail}
                 onChange={(e) => handleChange("contactEmail", e.target.value)}
-                className={`w-full rounded-xl px-4 py-3 outline-none focus:border-primary ${
-                  errors.contactEmail
+                className={`w-full rounded-xl px-4 py-3 outline-none focus:border-primary ${errors.contactEmail
                     ? "border border-red-300"
                     : "border border-neutral-light"
-                }`}
+                  }`}
                 placeholder="supplier@bulkbuy.com"
               />
               {errors.contactEmail ? (
@@ -345,11 +397,10 @@ export default function SupplierProfilePage() {
                 type="text"
                 value={profile.phone}
                 onChange={(e) => handleChange("phone", e.target.value)}
-                className={`w-full rounded-xl px-4 py-3 outline-none focus:border-primary ${
-                  errors.phone
+                className={`w-full rounded-xl px-4 py-3 outline-none focus:border-primary ${errors.phone
                     ? "border border-red-300"
                     : "border border-neutral-light"
-                }`}
+                  }`}
                 placeholder="+1 (555) 000-0000"
               />
               {errors.phone ? (
@@ -434,14 +485,12 @@ export default function SupplierProfilePage() {
                 <button
                   type="button"
                   onClick={() => handleChange(key, !profile[key])}
-                  className={`h-6 w-12 rounded-full transition ${
-                    profile[key] ? "bg-primary" : "bg-gray-300"
-                  }`}
+                  className={`h-6 w-12 rounded-full transition ${profile[key] ? "bg-primary" : "bg-gray-300"
+                    }`}
                 >
                   <div
-                    className={`h-6 w-6 rounded-full bg-white shadow transition ${
-                      profile[key] ? "translate-x-6" : "translate-x-0"
-                    }`}
+                    className={`h-6 w-6 rounded-full bg-white shadow transition ${profile[key] ? "translate-x-6" : "translate-x-0"
+                      }`}
                   />
                 </button>
               </div>

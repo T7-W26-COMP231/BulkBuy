@@ -268,7 +268,11 @@ class UserRepository {
 
   /**
    * Update by _id
-   */
+   *  Task #280 — persists user account status changes (suspend/activate) to MongoDB.
+  * Called by UserService.updateUserById whenever admin changes user status.
+   * Uses findByIdAndUpdate with runValidators: true to ensure schema compliance.
+ */
+
   async updateById(id, update = {}, opts = { new: true }) {
     if (!id) return null;
     const payload = { ...update, updatedAt: Date.now() };

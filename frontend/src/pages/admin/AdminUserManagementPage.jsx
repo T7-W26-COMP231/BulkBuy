@@ -202,6 +202,13 @@ export default function AdminUserManagementPage() {
   // Call API to suspend or activate, then update local state
   const toggleUserStatus = async (id, currentStatus) => {
     const newStatus = currentStatus === "active" ? "suspended" : "active";
+
+    // Confirmation for suspend only
+    if (newStatus === "suspended") {
+      const confirmed = window.confirm("Are you sure you want to suspend this user?");
+      if (!confirmed) return;
+    }
+
     try {
       await api.patch(`/users/${id}`, { status: newStatus });
       setUsers((prev) =>

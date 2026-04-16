@@ -542,6 +542,98 @@ class ConfigService {
     }
   }
 
+    /**
+   * Save supplier company profile
+   */
+  async saveCompanyProfile(companyProfile = {}, opts = {}) {
+    const actor = actorFromOpts(opts);
+    const correlationId = opts.correlationId || null;
+
+    const userId =
+      actor?.userId ||
+      actor?._id ||
+      opts?.actor?.userId ||
+      opts?.actor?._id;
+
+    if (!userId) {
+      throw createError(400, "Authenticated userId is required");
+    }
+
+    if (!companyProfile || typeof companyProfile !== "object") {
+      throw createError(400, "company profile payload is required");
+    }
+
+    const {
+      companyName = "",
+      businessAddress = "",
+      contactEmail = "",
+      phone = "",
+      serviceArea = "",
+      leadTime = "",
+      logoUrl = "",
+    } = companyProfile;
+
+    if (!companyName.trim()) {
+      throw createError(400, "companyName is required");
+    }
+
+    if (!businessAddress.trim()) {
+      throw createError(400, "businessAddress is required");
+    }
+
+    if (!contactEmail.trim()) {
+      throw createError(400, "contactEmail is required");
+    }
+
+    if (!phone.trim()) {
+      throw createError(400, "phone is required");
+    }
+
+    try {
+      const saved = await this.upsertForUser(
+        userId,
+        {
+          metadata: {
+            companyProfile: {
+              companyName,
+              businessAddress,
+              contactEmail,
+              phone,
+              serviceArea,
+              leadTime,
+              logoUrl,
+            },
+          },
+        },
+        opts
+      );
+
+      await auditService.logEvent({
+        eventType: "config.companyProfile.save.success",
+        actor,
+        target: { type: "Config", id: saved?._id || null },
+        outcome: "success",
+        severity: "info",
+        correlationId,
+        details: { companyName },
+      });
+
+      return sanitize(saved);
+    } catch (err) {
+      await auditService.logEvent({
+        eventType: "config.companyProfile.save.failed",
+        actor,
+        target: { type: "Config", id: null },
+        outcome: "failure",
+        severity: "error",
+        correlationId,
+        details: { message: err.message },
+      });
+
+      throw err;
+    }
+  }
+
   /**
    * Save admin pricing tiers
    */

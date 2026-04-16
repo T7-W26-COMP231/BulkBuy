@@ -1,3 +1,4 @@
+import axios from "axios";
 import { useEffect, useMemo, useState } from "react";
 import SupplierLayout from "../../components/supplier/SupplierLayout";
 
@@ -20,6 +21,7 @@ export default function SupplierProfilePage() {
   const [savedProfile, setSavedProfile] = useState(initialProfile);
   const [errors, setErrors] = useState({});
   const [saveMessage, setSaveMessage] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
   const [logoFile, setLogoFile] = useState(null);
   const [logoPreview, setLogoPreview] = useState("");
   const [logoError, setLogoError] = useState("");
@@ -80,7 +82,7 @@ export default function SupplierProfilePage() {
     return Object.keys(nextErrors).length === 0;
   };
 
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
 
     if (!validateForm()) {
@@ -88,8 +90,44 @@ export default function SupplierProfilePage() {
       return;
     }
 
-    setSavedProfile(profile);
-    setSaveMessage("Company details saved successfully.");
+    try {
+      setIsSaving(true);
+      setSaveMessage("");
+
+      const session = JSON.parse(
+        localStorage.getItem("app_auth_session_v1") || "{}"
+      );
+
+      const token = session?.accessToken;
+
+      await axios.patch(
+  `${import.meta.env.VITE_API_URL}/api/configs/company-profile`,
+  {
+          companyName: profile.companyName,
+          businessAddress: profile.businessAddress,
+          contactEmail: profile.contactEmail,
+          phone: profile.phone,
+          serviceArea: profile.serviceArea,
+          leadTime: profile.leadTime,
+          logoUrl: logoPreview || "",
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      setSavedProfile(profile);
+      setSaveMessage("Company details saved successfully.");
+    } catch (error) {
+      setSaveMessage(
+        error?.response?.data?.message ||
+          "Failed to save company details."
+      );
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleCancel = () => {
@@ -421,9 +459,10 @@ export default function SupplierProfilePage() {
           </button>
           <button
             type="submit"
-            className="rounded-xl bg-primary px-6 py-3 font-semibold text-white"
+            disabled={isSaving}
+            className="rounded-xl bg-primary px-6 py-3 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-70"
           >
-            Save Changes
+            {isSaving ? "Saving..." : "Save Changes"}
           </button>
         </div>
       </form>

@@ -32,10 +32,10 @@ const IMMUTABLE_STATUSES = new Set(['confirmed', 'dispatched', 'fulfilled']);
 
 class OrderService {
   /* -------------------------
-   * Reusable audit helper
-   * - One-line usage: await this._audit('event.type', actor, target, 'success', 'info', correlationId, { details })
-   * - Best-effort: does not throw if audit fails
-   * ------------------------- */
+  * Reusable audit helper
+  * - One-line usage: await this._audit('event.type', actor, target, 'success', 'info', correlationId, { details })
+  * - Best-effort: does not throw if audit fails
+  * ------------------------- */
   async _audit(eventType, actor = {}, target = undefined, outcome = 'success', severity = 'info', correlationId = null, details = {}) {
     try {
       await auditService.logEvent({
@@ -55,8 +55,8 @@ class OrderService {
   }
 
   /* -------------------------
-   * Core CRUD
-   * ------------------------- */
+  * Core CRUD
+  * ------------------------- */
 
   async createOrder(payload = {}, opts = {}) {
     if (!payload || typeof payload !== 'object') throw createError(400, 'Invalid payload');
@@ -456,8 +456,8 @@ class OrderService {
   }
 
   /* -------------------------
-   * Messages & status
-   * ------------------------- */
+  * Messages & status
+  * ------------------------- */
 
   async addMessage(orderId, messageId, opts = {}) {
     if (!orderId || !messageId) throw createError(400, 'orderId and messageId are required');
@@ -740,8 +740,8 @@ class OrderService {
 
 
   /* -------------------------
-   * Cart / item-level operations with immutability guards
-   * ------------------------- */
+  * Cart / item-level operations with immutability guards
+  * ------------------------- */
 
   async addItem(orderId, item = {}, opts = {}) {
     if (!orderId) throw createError(400, 'orderId is required');
@@ -865,13 +865,14 @@ class OrderService {
   }
 
   /* -------------------------
-   * Submit / Cancel flows (transactional)
-   * ------------------------- */
+  * Submit / Cancel flows (transactional)
+  * ------------------------- */
 
   async submitOrder(orderId, opts = {}) {
     if (!orderId) throw createError(400, 'orderId is required');
 
     const actor = actorFromOpts(opts);
+    console.log("kdjscbdvbuv099ru4385483583****************///>", actor);
     const correlationId = opts.correlationId || null;
 
     const session = await this.startSession();
@@ -883,7 +884,7 @@ class OrderService {
 
       const region = orderDoc.ops_region;
       if (!region) throw createError(400, 'order.ops_region is required to submit');
-
+      console.log("jabckdbckbciuv*******************>", region);
       const swResult = await SalesWindowService.listAllCurrentProducts(region, { page: 1, limit: 1000, session, lean: true });
       const swProducts = Array.isArray(swResult.products) ? swResult.products : [];
 
@@ -914,20 +915,6 @@ class OrderService {
         }
       }*/
 
-      /*const missing = [];
-      for (const it of orderDoc.items || []) {
-        const pid = String(it.productId);
-        const iid = String(it.itemId);
-        const pEntry = productLookup.get(pid);
-        if (!pEntry) {
-          missing.push({ productId: pid, itemId: iid });
-          continue;
-        }
-        const swItem = pEntry.itemMap.get(iid);
-        if (!swItem) {
-          missing.push({ productId: pid, itemId: iid });
-        }
-      }*/
 
       const missing = [];
       for (const it of orderDoc.items || []) {
@@ -965,6 +952,7 @@ class OrderService {
         const pEntry = productLookup.get(pid);
         const swItem = pEntry.itemMap.get(iid);*/
 
+      const tierChanges = 0;
       for (const it of orderDoc.items || []) {
         const pid = String(it.productId);
         const iid = String(it.itemId);
@@ -999,22 +987,174 @@ class OrderService {
 
         const currentQtySold = Number(swItem.qtySold || 0);
         const increment = Number(it.quantity || 1);
+
         const newQtySold = currentQtySold + increment;
+        const swItemPricingTiers = swItem.pricing_tiers;
+
+
         console.log("🔍 windowId being used:", pEntry.windowId);
         console.log("🔍 productId:", pid);
         console.log("🔍 itemId:", iid);
         console.log("🔍 newQtySold:", newQtySold);
+
+        // pricing tier logic placeholder
+        /*
+        //TODO
+        - let toBeActiveTier = {minQty: 0};
+        - loop through the swItemPricingTiers one tier at a time:
+                if tier.minQty >  toBeActiveTier.minQty and tier.minQty <= newQtySold
+                    toBeActiveTier = tier
+
+
+        - If toBeActiveTier.unitPrice != swItemLastPricingSnapShort.atInstantPrice
+                create a newSnapshot and append it to swItem.pricing_snapshots. (initial = first pricing tier unit price and final = the last)
+                tierChanges += 1;
+                        
+        */
+
+
+        //-----------------------------------------------------
+
+
+
+        try {
+          // ensure tiers is an array (collection is unordered)
+          const tiers = Array.isArray(swItemPricingTiers) ? swItemPricingTiers : [];
+
+          // last short snapshot price (fallback)
+          const swItemLastPricingSnapShort = latestSnapshot || null;
+          const lastPrice = swItemLastPricingSnapShort ? Number(swItemLastPricingSnapShort.atInstantPrice) : null;
+
+          // sort tiers by minQty for initial/final derivation
+          const sortedTiers = tiers.slice().sort((a, b) => Number(a.minQty) - Number(b.minQty));
+          const firstTier = sortedTiers.length > 0 ? sortedTiers[0] : null;
+          const lastTier = sortedTiers.length > 0 ? sortedTiers[sortedTiers.length - 1] : null;
+
+          const computeRateFromPrices = (basePrice, tierPrice) => {
+            if (!basePrice || tierPrice == null) return 0;
+            const diff = basePrice - tierPrice;
+            const pct = basePrice ? Math.round((diff / basePrice) * 100 * 100) / 100 : 0;
+            return isFinite(pct) ? pct : 0;
+          };
+
+          // derive final discount rate from tiers (prefer explicit field)
+          const finalRateFromTiers = lastTier && lastTier.discountPercentagePerUnitBulk != null
+            ? Number(lastTier.discountPercentagePerUnitBulk)
+            : (lastPrice ? computeRateFromPrices(lastPrice, lastTier && lastTier.unitPrice) : 0);
+
+          // determine current discount on last short snapshot (prefer explicit snapshot field)
+          const currentDiscount = (swItemLastPricingSnapShort && swItemLastPricingSnapShort.discountedPercentage != null)
+            ? Number(swItemLastPricingSnapShort.discountedPercentage)
+            : 0;
+
+          // If final discount already reached or exceeded, skip snapshot creation and only update qtySold
+          if (finalRateFromTiers != null && currentDiscount >= finalRateFromTiers) {
+            // final discount already reached — do not create a new snapshot
+            // just update qtySold below (no snapshot push)
+          } else {
+            // pick the effective tier by scanning all tiers (unordered safe)
+            let toBeActiveTier = { minQty: 0 };
+            for (const tier of tiers) {
+              const tMin = Number(tier && tier.minQty) || 0;
+              if (tMin > (Number(toBeActiveTier.minQty) || 0) && tMin <= newQtySold) {
+                toBeActiveTier = tier;
+              }
+            }
+
+            const newTierPrice = (toBeActiveTier && toBeActiveTier.unitPrice != null) ? Number(toBeActiveTier.unitPrice) : null;
+
+            // initial/final discount rates derived from explicit tier field if present,
+            // otherwise computed from lastPrice (if available) vs tier.unitPrice
+            const initialRateFromTiers = firstTier && firstTier.discountPercentagePerUnitBulk != null
+              ? Number(firstTier.discountPercentagePerUnitBulk)
+              : (lastPrice ? computeRateFromPrices(lastPrice, firstTier && firstTier.unitPrice) : 0);
+
+            const bracketInitialRate = (swItemLastPricingSnapShort && swItemLastPricingSnapShort.discountBracket && swItemLastPricingSnapShort.discountBracket.initial != null)
+              ? Number(swItemLastPricingSnapShort.discountBracket.initial)
+              : initialRateFromTiers;
+
+            const bracketFinalRate = (swItemLastPricingSnapShort && swItemLastPricingSnapShort.discountBracket && swItemLastPricingSnapShort.discountBracket.final != null)
+              ? Number(swItemLastPricingSnapShort.discountBracket.final)
+              : finalRateFromTiers;
+
+            // If tier price changed vs last short snapshot, create snapshot and append
+            if (newTierPrice != null && newTierPrice !== lastPrice) {
+              const now = new Date();
+              const atInstantPrice = newTierPrice;
+
+              // compute discountedPercentage: prefer tier legacy field, otherwise compute from lastPrice
+              let discountedPercentage = 0;
+              if (toBeActiveTier && toBeActiveTier.discountPercentagePerUnitBulk != null) {
+                discountedPercentage = Number(toBeActiveTier.discountPercentagePerUnitBulk);
+              } else if (lastPrice) {
+                const diff = lastPrice - atInstantPrice;
+                discountedPercentage = lastPrice ? Math.round((diff / lastPrice) * 100 * 100) / 100 : 0;
+                if (!isFinite(discountedPercentage)) discountedPercentage = 0;
+              }
+
+              // bracket initial/final are discount rates (copied from first snapshot or derived from tiers)
+              const newSnap = {
+                atInstantPrice,
+                discountedPercentage,
+                discountBracket: { initial: bracketInitialRate, final: bracketFinalRate },
+                createdAt: now,
+                updatedAt: now,
+                metadata: {
+                  tierMinQty: toBeActiveTier && toBeActiveTier.minQty != null ? Number(toBeActiveTier.minQty) : undefined,
+                  tierUnitPrice: atInstantPrice,
+                  tierFingerprint: toBeActiveTier && (toBeActiveTier.tierId ? String(toBeActiveTier.tierId) : `${Number(toBeActiveTier.minQty)}:${Number(toBeActiveTier.unitPrice)}`),
+                  reason: `qty ${currentQtySold} -> ${newQtySold}`
+                }
+              };
+
+              // append in-memory (preserve existing doc state)
+              swItem.pricing_snapshots = swItem.pricing_snapshots || [];
+              swItem.pricing_snapshots.push(newSnap);
+
+              // best-effort atomic push to sales window (non-fatal)
+              try {
+                await SalesWindowService.upsertPricingSnapshot(pEntry.windowId, pid, iid, newSnap, { session, actor, correlationId });
+              } catch (pushErr) {
+                // eslint-disable-next-line no-console
+                console.warn('Failed to push pricing snapshot atomically', pushErr && pushErr.message);
+              }
+
+              tierChanges += 1;
+            }
+          }
+        } catch (tierErr) {
+          // protect submit flow from tier-detection errors
+          // eslint-disable-next-line no-console
+          console.warn('Tier detection failed', tierErr && tierErr.message);
+        }
+
+
+
+        //-----------------------------------------------------
+
+
         try {
           //await SalesWindowService.addOrUpdateItem(pEntry.windowId, pid, iid, { qtySold: newQtySold }, { session, actor, correlationId });
-          await SalesWindowService.addOrUpdateItem(pEntry.windowId, pid, iid, { qtySold: newQtySold }, { actor, correlationId });
 
+          //await SalesWindowService.addOrUpdateItem(pEntry.windowId, pid, iid, { qtySold: newQtySold }, { actor, correlationId });
+          await SalesWindowService.addOrUpdateItem(
+            pEntry.windowId, pid, iid,
+            {
+              qtySold: newQtySold,
+              pricing_tiers: swItem.pricing_tiers ?? [],
+              pricing_snapshots: swItem.pricing_snapshots ?? [],
+              qtyAvailable: swItem.qtyAvailable ?? 0,
+            },
+            { actor, correlationId }
+          );
+          console.log("order.service.js coming-****************************************>", newQtySold);
         } catch (e) {
           // non-fatal for submission
           // eslint-disable-next-line no-console
           console.warn('Failed to update qtySold on sales window', e && e.message);
         }
 
-        // pricing tier logic placeholder
+
       }
 
       orderDoc.status = 'submitted';
@@ -1026,6 +1166,8 @@ class OrderService {
       await orderDoc.save({ session });
 
       const draft = await OrderRepo.findOrCreateDraftForUserRegion(orderDoc.userId, region, { session });
+
+
       await OrderRepo.moveSaveForLaterToDraft(orderDoc._id, draft._id, { session });
 
       await session.commitTransaction();
@@ -1034,6 +1176,34 @@ class OrderService {
       await this._audit('order.submit', actor, orderDoc._id, 'success', 'info', correlationId, { userId: orderDoc.userId, region });
 
       const updatedPlain = await OrderRepo.findById(orderDoc._id, { lean: true });
+
+
+
+      // TODO
+      // notify customer  ('order.submit', actor, orderDoc._id, 'success', 'info', correlationId, { userId: orderDoc.userId, region })
+      // trigger system wide update notif if a new treshold was reached -- tierChanges > 0. 
+      // or simply so because a new quantity was reached.
+
+      // update the entire region
+
+      try {
+        await emitUiUpdate(
+          'Region-UI-Update:RefreshActivity',
+          { message: `Changes : ${tierChanges} items on the current ${region} saleswindow` }, { region: region, scope: 'region' }
+
+        )
+
+        //notify user
+        await emitUiUpdate(
+          'UI-Update:RefreshActivity',
+          { message: `Order Intent Submitted successfully : Changes - ${tierChanges} items on the current ${region} saleswindow` }, { targetUserIds: [actor?._id, actor?.userId], scope: 'user' }
+        )
+      }
+
+      catch (error) {
+        console.log(`web socket message /**-**************************++++++++++:${error}`)
+      }
+      console.log("Realtime update coming from order.service.js------------------------------------------------------>");
       return sanitizeForClient(updatedPlain);
     }
     catch (err) {
@@ -1102,6 +1272,25 @@ class OrderService {
       await this._audit('order.cancel', actor, orderDoc._id, 'success', 'info', correlationId, { userId: orderDoc.userId });
 
       const plain = await OrderRepo.findById(orderDoc._id, { lean: true });
+
+
+      // TODO
+      // notify customer  ('order.submit', actor, orderDoc._id, 'success', 'info', correlationId, { userId: orderDoc.userId, region })
+      // trigger system wide update notif if a new treshold was reached -- tierChanges > 0. 
+      // or simply so because a new quantity was reached.
+
+      // update the entire region      
+      await emitUiUpdate(
+        'Region-UI-Update:RefreshActivity',
+        { message: `Changes : ${tierChanges} items on the current ${region} saleswindow` }, { region: region, scope: 'region' }
+      )
+
+      //notify user
+      await emitUiUpdate(
+        'UI-Update:RefreshActivity',
+        { message: `Order Cancelled : Changes - ${tierChanges} items on the current ${region} saleswindow` }, { targetUserIds: [actor?._id, actor?.userId], scope: 'user' }
+      )
+
       return sanitizeForClient(plain);
     } catch (err) {
       await session.abortTransaction();
@@ -1113,8 +1302,8 @@ class OrderService {
   }
 
   /* -------------------------
-   * Read-intensive enrichment (TODO)
-   * ------------------------- */
+  * Read-intensive enrichment (TODO)
+  * ------------------------- */
 
   // TODO: implement _getEnrichedOrdersForUser(userId, opts)
   // Signature:
@@ -1267,52 +1456,52 @@ class OrderService {
 
     //-------------------------------------------------
     /* function replacer(key, value) {
-       if (value instanceof Map) {
-         return Object.fromEntries(value);
-       }
-       return value;
-     }
+      if (value instanceof Map) {
+        return Object.fromEntries(value);
+      }
+      return value;
+    }
  
-     const getItemObj = async (item = {}, itemId = null) => {
-       let safe = Object.assign({}, item);
-       if (Object.keys(safe).length <= 0) {
-         safe = await getById(itemId);
-       }
-       const images = Array.isArray(safe?.images) ? safe?.images : [];
-       const primaryImage = images.length > 0 ? safe.images[0] : null;
-       return {
-         // Your custom mappings
-         _id: safe._id,
-         sku: safe.sku,
-         title: safe.title,
-         slug: safe.slug,
-         shortDescription: safe.shortDescription || safe.description || '',
-         images: images, // using your variable
-         image: primaryImage, // using your variable
-         published: safe.published,
-         status: safe.status,
+    const getItemObj = async (item = {}, itemId = null) => {
+      let safe = Object.assign({}, item);
+      if (Object.keys(safe).length <= 0) {
+        safe = await getById(itemId);
+      }
+      const images = Array.isArray(safe?.images) ? safe?.images : [];
+      const primaryImage = images.length > 0 ? safe.images[0] : null;
+      return {
+        // Your custom mappings
+        _id: safe._id,
+        sku: safe.sku,
+        title: safe.title,
+        slug: safe.slug,
+        shortDescription: safe.shortDescription || safe.description || '',
+        images: images, // using your variable
+        image: primaryImage, // using your variable
+        published: safe.published,
+        status: safe.status,
  
-         // Adding the missing fields from your list
-         description: safe.description,
-         brand: safe.brand,
-         categories: safe.categories,
-         tags: safe.tags,
-         media: safe.media,
-         inventory: safe.inventory,
-         variants: safe.variants,
-         weight: safe.weight,
-         dimensions: safe.dimensions,
-         taxClass: safe.taxClass,
-         ratings: safe.ratings,
-         reviews: safe.reviews,
-         relatedProducts: safe.relatedProducts,
-         seller: safe.seller,
-         metadata: safe.metadata,
-         ops_region: safe.ops_region,
-         createdAt: safe.createdAt,
-         updatedAt: safe.updatedAt,
-       };
-     }*/
+        // Adding the missing fields from your list
+        description: safe.description,
+        brand: safe.brand,
+        categories: safe.categories,
+        tags: safe.tags,
+        media: safe.media,
+        inventory: safe.inventory,
+        variants: safe.variants,
+        weight: safe.weight,
+        dimensions: safe.dimensions,
+        taxClass: safe.taxClass,
+        ratings: safe.ratings,
+        reviews: safe.reviews,
+        relatedProducts: safe.relatedProducts,
+        seller: safe.seller,
+        metadata: safe.metadata,
+        ops_region: safe.ops_region,
+        createdAt: safe.createdAt,
+        updatedAt: safe.updatedAt,
+      };
+    }*/
 
     // console.log('\nthese are the regionLookups ---------> | ', JSON.stringify(JSON.stringify(regionLookups, replacer, 2)));//-----------------------------
 
@@ -1454,8 +1643,8 @@ class OrderService {
 
 
   /* -------------------------
-   * Misc / helpers
-   * ------------------------- */
+  * Misc / helpers
+  * ------------------------- */
 
   async hardDeleteById(id, opts = {}) {
     if (!id) throw createError(400, 'id is required');
@@ -1589,60 +1778,60 @@ class OrderService {
   }
 
   async getThresholdChangeEvents(opts = {}) {
-  const page = Math.max(1, parseInt(opts.page, 10) || 1);
-  const limit = Math.max(1, parseInt(opts.limit, 10) || 10);
+    const page = Math.max(1, parseInt(opts.page, 10) || 1);
+    const limit = Math.max(1, parseInt(opts.limit, 10) || 10);
 
-  const filter = {};
+    const filter = {};
 
-  if (opts.ops_region) {
-    filter.ops_region = opts.ops_region;
-  }
-
-  filter.status = {
-    $in: ["submitted", "approved", "confirmed", "fulfilled"],
-  };
-
-  const result = await OrderRepo.paginate(filter, {
-    page,
-    limit,
-    sort: "updatedAt:-1",
-    select: "_id ops_region status items updatedAt createdAt",
-  });
-
-  const events = (result.items || []).map((order) => {
-    const totalDemand = (order.items || []).reduce(
-      (sum, item) => sum + Number(item.quantity || 0),
-      0
-    );
-
-    let activeTier = "Tier 1";
-
-    if (totalDemand >= 100) {
-      activeTier = "Tier 4";
-    } else if (totalDemand >= 50) {
-      activeTier = "Tier 3";
-    } else if (totalDemand >= 20) {
-      activeTier = "Tier 2";
+    if (opts.ops_region) {
+      filter.ops_region = opts.ops_region;
     }
 
-    return {
-      orderId: order._id,
-      ops_region: order.ops_region || "north-america:ca-on",
-      totalDemand,
-      activeTier,
-      status: order.status,
-      changedAt: order.updatedAt || order.createdAt || Date.now(),
+    filter.status = {
+      $in: ["submitted", "approved", "confirmed", "fulfilled"],
     };
-  });
 
-  return {
-    items: events,
-    total: result.total,
-    page: result.page,
-    limit: result.limit,
-    pages: result.pages,
-  };
-}
+    const result = await OrderRepo.paginate(filter, {
+      page,
+      limit,
+      sort: "updatedAt:-1",
+      select: "_id ops_region status items updatedAt createdAt",
+    });
+
+    const events = (result.items || []).map((order) => {
+      const totalDemand = (order.items || []).reduce(
+        (sum, item) => sum + Number(item.quantity || 0),
+        0
+      );
+
+      let activeTier = "Tier 1";
+
+      if (totalDemand >= 100) {
+        activeTier = "Tier 4";
+      } else if (totalDemand >= 50) {
+        activeTier = "Tier 3";
+      } else if (totalDemand >= 20) {
+        activeTier = "Tier 2";
+      }
+
+      return {
+        orderId: order._id,
+        ops_region: order.ops_region || "north-america:ca-on",
+        totalDemand,
+        activeTier,
+        status: order.status,
+        changedAt: order.updatedAt || order.createdAt || Date.now(),
+      };
+    });
+
+    return {
+      items: events,
+      total: result.total,
+      page: result.page,
+      limit: result.limit,
+      pages: result.pages,
+    };
+  }
 
   async getDashboardMetrics() {
     const pendingQuotes = await this.count({

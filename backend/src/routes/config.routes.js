@@ -16,11 +16,11 @@
  * GET    /configs/find                  -> find by filter (returns array)
  */
 
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 
-const ConfigController = require('../controllers/config.controller');
-const { requireAuth } = require('../middleware/auth.middleware');
+const ConfigController = require("../controllers/config.controller");
+const { requireAuth } = require("../middleware/auth.middleware");
 
 /* Async wrapper to forward errors to express error handler */
 const asyncHandler = (fn) => (req, res, next) => {
@@ -31,7 +31,7 @@ const asyncHandler = (fn) => (req, res, next) => {
 const validateIdParam = (paramName) => (req, res, next) => {
   const id = req.params[paramName];
 
-  if (!id || typeof id !== 'string' || !id.trim()) {
+  if (!id || typeof id !== "string" || !id.trim()) {
     const err = new Error(`${paramName} must be a valid string id`);
     err.status = 400;
     return next(err);
@@ -56,7 +56,7 @@ const parseFilterQuery = (req, res, next) => {
     try {
       req.query.filter = JSON.parse(req.query.filter);
     } catch (e) {
-      const err = new Error('filter must be a valid JSON string');
+      const err = new Error("filter must be a valid JSON string");
       err.status = 400;
       return next(err);
     }
@@ -68,89 +68,96 @@ const parseFilterQuery = (req, res, next) => {
 
 /* Create config for user */
 router.post(
-  '/for-user/:userId',
+  "/for-user/:userId",
   requireAuth,
-  validateIdParam('userId'),
+  validateIdParam("userId"),
   asyncHandler(ConfigController.createForUser)
 );
 
 // ✅ Save admin delivery rules
 router.post(
-  '/delivery-rules',
+  "/delivery-rules",
   requireAuth,
   asyncHandler(ConfigController.saveDeliveryRules)
 );
 
 // ✅ Get admin delivery rules
 router.get(
-  '/delivery-rules',
+  "/delivery-rules",
   requireAuth,
   asyncHandler(ConfigController.getDeliveryRules)
 );
 
-/* Get config by id */
-router.get(
-  '/:id',
-  requireAuth,
-  validateIdParam('id'),
-  asyncHandler(ConfigController.getById)
-);
-
 /* Get config by userId */
 router.get(
-  '/by-user/:userId',
+  "/by-user/:userId",
   requireAuth,
-  validateIdParam('userId'),
+  validateIdParam("userId"),
   asyncHandler(ConfigController.getByUserId)
+);
+
+// ✅ Save supplier company profile
+router.patch(
+  "/company-profile",
+  requireAuth,
+  asyncHandler(ConfigController.saveCompanyProfile)
+);
+
+/* Get config by id */
+router.get(
+  "/:id",
+  requireAuth,
+  validateIdParam("id"),
+  asyncHandler(ConfigController.getById)
 );
 
 /* Update config by id */
 router.patch(
-  '/:id',
+  "/:id",
   requireAuth,
-  validateIdParam('id'),
+  validateIdParam("id"),
   asyncHandler(ConfigController.updateById)
 );
 
 /* Upsert config for user */
 router.post(
-  '/by-user/:userId/upsert',
+  "/by-user/:userId/upsert",
   requireAuth,
-  validateIdParam('userId'),
+  validateIdParam("userId"),
   asyncHandler(ConfigController.upsertForUser)
 );
 
 /* Set theme */
 router.post(
-  '/by-user/:userId/theme',
+  "/by-user/:userId/theme",
   requireAuth,
-  validateIdParam('userId'),
-  requireBodyField('theme'),
+  validateIdParam("userId"),
+  requireBodyField("theme"),
   asyncHandler(ConfigController.setTheme)
 );
 
 /* Set location */
 router.post(
-  '/by-user/:userId/location',
+  "/by-user/:userId/location",
   requireAuth,
-  validateIdParam('userId'),
-  requireBodyField('lat'),
+  validateIdParam("userId"),
+  requireBodyField("lat"),
   asyncHandler(ConfigController.setLocation)
 );
 
 /* Soft delete */
 router.post(
-  '/:id/soft-delete',
+  "/:id/soft-delete",
   requireAuth,
-  validateIdParam('id'),
+  validateIdParam("id"),
   asyncHandler(ConfigController.softDelete)
 );
 
 /* Hard delete (admin only) */
 const adminOnly = (req, res, next) => {
   const user = req.user;
-  if (!user || user.role !== 'administrator') {
-    const err = new Error('admin privileges required');
+  if (!user || user.role !== "administrator") {
+    const err = new Error("admin privileges required");
     err.status = 403;
     return next(err);
   }
@@ -158,16 +165,16 @@ const adminOnly = (req, res, next) => {
 };
 
 router.delete(
-  '/:id/hard',
+  "/:id/hard",
   requireAuth,
-  validateIdParam('id'),
+  validateIdParam("id"),
   adminOnly,
   asyncHandler(ConfigController.hardDelete)
 );
 
 /* List / paginate configs */
 router.get(
-  '/',
+  "/",
   requireAuth,
   parseFilterQuery,
   asyncHandler(ConfigController.listConfigs)
@@ -175,14 +182,14 @@ router.get(
 
 // ✅ Save admin pricing tiers
 router.post(
-  '/pricing-tiers',
+  "/pricing-tiers",
   requireAuth,
   asyncHandler(ConfigController.savePricingTiers)
 );
 
 /* Find by filter */
 router.get(
-  '/find',
+  "/find",
   requireAuth,
   parseFilterQuery,
   asyncHandler(ConfigController.findByFilter)

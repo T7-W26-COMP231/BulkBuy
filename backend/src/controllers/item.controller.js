@@ -99,13 +99,51 @@ async function create(req, res) {
 }
 
 /* GET /items/:id */
-async function getById(req, res) {
+/*async function getById(req, res) {
   const correlationId = req.headers['x-correlation-id'] || null;
   const actor = actorFromReq(req);
   try {
     const id = req.params.id;
     const doc = await ItemService.getById(id, { actor, correlationId });
     return res.status(200).json({ success: true, data: doc });
+  } catch (err) {*/
+/* GET /items/:id */
+async function getById(req, res) {
+  const correlationId = req.headers['x-correlation-id'] || null;
+  const actor = actorFromReq(req);
+  try {
+    const id = req.params.id;
+    const doc = await ItemService.getById(id, { actor, correlationId });
+
+    // Fetch pricing_tiers from saleswindow
+    const SalesWindow = require('../models/salesWindow.model');
+    const now = Date.now();
+    const salesWindow = await SalesWindow.findOne({
+      isHead: true,
+      'window.toEpoch': { $gt: now },
+      'products.items.itemId': String(id)
+    }).lean();
+
+    let pricingTiers = [];
+    if (salesWindow) {
+      for (const product of salesWindow.products ?? []) {
+        const swItem = (product.items ?? []).find(
+          it => String(it.itemId) === String(id)
+        );
+        if (swItem?.pricing_tiers?.length) {
+          pricingTiers = swItem.pricing_tiers;
+          break;
+        }
+      }
+    }
+
+    const docObj = doc?.toObject ? doc.toObject() : { ...doc };
+    //const enriched = { ...docObj, pricingTiers };
+    const enriched = {
+      ...docObj,
+      pricingTiers: docObj.pricingTiers?.length ? docObj.pricingTiers : pricingTiers
+    };
+    return res.status(200).json({ success: true, data: enriched });
   } catch (err) {
     await auditService.logEvent({
       eventType: 'item.get.failed',

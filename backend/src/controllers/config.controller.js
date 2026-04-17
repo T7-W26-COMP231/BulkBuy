@@ -355,6 +355,41 @@ async function getDeliveryRules(req, res) {
     });
   }
 }
+/* PATCH /configs/company-profile */
+async function saveCompanyProfile(req, res) {
+  const correlationId = req.correlationId || null;
+  const actor = actorFromReq(req);
+
+  try {
+    const companyProfile = req.body || {};
+
+    const saved = await ConfigService.saveCompanyProfile(companyProfile, {
+      actor,
+      correlationId,
+      session: req.mongoSession
+    });
+
+    return res.status(200).json({
+      success: true,
+      data: saved
+    });
+  } catch (err) {
+    await auditService.logEvent({
+      eventType: 'config.companyProfile.save.failed',
+      actor,
+      target: { type: 'Config', id: null },
+      outcome: 'failure',
+      severity: 'error',
+      correlationId,
+      details: { message: err.message }
+    });
+
+    return res.status(err.status || 500).json({
+      success: false,
+      message: err.message
+    });
+  }
+}
 
 /* POST /configs/pricing-tiers */
 async function savePricingTiers(req, res) {
@@ -413,5 +448,6 @@ module.exports = {
   findByFilter: asyncHandler(findByFilter),
   saveDeliveryRules: asyncHandler(saveDeliveryRules),
   getDeliveryRules: asyncHandler(getDeliveryRules),
+  saveCompanyProfile: asyncHandler(saveCompanyProfile),
   savePricingTiers: asyncHandler(savePricingTiers)
 };

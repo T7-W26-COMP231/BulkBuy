@@ -37,6 +37,7 @@ function buildUiUpdatePayload(action, payload = {}, opts = {}) {
 async function emitUiUpdate(action, payload = {}, opts = {}) {
   try {
     const msg = buildUiUpdatePayload(action, payload, opts);
+    console.log("sjbsvbvkrbviurbv********************************************3957345738>", msg);
 
     switch (opts.scope) {
       case 'user':
@@ -47,6 +48,7 @@ async function emitUiUpdate(action, payload = {}, opts = {}) {
       case 'region':
         if (opts.region) {
           socketHandlers.emitToRegion(opts.region, 'ui:update', msg);
+          console.log("jabcsbkdsbviwebvfiwb034i095660**************************>", opts.region);
         }
         break;
       case 'role':

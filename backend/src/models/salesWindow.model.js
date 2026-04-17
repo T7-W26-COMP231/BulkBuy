@@ -42,14 +42,14 @@ const createError = require('http-errors');
 const PricingSnapshotSchema = new Schema({
   atInstantPrice: { type: Number, default: 0 },
   discountedPercentage: { type: Number, default: 0, min: 0, max: 100 },
-  discountBracket: {
+  discountBracket: {                                           // set on the first snapshot
     initial: { type: Number, default: 0 },
     final: { type: Number, default: 0 }
   },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
   metadata: { type: Schema.Types.Mixed, default: {} }
-}, { _id: false });
+}, { _id: false })
 
 /**
  * PricingTierSchema
@@ -71,13 +71,10 @@ const PricingTierSchema = new Schema({//pricing tier are set before product go l
  */
 
 const ProductItemSchema = new Schema({
-  /*_id: { type: String, required: true, trim: true }, // only for testing
+  /*
   itemId: { type: Schema.Types.ObjectId, required: true, index: true },
   productId: { type: Schema.Types.ObjectId, required: true, index: true },
   */
-
-  //_id: { type: String, required: true, trim: true }, I commented this as it was creating nested _id inside saleswindow
-
   itemId: { type: String, required: true, index: true },
   productId: { type: String, required: true, index: true },
   pricing_snapshots: { type: [PricingSnapshotSchema], default: [] }, // the first one is the initial price setter, first pricing snapshot initial one 
@@ -89,7 +86,7 @@ const ProductItemSchema = new Schema({
   metadata: { type: Schema.Types.Mixed, default: {} },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
-}, { _id: false, id: false });
+}, { _id: false });
 
 /**
  * ProductSchema
@@ -106,6 +103,8 @@ const ProductSchema = new Schema({
  * ------------------------- */
 
 const SalesWindowSchema = new Schema({
+
+  _id: { type: String, required: true, trim: true }, // only for testing
   window: {
     fromEpoch: { type: Number, required: true, index: true },
     toEpoch: { type: Number, required: true, index: true }

@@ -13,9 +13,6 @@ export default function ReviewModifyIntentPage() {
   const cartItems = (() => {
     if (location.state?.cartItems?.length) return location.state.cartItems;
     try {
-      //const storedUser = JSON.parse(localStorage.getItem("user") || "null");
-      //const key = storedUser?._id ? `cartItems_${storedUser._id}` : "cartItems_guest";
-
       const sessionRaw = localStorage.getItem("app_auth_session_v1");
       const session = sessionRaw ? JSON.parse(sessionRaw) : null;
       const storedUser = session?.user || null;
@@ -45,9 +42,7 @@ export default function ReviewModifyIntentPage() {
 
       try {
         setFetchError(null);
-        //const data = await getMyIntents(user._id);
         const data = await getMyIntents(user.userId || user._id);
-        //const data = await getMyIntents(user.userId || user._id);
         console.log("🔍 intents data:", data);
         console.log("🔍 user:", user.userId, user._id);
 
@@ -598,7 +593,31 @@ export default function ReviewModifyIntentPage() {
                   );
 
                   // 2. Navigate to cart — status stays DRAFT
-                  navigate("/cart");
+                  const primaryIntent = intents[0];
+
+                  if (!primaryIntent) {
+                    navigate("/cart");
+                    return;
+                  }
+
+                  const updatedCartItems = (primaryIntent.items || []).map((item) => {
+                    const resolvedItemId = item.itemId?._id || item.itemId;
+                    const key = `${primaryIntent._id}::${resolvedItemId}`;
+                    const editedQty = editedQtys[key] ?? item.quantity;
+
+                    return {
+                      ...item,
+                      intentId: primaryIntent._id,
+                      itemId: resolvedItemId,
+                      quantity: editedQty,
+                    };
+                  });
+
+                  navigate("/cart", {
+                    state: {
+                      cartItems: updatedCartItems,
+                    },
+                  });
 
                 } catch (err) {
                   if (err.locked) {

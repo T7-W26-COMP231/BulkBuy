@@ -350,6 +350,7 @@ class SalesWindowService {
   async addOrUpdateItem(windowId, productId, itemId, payload = {}, opts = {}) {
     const actor = actorFromOpts(opts);
     const correlationId = opts.correlationId || null;
+    console.log("jksbvbrv/**********************************************>", windowId)
     if (!windowId) throw createError(400, "windowId is required");
     if (!productId) throw createError(400, "productId is required");
     if (!itemId) throw createError(400, "itemId is required");
@@ -1003,6 +1004,10 @@ class SalesWindowService {
                 itemId: it.itemId,
                 productId: p.productId,
                 windowId: sourceWindowId,
+                pricing_tiers: it.pricing_tiers ?? [],
+                pricing_snapshots: it.pricing_snapshots ?? [],
+                qtySold: it.qtySold ?? 0,
+                qtyAvailable: it.qtyAvailable ?? 0,
               };
               itemMap.set(iid, itemStub);
               itemsOut.push(itemStub);
@@ -1027,10 +1032,21 @@ class SalesWindowService {
                 continue;
               const iid = String(it.itemId);
               if (!itemMap.has(iid)) {
+                // const itemStub = {
+                //   itemId: it.itemId,
+                //   productId: p.productId,
+                //   windowId: sourceWindowId,
+                // };
+
+                // Replace with:
                 const itemStub = {
                   itemId: it.itemId,
                   productId: p.productId,
                   windowId: sourceWindowId,
+                  pricing_tiers: it.pricing_tiers ?? [],
+                  pricing_snapshots: it.pricing_snapshots ?? [],
+                  qtySold: it.qtySold ?? 0,
+                  qtyAvailable: it.qtyAvailable ?? 0,
                 };
                 itemMap.set(iid, itemStub);
               }
@@ -1050,7 +1066,7 @@ class SalesWindowService {
     }
 
     // 4) finalize products array (defer heavy object creation until now)
-    const allProducts = Array.from(productMap.values()).map((p) => ({
+    /*const allProducts = Array.from(productMap.values()).map((p) => ({
       productId: p.productId,
       windowId: p.windowId,
       window: { fromEpoch: p.window.fromEpoch, toEpoch: p.window.toEpoch },
@@ -1060,7 +1076,24 @@ class SalesWindowService {
         windowId: it.windowId,
       })),
       metadata: p.metadata,
+    }));*/
+
+    const allProducts = Array.from(productMap.values()).map((p) => ({
+      productId: p.productId,
+      windowId: p.windowId,
+      window: { fromEpoch: p.window.fromEpoch, toEpoch: p.window.toEpoch },
+      items: p.items.map((it) => ({
+        itemId: it.itemId,
+        productId: it.productId,
+        windowId: it.windowId,
+        pricing_tiers: it.pricing_tiers ?? [],
+        pricing_snapshots: it.pricing_snapshots ?? [],
+        qtySold: it.qtySold ?? 0,
+        qtyAvailable: it.qtyAvailable ?? 0,
+      })),
+      metadata: p.metadata,
     }));
+
 
 
     // 5) paginate products (we will enrich each paged product one at a time)
@@ -1132,11 +1165,22 @@ class SalesWindowService {
         const details = itemDetailsMap.get(idStr) || null;
         if (details) {
           // ensure the stub fields are preserved and details fields are included
+          // return Object.assign(
+          //   {
+          //     itemId: it.itemId,
+          //     productId: it.productId,
+          //     windowId: it.windowId,
+          //   },
+          //   details,
           return Object.assign(
             {
               itemId: it.itemId,
               productId: it.productId,
               windowId: it.windowId,
+              pricing_tiers: it.pricing_tiers ?? [],
+              pricing_snapshots: it.pricing_snapshots ?? [],
+              qtySold: it.qtySold ?? 0,
+              qtyAvailable: it.qtyAvailable ?? 0,
             },
             details,
           );

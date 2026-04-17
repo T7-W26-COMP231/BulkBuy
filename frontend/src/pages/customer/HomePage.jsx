@@ -75,8 +75,8 @@ export default function HomePage() {
     () => flattenAndRankItems(productsArray, activeRegionCode),
     [productsArray, activeRegionCode]
   );
-  console.log("products raw ->", products);
-  console.log("productsArray ->", productsArray);
+  /*console.log("products raw ->", products);
+  console.log("productsArray ->", productsArray);*/
 
 
 
@@ -84,9 +84,9 @@ export default function HomePage() {
   const popularItems = rankedItems.slice(1, 7);
 
   // ADD THESE:
-  console.log("rankedItems ->", rankedItems);
+  /*console.log("rankedItems ->", rankedItems);
   console.log("heroItem ->", heroItem);
-  console.log("popularItems ->", popularItems);
+  console.log("popularItems ->", popularItems);*/
 
   // ── Hero card derived values ──────────────────────────────────────────────
   const toEpoch = heroItem?.window?.toEpoch;

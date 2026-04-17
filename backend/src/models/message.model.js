@@ -33,7 +33,9 @@ const STATUS_ENUM = ['draft', 'submitted', 'read', 'unread'];
 const RecipientsSchema = new Schema(
   {
     all: { type: Boolean, default: false },
-    users: [{ type: Schema.Types.ObjectId, ref: 'User' }]
+    //users: [{ type: Schema.Types.ObjectId, ref: 'User' }]
+    users: [{ type: String }]
+
   },
   { _id: false }
 );
@@ -44,13 +46,16 @@ const MessageSchema = new Schema(
     avatar: { type: Schema.Types.ObjectId, ref: 'S3File', default: null },
     type: { type: String, enum: TYPE_ENUM, required: true, index: true },
     recipients: { type: RecipientsSchema, default: () => ({ all: false, users: [] }) },
-    fromUserId: { type: Schema.Types.ObjectId, ref: 'User', default: null },
+    //fromUserId: { type: Schema.Types.ObjectId, ref: 'User', default: null },
+    fromUserId: { type: String, default: null },
+
     subject: { type: String, trim: true, default: '' },
     details: { type: String, trim: true, default: '' },
     attachments: [{ type: Schema.Types.ObjectId, ref: 'S3File' }],
     ops_region: { type: String, trim: true, index: true, default: '' },
     status: { type: String, enum: STATUS_ENUM, default: 'draft', index: true },
-    replyTo: { type: Schema.Types.ObjectId, ref: 'Message', default: null },
+    replyTo: { type: String, ref: 'Message', default: null },
+    // replyTo: { type: Schema.Types.ObjectId, ref: 'Message', default: null },
     metadata: { type: Map, of: Schema.Types.Mixed, default: {} },
     internalNotes: { type: String, trim: true, default: '' },
     deleted: { type: Boolean, default: false, index: true }

@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import NotificationBell from "../../pages/shared/NotificationBell";
 import { useAuth } from "../../contexts/AuthContext.jsx";
 import { useToast } from "../../contexts/ToastProvider.jsx";
+import { Link } from "react-router-dom";
+import { useOpsContext } from "../../contexts/OpsContext";
 
 const REGIONS = [
   "Admin Region",
@@ -22,9 +24,12 @@ export default function AdminTopbar({
   const [region, setRegion] = useState("Admin Region");
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
-  const { signOut } = useAuth();
   const { clearAll } = useToast();
   const navigate = useNavigate();
+
+    // Auth + Ops contexts  
+    const { user, accessToken, signOut } = useAuth() ?? {};
+    const { msgCenter, setMsgCenter, jwtExpiryTracker } = useOpsContext() ?? {};
 
   const handleSignOut = async () => {
     try {
@@ -38,6 +43,7 @@ export default function AdminTopbar({
 
   return (
     <header className="bg-white px-6 py-4 md:px-8">
+      
       <div className="flex items-center gap-4">
         <button
           type="button"
@@ -111,7 +117,21 @@ export default function AdminTopbar({
             )}
           </div>
 
-          <NotificationBell />
+          {/* <NotificationBell /> */}
+
+          <Link to="/notifications"
+              className="relative flex h-10 w-10 items-center justify-center rounded-lg bg-neutral-light transition-colors hover:bg-primary/20"
+              aria-label="Notifications">
+              <span className="material-symbols-outlined">notifications</span>
+
+              {/* The Badge */}
+              {
+                msgCenter.notifs.length > 0 &&
+                <span className="absolute bottom-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
+                  {msgCenter.notifs.length}
+                </span>
+              }          
+          </Link>
 
           <button
             type="button"

@@ -302,9 +302,9 @@ export default function AuthTabs(props) {
           // console.log("Socket Initialization s-in---> | ", ops_region, backendUrl); //--------------------------
           // if (socket) socket.close(); // close anonymouse socket connection to reinnitialise.
           // setSocket(initSocket(res.accessToken || null, { user: res.user, region: ops_region, url : backendUrl, getAuth: () => useAuth()}));
-            
+
           console.log("Socket Initialization s-up---> | ", res.user.userId, backendUrl); //--------------------------
-          identifyUserAfterLogin({token : res.accessToken, userId : res.user._id}, { user: user, ops_region: ops_region, url : backendUrl, getAuth: () => useAuth()});
+          identifyUserAfterLogin({ token: res.accessToken, userId: res.user._id }, { user: user, ops_region: ops_region, url: backendUrl, getAuth: () => useAuth() });
         } catch (error) {
           console.log("Socket Initializtion error ---> | ", error);
         }
@@ -368,10 +368,10 @@ export default function AuthTabs(props) {
         }, 3000);
 
         try {
-          console.log("Socket Initialization s-up---> | ", res.user.userId,  backendUrl); //--------------------------
+          console.log("Socket Initialization s-up---> | ", res.user.userId, backendUrl); //--------------------------
           // socket.io
           // initSocket(res.accessToken || null, { user: user, region: ops_region, url : backendUrl});
-          identifyUserAfterLogin({token : res.accessToken, userId : res.user._id }, { user: user, region: ops_region, url : backendUrl, getAuth: () => useAuth()});
+          identifyUserAfterLogin({ token: res.accessToken, userId: res.user._id }, { user: user, region: ops_region, url: backendUrl, getAuth: () => useAuth() });
         } catch (error) {
           console.log("Socket Initializtion error ---> | ", error);
         }
@@ -397,7 +397,7 @@ export default function AuthTabs(props) {
   return (
     <div
       className={`auth-tabs-folder ${className}`}
-      style={{ width: 520, maxWidth: "calc(100% - 24px)", ...style, border : '1em solid #0fb3a6' }}
+      style={{ width: 520, maxWidth: "calc(100% - 24px)", ...style, border: '1em solid #0fb3a6' }}
     >
       <div className="folder-flap" aria-hidden="true">
         <div
@@ -476,7 +476,7 @@ export default function AuthTabs(props) {
                   type="email"
                   autoComplete="email"
                   placeholder="alice@example.com"
-                  disabled={busy}/>
+                  disabled={busy} />
                 {siErrors.email && (
                   <div className="field-error" role="alert">
                     {siErrors.email}
@@ -493,7 +493,7 @@ export default function AuthTabs(props) {
                   type="password"
                   autoComplete="current-password"
                   placeholder="Enter your password"
-                  disabled={busy}/>
+                  disabled={busy} />
                 {siErrors.password && (
                   <div className="field-error" role="alert">
                     {siErrors.password}
@@ -502,17 +502,17 @@ export default function AuthTabs(props) {
               </div>
 
               <div className="actions">
-                <button
+                {/* <button
                   type="button"
                   onClick={() => {
-                    setSiEmail("aisha.khan@bulkbuy.org");
-                    setSiPassword("AdminPass!2026");
+                    setSiEmail("noah.patel@example.com");
+                    setSiPassword("CustomerPass2!");
                   }}
                   className="btn"
-                  disabled={busy}
+                  disabled={busy}Fill demo
                 >
-                  Fill demo
-                </button>
+                  
+                </button> */}
 
                 <button type="submit" className="btn primary" disabled={busy}>
                   Sign In

@@ -49,7 +49,7 @@ const PricingSnapshotSchema = new Schema({
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
   metadata: { type: Schema.Types.Mixed, default: {} }
-}, { _id: false });
+}, { _id: false })
 
 /**
  * PricingTierSchema

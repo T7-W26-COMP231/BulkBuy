@@ -1134,7 +1134,18 @@ class OrderService {
 
         try {
           //await SalesWindowService.addOrUpdateItem(pEntry.windowId, pid, iid, { qtySold: newQtySold }, { session, actor, correlationId });
-          await SalesWindowService.addOrUpdateItem(pEntry.windowId, pid, iid, { qtySold: newQtySold }, { actor, correlationId });
+
+          //await SalesWindowService.addOrUpdateItem(pEntry.windowId, pid, iid, { qtySold: newQtySold }, { actor, correlationId });
+          await SalesWindowService.addOrUpdateItem(
+            pEntry.windowId, pid, iid,
+            {
+              qtySold: newQtySold,
+              pricing_tiers: swItem.pricing_tiers ?? [],
+              pricing_snapshots: swItem.pricing_snapshots ?? [],
+              qtyAvailable: swItem.qtyAvailable ?? 0,
+            },
+            { actor, correlationId }
+          );
           console.log("order.service.js coming-****************************************>", newQtySold);
         } catch (e) {
           // non-fatal for submission

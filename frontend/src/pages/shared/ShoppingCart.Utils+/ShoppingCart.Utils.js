@@ -159,9 +159,15 @@ export async function removeItemFromDraft({ orderId, itemId }) {
  */
 export async function toggleSaveForLater({ orderId, itemId, saveForLater }) {
   if (!orderId || !itemId) throw new Error("toggleSaveForLater requires orderId and itemId");
-  return apiFetch(`/ordrs/${encodeURIComponent(orderId)}/items/${encodeURIComponent(itemId)}`, {
+  return apiFetch(`/ordrs/${encodeURIComponent(orderId)}/update-item`, {
     method: "PATCH",
-    body: { saveForLater: !!saveForLater },
+    body: {
+      itemId,
+      changes: {
+        saveForLater: !!saveForLater,
+        status: saveForLater ? "savedForLater" : "active",
+      },
+    },
   });
 }
 

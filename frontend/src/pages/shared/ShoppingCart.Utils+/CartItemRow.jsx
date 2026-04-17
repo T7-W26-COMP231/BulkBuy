@@ -3,21 +3,18 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import PropTypes from "prop-types";
 import { formatCurrency, calcLineTotal } from "./ShoppingCart.Utils";
 import { useToastService } from "./useToastService";
-import useCart from "./useCart";
 import "./CartItemRow.css";
 
 /**
  * CartItemRow
  *
  * Accessible, production-ready row for a single cart item.
- * - Optimistic quantity updates via useCart
  * - Thumbnail opens full item toast (toast service)
  * - Save for later / Remove actions (supports parent confirm flow)
  * - Defensive: respects inventory, avoids state updates after unmount
  */
-export default function CartItemRow({ item, requestRemoveWithConfirm }) {
+export default function CartItemRow({ item, cart, requestRemoveWithConfirm, onLocalItemUpdate }) {
   const toast = useToastService();
-  const cart = useCart();
   const mountedRef = useRef(true);
 
   const [localQty, setLocalQty] = useState(() => Number(item?.quantity ?? 1));
@@ -34,7 +31,6 @@ export default function CartItemRow({ item, requestRemoveWithConfirm }) {
   // Derived values
   const itemInfo = item?.ItemSysInfo ?? {};
   const currency = item?.pricingSnapshot?.meta?.currency ?? "CAD";
-  //const unitPrice = Number(item?.pricingSnapshot?.atInstantPrice ?? 0);
   const snap = Array.isArray(item?.pricingSnapshot)
     ? item.pricingSnapshot[0]
     : item?.pricingSnapshot;
@@ -117,7 +113,7 @@ export default function CartItemRow({ item, requestRemoveWithConfirm }) {
     const next = Math.max(0, Number(localQty || 0) - 1);
     if (next === 0) {
       if (typeof requestRemoveWithConfirm === "function") {
-        requestRemoveWithConfirm(item.itemId);
+        requestRemoveWithConfirm(item);
         return;
       }
       const confirmed = window.confirm("Quantity set to 0 will remove this item from your cart. Continue?");
@@ -149,16 +145,24 @@ export default function CartItemRow({ item, requestRemoveWithConfirm }) {
     if (!cart?.orderId) return toast.showError("Cart not available.");
     setBusy(true);
     try {
-      await cart.toggleSaveForLater?.({ orderId: cart.orderId, itemId: item.itemId, saveForLater: true });
-      toast.showSuccess("Saved for later.");
+      await cart.toggleSaveForLater?.({
+        orderId: cart.orderId,
+        itemId: item.itemId,
+        saveForLater: true,
+      });
+
+      onLocalItemUpdate?.({
+        ...item,
+        saveForLater: true,
+        status: "savedForLater",
+      });
     } catch {
       toast.showError("Could not save item for later.");
     } finally {
       if (mountedRef.current) setBusy(false);
     }
-  }, [cart, item, toast]);
+  }, [cart, item, toast, onLocalItemUpdate]);
 
-  // --- replace existing handleMoveToActive with this ---
   const handleMoveToActive = useCallback(async () => {
     if (!cart?.orderId) {
       toast.showError("Cart not available.");
@@ -166,25 +170,39 @@ export default function CartItemRow({ item, requestRemoveWithConfirm }) {
     }
     setBusy(true);
     try {
-      // toggleSaveForLater with saveForLater: false moves item back to active cart
-      await cart.toggleSaveForLater?.({ orderId: cart.orderId, itemId: item.itemId, saveForLater: false });
-      toast.showSuccess("Moved to cart.");
-    } catch (err) {
+      await cart.toggleSaveForLater?.({
+        orderId: cart.orderId,
+        itemId: item.itemId,
+        saveForLater: false,
+      });
+
+      onLocalItemUpdate?.({
+        ...item,
+        saveForLater: false,
+        status: "active",
+      });
+    } catch {
       toast.showError("Could not move item to cart.");
     } finally {
       if (mountedRef.current) setBusy(false);
     }
-  }, [cart, item, toast]);
+  }, [cart, item, toast, onLocalItemUpdate]);
 
 
   const handleRemove = useCallback(async () => {
-    if (!cart?.orderId) return toast.showError("Cart not available.");
     if (typeof requestRemoveWithConfirm === "function") {
-      requestRemoveWithConfirm(item.itemId);
+      requestRemoveWithConfirm(item);
       return;
     }
+
+    if (!cart?.orderId) {
+      toast.showError("Cart not available.");
+      return;
+    }
+
     const confirmed = window.confirm("Remove this item from your cart?");
     if (!confirmed) return;
+
     setBusy(true);
     try {
       await cart.removeItem?.({ orderId: cart.orderId, itemId: item.itemId });
@@ -329,5 +347,12 @@ CartItemRow.propTypes = {
     status: PropTypes.string,
     ItemSysInfo: PropTypes.object,
   }).isRequired,
+  cart: PropTypes.shape({
+    orderId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    updateItemQty: PropTypes.func,
+    toggleSaveForLater: PropTypes.func,
+    removeItem: PropTypes.func,
+  }).isRequired,
   requestRemoveWithConfirm: PropTypes.func,
+  onLocalItemUpdate: PropTypes.func,
 };

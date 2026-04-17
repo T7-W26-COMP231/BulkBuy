@@ -116,6 +116,7 @@ export function useCart({ userId = null, persistence = "batch", batchDelay = 800
   const ops = useOpsContext?.() ?? {};
   const orders = ops?.orders ?? null;
   const setOrders = ops?.setOrders ?? null;
+  const setCart = ops?.setCart ?? null;
   const opsOrder = orders?.draftOrder ?? orders?.order ?? null;
   const opsPatchFn = ops?.patchDraftOrder ?? null; // optional helper provided by ops context
 
@@ -189,34 +190,48 @@ export function useCart({ userId = null, persistence = "batch", batchDelay = 800
 
   const schedulePatch = useCallback(() => {
     if (patchTimerRef.current) clearTimeout(patchTimerRef.current);
+
     patchTimerRef.current = setTimeout(async () => {
       patchTimerRef.current = null;
       const toPatch = pendingPatchRef.current;
       pendingPatchRef.current = null;
       if (!toPatch) return;
+
       try {
         await doPatchDraftOrder(toPatch);
-        // attempt to refresh authoritative state if helper exists
-        if (typeof Utils.getDraftOrder === "function") {
-          const res = await Utils.getDraftOrder({ userId });
-          const order = res?.order ?? res ?? {};
-          if (mountedRef.current) dispatch({ type: ACTIONS.CONFIRM_UPDATE, payload: { order } });
+
+        if (mountedRef.current) {
+          dispatch({ type: ACTIONS.CONFIRM_UPDATE, payload: { order: toPatch } });
         }
       } catch (err) {
         toast.showError("Failed to persist cart changes.");
       }
     }, batchDelay);
-  }, [batchDelay, doPatchDraftOrder, toast, userId]);
+  }, [batchDelay, doPatchDraftOrder, toast]);
 
   const updateOpsOrder = useCallback(
     (newOrder) => {
+      const stampedOrder = {
+        ...newOrder,
+        updatedAt: Date.now(),
+      };
+
       if (typeof setOrders === "function") {
-        setOrders((prev = {}) => ({ ...prev, draftOrder: newOrder, order: newOrder }));
+        setOrders((prev = {}) => ({
+          ...prev,
+          draftOrder: stampedOrder,
+          order: stampedOrder,
+        }));
       }
-      pendingPatchRef.current = newOrder;
+
+      if (typeof setCart === "function") {
+        setCart(stampedOrder);
+      }
+
+      pendingPatchRef.current = stampedOrder;
       schedulePatch();
     },
-    [setOrders, schedulePatch]
+    [setOrders, setCart, schedulePatch]
   );
 
   /* -------------------------
@@ -307,8 +322,18 @@ export function useCart({ userId = null, persistence = "batch", batchDelay = 800
       // optimistic update
       dispatch({ type: ACTIONS.OPTIMISTIC_UPDATE, payload: { itemId, patch: { quantity: Number(quantity) } } });
 
-      const newItems = state.items.map((it) => (it.itemId === itemId ? { ...it, quantity: Number(quantity) } : it));
-      const newOrder = { ...state.order, items: newItems };
+      const newItems = state.items.map((it) =>
+        it.itemId === itemId ? { ...it, quantity: Number(quantity) } : it
+      );
+      const resolvedOrderId = orderId || state.order?._id || state.order?.orderId || state.orderId;
+
+      const newOrder = {
+        ...state.order,
+        _id: resolvedOrderId,
+        orderId: resolvedOrderId,
+        items: newItems,
+        updatedAt: Date.now(),
+      };
 
       if (isBatchMode) {
         updateOpsOrder(newOrder);
@@ -350,46 +375,94 @@ export function useCart({ userId = null, persistence = "batch", batchDelay = 800
       const target = findItem(itemId);
       if (!target) throw new Error("Item not found in cart");
 
-      dispatch({
-        type: ACTIONS.OPTIMISTIC_UPDATE,
-        payload: { itemId, patch: { saveForLater: !!saveForLater, status: !!saveForLater ? "savedForLater" : "active" } },
-      });
-
       const newItems = state.items.map((it) =>
-        it.itemId === itemId ? { ...it, saveForLater: !!saveForLater, status: !!saveForLater ? "savedForLater" : "active" } : it
+        it.itemId === itemId
+          ? {
+              ...it,
+              saveForLater: !!saveForLater,
+              status: !!saveForLater ? "savedForLater" : "active",
+            }
+          : it
       );
-      const newOrder = { ...state.order, items: newItems };
 
-      if (isBatchMode) {
-        updateOpsOrder(newOrder);
-        toast.showSuccess(saveForLater ? "Saved for later (local)." : "Moved to cart (local).");
-        return newOrder;
+      const resolvedOrderId =
+        orderId || state.order?._id || state.order?.orderId || state.orderId;
+
+      const newOrder = {
+        ...state.order,
+        _id: resolvedOrderId,
+        orderId: resolvedOrderId,
+        items: newItems,
+        updatedAt: Date.now(),
+      };
+
+      // optimistic UI update
+      dispatch({ type: ACTIONS.CONFIRM_UPDATE, payload: { order: newOrder } });
+
+      // clear any queued stale batch patch
+      if (patchTimerRef.current) {
+        clearTimeout(patchTimerRef.current);
+        patchTimerRef.current = null;
       }
+      pendingPatchRef.current = null;
 
+      // prefer the dedicated item endpoint
       if (typeof Utils.toggleSaveForLater === "function") {
         try {
-          await Utils.toggleSaveForLater({ orderId, itemId, saveForLater: !!saveForLater });
-          if (typeof Utils.getDraftOrder === "function") {
-            const res = await Utils.getDraftOrder({ userId });
-            const order = res?.order ?? res ?? {};
-            if (mountedRef.current) dispatch({ type: ACTIONS.CONFIRM_UPDATE, payload: { order } });
-            toast.showSuccess(saveForLater ? "Moved to Saved for Later." : "Moved to cart.");
-            return order;
+          await Utils.toggleSaveForLater({
+            orderId: resolvedOrderId,
+            itemId,
+            saveForLater: !!saveForLater,
+          });
+
+          if (typeof setOrders === "function") {
+            setOrders((prev = {}) => ({
+              ...prev,
+              draftOrder: newOrder,
+              order: newOrder,
+            }));
           }
-          dispatch({ type: ACTIONS.CONFIRM_UPDATE, payload: { order: newOrder } });
-          toast.showSuccess(saveForLater ? "Moved to Saved for Later." : "Moved to cart.");
+
+          if (typeof setCart === "function") {
+            setCart(newOrder);
+          }
+
+          toast.showSuccess(saveForLater ? "Saved for later." : "Moved to cart.");
           return newOrder;
         } catch (err) {
-          if (mountedRef.current) dispatch({ type: ACTIONS.ROLLBACK_UPDATE, payload: { previousItems: prevItems, error: err.message } });
+          if (mountedRef.current) {
+            dispatch({
+              type: ACTIONS.ROLLBACK_UPDATE,
+              payload: { previousItems: prevItems, error: err.message },
+            });
+          }
           toast.showError("Could not move item. Try again.");
           throw err;
         }
       }
 
+      // fallback local-only
+      if (isBatchMode) {
+        if (typeof setOrders === "function") {
+          setOrders((prev = {}) => ({
+            ...prev,
+            draftOrder: newOrder,
+            order: newOrder,
+          }));
+        }
+
+        if (typeof setCart === "function") {
+          setCart(newOrder);
+        }
+
+        toast.showSuccess(saveForLater ? "Saved for later (local)." : "Moved to cart (local).");
+        return newOrder;
+      }
+
       toast.showSuccess(saveForLater ? "Saved for later (local)." : "Moved to cart (local).");
       return newOrder;
     },
-    [state.items, state.order, state.orderId, findItem, toast, isBatchMode, updateOpsOrder, userId]
+    [state.items, state.order, state.orderId, findItem, toast, setOrders, setCart, isBatchMode]
   );
 
   const removeItem = useCallback(
@@ -399,51 +472,109 @@ export function useCart({ userId = null, persistence = "batch", batchDelay = 800
       if (!exists) throw new Error("Item not found in cart");
 
       const optimisticItems = state.items.filter((it) => it.itemId !== itemId);
-      const newOrder = { ...state.order, items: optimisticItems };
+      const resolvedOrderId = orderId || state.order?._id || state.order?.orderId || state.orderId;
+      const newOrder = {
+        ...state.order,
+        _id: resolvedOrderId,
+        orderId: resolvedOrderId,
+        items: optimisticItems,
+        updatedAt: Date.now(),
+      };
+
+      // optimistic UI update
       dispatch({ type: ACTIONS.CONFIRM_UPDATE, payload: { order: newOrder } });
 
-      if (isBatchMode) {
-        updateOpsOrder(newOrder);
-        toast.showSuccess("Item removed (local).");
-        return newOrder;
+      // clear any queued stale batch patch so it doesn't re-add the item later
+      if (patchTimerRef.current) {
+        clearTimeout(patchTimerRef.current);
+        patchTimerRef.current = null;
       }
+      pendingPatchRef.current = null;
 
+      // IMPORTANT: for remove, prefer the dedicated DELETE endpoint
       if (typeof Utils.removeItemFromDraft === "function") {
         try {
-          await Utils.removeItemFromDraft({ orderId, itemId });
-          if (typeof Utils.getDraftOrder === "function") {
-            const res = await Utils.getDraftOrder({ userId });
-            const order = res?.order ?? res ?? {};
-            if (mountedRef.current) dispatch({ type: ACTIONS.CONFIRM_UPDATE, payload: { order } });
-            toast.showSuccess("Item removed.");
-            return order;
+          await Utils.removeItemFromDraft({ orderId: resolvedOrderId, itemId });
+
+          if (typeof setOrders === "function") {
+            setOrders((prev = {}) => ({
+              ...prev,
+              draftOrder: newOrder,
+              order: newOrder,
+            }));
           }
+
+          if (typeof setCart === "function") {
+            setCart(newOrder);
+          }
+
           toast.showSuccess("Item removed.");
           return newOrder;
         } catch (err) {
-          if (mountedRef.current) dispatch({ type: ACTIONS.ROLLBACK_UPDATE, payload: { previousItems: prevItems, error: err.message } });
+          if (mountedRef.current) {
+            dispatch({
+              type: ACTIONS.ROLLBACK_UPDATE,
+              payload: { previousItems: prevItems, error: err.message },
+            });
+          }
           toast.showError("Could not remove item.");
           throw err;
         }
       }
 
+      // fallback local-only behavior
+      if (isBatchMode) {
+        if (typeof setOrders === "function") {
+          setOrders((prev = {}) => ({
+            ...prev,
+            draftOrder: newOrder,
+            order: newOrder,
+          }));
+        }
+
+        if (typeof setCart === "function") {
+          setCart(newOrder);
+        }
+
+        toast.showSuccess("Item removed (local).");
+        return newOrder;
+      }
+
+      // final fallback
       toast.showSuccess("Item removed (local).");
       return newOrder;
     },
-    [state.items, state.order, state.orderId, findItem, toast, isBatchMode, updateOpsOrder, userId]
+    [state.items, state.order, state.orderId, findItem, toast, setOrders, setCart, isBatchMode]
   );
 
   const addItem = useCallback(
     async ({ orderId = state.orderId, item }) => {
       if (!item || !item.itemId) throw new Error("addItem requires item with itemId");
+
       const prevItems = state.items.slice();
       const existing = state.items.find((it) => it.itemId === item.itemId);
+      const resolvedOrderId =
+        orderId || state.order?._id || state.order?.orderId || state.orderId;
 
       const optimisticItems = existing
-        ? state.items.map((it) => (it.itemId === item.itemId ? { ...it, quantity: Number(it.quantity || 0) + Number(item.quantity || 1) } : it))
-        : [...state.items, { ...item, quantity: Number(item.quantity || 1), status: "active", saveForLater: false }];
+        ? state.items.map((it) =>
+            it.itemId === item.itemId
+              ? { ...it, quantity: Number(it.quantity || 0) + Number(item.quantity || 1) }
+              : it
+          )
+        : [
+            ...state.items,
+            { ...item, quantity: Number(item.quantity || 1), status: "active", saveForLater: false },
+          ];
 
-      const newOrder = { ...state.order, items: optimisticItems };
+      const newOrder = {
+        ...state.order,
+        _id: resolvedOrderId,
+        orderId: resolvedOrderId,
+        items: optimisticItems,
+        updatedAt: Date.now(),
+      };
+
       dispatch({ type: ACTIONS.CONFIRM_UPDATE, payload: { order: newOrder } });
 
       if (isBatchMode) {
@@ -455,21 +586,30 @@ export function useCart({ userId = null, persistence = "batch", batchDelay = 800
       if (typeof Utils.addItemToDraft === "function" || typeof Utils.updateDraftOrder === "function") {
         try {
           if (typeof Utils.addItemToDraft === "function") {
-            await Utils.addItemToDraft({ orderId, item });
+            await Utils.addItemToDraft({ orderId: resolvedOrderId, item });
           } else {
-            await Utils.updateDraftOrder({ orderId, patch: { items: optimisticItems } });
+            await Utils.updateDraftOrder({ orderId: resolvedOrderId, patch: { items: optimisticItems } });
           }
+
           if (typeof Utils.getDraftOrder === "function") {
             const res = await Utils.getDraftOrder({ userId });
             const order = res?.order ?? res ?? {};
-            if (mountedRef.current) dispatch({ type: ACTIONS.CONFIRM_UPDATE, payload: { order } });
+            if (mountedRef.current) {
+              dispatch({ type: ACTIONS.CONFIRM_UPDATE, payload: { order } });
+            }
             toast.showSuccess("Item added to cart.");
             return order;
           }
+
           toast.showSuccess("Item added to cart.");
           return newOrder;
         } catch (err) {
-          if (mountedRef.current) dispatch({ type: ACTIONS.ROLLBACK_UPDATE, payload: { previousItems: prevItems, error: err.message } });
+          if (mountedRef.current) {
+            dispatch({
+              type: ACTIONS.ROLLBACK_UPDATE,
+              payload: { previousItems: prevItems, error: err.message },
+            });
+          }
           toast.showError("Could not add item.");
           throw err;
         }

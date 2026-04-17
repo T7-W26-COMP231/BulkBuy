@@ -52,7 +52,6 @@ export default function ShoppingCart({ onContinueShopping }) {
   const location = useLocation();
   const navigate = useNavigate();
 
-
   const [activeTab, setActiveTab] = useState(1); // 1 = Cart, 2 = Checkout
   const [query, setQuery] = useState("");
   const [filterBrand, setFilterBrand] = useState("");
@@ -92,7 +91,7 @@ export default function ShoppingCart({ onContinueShopping }) {
 
     setCartItems(incoming);
     setCart((prev) => (prev ? { ...prev, ...hydratedDraft } : hydratedDraft));
-    cart.loadDraft?.({ draftOrder: hydratedDraft }).catch(() => {});
+    cart.loadDraft?.({ draftOrder: hydratedDraft }).catch(() => { });
 
     // clear one-time router state so it doesn't get replayed
     navigate(location.pathname, { replace: true, state: null });
@@ -252,11 +251,11 @@ export default function ShoppingCart({ onContinueShopping }) {
         const prevItem = prevById.get(it.itemId);
         return prevItem
           ? {
-              ...it,
-              ItemSysInfo: it.ItemSysInfo ?? prevItem.ItemSysInfo,
-              pricingSnapshot: it.pricingSnapshot ?? prevItem.pricingSnapshot,
-              pricingTiers: it.pricingTiers ?? prevItem.pricingTiers,
-            }
+            ...it,
+            ItemSysInfo: it.ItemSysInfo ?? prevItem.ItemSysInfo,
+            pricingSnapshot: it.pricingSnapshot ?? prevItem.pricingSnapshot,
+            pricingTiers: it.pricingTiers ?? prevItem.pricingTiers,
+          }
           : it;
       });
 
@@ -370,9 +369,9 @@ export default function ShoppingCart({ onContinueShopping }) {
         setCart((prev) =>
           prev
             ? {
-                ...prev,
-                items: (prev.items || []).filter((it) => it.itemId !== resolvedItemId),
-              }
+              ...prev,
+              items: (prev.items || []).filter((it) => it.itemId !== resolvedItemId),
+            }
             : prev
         );
 
@@ -456,7 +455,7 @@ export default function ShoppingCart({ onContinueShopping }) {
         const syncedDraft = { ...latestDraft, items: enrichedItems };
         setCart(syncedDraft);
         setCartItems(enrichedItems);
-        cart.loadDraft?.({ draftOrder: syncedDraft }).catch(() => {});
+        cart.loadDraft?.({ draftOrder: syncedDraft }).catch(() => { });
       };
 
       setConfirmModal({ open: true, itemId: item?.itemId ?? null, onConfirm });
@@ -474,11 +473,11 @@ export default function ShoppingCart({ onContinueShopping }) {
     setCart((prev) =>
       prev
         ? {
-            ...prev,
-            items: (prev.items || []).map((it) =>
-              it.itemId === updatedItem.itemId ? { ...it, ...updatedItem } : it
-            ),
-          }
+          ...prev,
+          items: (prev.items || []).map((it) =>
+            it.itemId === updatedItem.itemId ? { ...it, ...updatedItem } : it
+          ),
+        }
         : prev
     );
   }, [setCart]);

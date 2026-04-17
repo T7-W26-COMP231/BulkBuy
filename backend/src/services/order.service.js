@@ -872,6 +872,7 @@ class OrderService {
     if (!orderId) throw createError(400, 'orderId is required');
 
     const actor = actorFromOpts(opts);
+    console.log("kdjscbdvbuv099ru4385483583****************///>", actor);
     const correlationId = opts.correlationId || null;
 
     const session = await this.startSession();
@@ -883,7 +884,7 @@ class OrderService {
 
       const region = orderDoc.ops_region;
       if (!region) throw createError(400, 'order.ops_region is required to submit');
-
+      console.log("jabckdbckbciuv*******************>", region);
       const swResult = await SalesWindowService.listAllCurrentProducts(region, { page: 1, limit: 1000, session, lean: true });
       const swProducts = Array.isArray(swResult.products) ? swResult.products : [];
 
@@ -1165,6 +1166,8 @@ class OrderService {
       await orderDoc.save({ session });
 
       const draft = await OrderRepo.findOrCreateDraftForUserRegion(orderDoc.userId, region, { session });
+
+
       await OrderRepo.moveSaveForLaterToDraft(orderDoc._id, draft._id, { session });
 
       await session.commitTransaction();
